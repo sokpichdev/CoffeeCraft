@@ -157,11 +157,7 @@ numOfInts[42] = "Forty-two"
 print(numOfInts[23, default: "None"])
 print(numOfInts[11, default: "None"])
 
-var people = [String: Any]()
-people["id"] = 82907500
-people["name"] = "Sok Pich"
-people["age"] = 25
-people["isGraduated"] = true
+
 //var dict2 = ["name": "Dara", "age": 16]
 // this is why we should declare type for the value of dict.
 var dict2: [String: Any] = ["name": "Dara", "age": 16]// we should declare type for the dict first.
@@ -172,6 +168,12 @@ heights["Yao Ming"] = 229
 heights["Shaquille O'Neal"] = 216
 heights["LeBron James"] = 206
 print(heights)
+
+var people = [String: Any]()
+people["id"] = 82907500
+people["name"] = "Sok Pich"
+people["age"] = 25
+people["isGraduated"] = true
 
 /*
  when the new key is added, it adds new key:value.
@@ -290,6 +292,11 @@ var soda: [String] = ["Coke", "Pepsi"] // not here, Swift knows you are assignin
 var teams: [String] = [String]() // this is not required too. but need to open and close parentheses.
 var school: [String] = [] // some ppl prefer to use type annotation, then assign an empty array.
 var clues = [String]() // this is type inference
+
+// make an empty dictionary
+var referees: [String: Int] = [String: Int]()
+var players: [String: Int] = [:] // recommend to use this.
+var enemies = [String: Int]()
 
 enum UIStyle {
     case light, dark, system
