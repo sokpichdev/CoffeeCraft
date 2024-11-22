@@ -259,7 +259,7 @@ printTimesTables(for: 2, end: 4);print()
 func sursdey(name: String, from hometown: String) -> String {
     return "Sursdey all, My name is \(name)! I'm from \(hometown)"
 }
-print(sursdey(name: "Nomercy", from: "Phnom Penh"));print() // make sure the argument label and parameter label matches.
+print(sursdey(name: "Nomercy",from: "Phnom Penh"));print() // make sure the argument label and parameter label matches.
 
 //-------------------------
 // Omitting Argument Labels
