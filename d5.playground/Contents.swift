@@ -89,7 +89,7 @@ print("team caption: \(captainFirstTeam) -> \(captainFirstTeam[0])")
     why does Swift love them so much?
  -------------------------------------
     -> Closures let us wrap up(store) some functoinality in a single variable, then store that somewhere.
-        we can also return it from a functino, and store the closure somewhere else.
+        we can also return it from a function, and store the closure somewhere else.
     example uses:
         - Running some code after a delay
         - Running some code after an animation has finished
@@ -126,7 +126,7 @@ addNums = { (a: Int, b: Int) -> Int in
 }(2,3) // (2,3) here is the default value.
 
 print(addNums) // 5
-// when don't have default value, we have to set the type to be the same.
+// when don't have default value, we have to set the type for the variable/constant to be the same as clousure.
 let addN: (Int, Int) -> Int
 addN = { (a: Int, b: Int) -> Int in
     return a + b

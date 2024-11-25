@@ -133,7 +133,7 @@ print("Name: \(user2.firstName) \(user2.lastName)")
     - when access value in tuple, Swift knows it's available.
     - no typos, becuase we don't access value using string. (user.firstName)
     - dictionary might containt hundreds of other values alongside "firstName",
-        tuple cna't - we must list all the value it will contain -> result = containt them all.
+        tuple can't - we must list all the value it will contain -> result = containt them all.
 */
 // this code does the same as getUser2()
 func getUser3() ->(firstName: String, lastName: String) {
@@ -483,3 +483,16 @@ do {
 } catch {
     print("An unexpected error occurred: \(error)")
 }
+
+
+func testTuple(a: Int, b: Int) -> (Int, Int) {
+    return (b, a)
+}
+print(testTuple(a: 3, b: 8))
+var a1 = testTuple(a: 3, b: 8)
+a1  = testTuple(a: 1, b: 2)
+print(a1)
+
+var (a, b) = testTuple(a: 3, b: 8)
+print(a)
+print(b)

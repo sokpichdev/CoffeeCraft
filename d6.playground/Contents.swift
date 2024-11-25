@@ -56,7 +56,8 @@ struct Employee {
         }
     }
 }
-// if we create an employee as constant using let, Swift makes the employee and all its daya constant - we can call function just fine, but aren't allowd to change the struct's data.
+
+// if we create an employee as constant using let, Swift makes the employee and all its data constant - we can call function just fine, but aren't allowd to change the struct's data.
 // -remove the keyword "mutating" to see.
 var john = Employee(name: "John", vacationRemaining: 10)
 john.takeVacation(days: 4)
@@ -71,7 +72,7 @@ printEmp(emp: Kane);print()
             HOW TO COMPUTE PROPERTY VALUES DYNAMICALLY
 -----------------------------------------------------------------*/
 // Structs have 2 kinds of properties:
-//      - a stored property is a variable or constant that hds a peice of data inside an instance of the struct.
+//      - a stored property is a variable or constant that has a peice of data inside an instance of the struct.
 //      - a computed property calculates the value of the property dynamically every time it's accessed. (they're accessed like stored properties, but work like fuctions.
 
 // NOTES: computed properties can't be constant.
@@ -85,6 +86,7 @@ sara.vacationRemaining -= 3
 printEmp(emp: sara)
 sara.vacationRemaining -= 5
 printEmp(emp: sara);print()
+
 struct Employee2 {
     let name: String
     var vacationAllocated = 14
@@ -121,10 +123,48 @@ juu.vacationTaken += 4
 juu.vacationRemaining = 5 // modifying the value for the property using "set"
 printEmp(emp: juu);print()
 
+struct Point {
+    var x = 0.0, y = 0.0
+}
+struct Size {
+    var width = 0.0, height = 0.0
+}
+struct Rect {
+    var origin = Point()
+    var size = Size()
+    var center: Point {
+//        get {
+//            let centerX = origin.x + (size.width / 2)
+//            let centerY = origin.y + (size.height / 2)
+//            return Point(x: centerX, y: centerY)
+//        }
+        // Shorthand Getter Declaretion
+        get {
+            Point(x: origin.x + (size.width / 2),
+                  y: origin.y + (size.height / 2))
+        }
+//        set(newCenter) {
+//            origin.x = newCenter.x - (size.width / 2)
+//            origin.y = newCenter.y - (size.height / 2)
+//        }
+        // Shorthand Setter Declaration
+        set {
+            origin.x = newValue.x - (size.width / 2)
+            origin.y = newValue.y - (size.height / 2)
+        }
+    }
+}
+var square = Rect(origin: Point(x: 0.0, y: 0.0), size: Size(width: 10.0, height: 10.0))
+let initalSquareCenter = square.center// initialSquareCenter is at (5.0, 5.0)
+
+square.center = Point(x: 15.0, y: 15.0)
+print("Square.origin is now at \(square.origin.x), \(square.origin.y)")
+// Prints "square.origin is now at (10.0, 10.0)"
+
 /* ----------------------------------------------------------------
             HOW TO TAKE ACTION WHEN A PROPERTY CHAGNES
 -----------------------------------------------------------------*/
-// - Property observers, which are special peices of cdoe that run when properties chagne.
+// - Property observers, which are special peices of code that runs when properties change.
 // - these take two froms: "didSet" observer run when property just changed,
 //                         "willSet" observer run before the property changed
 // - You can't attact a property observer to a constant, because it will never change.
@@ -230,6 +270,33 @@ struct SuperHero {
 let batman = SuperHero(nickame: "The Rich Man", superpowers: ["Rich", "Money", "Power"])
 print(batman)
 
+struct student {
+    var name: String
+    var age: Int
+    var className: [[[Any]]]
+    init(name: String, age: Int, className: [[[Any]]]) {
+        self.name = name
+        self.age = age
+        self.className = className
+    }
+}
+let Liz = student(name: "Aliz", age: 21,
+                  className:[
+                    [
+                        ["Math",[89,90]],
+                        ["Science", [87,88]]
+                    ],
+                    [
+                        ["English", [98, 90]],
+                        ["History", [87, 99]]
+                    ]
+                  ])
+// print Liz info
+for i in 0..<Liz.className.count {
+    for j in 0..<Liz.className[i].count {
+        print(Liz.className[i][j])
+    }
+}
 
 /* ----------------------------------------------------------------
             HOW TO LIMIT ACCESS TO INTERNAL DATA USING ACCESS CONTROL
@@ -360,3 +427,43 @@ var myCar = Car(model: "Ford", numberOfSeats: 5)
 print(myCar.descripton())
 myCar.changeGear(up: false)
 myCar.changeGear(up: true)
+
+
+struct test {
+    var a: Int = 3
+    var b: Int
+    mutating func increment(n1: Int) {
+        a += n1
+    }
+    func show() {
+        print("a = \(a), b = \(b)")
+    }
+}
+var t = test(b: 5)
+t.increment(n1: 2) // increment a
+t.show()
+
+
+struct B {
+    var b = 4
+    mutating func changeB() {
+        b += 1
+    }
+}
+var b = B()
+b.changeB()
+print(b.b);print()
+
+struct Calc {
+    var a = 3
+    var b = 5
+    var aAddB: Int {
+        get { a + b}
+        set { a = newValue}
+    }
+}
+var num = Calc() // a = 3, b = 5
+print(num.aAddB) // a + b = 8
+num.aAddB = 7   // a = 7, b = 5
+print(num.aAddB) // a + b = 12
+print(num.a)    // a = 7
