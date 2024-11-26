@@ -222,7 +222,7 @@ struct Player {
 }
 
 // memeberwise initializer(constructor)
-let player = Player(name: "Dara", number: 21) // create a new Player instance by providing valeus for its two properties.
+let player = Player(name: "Dara", number: 21) // create a new Player instance by providing values for its two properties.
 print(player)
 
 //we could write our own to do the same.
@@ -255,7 +255,7 @@ print(player3);print()
 // --------------------
 // When would you use self ?
 //-----------------
-//outside of initializers, the main reaosn for using self is becuase we're in a closure and Swift requires it so we're clear we understand what's happening. This is only needed when accessing self from inside a closure that belongs to a class, and Swift will refuse to build your code unless you add it.
+//outside of initializers, the main reason for using self is becuase we're in a closure and Swift requires it so we're clear we understand what's happening. This is only needed when accessing self from inside a closure that belongs to a class, and Swift will refuse to build your code unless you add it.
 
 
 // property that is array.

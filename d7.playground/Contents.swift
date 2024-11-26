@@ -39,7 +39,7 @@ class Game {
 var newGame = Game()
 newGame.score = 20;print()
 //------------------------------ - - - - - - - - - - - - - --
-// Why does Swift havae both classes and structs?
+// Why does Swift have both classes and structs?
 //----------------------- - - - - - - - - - - - - - - - - - -
 // - Classes don't come with synthesized memeberwise initializers
 // - One class can build uopn("Inherit from") another class, gaining its properties and methods.
@@ -199,6 +199,8 @@ class User2 {
 let useR2 = User2() // constant instance
 useR2.name = "John"
 print(useR2.name) // don't change at all. still "John"
+//useR2 = User2() // error
+//print(useR2.name)
 
 var u = User2()
 u.name = "John"
@@ -248,8 +250,7 @@ class Dog: Animal {
     override init(legs: Int = 4) {
         super.init(legs: legs)
     }
-    func speak() {
-        print("woof woof")
+    func speak() {        print("woof woof")
     }
 }
 class Corgi: Dog {
@@ -265,18 +266,19 @@ class Poodle: Dog {
 
 class Cat: Animal {
     var isTame: Bool
-    
+
     init(isTame: Bool, legs: Int = 4) {
         self.isTame = isTame
         super.init(legs: legs)
     }
-    
+
     func speak() {
         print("Meow")
     }
+
     override func info() {
         if isTame {
-             print("I am tame")
+            print("I am tame")
         } else {
             print("I am not tame")
         }
@@ -296,6 +298,7 @@ class Lion: Cat {
     }
 }
 
+// Dog Instances
 var dog1 = Dog()
 dog1.speak()
 dog1.info()
@@ -308,6 +311,7 @@ var poodle = Poodle()
 poodle.speak()
 poodle.info()
 
+// Cat Instances
 var cat = Cat(isTame: true)
 cat.speak()
 cat.info()
@@ -320,52 +324,83 @@ var lion = Lion(isTame: false)
 lion.speak()
 lion.info()
 
-
-
+// Calculator Struct
 struct Calculator {
     var currentTotal = 0
 }
+
 var baseModel = Calculator()
 var casio = baseModel
 var texas = baseModel
 casio.currentTotal = 342
 texas.currentTotal = 657
+
 print(casio.currentTotal)
 print(texas.currentTotal)
 print(baseModel.currentTotal)
- 
+
+// Hospital Class
 class Hospital {
     var onCallstaff: [String] = []
 }
+
 var londonCentral = Hospital()
 var londonWest = londonCentral
 londonCentral.onCallstaff.append("Bun")
 londonWest.onCallstaff.append("Feb")
 londonWest.onCallstaff.append("Aliz")
+
 print(londonWest.onCallstaff)
 print(londonCentral.onCallstaff)
 
-
-enum CompasPoint {
+// CompassPoint Enum
+enum CompassPoint {
     case north, south, east, west
+
     mutating func turnNorth() {
         self = .north
     }
 }
-var currentDirection = CompasPoint.west
+
+var currentDirection = CompassPoint.west
 let rememberedDirection = currentDirection
 currentDirection.turnNorth()
 
-print("The current directino is \(currentDirection)")
+print("The current direction is \(currentDirection)")
 print("The remembered direction is \(rememberedDirection)")
 
+// Class A
 class A {
     var a: Int = 50
-    
 }
+
 var a = A()
 print(a.a)
+
 var b = a
 b.a = 100
 print(b.a)
 print(a.a)
+
+// Parent and Child Classes
+class Parent {
+    func getName() {
+        print("This is Parent Class")
+    }
+
+    func calculate(x: Int, y: Int) { }
+
+    func calculate(x: Int, y: Int, z: Int) { }
+}
+
+class Child: Parent {
+    override func getName() {
+        print("This is Child Class")
+    }
+
+    func getAllFunc() {
+        super.getName()
+        self.getName()
+    }
+}
+
