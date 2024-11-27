@@ -9,7 +9,7 @@ protocol Vehicle {
     var currentPassenger: Int {get set} // because protocol must not have implementation.
     
     func estimateTime(for distance: Int) -> Int
-    func travel(distance: Int) // function body
+    func travel(distance: Int) // no function body
     // any struct, classes or enum that that conform this struct must implement these two methods.
 }
 // when we work with/implement the protocol, which the process called adopting the protocol or conforming the protocol
@@ -85,11 +85,31 @@ protocol Greetable {
     func greey() -> String
 }
 //5. Protocol Inheritance: A protocol can inherit from one or more protocols.
+protocol AdvancedProtocol: MyProtocol {
+    func doAnotherThing()
+}
 //6. Protocol Extensions: Protocols can have default method implementations using extensions.
+extension MyProtocol {
+    func doSomething() {
+        print("Default Implementation")
+    }
+}
 //7. Protocol Composition: Combine multiple protocols in a single requirement.
+func display(item: MyProtocol & AnotherProtocol){
+    // Use combined functionality
+}
 //8. Protocols as Types: Protocols can be used as types for variables, parameters, or return values.
+var myObject: MyProtocol
 //9. Optional Requirements (Objective-C Protocols): Use @objc for optional methods (works with classes only).
+@objc protocol OptionalProtocol {
+    @objc optional func optionalMethod()
+}
 //10. Associated Types: Protocols can define placeholders for types with
+protocol Container {
+    associatedtype Item
+    func add(item: Item)
+    func getItem(at index: Int) -> Item
+}
 /* ----------------------------------------------------------------
             HOW TO USE OPAQUE RETURN TYPES ?
 -----------------------------------------------------------------*/
@@ -114,7 +134,7 @@ print(getRandomNumber() == getRandomNumber())
 // extensions let us add functionality to existing types,
 /*
     Extension in Swift can:
-    - Add computed instance properties and computed type properties
+    - Add computed instance properties and computed type properties (look at d6
     - Define instance methods and type methods
     - Provide new initializers
     - Define subscripts
@@ -224,6 +244,8 @@ print("Three feet is \(threeFeet) meters")
 
 let aMarathon = 42.km + 195.m
 print("A marathon is \(aMarathon) meters long.")
+
+
 /* ----------------------------------------------------------------
             HOW TO CREATE AND USE PROTOCOL EXTENSIONS
 -----------------------------------------------------------------*/
@@ -404,3 +426,26 @@ house.printSalesSummary();print()
 
 let office = Office(rooms: 16, estateAgent: "Dadan P. Panda")
 office.printSalesSummary();print()
+
+
+protocol A {
+    func a()
+}
+extension A {
+    func a() {
+        print("call from extension")
+    }
+    func b() {}
+}
+struct B: A {
+    func a() {
+        print("call from struct")
+    }
+}
+struct C: A {
+    
+}
+let b = B()
+b.a()
+let c = C()
+c.a()

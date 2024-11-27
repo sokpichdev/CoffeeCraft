@@ -161,6 +161,44 @@ square.center = Point(x: 15.0, y: 15.0)
 print("Square.origin is now at \(square.origin.x), \(square.origin.y)")
 // Prints "square.origin is now at (10.0, 10.0)"
 
+// Computed Instance Properties
+struct Rectangle {
+    var width: Double // stored instance properties
+    var Height: Double
+    
+    // computed instance property
+    var area: Double {
+        return width * Height
+    }
+    
+    var perimeter: Double {
+        return 2 * (width + Height)
+    }
+    // area and perimeter are computed instance properties.
+    // Their values depend on the instace properties width and height.
+}
+let rect = Rectangle(width: 5, Height: 10)
+print(rect.area) // 50.0
+print(rect.perimeter) // 30.0
+
+// Computed Type Properties
+struct Circle {
+    static let pi = 3.124159 // Stored type property
+    
+    // Computed type property
+    static var description: String {
+        return "A shape with constant curvation"
+    }
+    
+    var radius: Double
+    var circumference: Double {
+        return 2 * Circle.pi * radius
+    }
+}
+print(Circle.description)
+let cirlce = Circle(radius: 5)
+print(cirlce.circumference) // 31.24....
+
 /* ----------------------------------------------------------------
             HOW TO TAKE ACTION WHEN A PROPERTY CHAGNES
 -----------------------------------------------------------------*/
@@ -213,7 +251,7 @@ app.contacts.append("Nomercy")
 app.contacts.append("Natsu")
 app.contacts.append("Deadshot")
 /* ----------------------------------------------------------------
-            HOW TO CREATE CUSTOM INITIALIZERS
+            HOW TO CREATE CUSTOME INITIALIZERS
 -----------------------------------------------------------------*/
 // RULES: all properties must have a value by the time the initializer for structs:
 struct Player {
