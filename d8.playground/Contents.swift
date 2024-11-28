@@ -449,3 +449,22 @@ let b = B()
 b.a()
 let c = C()
 c.a()
+
+struct SInstance {
+    var text: String
+    
+    func show(text: String) -> String {
+        return "\(text) \(self.text)"
+    }
+}
+var sInstance: SInstance = SInstance(text: "Hello, World!")
+print(sInstance.show(text: "Hello, Swift!"))
+
+struct SType {
+    static let text: String = "HI world!."
+    static func show() {
+        print("\(text), I am a static function.")
+    }
+}
+SType.show()
+SType.text
