@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct ContentView: View {
+    // modifying program state
     @State private var checkAmount = 0.0
     @State private var numberOfPeople = 2
     @State private var tipPercentage = 20
+    
     
     @FocusState private var amountIsFocused: Bool
     
@@ -21,7 +23,7 @@ struct ContentView: View {
         return amount + amount / 100 * tipSelection
     }
     
-    let tipPercentanges = [10, 15, 20, 25, 0]
+    let tipPercentanges = [5, 10, 15, 20, 25, 0]
     
     var totalPerPerson: Double {
             let peopleCount = Double(numberOfPeople + 2) // picker start from 2, so + 2 to make it count correctly
@@ -37,10 +39,14 @@ struct ContentView: View {
         NavigationStack{
             Form {
                 Section {
+                    //Binding state to user user interface controls
+                    
+                    //Reading text form the user with TextField
                     TextField("Amount", value: $checkAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                         .keyboardType(.numberPad)
                         .focused($amountIsFocused)
                     
+                    // Creating Pickers in a form
                     Picker("Number of people", selection: $numberOfPeople) {
                         ForEach(2..<100) {
                             Text("\($0) people")
@@ -48,10 +54,11 @@ struct ContentView: View {
                     }
                     //.pickerStyle(.navigationLink)
                 }
-                
+                // Adding a segmented control for tip percentages
                 Section("How much do you want to tip?") {
                     //Text("How much do you want to tip?")
                     Picker("Tip percentage", selection: $tipPercentage) {
+                        //Creating views in a loop
                         ForEach(tipPercentanges, id:\.self) {
                             //Text("\($0)%")'
                             Text($0, format: .percent)

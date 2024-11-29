@@ -7,62 +7,62 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
-		6ADB18D12CF8276F004CB43A /* PBXContainerItemProxy */ = {
+		6AB587A62CF984E600558864 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 6ADB18B82CF8276D004CB43A /* Project object */;
+			containerPortal = 6AB5878D2CF984E400558864 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 6ADB18BF2CF8276D004CB43A;
-			remoteInfo = GuessTheFlag;
+			remoteGlobalIDString = 6AB587942CF984E400558864;
+			remoteInfo = RockPaperScissors;
 		};
-		6ADB18DB2CF8276F004CB43A /* PBXContainerItemProxy */ = {
+		6AB587B02CF984E600558864 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 6ADB18B82CF8276D004CB43A /* Project object */;
+			containerPortal = 6AB5878D2CF984E400558864 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 6ADB18BF2CF8276D004CB43A;
-			remoteInfo = GuessTheFlag;
+			remoteGlobalIDString = 6AB587942CF984E400558864;
+			remoteInfo = RockPaperScissors;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		6ADB18C02CF8276D004CB43A /* GuessTheFlag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuessTheFlag.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6ADB18D02CF8276F004CB43A /* GuessTheFlagTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuessTheFlagTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6ADB18DA2CF8276F004CB43A /* GuessTheFlagUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuessTheFlagUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6AB587952CF984E400558864 /* RockPaperScissors.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RockPaperScissors.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6AB587A52CF984E600558864 /* RockPaperScissorsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RockPaperScissorsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6AB587AF2CF984E600558864 /* RockPaperScissorsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RockPaperScissorsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		6ADB18C22CF8276D004CB43A /* GuessTheFlag */ = {
+		6AB587972CF984E400558864 /* RockPaperScissors */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = GuessTheFlag;
+			path = RockPaperScissors;
 			sourceTree = "<group>";
 		};
-		6ADB18D32CF8276F004CB43A /* GuessTheFlagTests */ = {
+		6AB587A82CF984E600558864 /* RockPaperScissorsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = GuessTheFlagTests;
+			path = RockPaperScissorsTests;
 			sourceTree = "<group>";
 		};
-		6ADB18DD2CF8276F004CB43A /* GuessTheFlagUITests */ = {
+		6AB587B22CF984E600558864 /* RockPaperScissorsUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = GuessTheFlagUITests;
+			path = RockPaperScissorsUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6ADB18BD2CF8276D004CB43A /* Frameworks */ = {
+		6AB587922CF984E400558864 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6ADB18CD2CF8276F004CB43A /* Frameworks */ = {
+		6AB587A22CF984E600558864 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6ADB18D72CF8276F004CB43A /* Frameworks */ = {
+		6AB587AC2CF984E600558864 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -72,22 +72,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6ADB18B72CF8276D004CB43A = {
+		6AB5878C2CF984E400558864 = {
 			isa = PBXGroup;
 			children = (
-				6ADB18C22CF8276D004CB43A /* GuessTheFlag */,
-				6ADB18D32CF8276F004CB43A /* GuessTheFlagTests */,
-				6ADB18DD2CF8276F004CB43A /* GuessTheFlagUITests */,
-				6ADB18C12CF8276D004CB43A /* Products */,
+				6AB587972CF984E400558864 /* RockPaperScissors */,
+				6AB587A82CF984E600558864 /* RockPaperScissorsTests */,
+				6AB587B22CF984E600558864 /* RockPaperScissorsUITests */,
+				6AB587962CF984E400558864 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		6ADB18C12CF8276D004CB43A /* Products */ = {
+		6AB587962CF984E400558864 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6ADB18C02CF8276D004CB43A /* GuessTheFlag.app */,
-				6ADB18D02CF8276F004CB43A /* GuessTheFlagTests.xctest */,
-				6ADB18DA2CF8276F004CB43A /* GuessTheFlagUITests.xctest */,
+				6AB587952CF984E400558864 /* RockPaperScissors.app */,
+				6AB587A52CF984E600558864 /* RockPaperScissorsTests.xctest */,
+				6AB587AF2CF984E600558864 /* RockPaperScissorsUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,134 +95,134 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6ADB18BF2CF8276D004CB43A /* GuessTheFlag */ = {
+		6AB587942CF984E400558864 /* RockPaperScissors */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6ADB18E42CF8276F004CB43A /* Build configuration list for PBXNativeTarget "GuessTheFlag" */;
+			buildConfigurationList = 6AB587B92CF984E600558864 /* Build configuration list for PBXNativeTarget "RockPaperScissors" */;
 			buildPhases = (
-				6ADB18BC2CF8276D004CB43A /* Sources */,
-				6ADB18BD2CF8276D004CB43A /* Frameworks */,
-				6ADB18BE2CF8276D004CB43A /* Resources */,
+				6AB587912CF984E400558864 /* Sources */,
+				6AB587922CF984E400558864 /* Frameworks */,
+				6AB587932CF984E400558864 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				6ADB18C22CF8276D004CB43A /* GuessTheFlag */,
+				6AB587972CF984E400558864 /* RockPaperScissors */,
 			);
-			name = GuessTheFlag;
+			name = RockPaperScissors;
 			packageProductDependencies = (
 			);
-			productName = GuessTheFlag;
-			productReference = 6ADB18C02CF8276D004CB43A /* GuessTheFlag.app */;
+			productName = RockPaperScissors;
+			productReference = 6AB587952CF984E400558864 /* RockPaperScissors.app */;
 			productType = "com.apple.product-type.application";
 		};
-		6ADB18CF2CF8276F004CB43A /* GuessTheFlagTests */ = {
+		6AB587A42CF984E600558864 /* RockPaperScissorsTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6ADB18E72CF8276F004CB43A /* Build configuration list for PBXNativeTarget "GuessTheFlagTests" */;
+			buildConfigurationList = 6AB587BC2CF984E600558864 /* Build configuration list for PBXNativeTarget "RockPaperScissorsTests" */;
 			buildPhases = (
-				6ADB18CC2CF8276F004CB43A /* Sources */,
-				6ADB18CD2CF8276F004CB43A /* Frameworks */,
-				6ADB18CE2CF8276F004CB43A /* Resources */,
+				6AB587A12CF984E600558864 /* Sources */,
+				6AB587A22CF984E600558864 /* Frameworks */,
+				6AB587A32CF984E600558864 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				6ADB18D22CF8276F004CB43A /* PBXTargetDependency */,
+				6AB587A72CF984E600558864 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				6ADB18D32CF8276F004CB43A /* GuessTheFlagTests */,
+				6AB587A82CF984E600558864 /* RockPaperScissorsTests */,
 			);
-			name = GuessTheFlagTests;
+			name = RockPaperScissorsTests;
 			packageProductDependencies = (
 			);
-			productName = GuessTheFlagTests;
-			productReference = 6ADB18D02CF8276F004CB43A /* GuessTheFlagTests.xctest */;
+			productName = RockPaperScissorsTests;
+			productReference = 6AB587A52CF984E600558864 /* RockPaperScissorsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		6ADB18D92CF8276F004CB43A /* GuessTheFlagUITests */ = {
+		6AB587AE2CF984E600558864 /* RockPaperScissorsUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6ADB18EA2CF8276F004CB43A /* Build configuration list for PBXNativeTarget "GuessTheFlagUITests" */;
+			buildConfigurationList = 6AB587BF2CF984E600558864 /* Build configuration list for PBXNativeTarget "RockPaperScissorsUITests" */;
 			buildPhases = (
-				6ADB18D62CF8276F004CB43A /* Sources */,
-				6ADB18D72CF8276F004CB43A /* Frameworks */,
-				6ADB18D82CF8276F004CB43A /* Resources */,
+				6AB587AB2CF984E600558864 /* Sources */,
+				6AB587AC2CF984E600558864 /* Frameworks */,
+				6AB587AD2CF984E600558864 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				6ADB18DC2CF8276F004CB43A /* PBXTargetDependency */,
+				6AB587B12CF984E600558864 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				6ADB18DD2CF8276F004CB43A /* GuessTheFlagUITests */,
+				6AB587B22CF984E600558864 /* RockPaperScissorsUITests */,
 			);
-			name = GuessTheFlagUITests;
+			name = RockPaperScissorsUITests;
 			packageProductDependencies = (
 			);
-			productName = GuessTheFlagUITests;
-			productReference = 6ADB18DA2CF8276F004CB43A /* GuessTheFlagUITests.xctest */;
+			productName = RockPaperScissorsUITests;
+			productReference = 6AB587AF2CF984E600558864 /* RockPaperScissorsUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		6ADB18B82CF8276D004CB43A /* Project object */ = {
+		6AB5878D2CF984E400558864 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
-					6ADB18BF2CF8276D004CB43A = {
+					6AB587942CF984E400558864 = {
 						CreatedOnToolsVersion = 16.1;
 					};
-					6ADB18CF2CF8276F004CB43A = {
+					6AB587A42CF984E600558864 = {
 						CreatedOnToolsVersion = 16.1;
-						TestTargetID = 6ADB18BF2CF8276D004CB43A;
+						TestTargetID = 6AB587942CF984E400558864;
 					};
-					6ADB18D92CF8276F004CB43A = {
+					6AB587AE2CF984E600558864 = {
 						CreatedOnToolsVersion = 16.1;
-						TestTargetID = 6ADB18BF2CF8276D004CB43A;
+						TestTargetID = 6AB587942CF984E400558864;
 					};
 				};
 			};
-			buildConfigurationList = 6ADB18BB2CF8276D004CB43A /* Build configuration list for PBXProject "GuessTheFlag" */;
+			buildConfigurationList = 6AB587902CF984E400558864 /* Build configuration list for PBXProject "RockPaperScissors" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 6ADB18B72CF8276D004CB43A;
+			mainGroup = 6AB5878C2CF984E400558864;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6ADB18C12CF8276D004CB43A /* Products */;
+			productRefGroup = 6AB587962CF984E400558864 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6ADB18BF2CF8276D004CB43A /* GuessTheFlag */,
-				6ADB18CF2CF8276F004CB43A /* GuessTheFlagTests */,
-				6ADB18D92CF8276F004CB43A /* GuessTheFlagUITests */,
+				6AB587942CF984E400558864 /* RockPaperScissors */,
+				6AB587A42CF984E600558864 /* RockPaperScissorsTests */,
+				6AB587AE2CF984E600558864 /* RockPaperScissorsUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		6ADB18BE2CF8276D004CB43A /* Resources */ = {
+		6AB587932CF984E400558864 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6ADB18CE2CF8276F004CB43A /* Resources */ = {
+		6AB587A32CF984E600558864 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6ADB18D82CF8276F004CB43A /* Resources */ = {
+		6AB587AD2CF984E600558864 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -232,21 +232,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		6ADB18BC2CF8276D004CB43A /* Sources */ = {
+		6AB587912CF984E400558864 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6ADB18CC2CF8276F004CB43A /* Sources */ = {
+		6AB587A12CF984E600558864 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6ADB18D62CF8276F004CB43A /* Sources */ = {
+		6AB587AB2CF984E600558864 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -256,20 +256,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		6ADB18D22CF8276F004CB43A /* PBXTargetDependency */ = {
+		6AB587A72CF984E600558864 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 6ADB18BF2CF8276D004CB43A /* GuessTheFlag */;
-			targetProxy = 6ADB18D12CF8276F004CB43A /* PBXContainerItemProxy */;
+			target = 6AB587942CF984E400558864 /* RockPaperScissors */;
+			targetProxy = 6AB587A62CF984E600558864 /* PBXContainerItemProxy */;
 		};
-		6ADB18DC2CF8276F004CB43A /* PBXTargetDependency */ = {
+		6AB587B12CF984E600558864 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 6ADB18BF2CF8276D004CB43A /* GuessTheFlag */;
-			targetProxy = 6ADB18DB2CF8276F004CB43A /* PBXContainerItemProxy */;
+			target = 6AB587942CF984E400558864 /* RockPaperScissors */;
+			targetProxy = 6AB587B02CF984E600558864 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		6ADB18E22CF8276F004CB43A /* Debug */ = {
+		6AB587B72CF984E600558864 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -332,7 +332,7 @@
 			};
 			name = Debug;
 		};
-		6ADB18E32CF8276F004CB43A /* Release */ = {
+		6AB587B82CF984E600558864 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -388,14 +388,14 @@
 			};
 			name = Release;
 		};
-		6ADB18E52CF8276F004CB43A /* Debug */ = {
+		6AB587BA2CF984E600558864 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"GuessTheFlag/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"RockPaperScissors/Preview Content\"";
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -404,13 +404,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.GuessTheFlag;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RockPaperScissors;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -418,14 +418,14 @@
 			};
 			name = Debug;
 		};
-		6ADB18E62CF8276F004CB43A /* Release */ = {
+		6AB587BB2CF984E600558864 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"GuessTheFlag/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"RockPaperScissors/Preview Content\"";
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -434,13 +434,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.GuessTheFlag;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RockPaperScissors;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -448,7 +448,7 @@
 			};
 			name = Release;
 		};
-		6ADB18E82CF8276F004CB43A /* Debug */ = {
+		6AB587BD2CF984E600558864 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -458,16 +458,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.GuessTheFlagTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RockPaperScissorsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GuessTheFlag.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GuessTheFlag";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RockPaperScissors.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RockPaperScissors";
 			};
 			name = Debug;
 		};
-		6ADB18E92CF8276F004CB43A /* Release */ = {
+		6AB587BE2CF984E600558864 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -477,16 +477,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.GuessTheFlagTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RockPaperScissorsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GuessTheFlag.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GuessTheFlag";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RockPaperScissors.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RockPaperScissors";
 			};
 			name = Release;
 		};
-		6ADB18EB2CF8276F004CB43A /* Debug */ = {
+		6AB587C02CF984E600558864 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -494,16 +494,16 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.GuessTheFlagUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RockPaperScissorsUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GuessTheFlag;
+				TEST_TARGET_NAME = RockPaperScissors;
 			};
 			name = Debug;
 		};
-		6ADB18EC2CF8276F004CB43A /* Release */ = {
+		6AB587C12CF984E600558864 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -511,55 +511,55 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.GuessTheFlagUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RockPaperScissorsUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GuessTheFlag;
+				TEST_TARGET_NAME = RockPaperScissors;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6ADB18BB2CF8276D004CB43A /* Build configuration list for PBXProject "GuessTheFlag" */ = {
+		6AB587902CF984E400558864 /* Build configuration list for PBXProject "RockPaperScissors" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6ADB18E22CF8276F004CB43A /* Debug */,
-				6ADB18E32CF8276F004CB43A /* Release */,
+				6AB587B72CF984E600558864 /* Debug */,
+				6AB587B82CF984E600558864 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6ADB18E42CF8276F004CB43A /* Build configuration list for PBXNativeTarget "GuessTheFlag" */ = {
+		6AB587B92CF984E600558864 /* Build configuration list for PBXNativeTarget "RockPaperScissors" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6ADB18E52CF8276F004CB43A /* Debug */,
-				6ADB18E62CF8276F004CB43A /* Release */,
+				6AB587BA2CF984E600558864 /* Debug */,
+				6AB587BB2CF984E600558864 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6ADB18E72CF8276F004CB43A /* Build configuration list for PBXNativeTarget "GuessTheFlagTests" */ = {
+		6AB587BC2CF984E600558864 /* Build configuration list for PBXNativeTarget "RockPaperScissorsTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6ADB18E82CF8276F004CB43A /* Debug */,
-				6ADB18E92CF8276F004CB43A /* Release */,
+				6AB587BD2CF984E600558864 /* Debug */,
+				6AB587BE2CF984E600558864 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6ADB18EA2CF8276F004CB43A /* Build configuration list for PBXNativeTarget "GuessTheFlagUITests" */ = {
+		6AB587BF2CF984E600558864 /* Build configuration list for PBXNativeTarget "RockPaperScissorsUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6ADB18EB2CF8276F004CB43A /* Debug */,
-				6ADB18EC2CF8276F004CB43A /* Release */,
+				6AB587C02CF984E600558864 /* Debug */,
+				6AB587C12CF984E600558864 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 6ADB18B82CF8276D004CB43A /* Project object */;
+	rootObject = 6AB5878D2CF984E400558864 /* Project object */;
 }
