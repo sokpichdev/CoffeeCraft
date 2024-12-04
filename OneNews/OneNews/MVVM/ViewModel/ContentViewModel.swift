@@ -43,17 +43,23 @@ class ContentViewModel: ObservableObject {
         NewsModel(image: "mysterywinnner", title: "Mystery Winner Comes Forward to Claim $500 Million Jackpot After Two Weeks", type: .lottery)
     ].shuffled()
     
+    @Published var newsDetail = """
+                    Cristiano Ronaldo has made football history once again by becoming the all-time top scorer in European leagues, a record that underscores his extraordinary career and remarkable consistency. 
+                    
+                    The Portuguese superstar achieved this historic milestone in style, scoring a sensational hat trick during a crucial match. This feat is the result of years of relentless hard work, discipline, and a never-ending hunger for success. 
+                    
+                    Over his illustrious career, Ronaldo has represented some of Europe’s most iconic clubs, including Manchester United, Real Madrid, and Juventus, netting goals across the Premier League, La Liga, and Serie A.
+                        
+                    Each goal tells the story of his evolution as a player, from a promising young talent at Sporting Lisbon to a global icon. His contributions have not only brought trophies and glory to his teams but also inspired countless fans around the world. 
+                    
+                    This latest record is yet another chapter in the legendary story of a player often regarded as one of the greatest in football history. Celebrated for his exceptional fitness, technical ability, and leadership, Ronaldo’s achievements continue to cement his status as an enduring symbol of excellence in the beautiful game.
+                    """
+    
+    func filter(news: NewsModel) -> [NewsModel] {
+        return self.news.filter {
+            $0.type == news.type && $0.title != news.title
+        }
+    }
 }
 
 
-struct NewsModel {
-    let image: String
-    let title: String
-    let type: NewsType
-}
-
-enum NewsType: Int {
-    case football = 1
-    case basketball = 2
-    case lottery = 3
-}

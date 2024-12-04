@@ -11,7 +11,8 @@ import SwiftUI
 struct OneNewsApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabBar()
+//            JournalsView()
         }
     }
 }
