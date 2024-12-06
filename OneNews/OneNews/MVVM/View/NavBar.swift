@@ -64,8 +64,10 @@ struct CusNavbar: View {
                     .frame(width: 20, height: 20)
             }
         }
+        
         .frame(maxWidth: .infinity, maxHeight: 50)
     }
+
 }
 
 #Preview {

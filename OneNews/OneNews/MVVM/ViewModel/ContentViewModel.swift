@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-class ContentViewModel: ObservableObject {
+class NewsViewModel: ObservableObject {
     @Published public var selectedCategoryIndex: Int = 0
     @Published public var newsImage: String = ""
     @Published public var selectedNews: NewsModel? = nil

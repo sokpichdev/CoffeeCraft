@@ -9,21 +9,18 @@ import SwiftUI
 
 struct NewsView: View {
     
-    @ObservedObject var viewModel = ContentViewModel()
-    
-    let tabBarItems = ["News","Journals","Sports","Lottery","Products"]
-    @State var selectedTabBarIndex: Int = 0
-        // I want to click the buttons in the tab bar and it goes to the other views baseds on he index 
+    @ObservedObject var viewModel = NewsViewModel()
+
     var body: some View {
             VStack{
                 
                 categoryButtons
                 Spacer() // Push content to the bottom
                 
-                showContents.background(Color(UIColor.systemGray6))
+                showContents.background(Color(UIColor.systemGray5))
                 
 //                TabBar()
-            }
+            }.background(Color(.systemGray5))
     }
     
     private var categoryButtons: some View {

@@ -9,7 +9,7 @@ import SwiftUI
 struct ContentDetail: View {
     
     let news: NewsModel?
-    @ObservedObject var viewModel = ContentViewModel()
+    @ObservedObject var viewModel = NewsViewModel()
     
     var body: some View {
         ScrollView {
