@@ -28,31 +28,9 @@ struct NewsView: View {
         HStack(spacing: 3) { // No spacing for equal distribution
             ForEach(viewModel.categories.indices, id: \.self) { index in
                 withAnimation(.smooth){
-                    Button(action: {
-                        viewModel.selectedCategoryIndex = index
-                    }) {
-                        VStack(spacing: 5) {
-                            Image(viewModel.selectedCategoryIndex == index ? "Clicked\(viewModel.categories[index])" : viewModel.categories[index])
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 20)
-                            
-                            Text(viewModel.categories[index])
-                                .font(.caption)
-                                .foregroundColor(viewModel.selectedCategoryIndex == index ? .main : .gray)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(8)
-                        //                    .background(
-                        //                        selectedCategory == category ? Color.purple.opacity(0.2) : Color.clear
-                        //                    )
-                        .background(LinearGradient(gradient: Gradient(colors: [Color(.systemGray4), .white, Color(.systemGray5)]), startPoint: .top, endPoint: .bottom)) // Background gradient
-                        .shadow(radius: 10)
-                        .cornerRadius(10)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(viewModel.selectedCategoryIndex == index ? Color.main: Color.clear, lineWidth: 2) // add border.
-                        )
+                    CustomOptionButtons(title: viewModel.categories[index], imageName: viewModel.categories[index], isSelected: viewModel.selectedCategoryIndex == index) {
+                            viewModel.selectedCategoryIndex = index
+                        
                     }
                 }
             }
@@ -66,8 +44,11 @@ struct NewsView: View {
         ScrollViewReader { proxy in // to make it scroll back to the id(0)
             ScrollView {
                 VStack {
+                    
                     let allNews = viewModel.selectedCategoryIndex == 0 ? viewModel.news :
                     viewModel.news.filter { $0.type.rawValue == viewModel.selectedCategoryIndex }
+                    
+                    CustomLabel(text: "Lastest news", alignment: .leading)
                     
                     // Latest news
                     if let latestNews = allNews.first {

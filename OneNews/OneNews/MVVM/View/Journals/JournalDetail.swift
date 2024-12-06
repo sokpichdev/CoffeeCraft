@@ -9,74 +9,73 @@ import SwiftUI
 
 struct JournalDetail: View {
     @ObservedObject var viewModel = NewsViewModel()
-    @State private var selectedIndex: Int = 0 /// Tracks the currently selected index
-    @State private var isSheetPresented = false /// Tracks sheet presentation
+    @State private var selectedIndex: Int = 0
+    @State private var isSheetPresented = false
     
-    // test data
-    let imageARray = [Image(.issue), Image(.recent), Image(.basketball), Image(.football), Image(.giannis), Image(.barceVSmancity), Image(.lottery)]
+    // Test data
+    let imageArray = [Image(.issue), Image(.recent), Image(.basketball), Image(.football), Image(.giannis), Image(.barceVSmancity), Image(.lottery)]
     
     var body: some View {
         VStack {
             /// Full-size Images with TabView
             TabView(selection: $selectedIndex) {
-                ForEach(imageARray.indices, id: \.self) { index in
-                    imageARray[index]
+                ForEach(imageArray.indices, id: \.self) { index in
+                    imageArray[index]
                         .resizable()
-                        .scaledToFit() // this case, use Fit, so it won't overlap on the other
-                        .frame(height: 480)
+                        .scaledToFit() // ensures images adapt to the screen width while maintaining their aspect ratio.
+                        .frame(maxWidth: .infinity, maxHeight: .infinity) // ensures components adjust to different screen sizes.
                         .cornerRadius(10)
                         .clipped()
                         .padding(.bottom, 10)
-                        .tag(index) /// Links each page to its index
+                        .tag(index)
                 }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // Hides the default page dots
-            .frame(height: 500)
+//            .background(.yellow)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .frame(maxWidth: .infinity, maxHeight: UIScreen.main.bounds.height * 0.5) // makes the full image flexible while occupying 50% of the screen height.
+            Spacer()
             
             /// Issue Images
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    ForEach(imageARray.indices, id: \.self) { index in
+                    ForEach(imageArray.indices, id: \.self) { index in
                         Button(action: {
                             withAnimation {
-                                selectedIndex = index /// Sync selected page when tapping on an issue
+                                selectedIndex = index
                             }
                         }) {
                             VStack {
-                                VStack {
-                                    imageARray[index]
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 90, height: 140)
-                                        .clipped()
-                                        .cornerRadius(10)
-                                        .shadow(radius: 5)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(selectedIndex == index ? Color.main: Color.clear, lineWidth: 4)
-                                        )
-                                }
-                                .padding(5)
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                
+                                imageArray[index]
+                                    .resizable()
+                                    .scaledToFill() // for issues to ensure they fill the defined frame without distortion.
+                                    .frame(width: 90, height: 140)
+                                    .clipped()
+                                    .shadow(radius: 5)
+                                    .cornerRadius(10)
+                                    .padding(5)
+                                    .background(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(selectedIndex == index ? Color.main : Color.clear, lineWidth: 2)
+                                    )
+                                    .cornerRadius(10)
                                 Text("2023-\(index)")
                                     .foregroundColor(selectedIndex == index ? .main : .black)
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 16)
-                //                .onchange(of: selectedIndex)
+//                .padding(.horizontal, 16)
             }
             .frame(height: 170)
             
             Spacer()
         }
+//        .background(.green)
         .padding(.horizontal, 16)
         .navigationTitle("Name of the journal")
         .navigationBarItems(trailing: Button(action: {
-            isSheetPresented = true /// Toggle sheet presentation
+            isSheetPresented = true
         }) {
             Image(.calendar)
                 .resizable()
@@ -88,6 +87,4 @@ struct JournalDetail: View {
         }
         .background(Color(UIColor.systemGray5))
     }
-    
-    
 }
