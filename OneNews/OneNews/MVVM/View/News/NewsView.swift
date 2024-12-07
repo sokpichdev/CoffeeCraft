@@ -19,7 +19,6 @@ struct NewsView: View {
                 
                 showContents.background(Color(UIColor.systemGray5))
                 
-//                TabBar()
             }.background(Color(.systemGray5))
     }
     

@@ -72,11 +72,14 @@ struct SheetContentView: View {
                             .padding()
                             .frame(width: 100, height: 60)
                             .background(Color.gray.opacity(0.1))
+//                            .background(selectedYear == yearIndex ? .main: Color.clear)
+
                             .foregroundStyle(.black)
 //                            .shadow(radius: 2)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(selectedYear == yearIndex ? .main : Color.clear, lineWidth: 2)
+
                             )
                             .cornerRadius(10)
                         }
