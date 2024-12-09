@@ -10,13 +10,29 @@ import SwiftUI
 struct SportsView: View {
     @ObservedObject var viewModel = NewsViewModel()
     let sportOptions = ["Football", "Basketball"]
-    let days = ["Sat", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    @State var chosenDay: Int? = nil // track the selected day
-    @State var selectedOptions: Int = 0
-    @State var isDateSelected: Bool = false
-    
+    @State private var chosenDay: Int? = nil /// track the selected day
+    @State private var selectedOptions: Int = 0
+    @State private var isDateSelected: Bool = false
     @State private var isDatePickerPresented: Bool = false
-    @State private var selectedDate: Date? = nil // to track the selected date from the date picker
+    @State private var selectedDate: Date? = nil /// to track the selected date from the date picker
+    
+    let  calendar = Calendar.current
+    let today = Date()
+    
+    var daysAndDate: [(day: String, date: Int)] { /// return an array of tuples
+        var daysArray: [(String, Int)] = [] // empty array to store tuples
+        for offset in -1..<6 { /// loop from -1 to 6. -1 for Ytd, 0 for today, 1...5 for next days
+            if let date = calendar.date(byAdding: .day, value: offset, to: today) { /// calculate a new date by adding offset days to the today date:
+                let dayName = calendar.shortWeekdaySymbols[calendar.component(.weekday, from: date) -  1]
+                ///  calendar.component(.weekday, from: date) retrieves the day of the week an integers (1 = Sunday, 2 = Monday, ...).
+                ///  calendar.shortWeekdaySymbols is na array of short weekday names: ["Sun", "Mon"...]
+                ///  -1 maps the weekdays integer to the correct index in shortWeekdaySymbols
+                let dayNumber = calendar.component(.day, from: date) /// Extracts the day number of the month (e.g., 9 for December 9th)
+                daysArray.append((dayName, dayNumber)) /// Adds the typle (dayName, dayNumber) to the daysArray.
+            }
+        }
+        return daysArray /// Returns the array of tuples.
+    }
     
     var body: some View {
         ScrollView {
@@ -51,7 +67,7 @@ struct SportsView: View {
                                         }
                                         .frame(width: 65, height: 50)
                                         .background(Color.black.opacity(0.1))
-                                        .shadow(radius: 5)
+                                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
                                         .cornerRadius(10)
                                         
                                         Image(.live)
@@ -84,19 +100,16 @@ struct SportsView: View {
                                     .background(Color.black.opacity(0.2))
                                     .shadow(radius: 5)
                                 }
-                                //                                .padding(.bottom, -17) // teanh vea oy smer ng bottom. but not dynamic
+                                //.padding(.bottom, -17) // teanh vea oy smer ng bottom. but not dynamic
                                 
                             }
                             .foregroundColor(Color.white)
-                            //                                        .padding()
                             .frame(width: 330, height: 170)
                             .background(LinearGradient(gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]), startPoint: .top, endPoint: .bottom))
                             
                             .cornerRadius(15)
                             .shadow(radius: 5)
-                            //
                         }
-                        //
                     }
                     .padding(.horizontal, 16) // avoid padding the scrollView
                 }
@@ -109,7 +122,7 @@ struct SportsView: View {
                             selectedOptions = index
                         }
                     }
-                    Spacer() // push button to the left
+                    Spacer() /// push button to the left
                     
                 }
                 .padding(16)
@@ -121,30 +134,20 @@ struct SportsView: View {
                 HStack(spacing: 10) {
                     // Conditional layout
                     if let selectedDate = selectedDate {
-                        // Display one button on the left
-                        Button(action: {
-//                            chosenDay = 0 // Optionally reset or reassign
+                        
+                        Button(action: { /// Display one button on the left
                             withAnimation(.smooth){
-                                self.selectedDate = nil // Reset the selectedDate to nil to go back to default layout
+                                self.selectedDate = nil /// Reset the selectedDate to nil to go back to default layout
                             }
-
                         }) {
-                            VStack {
-                                Text(days[0])
-                                    .font(.system(size: 9, weight: .regular))
-                                    .frame(width: 20, height: 12)
-                                Text("10")
-                                    .font(.system(size: 12, weight: .semibold))
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            DayView(day: daysAndDate[0].day, date: daysAndDate[0].date)
                             .background(chosenDay == 0 ? Color.main : Color.white)
                             .foregroundColor(chosenDay == 0 ? .white : .black)
                             .clipShape(Capsule())
                         }
                         .frame(width: (UIScreen.main.bounds.size.width - 60 - 32) / 7, height: 65)
                         
-                        // Display the selected date as a single button spanning 5 spaces
-                        Button(action: {
+                        Button(action: { // Display the selected date as a single button spanning 5 spaces
                             print("Selected Date: \(selectedDate)")
                         }) {
                             VStack {
@@ -156,10 +159,11 @@ struct SportsView: View {
                             .foregroundColor(.white)
                             .clipShape(Capsule())
                         }
-                        .frame(width: ((UIScreen.main.bounds.size.width - 60 - 32) / 7) * 6, height: 65)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 65)
                         
-                        // Calendar button
-                        Button(action: {
+                        
+                        Button(action: { /// Calendar button
                             isDatePickerPresented = true
                         }) {
                             VStack {
@@ -172,10 +176,10 @@ struct SportsView: View {
                         .frame(width: (UIScreen.main.bounds.size.width - 60 - 32) / 7, height: 65)
                     } else {
                         // Default layout
-                        ForEach(days.indices, id: \.self) { index in
+                        ForEach(daysAndDate.indices, id: \.self) { index in
                             Button(action: {
                                 if index == 6 {
-                                    isDatePickerPresented = true // Show date picker for the last button
+                                    isDatePickerPresented = true /// Show date picker for the last button
                                 } else {
                                     withAnimation {
                                         chosenDay = index
@@ -188,14 +192,8 @@ struct SportsView: View {
                                     }
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 } else {
-                                    VStack {
-                                        Text(days[index])
-                                            .font(.system(size: 9, weight: .regular))
-                                            .frame(width: 20, height: 12)
-                                        Text("\(10 + index)")
-                                            .font(.system(size: 12, weight: .semibold))
-                                    }
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    DayView(day: daysAndDate[index].day, date: daysAndDate[index].date)
+                                    
                                     .foregroundColor(chosenDay == index ? .white : .black)
                                     
                                 }
@@ -224,79 +222,43 @@ struct SportsView: View {
                 }
                 
                 
-                ForEach(1...4, id: \.self){ _ in
+                ForEach(1...3, id: \.self){ _ in
                     // section
-                    HStack(spacing: 16) {
-                        Image(.cpl)
-                        Text("Cambodia Premier Leaque")
-                            .foregroundStyle(.white)
-                        
-                        Spacer()
-                        Image(.star2)
-                        
-                        Image(.frontBtn)
-                    }
-//                    .padding(.horizontal, 16)
-//                    .padding(.vertical, 10)
-                    .padding(EdgeInsets(top: 10, leading: 16,bottom: 10, trailing: 16))
-                    .background(LinearGradient(gradient: Gradient(colors: [Color.darkPink, Color.lightPink]), startPoint: .leading, endPoint: .trailing))
-                    .cornerRadius(10)
-                    .padding(.horizontal, 16)
+                    SmallLeagueView(leagueTitle: "Cambodia Premier Leaque", leagueImageName: "cpl")
                     
                     
-                    ForEach(1...5, id: \.self) { _ in
-                        // Matches
-                        VStack(spacing: 5) {
-                            HStack {
-                                Spacer()
-                                Text("68'")
-                                Image(systemName: "timer")
-                            }
-                            .foregroundStyle(.red)
-                            HStack {
-                                // Left team
-                                TeamView(teamImage: Image(.barceTeam), teamName: "North Korea")
-                                
-                                Spacer()
-                                
-                                // Score and Live
-                                ZStack {
-                                    // Score box with shadow
-                                    VStack {
-                                        Text("5 - 3")
-                                            .foregroundColor(.black)
-                                    }
-                                    .frame(width: 65, height: 50)
-                                    .background(Color.white) // Background color for the box
-                                    .cornerRadius(10)
-                                    .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5) // directly to the VStack holding the score (5 - 3).
-                                    .offset(y: -15)
-                                    // Live indicator
-                                    Image(.live)
-                                        .resizable()
-                                        .frame(width: 25, height: 15)
-                                        .offset(y: -40) // Position "Live" indicator
-                                }
-                                
-                                Spacer()
-                                // Right team
-                                TeamView(teamImage: Image(.barceTeam), teamName: "South korea")
-                            }
-                            
+                    Button(action: {
+                        
+                    }) {
+                        NavigationLink(destination: FMatchDetail()) {
+                            LiveMatch()
                         }
-                        .padding(.horizontal, 16)
-                        .frame(maxWidth: .infinity, minHeight: 100)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal, 16)
-                    }
+                    }.foregroundStyle(Color.black)
+                    
+                    Button(action: {
+                        
+                    }) {
+                        NavigationLink(destination: FMatchDetail()) {
+                            UpcomingMatch()
+                        }
+                    }.foregroundStyle(Color.black)
+                    
+                    Button(action: {
+                        
+                    }) {
+                        NavigationLink(destination: FMatchDetail()) {
+                            FinishedMatch()
+                        }
+                    }.foregroundStyle(Color.black)
+                    
                 }
             }
             .background(Color(.systemGray5)) // background for all
             Spacer()
         }
+        
     }
-    
+        
 }
 
 #Preview {
