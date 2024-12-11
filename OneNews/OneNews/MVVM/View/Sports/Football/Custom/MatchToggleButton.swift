@@ -16,8 +16,8 @@ struct MatchToggleButton: View {
             Text(title)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(isSelected ? Color.main : Color.white)
-                .foregroundStyle(isSelected ? Color.white : Color.black)
+                .background(isSelected ? Color.main : Color.optionBtn2)
+                .foregroundStyle(isSelected ? Color.white : Color.letters)
         }
     }
 }

@@ -10,6 +10,7 @@ import SwiftUI
 struct FMatchDetail: View {
     @State var selectedSummary: Bool = true
     var body: some View {
+        ScrollView {
         VStack(spacing: 10) {
             BigLeagueView(leagueTitle: "Cambodia Premier League", leagueImageName: "cpl")
             
@@ -31,9 +32,16 @@ struct FMatchDetail: View {
             .padding(.horizontal, 16)
             .shadow(radius: 5)
             
-            Spacer()
+                if selectedSummary {
+                    SummaryView()
+                } else {
+                    StatsView()
+                }
+            
+//            Spacer()
         }
-        .background(Color(.systemGray5))
+            .background(Color.background)
+    }
     }
 }
 

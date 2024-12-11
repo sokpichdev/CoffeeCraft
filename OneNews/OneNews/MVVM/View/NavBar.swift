@@ -45,9 +45,9 @@ struct NavBar: View {
             .overlay( // to put the title in front of the nav bar
                 Image("title")
                     .font(.headline)
-                    .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .center)
             )
+            Divider().shadow(radius: 5, y: 2)
         }
     }
 }
@@ -67,6 +67,7 @@ struct CusNavbar: View {
         .background(Color.white)
         
         .frame(maxWidth: .infinity, maxHeight: 50)
+       
     }
 
 }

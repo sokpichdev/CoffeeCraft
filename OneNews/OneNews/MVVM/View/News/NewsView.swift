@@ -12,19 +12,23 @@ struct NewsView: View {
     @ObservedObject var viewModel = NewsViewModel()
 
     var body: some View {
-            VStack{
+            VStack {
                 
                 categoryButtons
                 Spacer() // Push content to the bottom
                 
-                showContents.background(Color(UIColor.systemGray5))
+                showContents
+//                    .background(Color.white)
                 
-            }.background(Color(.systemGray5))
+            }
+//            .padding(.horizontal, 16)
+//            .background(Color(.systemGray5))
+//            .background(Color.white)
     }
-    
+
     private var categoryButtons: some View {
         // Categories Tabs
-        HStack(spacing: 3) { // No spacing for equal distribution
+        HStack(spacing: 5) { // No spacing for equal distribution
             ForEach(viewModel.categories.indices, id: \.self) { index in
                 withAnimation(.smooth){
                     CustomOptionButtons(title: viewModel.categories[index], imageName: viewModel.categories[index], isSelected: viewModel.selectedCategoryIndex == index) {
@@ -36,18 +40,25 @@ struct NewsView: View {
         }
         .frame(height: 80) //// Total height of the tabs
         .padding(.horizontal, 16)
-        .background(Color(UIColor.systemGray6))
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [.letters.opacity(0.0), .letters.opacity(0.0), .letters.opacity(0.0)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
     
     private var showContents: some View {
         ScrollViewReader { proxy in // to make it scroll back to the id(0)
             ScrollView {
                 VStack {
-                    
                     let allNews = viewModel.selectedCategoryIndex == 0 ? viewModel.news :
                     viewModel.news.filter { $0.type.rawValue == viewModel.selectedCategoryIndex }
                     
-                    CustomLabel(text: "Lastest news", alignment: .leading)
+                    CustomLabel(text: "Lastest news", font: .largeTitle, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .id(0)
                     
                     // Latest news
                     if let latestNews = allNews.first {
@@ -58,13 +69,15 @@ struct NewsView: View {
                         }) {
                             NavigationLink(destination: ContentDetail(news: latestNews)){
                                 LatestNewsView(newsItem: latestNews)
-                            }.foregroundStyle(.black)
-                        }.buttonStyle(PlainButtonStyle())
-                            .id(0)
+                            }
+                            .foregroundStyle(Color.letters)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
                         
                         Divider()
-                            .padding(.horizontal, 16)
                             .background(Color.gray)
+                            .padding(.horizontal, 16)
                     }
                     
                     // The rest of the news
@@ -77,8 +90,9 @@ struct NewsView: View {
                             NavigationLink(destination: ContentDetail(news: newsItem)){
                                 RegularNewsView(newsItem: newsItem)
                             }
-                            .foregroundStyle(Color.black)
+                            .foregroundStyle(Color.letters)
                         }
+                        .padding(.horizontal, 16)
                         .buttonStyle(PlainButtonStyle())
                     }
                     
@@ -88,7 +102,8 @@ struct NewsView: View {
                             OldNews(newsItem: newsItem)
                         }
                         .foregroundStyle(Color.black)
-                    }.padding(.vertical, 10)
+                    }
+                    .padding(.horizontal, 16)
                     
                     // Section Football
                     ForEach(allNews, id: \.title) { newsItem in
@@ -102,10 +117,11 @@ struct NewsView: View {
                                 OtherNews(newsItem: newsItem)
                             default:
                                 OtherNews(newsItem: newsItem)
-                            }                    }
+                            }
+                        }
                     }
-                    .foregroundStyle(.black)
-                }.padding(.horizontal, 16)
+                    .foregroundStyle(.letters)
+                }
             }
             .onChange(of: viewModel.selectedCategoryIndex) { _ in
                 withAnimation {
@@ -114,6 +130,8 @@ struct NewsView: View {
                 }
             }
         }
+//        .padding(16)
+        
     }
 }
 

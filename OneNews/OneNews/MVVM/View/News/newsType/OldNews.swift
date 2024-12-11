@@ -15,6 +15,7 @@ struct OldNews: View {
                 Text(newsItem.title)
                     .font(.caption)
                     .multilineTextAlignment(.leading)
+                    .foregroundStyle(.letters)
                 Spacer() // push to the left
             }
             .padding(.vertical, 5)
@@ -23,5 +24,6 @@ struct OldNews: View {
                 .padding(.horizontal, 16)
                 .background(.gray)
         }
+//        .padding(.horizontal, 16)
     }
 }

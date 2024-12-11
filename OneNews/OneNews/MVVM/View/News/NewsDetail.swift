@@ -20,14 +20,11 @@ struct ContentDetail: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.leading)
-                        .padding(.bottom, 10)
-                        .padding(.horizontal, 16)
                     
                     // Published Date
                     Text("Published Date:")
                         .font(.caption)
                         .foregroundColor(.gray)
-                        .padding(.horizontal, 16)
                     
                     
                     HStack(spacing: 20) {
@@ -49,22 +46,18 @@ struct ContentDetail: View {
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
                     
                     // Image
                     Image(news.image)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 380, height: 200)
+                        .frame(maxWidth: .infinity, maxHeight: 200)
                         .cornerRadius(10)
                         .clipped() // Ensures no overflow
-                        .padding(.horizontal, 16)
                     
                     // Subtitle
                     Text(news.title)
                         .font(.subheadline)
-                        .padding(.horizontal, 16)
                     
                     Divider()
                         .padding(.horizontal, 16)
@@ -75,38 +68,30 @@ struct ContentDetail: View {
                         .font(.body)
                         .lineSpacing(10)
                         .multilineTextAlignment(.leading)
-                        .padding(.horizontal, 16)
                     
                     // Ads
                     VStack(alignment: .leading ,spacing: 10){
-                        Text("Advertisement")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .padding(.horizontal, 16)
+                        CustomLabel(text: "Advertisement")
                         
                         
                         Image("ads1")
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 380, height: 200)
+                            .frame(maxWidth: .infinity, maxHeight: 200)
                             .cornerRadius(10)
                             .clipped() // Ensures no overflow
-                            .padding(.horizontal, 16)
                     }.padding(.vertical, 10)
                     
-                    Text("Recommended News")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 15)
-                    /*How to show recommended news base on the type content user clicked.*/
+                    CustomLabel(text: "Recommended News")
                     
                     ForEach(viewModel.filter(news: news), id: \.title) { relatedNewsItem in
                         NavigationLink(destination: ContentDetail(news: relatedNewsItem, viewModel: viewModel)) {
-                            LatestNewsView(newsItem: relatedNewsItem)
+                            OtherNews(newsItem: relatedNewsItem)
+                            
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, -16)
+                        Divider()
                     }
                     
                 } else {
@@ -114,7 +99,6 @@ struct ContentDetail: View {
                     Text("No news selected.")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .padding(.horizontal, 16)
                 }
                 
                 
@@ -125,6 +109,11 @@ struct ContentDetail: View {
             
 //            .navigationBarItems(leading: NavBar())
         }
+        .padding(.horizontal, UIScreen.main.bounds.width < 375 ? 10: 16)
 //        .navigationBarHidden(true)
     }
+}
+
+#Preview {
+    ContentDetail(news: NewsModel.init(image: "CR7ScoredHatTrick", title: "CR7 scores hat-trick", type: .football))
 }

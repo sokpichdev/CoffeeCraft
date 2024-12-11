@@ -16,6 +16,7 @@ struct JournalDetail: View {
     let imageArray = [Image(.issue), Image(.recent), Image(.basketball), Image(.football), Image(.giannis), Image(.barceVSmancity), Image(.lottery)]
     
     var body: some View {
+        Divider()
         VStack {
             /// Full-size Images with TabView
             TabView(selection: $selectedIndex) {
@@ -53,14 +54,14 @@ struct JournalDetail: View {
                                     .shadow(radius: 5)
                                     .cornerRadius(10)
                                     .padding(5)
-                                    .background(Color.white)
+                                    .background(Color.optionBtn1)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 10)
                                             .stroke(selectedIndex == index ? Color.main : Color.clear, lineWidth: 2)
                                     )
                                     .cornerRadius(10)
                                 Text("2023-\(index)")
-                                    .foregroundColor(selectedIndex == index ? .main : .black)
+                                    .foregroundColor(selectedIndex == index ? .main : .letters)
                             }
                         }
                     }
@@ -85,6 +86,6 @@ struct JournalDetail: View {
             SheetContentView()
                 .presentationDetents([.height(400)])
         }
-        .background(Color(UIColor.systemGray5))
+        .background(Color.background)
     }
 }

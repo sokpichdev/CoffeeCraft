@@ -27,11 +27,12 @@ struct RegularNewsView: View {
                 
                 Spacer()
             }
-            .padding(.vertical, 5)
+//            .padding(.vertical, 5)
             
             Divider()
                 .padding(.horizontal, 16)
                 .background(Color.gray)
         }
+//        .padding(.horizontal, 16)
     }
 }

@@ -14,13 +14,17 @@ struct ScoreBoardView: View {
     var body: some View {
         VStack {
             Text("\(leftTeamScore) - \(rightTeamScore)")
-                .foregroundColor(.black)
+                .foregroundColor(.letters)
         }
         .frame(width: 65, height: 50)
-        .background(Color.white) /// Background color for the box
+        .background(Color.letters.opacity(0.1)) /// Background color for the box
         .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5) /// directly to the VStack holding the score (5 - 3).
+        .shadow( radius: 10, x: 0, y: 4) /// directly to the VStack holding the score (5 - 3).
         .offset(y: -15)
     }
     
+}
+
+#Preview {
+    ScoreBoardView(leftTeamScore: 11, rightTeamScore: 23)
 }

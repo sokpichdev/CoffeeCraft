@@ -32,7 +32,7 @@ struct FootballMatches: View {
                             NavigationLink(destination: FMatchDetail()) {
                                 UpcomingMatch()
                             }
-                        }.foregroundStyle(Color.black)
+                        }.foregroundStyle(Color.letters)
                     }
                 } else {
                     ForEach(1...5, id: \.self) { _ in
@@ -42,13 +42,13 @@ struct FootballMatches: View {
                             NavigationLink(destination: FMatchDetail()) {
                                 FinishedMatch()
                             }
-                        }.foregroundStyle(Color.black)
+                        }.foregroundStyle(Color.letters)
                     }
                 }
             }
             
         }
-        .background(Color(.systemGray5))
+        .background(Color.background)
         .navigationTitle("Football Matches")
         
         

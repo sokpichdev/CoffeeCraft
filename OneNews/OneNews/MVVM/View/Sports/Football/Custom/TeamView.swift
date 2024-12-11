@@ -20,5 +20,6 @@ struct TeamView: View {
                 .frame(width: imageSize.width, height: imageSize.height)
             Text(teamName)
         }
+        .foregroundStyle(.letters)
     }
 }

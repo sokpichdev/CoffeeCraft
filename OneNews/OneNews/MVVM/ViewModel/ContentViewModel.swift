@@ -16,7 +16,6 @@ class NewsViewModel: ObservableObject {
     
     @Published var news: [NewsModel] = [
         // Football
-        NewsModel(image: "barceVSmancity", title: "Champions League: Barcelona and Manchester City Advance to Quarterfinals", type: .football),
         NewsModel(image: "CR7ScoredHatTrick", title: "Cristiano Ronaldo Becomes All-Time Top Scorer in European Leagues", type: .football),
         NewsModel(image: "ChelseaOVerManUnited", title: "Premier League: Chelsea Triumphs Over Manchester United in Thrilling Match", type: .football),
         NewsModel(image: "messi", title: "Lionel Messi Announces Departure from Paris Saint-Germain After 2023 Season", type: .football),

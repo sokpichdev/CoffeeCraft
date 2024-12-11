@@ -14,6 +14,7 @@ struct FinishedMatch: View {
                 Spacer()
                 Text("FT")
                     .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.letters.opacity(0.5))
                     
             }
             .padding(.top, 10)
@@ -35,7 +36,13 @@ struct FinishedMatch: View {
             
         }
         .frame(maxWidth: .infinity, maxHeight: 120)
-        .background(Color.white)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [.optionBtn2.opacity(1.5),.optionBtn2.opacity(0.5), .optionBtn2.opacity(1.5)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
         .cornerRadius(10)
         .padding(.horizontal, 16)
     }

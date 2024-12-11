@@ -39,14 +39,14 @@ struct SheetContentView: View {
                     // Perform apply action
                 }) {
                     Text("Apply")
-                        .foregroundColor(isIssueSelected ? .white : .black)
+                        .foregroundColor(isIssueSelected ? .white : .letters)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                 }
-                .background(isIssueSelected ? Color.main : Color.white)
+                .background(isIssueSelected ? Color.main : Color.clear)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(isIssueSelected ? .main : Color.gray.opacity(0.3), lineWidth: 1)
+                        .stroke(isIssueSelected ? .main : Color.letters.opacity(0.4), lineWidth: 1)
                 )
                 .cornerRadius(10)
             }
@@ -71,10 +71,10 @@ struct SheetContentView: View {
                             }
                             .padding()
                             .frame(width: 100, height: 60)
-                            .background(Color.gray.opacity(0.1))
+                            .background(Color.optionBtn1)
 //                            .background(selectedYear == yearIndex ? .main: Color.clear)
 
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.letters)
 //                            .shadow(radius: 2)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
@@ -102,9 +102,9 @@ struct SheetContentView: View {
                                 Text("Issue \(issueIndex + 1)")
                                     .font(.caption2)
                                     .frame(maxWidth: .infinity, minHeight: 40)
-                                    .background(Color.gray.opacity(0.1))
+                                    .background(.optionBtn1)
                             }
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.letters)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(selectedIssue == issueIndex ? Color.main : Color.clear, lineWidth: 2)

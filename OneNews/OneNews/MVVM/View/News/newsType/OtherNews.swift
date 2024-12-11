@@ -10,19 +10,26 @@ import SwiftUI
 struct OtherNews: View {
     let newsItem: NewsModel
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Image(newsItem.image)
                 .resizable()
                 .scaledToFill()
-                .frame(width: 380, height: 200) // Larger frame for the latest news
+                .frame(maxWidth: .infinity, maxHeight: 200) // Larger frame for the latest news
                 .cornerRadius(10)
                 .clipped() // Ensures no overflow
                 .padding(.bottom, 10) // Space between the latest and other news
             
             Text(newsItem.title)
-                .font(.title3) // Larger font for emphasis
+                .font(.title3)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.leading)
+                .lineLimit(2) // Limit lines for small screens
+                .minimumScaleFactor(0.75) // Shrink text to fit smaller widths
+
         }
+//        .padding(.horizontal, 16)
+        .padding(.bottom, UIScreen.main.bounds.width < 375 ? 5 : 10)
+        .padding(.horizontal, UIScreen.main.bounds.width < 375 ? 10 : 16)
+
     }
 }
