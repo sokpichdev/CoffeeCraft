@@ -20,9 +20,7 @@ struct CustomLabel: View {
                 .font(font)
                 .fontWeight(fontWeight)
                 .foregroundColor(textColor)
-//            Spacer()
         }
-        .frame(maxWidth: .infinity, alignment: alignment)
     }
 }
 // example uses

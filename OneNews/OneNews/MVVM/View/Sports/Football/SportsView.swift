@@ -36,9 +36,13 @@ struct SportsView: View {
     
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .leading) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    teamCards
+                    if selectedOptions == 0 {
+                        TeamCard(title: "Cambodia U19 vs Vietname U19", leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", leftTeamScore: 14, rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea", rightTeamScore: 11)
+                    } else {
+                        TeamCard(title: "NBL Final", leftTeamImage: Image(.barceTeam), leftTeamName: "Russia", leftTeamScore: 34, rightTeamImage: Image(.barceTeam), rightTeamName: "Australia", rightTeamScore: 31)
+                    }
                 }
                 
                 optionButtons
@@ -48,89 +52,19 @@ struct SportsView: View {
                 
                 dateButtons
                 
-                sections
+                if selectedOptions == 0 {
+                    FootballSections
+                } else {
+                    BasketballSections
+                }
             }
             .background(Color.background) // background for all
             Spacer()
         }
         
     }
-    
-    private var teamCards: some View {
-        HStack/*(spacing: 16)*/ {
-            ForEach(1...4, id: \.self) { index in
-                //                            // Background card
-                VStack(spacing: 10) {
-                    Spacer(minLength: 0)
-                    // section 1
-                    HStack {
-                        Text("Cambodia U19 vs Vietnam U19")
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
-                    }
-                    .padding(.horizontal, 16)
-                    
-                    Spacer(minLength: 0)
-                    // section 2
-                    HStack {
-                        // Left team
-                        TeamView(teamImage: Image(.barceTeam), teamName: "North Korea")
-                        Spacer()
-                        
-                        // Score and Live
-                        ZStack {
-                            VStack {
-                                Text("5 - 3")
-                                    .foregroundColor(.white)
-                            }
-                            .frame(width: 65, height: 50)
-                            .background(Color.black.opacity(0.1))
-                            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
-                            .cornerRadius(10)
-                            
-                            Image(.live)
-                                .resizable()
-                                .frame(width: 25, height: 15)
-                                .offset(y: -25) // Position "Live" indicator
-                        }
-                        Spacer()
-                        // Right team
-                        TeamView(teamImage: Image(.barceTeam), teamName: "South Korea")
-                        
-                    }.padding(10)
-                    
-                    Spacer(minLength: 0)
-                    VStack{
-                        ZStack(alignment: .bottom) {
-                            HStack {
-                                Text("First Haft 32:44")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text("28 Oct, Sat. 03:30 PM")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.horizontal, 10)
-                        }
-                        .frame(height: 40)
-                        .frame(maxWidth: .infinity, alignment: .bottom)
-                        .background(Color.black.opacity(0.2))
-                        .shadow(radius: 5)
-                    }
-                    
-                }
-                .foregroundColor(Color.white)
-                .frame(width: 330, height: 170)
-                .background(LinearGradient(gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]), startPoint: .top, endPoint: .bottom))
-                
-                .cornerRadius(15)
-                .shadow(radius: 5)
-            }
-        }
-        .padding(.horizontal, 16) // avoid padding the scrollView
-    }
+//    
+//    private var teamCards: some View
     
     private var optionButtons: some View {
         HStack { // buttons
@@ -246,7 +180,7 @@ struct SportsView: View {
     }
     
     
-    private var sections: some View {
+    private var FootballSections: some View {
         ForEach(1...3, id: \.self){ _ in
             // section
             SmallLeagueView(leagueTitle: "Cambodia Premier Leaque", leagueImageName: "cpl")
@@ -256,7 +190,7 @@ struct SportsView: View {
                 
             }) {
                 NavigationLink(destination: FMatchDetail()) {
-                    LiveMatch()
+                    LiveMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", leftTeamScore: 3, rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea", rightTeamScore: 3)
                 }
             }.foregroundStyle(Color.black)
             
@@ -264,7 +198,7 @@ struct SportsView: View {
                 
             }) {
                 NavigationLink(destination: FMatchDetail()) {
-                    UpcomingMatch()
+                    UpcomingMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea")
                 }
             }.foregroundStyle(Color.black)
             
@@ -272,7 +206,40 @@ struct SportsView: View {
                 
             }) {
                 NavigationLink(destination: FMatchDetail()) {
-                    FinishedMatch()
+                    FinishedMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", leftTeamScore: 1, rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea", rightTeamScore: 3)
+                }
+            }.foregroundStyle(Color.black)
+            
+        }
+    }
+    
+    private var BasketballSections: some View {
+        ForEach(1...3, id: \.self){ _ in
+            // section
+            SmallLeagueView(leagueTitle: "NBL", leagueImageName: "cpl")
+            
+            
+            Button(action: {
+                
+            }) {
+                NavigationLink(destination: FMatchDetail()) {
+                    LiveMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "USA", leftTeamScore: 3, rightTeamImage: Image(.barceTeam), rightTeamName: "USB", rightTeamScore: 3)
+                }
+            }.foregroundStyle(Color.black)
+            
+            Button(action: {
+                
+            }) {
+                NavigationLink(destination: FMatchDetail()) {
+                    UpcomingMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Japan", rightTeamImage: Image(.barceTeam), rightTeamName: "China")
+                }
+            }.foregroundStyle(Color.black)
+            
+            Button(action: {
+                
+            }) {
+                NavigationLink(destination: FMatchDetail()) {
+                    FinishedMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Thailand", leftTeamScore: 1, rightTeamImage: Image(.barceTeam), rightTeamName: "Cambodia", rightTeamScore: 3)
                 }
             }.foregroundStyle(Color.black)
             

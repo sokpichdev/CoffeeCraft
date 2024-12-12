@@ -73,6 +73,7 @@ struct JournalsView: View {
                 HStack{
                     CustomLabel(text: "Recent Journals")
                     Spacer()
+                    
                 }
                 .padding(.vertical, 10)
                 

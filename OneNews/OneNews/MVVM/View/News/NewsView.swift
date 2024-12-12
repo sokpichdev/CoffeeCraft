@@ -52,7 +52,7 @@ struct NewsView: View {
     private var showContents: some View {
         ScrollViewReader { proxy in // to make it scroll back to the id(0)
             ScrollView {
-                VStack {
+                VStack(alignment: .leading) {
                     let allNews = viewModel.selectedCategoryIndex == 0 ? viewModel.news :
                     viewModel.news.filter { $0.type.rawValue == viewModel.selectedCategoryIndex }
                     

@@ -14,7 +14,7 @@ struct FMatchDetail: View {
         VStack(spacing: 10) {
             BigLeagueView(leagueTitle: "Cambodia Premier League", leagueImageName: "cpl")
             
-            FinishedMatch()
+            FinishedMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Thailand", leftTeamScore: 1, rightTeamImage: Image(.barceTeam), rightTeamName: "Cambodia", rightTeamScore: 3)
             
             HStack(spacing: 0) {
                 MatchToggleButton(title: "Summary", isSelected: selectedSummary) {

@@ -8,6 +8,12 @@
 import SwiftUI
 
 struct UpcomingMatch: View {
+    @State var leftTeamImage: Image = Image(.football)
+    @State var leftTeamName: String = ""
+    
+    @State var rightTeamImage: Image = Image(.basketball)
+    @State var rightTeamName: String = ""
+    
     var body: some View {
         VStack(spacing: 5) {
             HStack {
@@ -19,18 +25,18 @@ struct UpcomingMatch: View {
             Spacer()
                 
             HStack {
-                TeamView(teamImage: Image(.barceTeam), teamName: "North Korea")
-                Spacer()
+                TeamView(teamImage: leftTeamImage, teamName: leftTeamName)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 
                 CountDownTimer(countDownTime: 40)
-                Spacer()
+                    .frame(width: 65)
                 
-                TeamView(teamImage: Image(.barceTeam), teamName: "South Korea")
+                TeamView(teamImage: rightTeamImage, teamName: rightTeamName)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
             }
-            .padding(.horizontal, 16)
             Spacer()
         }
-//        .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: 120)
         .background(
             LinearGradient(

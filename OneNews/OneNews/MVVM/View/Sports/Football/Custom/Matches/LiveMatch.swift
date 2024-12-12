@@ -8,7 +8,13 @@
 import SwiftUI
 
 struct LiveMatch: View {
+    @State var leftTeamImage: Image = Image(.football)
+    @State var leftTeamName: String = ""
+    @State var leftTeamScore: Int = 0
     
+    @State var rightTeamImage: Image = Image(.basketball)
+    @State var rightTeamName: String = ""
+    @State var rightTeamScore: Int = 0
     var body: some View {
         VStack(spacing: 5) {
             HStack(spacing: 0) {
@@ -29,19 +35,20 @@ struct LiveMatch: View {
             
             Spacer()
             HStack {
-                TeamView(teamImage: Image(.barceTeam), teamName: "North Korea") /// Left team
-                Spacer()
+                TeamView(teamImage: leftTeamImage, teamName: leftTeamName) /// Left team
+                    .frame(maxWidth: .infinity, alignment: .center)
                 ZStack { /// Score and Live
-                    ScoreBoardView(leftTeamScore: 3, rightTeamScore: 1)
+                    ScoreBoardView(leftTeamScore: leftTeamScore, rightTeamScore: rightTeamScore)
                     
                     Image(.live) /// Live indicator
                         .resizable()
                         .frame(width: 25, height: 15)
                         .offset(y: -40) /// Position "Live" indicator
                 }
-                
-                Spacer()
-                TeamView(teamImage: Image(.barceTeam), teamName: "South Korea") /// Right team
+                .frame(width: 65)
+                TeamView(teamImage: rightTeamImage, teamName: rightTeamName) /// Right team
+                    .frame(maxWidth: .infinity, alignment: .center)
+
             }
             .padding(.horizontal, 16)
             Spacer()

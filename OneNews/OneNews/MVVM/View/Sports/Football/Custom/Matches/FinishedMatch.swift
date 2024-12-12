@@ -8,6 +8,14 @@
 import SwiftUI
 
 struct FinishedMatch: View {
+    @State var leftTeamImage: Image = Image(.football)
+    @State var leftTeamName: String = ""
+    @State var leftTeamScore: Int = 0
+    
+    @State var rightTeamImage: Image = Image(.basketball)
+    @State var rightTeamName: String = ""
+    @State var rightTeamScore: Int = 0
+    
     var body: some View {
         VStack(spacing: 5) {
             HStack {
@@ -23,13 +31,15 @@ struct FinishedMatch: View {
 //            .background(Color.blue)
             Spacer()
             HStack {
-                TeamView(teamImage: Image(.barceTeam), teamName: "North Korea")
-                Spacer()
+                TeamView(teamImage: leftTeamImage, teamName: leftTeamName)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 ZStack{
-                    ScoreBoardView(leftTeamScore: 3, rightTeamScore: 1)
+                    ScoreBoardView(leftTeamScore: leftTeamScore, rightTeamScore: rightTeamScore)
                 }
-                Spacer()
-                TeamView(teamImage: Image(.barceTeam), teamName: "South Korea")
+                .frame(width: 65)
+                TeamView(teamImage: rightTeamImage, teamName: rightTeamName)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
             }
             .padding(.horizontal, 16)
             Spacer()
