@@ -18,14 +18,7 @@ struct CountriesButton: View {
             action() // Call the action closure passed from the parent
         }) {
             VStack(alignment: .center, spacing: 5) {
-                Circle()
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(countryName)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                    )
+                CountryCircle(countryName: countryName)
                     .overlay(
                         Circle()
                             .stroke(Color.optionBtn2, lineWidth: 4) // Adds a border

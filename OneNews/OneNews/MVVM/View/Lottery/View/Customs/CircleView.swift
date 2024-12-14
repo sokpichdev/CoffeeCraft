@@ -39,7 +39,7 @@ struct CircleResult: View {
             )
             .overlay(
                 Circle()
-                    .stroke(Color.main, lineWidth: 2) // Adds a border
+                    .stroke(Color.main, lineWidth: 1) // Adds a border
             )
             .shadow(radius: 2, y: 4) // Adds a shadow
     }
