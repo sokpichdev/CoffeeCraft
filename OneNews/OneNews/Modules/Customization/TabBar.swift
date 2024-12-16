@@ -41,6 +41,7 @@ struct TabBar: View {
                 }
                 .frame(height: 50)
             }
+            .background(Color.background)
         }
     }
     @ViewBuilder

@@ -24,7 +24,7 @@ struct ResultVN: View {
     ]
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             SectionResult(imageName: Image(.result1))
             ResultDetail(lists: [12, 1, 6, 33, 76, 23].shuffled(), isSpecial: true)
             
@@ -32,7 +32,7 @@ struct ResultVN: View {
                 VStack(alignment: .center) {
                     Divider()
                     
-                    // First and Second Prize in one HStack
+                    // First and Second Prize
                     HStack {
                         PrizeTh(prizeTh: "First prize", prizeNumber: prizeData[0])
                         Divider().padding(.vertical, 5)

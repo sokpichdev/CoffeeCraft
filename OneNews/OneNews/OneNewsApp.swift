@@ -12,6 +12,7 @@ struct OneNewsApp: App {
     var body: some Scene {
         WindowGroup {
             TabBar()
+//            AlbumUI()
 //            JournalsView()
         }
     }

@@ -59,9 +59,6 @@ struct SheetContentView: View {
                         Button(action: {
                             print("Year \(2024 - yearIndex)") // Print year based on index
                             selectedYear = yearIndex
-                            //                                withAnimation {
-                            //                                    proxy.scrollTo(0) // Scroll to the top of the issue list
-                            //                                }
                         }) {
                             VStack(spacing: 5) {
                                 Text("\(2024 - yearIndex)")
@@ -72,10 +69,8 @@ struct SheetContentView: View {
                             .padding()
                             .frame(width: 100, height: 60)
                             .background(Color.optionBtn1)
-//                            .background(selectedYear == yearIndex ? .main: Color.clear)
 
                             .foregroundStyle(.letters)
-//                            .shadow(radius: 2)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(selectedYear == yearIndex ? .main : Color.clear, lineWidth: 2)
