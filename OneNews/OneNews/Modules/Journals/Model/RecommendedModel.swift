@@ -18,7 +18,7 @@ struct RecommendedResponseModel: Codable {
     }
 }
 
-struct RecommendedModel: Codable, Identifiable{
+struct RecommendedModel: Codable{
     var id: Int?
     var albumID: Int?
     var issueYear: String?

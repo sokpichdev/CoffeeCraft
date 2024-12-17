@@ -1,20 +1,19 @@
 //
-//  JournalDetailViewModel.swift
+//  RecommendedMatchesViewModel.swift
 //  OneNews
 //
-//  Created by Sok Pich on 12/16/24.
+//  Created by Sok Pich on 12/17/24.
 //
+
 
 import SwiftUI
 import Combine
 
-class JournalDetailViewModel: ObservableObject {
-    @Published var JD: [JournalDetailModel] = []
+class RecommendedMatchesViewModel: ObservableObject {
+    @Published var recommended: [RecommendedMatchesModel] = []
     
-    func fetchJournalDetail(albumID: Int, issueYear: String) {
-        //        let url = URL(string: "https://gateway.luckyinfos.com/api/journal/journals/2024/107?lang=en")!
-        let url = URL(string:"https://gateway.luckyinfos.com/api/journal/journals/\(issueYear)/\(albumID)?lang=en")!
-        
+    func fetchJournals() {
+        let url = URL(string: "https://gateway.luckyinfos.com/api/sport/recommended-matches?lang=en&sport_id=1&timezone=Asia/Phnom_Penh")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -31,17 +30,20 @@ class JournalDetailViewModel: ObservableObject {
             }
             
             do {
-                let decodedResponse = try JSONDecoder().decode(BaseModel<[JournalDetailModel]>.self, from: data)
+                // Decode the response into JournalResponseModel
+                let decodedResponse = try JSONDecoder().decode(BaseModel<[RecommendedMatchesModel]>.self, from: data)
                 
-                if let jd = decodedResponse.data {
+                // Check if 'data' exists and assign to the journals array
+                if let recommended = decodedResponse.data {
                     DispatchQueue.main.async {
-                        self?.JD = jd
+                        self?.recommended = recommended
                     }
                 }
             } catch let jsonError {
-                print("Failed to decode JSON: ", jsonError)
+                print("Failed to decode JSON:", jsonError)
             }
         }
+        
         task.resume()
     }
 }

@@ -7,18 +7,7 @@
 
 import SwiftUI
 
-struct IssueListResponseModel: Codable {
-    var status: Bool?
-    var message: [Message]?
-    var data: [IssueListData]?
-    
-    struct Message: Codable {
-        var title: String?
-        var description: String?
-    }
-}
-
-struct IssueListData: Codable {
+struct IssueListModel: Codable {
     var issueYear: String?
     var issueList: [String]?
     
@@ -27,3 +16,6 @@ struct IssueListData: Codable {
         case issueList = "issue_list"
     }
 }
+
+
+

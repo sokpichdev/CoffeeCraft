@@ -1,19 +1,19 @@
 //
-//  JournalDetailViewModel.swift
+//  IssueListViewModel.swift
 //  OneNews
 //
-//  Created by Sok Pich on 12/16/24.
+//  Created by Sok Pich on 12/17/24.
 //
+
 
 import SwiftUI
 import Combine
 
-class JournalDetailViewModel: ObservableObject {
-    @Published var JD: [JournalDetailModel] = []
+class IssueListViewModel: ObservableObject {
+    @Published var issueList: [IssueListModel] = []
     
-    func fetchJournalDetail(albumID: Int, issueYear: String) {
-        //        let url = URL(string: "https://gateway.luckyinfos.com/api/journal/journals/2024/107?lang=en")!
-        let url = URL(string:"https://gateway.luckyinfos.com/api/journal/journals/\(issueYear)/\(albumID)?lang=en")!
+    func fetchIssueList(albumID: Int, issueYear: String) {
+        let url = URL(string: "https://gateway.luckyinfos.com/api/journal/journals/year/\(albumID)?lang=en")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -31,11 +31,11 @@ class JournalDetailViewModel: ObservableObject {
             }
             
             do {
-                let decodedResponse = try JSONDecoder().decode(BaseModel<[JournalDetailModel]>.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(BaseModel<[IssueListModel]>.self, from: data)
                 
-                if let jd = decodedResponse.data {
+                if let issueList = decodedResponse.data {
                     DispatchQueue.main.async {
-                        self?.JD = jd
+                        self?.issueList = issueList
                     }
                 }
             } catch let jsonError {
