@@ -8,19 +8,22 @@
 import SwiftUI
 
 struct LiveMatch: View {
-    @State var leftTeamImage: Image = Image(.football)
-    @State var leftTeamName: String = ""
-    @State var leftTeamScore: Int = 0
+    var leftTeamImage: String = ""
+    var leftTeamName: String = ""
+    var leftTeamScore: String = "0"
     
-    @State var rightTeamImage: Image = Image(.basketball)
-    @State var rightTeamName: String = ""
-    @State var rightTeamScore: Int = 0
+    var rightTeamImage: String = ""
+    var rightTeamName: String = ""
+    var rightTeamScore: String = "0"
+    
+    var timer: String = ""
+    
     var body: some View {
         VStack(spacing: 5) {
             HStack(spacing: 0) {
                 Spacer()/// Matches
     //            TimerView(time: 68)
-                Text("\(34)'")
+                Text(timer + "'")
                     .font(.system(size: 12, weight: .regular))
                 
                 Image(systemName: "timer")
@@ -40,10 +43,7 @@ struct LiveMatch: View {
                 ZStack { /// Score and Live
                     ScoreBoardView(leftTeamScore: leftTeamScore, rightTeamScore: rightTeamScore)
                     
-                    Image(.live) /// Live indicator
-                        .resizable()
-                        .frame(width: 25, height: 15)
-                        .offset(y: -40) /// Position "Live" indicator
+                    LiveIndicator().offset(y: -40) /// Position "Live" indicator
                 }
                 .frame(width: 65)
                 TeamView(teamImage: rightTeamImage, teamName: rightTeamName) /// Right team
@@ -65,8 +65,4 @@ struct LiveMatch: View {
         .cornerRadius(10)
         .padding(.horizontal, 16)
     }
-}
-
-#Preview {
-    LiveMatch()
 }

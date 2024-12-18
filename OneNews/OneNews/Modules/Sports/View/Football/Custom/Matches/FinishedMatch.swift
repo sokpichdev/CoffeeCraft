@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct FinishedMatch: View {
-    @State var leftTeamImage: Image = Image(.football)
+    @State var leftTeamImage: String = "football"
     @State var leftTeamName: String = ""
-    @State var leftTeamScore: Int = 0
+    @State var leftTeamScore: String = "0"
     
-    @State var rightTeamImage: Image = Image(.basketball)
+    @State var rightTeamImage: String = "basketball"
     @State var rightTeamName: String = ""
-    @State var rightTeamScore: Int = 0
+    @State var rightTeamScore: String = "0"
+    
+    
     
     var body: some View {
         VStack(spacing: 5) {

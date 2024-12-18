@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct SportsView: View {
-    @ObservedObject var viewModel = NewsViewModel()
-    let sportOptions = ["Football", "Basketball"]
-    @State private var chosenDay: Int? = nil /// track the selected day
-    @State private var selectedOptions: Int = 0
+    @ObservedObject var recommendedVM = RecommendedMatchesViewModel()
+    @State  var chosenDay: Int = 1 /// track the selected day
+    @State private var selectedFootball: Bool = true
     @State private var isDateSelected: Bool = false
     @State private var isDatePickerPresented: Bool = false
-    @State private var selectedDate: Date? = nil /// to track the selected date from the date picker
+    @State  var selectedDate: Date? = nil /// to track the selected date from the date picker
+    
+    @State private var isLoading = true // Tracks if the card is still loading
+    
     
     let  calendar = Calendar.current
     let today = Date()
@@ -38,54 +40,134 @@ struct SportsView: View {
         ScrollView {
             VStack(alignment: .leading) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    if selectedOptions == 0 {
-                        TeamCard(title: "Cambodia U19 vs Vietname U19", leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", leftTeamScore: 14, rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea", rightTeamScore: 11)
-                    } else {
-                        TeamCard(title: "NBL Final", leftTeamImage: Image(.barceTeam), leftTeamName: "Russia", leftTeamScore: 34, rightTeamImage: Image(.barceTeam), rightTeamName: "Australia", rightTeamScore: 31)
+                    HStack() { // Adjust the spacing as needed
+                        if selectedFootball {
+                            if !recommendedVM.recommended.isEmpty {
+                                ForEach(recommendedVM.recommended, id: \.id) { recommended in
+                                    TeamCard(
+                                        title: recommended.league?.name ?? "",
+                                        leftTeamImage: recommended.homeTeam?.logoPath ?? "",
+                                        leftTeamName: recommended.homeTeam?.name ?? "",
+                                        leftTeamScore: recommended.homeTeamScore ?? "",
+                                        rightTeamImage: recommended.awayTeam?.logoPath ?? "",
+                                        rightTeamName: recommended.awayTeam?.name ?? "",
+                                        rightTeamScore: recommended.awayTeamScore ?? "",
+                                        timer: recommended.timer ?? "",
+                                        formattedDateTime: recommended.formattedDateTime ?? "",
+                                        isLive: false
+                                    )
+                                    .padding(.horizontal, 16) // avoid padding the scrollView
+                                }
+                                
+                            }
+                        } else {
+                            if !recommendedVM.recommended.isEmpty {
+                                ForEach(recommendedVM.recommended, id: \.id) { recommended in
+                                    TeamCard(
+                                        title: recommended.league?.name ?? "",
+                                        leftTeamImage: recommended.homeTeam?.logoPath ?? "",
+                                        leftTeamName: recommended.homeTeam?.name ?? "",
+                                        leftTeamScore: recommended.homeTeamScore ?? "",
+                                        rightTeamImage: recommended.awayTeam?.logoPath ?? "",
+                                        rightTeamName: recommended.awayTeam?.name ?? "",
+                                        rightTeamScore: recommended.awayTeamScore ?? "",
+                                        timer: recommended.timer ?? "",
+                                        formattedDateTime: recommended.formattedDateTime ?? "",
+                                        isLive: false
+                                    )
+                                    .padding(.horizontal, 16) // avoid padding the scrollView
+                                }
+                                
+                            }
+                        }
                     }
                 }
-                
                 optionButtons
                 
-                CustomLabel(text: "Football Matches")
+                CustomLabel(text: selectedFootball ? "Football Matches" : "Basketball Matches")
                     .padding(.horizontal, 16)
                 
                 dateButtons
                 
-                if selectedOptions == 0 {
-                    FootballSections
-                } else {
-                    BasketballSections
-                }
+                
+//                if chosenDay == 1{
+//                    if !recommendedVM.recommended.isEmpty {
+//                        ForEach(recommendedVM.recommended, id: \.id) { rcmd in
+//                            LiveMatch(leftTeamImage: rcmd.homeTeam?.logoPath ?? "",
+//                                      leftTeamName: rcmd.homeTeam?.name ?? "",
+//                                      leftTeamScore: rcmd.homeTeamScore ?? "",
+//                                      rightTeamImage: rcmd.awayTeam?.logoPath ?? "",
+//                                      rightTeamName: rcmd.awayTeam?.name ?? "",
+//                                      rightTeamScore: rcmd.awayTeamScore ?? ""
+//                                      )
+//                        }
+//                    } else {
+//                        Text("NO DATA")
+//                    }
+//                } else if chosenDay < 1 {
+//                    if !recommendedVM.recommended.isEmpty {
+//                        ForEach(recommendedVM.recommended, id: \.id) { rmcd in
+//                            FinishedMatch(leftTeamImage: rcmd.homeTeam?.logoPath ?? "",
+//                                          leftTeamName: rcmd.homeTeam?.name ?? "",
+//                                          leftTeamScore: rcmd.homeTeamScore ?? "",
+//                                          rightTeamImage: rcmd.awayTeam?.logoPath ?? "",
+//                                          rightTeamName: rcmd.awayTeam?.name ?? "",
+//                                          rightTeamScore: rcmd.awayTeamScore ?? ""
+//                                        )
+//                        }
+//                    }
+//                } else {
+//                    if !recommendedVM.recommended.isEmpty {
+//                        ForEach(recommendedVM.recommended, id: \.id) { rmcd in
+//                            UpcomingMatch(leftTeamImage: rcmd.homeTeam?.logoPath ?? "",
+//                                          leftTeamName: rcmd.homeTeam?.name ?? "",
+//                                          rightTeamImage: rcmd.awayTeam?.logoPath ?? "",
+//                                          rightTeamName: rcmd.awayTeam?.name ?? ""
+//                                        )
+//                        }
+//                    }
+//                }
+            }
+            .onAppear() {
+                recommendedVM.fetchJournals(sportID: selectedFootball ? 1 : 2)
+            }
+            .onChange(of: selectedFootball) { newValue in
+                recommendedVM.fetchJournals(sportID: newValue ? 1 : 2)
             }
             .background(Color.background) // background for all
             Spacer()
         }
         
     }
-//    
-//    private var teamCards: some View
     
     private var optionButtons: some View {
         HStack { // buttons
-            ForEach(sportOptions.indices, id: \.self) { index in
-                CustomOptionButtons (title: sportOptions[index],
-                                     imageName: sportOptions[index],
-                                     isSelected: selectedOptions == index) {
-                    selectedOptions = index
-                }
+            CustomOptionButtons(
+                title: "Football",
+                imageName: "Football",
+                isSelected: selectedFootball
+            ) {
+                selectedFootball = true
             }
-            Spacer() /// push button to the left
             
+            CustomOptionButtons(
+                title: "Basketball",
+                imageName: "Basketball",
+                isSelected: !selectedFootball
+            ) {
+                selectedFootball = false
+            }
+            
+            Spacer()
         }
         .padding(16)
     }
     
+    
     private var dateButtons: some View {
         HStack(spacing: 10) {
             if let selectedDate = selectedDate {
-                // Button to reset to default layout
-                Button(action: {
+                Button(action: { // Button to reset to default layout
                     withAnimation(.smooth) {
                         self.selectedDate = nil
                     }
@@ -100,17 +182,14 @@ struct SportsView: View {
                 
                 VStack {
                     HStack {
-                        // Previous day button
-                        Button(action: { adjustDate(by: -1) }) {
+                        Button(action: { adjustDate(by: -1) }) { // Previous day btn
                             Image(.backBtn)
                         }
                         Spacer()
-                        // Display selected date
-                        Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                        Text(selectedDate.formatted(date: .abbreviated, time: .omitted)) // Display selected date
                             .font(.subheadline)
                         Spacer()
-                        // Next day button
-                        Button(action: { adjustDate(by: 1) }) {
+                        Button(action: { adjustDate(by: 1) }) { // Next day btn
                             Image(.frontBtn)
                         }
                     }
@@ -122,8 +201,7 @@ struct SportsView: View {
                 .foregroundColor(.letters)
                 .clipShape(Capsule())
                 
-                // Calendar button
-                Button(action: {
+                Button(action: { // Calendar button
                     isDatePickerPresented = true
                 }) {
                     VStack {
@@ -134,8 +212,7 @@ struct SportsView: View {
                     .clipShape(Capsule())
                 }
                 .frame(width: (UIScreen.main.bounds.size.width - 60 - 32) / 7, height: 65)
-            } else {
-                // Default layout
+            } else { // Default layout
                 ForEach(daysAndDate.indices, id: \.self) { index in
                     Button(action: {
                         if index == 6 {
@@ -152,8 +229,13 @@ struct SportsView: View {
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         } else {
-                            DayView(day: daysAndDate[index].day, date: daysAndDate[index].date)
-                                .foregroundColor(chosenDay == index ? .white : .letters)
+                            if index == 1{
+                                DayView(day: "Tod", date: daysAndDate[index].date)
+                                    .foregroundStyle(chosenDay == index ? .white : .letters)
+                            } else {
+                                DayView(day: daysAndDate[index].day, date: daysAndDate[index].date)
+                                    .foregroundColor(chosenDay == index ? .white : .letters)
+                            }
                         }
                     }
                     .background(chosenDay == index ? Color.main : Color.optionBtn2)
@@ -180,71 +262,7 @@ struct SportsView: View {
     }
     
     
-    private var FootballSections: some View {
-        ForEach(1...3, id: \.self){ _ in
-            // section
-            SmallLeagueView(leagueTitle: "Cambodia Premier Leaque", leagueImageName: "cpl")
-            
-            
-            Button(action: {
-                
-            }) {
-                NavigationLink(destination: FMatchDetail()) {
-                    LiveMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", leftTeamScore: 3, rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea", rightTeamScore: 3)
-                }
-            }.foregroundStyle(Color.black)
-            
-            Button(action: {
-                
-            }) {
-                NavigationLink(destination: FMatchDetail()) {
-                    UpcomingMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea")
-                }
-            }.foregroundStyle(Color.black)
-            
-            Button(action: {
-                
-            }) {
-                NavigationLink(destination: FMatchDetail()) {
-                    FinishedMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "North Korea", leftTeamScore: 1, rightTeamImage: Image(.barceTeam), rightTeamName: "South Korea", rightTeamScore: 3)
-                }
-            }.foregroundStyle(Color.black)
-            
-        }
-    }
     
-    private var BasketballSections: some View {
-        ForEach(1...3, id: \.self){ _ in
-            // section
-            SmallLeagueView(leagueTitle: "NBL", leagueImageName: "cpl")
-            
-            
-            Button(action: {
-                
-            }) {
-                NavigationLink(destination: FMatchDetail()) {
-                    LiveMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "USA", leftTeamScore: 3, rightTeamImage: Image(.barceTeam), rightTeamName: "USB", rightTeamScore: 3)
-                }
-            }.foregroundStyle(Color.black)
-            
-            Button(action: {
-                
-            }) {
-                NavigationLink(destination: FMatchDetail()) {
-                    UpcomingMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Japan", rightTeamImage: Image(.barceTeam), rightTeamName: "China")
-                }
-            }.foregroundStyle(Color.black)
-            
-            Button(action: {
-                
-            }) {
-                NavigationLink(destination: FMatchDetail()) {
-                    FinishedMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Thailand", leftTeamScore: 1, rightTeamImage: Image(.barceTeam), rightTeamName: "Cambodia", rightTeamScore: 3)
-                }
-            }.foregroundStyle(Color.black)
-            
-        }
-    }
     // Helper Function to Adjust Date
     private func adjustDate(by days: Int) {
         withAnimation {
@@ -252,8 +270,4 @@ struct SportsView: View {
             selectedDate = calendar.date(byAdding: .day, value: days, to: date)
         }
     }
-}
-
-#Preview {
-    SportsView()
 }

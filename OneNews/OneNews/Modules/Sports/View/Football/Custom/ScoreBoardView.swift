@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ScoreBoardView: View {
-    @State var leftTeamScore: Int = 0
-    @State var rightTeamScore: Int = 0
+    @State var leftTeamScore: String = "0"
+    @State var rightTeamScore: String = "0"
     
     var body: some View {
         VStack {
@@ -23,8 +23,4 @@ struct ScoreBoardView: View {
         .offset(y: -15)
     }
     
-}
-
-#Preview {
-    ScoreBoardView(leftTeamScore: 11, rightTeamScore: 23)
 }

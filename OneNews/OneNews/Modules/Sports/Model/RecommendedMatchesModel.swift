@@ -11,7 +11,8 @@ struct RecommendedMatchesModel: Codable, Identifiable {
     var league: League?
     var leagueID: Int?
     var date: String?
-    var status: String?
+    var status: String? // Finished,
+    var time: String?
     var timer: String?
     var isLive: Bool?
     var homeTeamScore: String?
@@ -28,6 +29,7 @@ struct RecommendedMatchesModel: Codable, Identifiable {
         case leagueID = "league_id"
         case date
         case status
+        case time
         case timer
         case isLive = "is_live"
         case homeTeamScore = "home_team_score"
@@ -35,8 +37,8 @@ struct RecommendedMatchesModel: Codable, Identifiable {
         case scheduledTime = "scheduled_time"
         case formattedDateTime = "formatted_date_time"
         case displayDateTime = "display_date_time"
-        case homeTeam = "home_team"
-        case awayTeam = "away_team"
+        case homeTeam = "hometeam"
+        case awayTeam = "awayteam"
     }
 }
 

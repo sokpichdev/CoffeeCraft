@@ -7,17 +7,6 @@
 
 import SwiftUI
 
-struct JournalResponseModel: Codable {
-    var data: [AlbumModel]?
-    var status: Bool?
-    var message: MessageModel?
-    
-    struct MessageModel: Codable {
-        var tittle: String?
-        var description: String?
-    }
-}
-
 struct AlbumModel: Codable, Identifiable {
     var id: Int?
     var name: String?

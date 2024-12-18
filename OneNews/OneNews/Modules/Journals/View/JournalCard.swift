@@ -17,7 +17,7 @@ struct JournalCard: View {
         VStack {
             HStack(spacing: 10) {
                 // Album Cover
-                LoadImages(image: album.cover, maxWidth: 140, maxHeight: 120, isFit: true)
+                LoadImages(image: album.cover, maxWidth: 140, maxHeight: 120, isFit: true, shadow: 5)
                 
                 VStack(alignment: .leading, spacing: 5) {
                     // Star Button

@@ -33,9 +33,22 @@
 		6A460D7C2CFD463B00E243E3 /* OneNewsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OneNewsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6AF693772D128B7700ECD3BF /* Exceptions for "OneNews" folder in "OneNews" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6A460D612CFD463900E243E3 /* OneNews */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6A460D642CFD463900E243E3 /* OneNews */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6AF693772D128B7700ECD3BF /* Exceptions for "OneNews" folder in "OneNews" target */,
+			);
 			path = OneNews;
 			sourceTree = "<group>";
 		};
@@ -410,6 +423,7 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OneNews/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OneNews;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -444,6 +458,7 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OneNews/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OneNews;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -12,8 +12,10 @@ import Combine
 class RecommendedMatchesViewModel: ObservableObject {
     @Published var recommended: [RecommendedMatchesModel] = []
     
-    func fetchJournals() {
-        let url = URL(string: "https://gateway.luckyinfos.com/api/sport/recommended-matches?lang=en&sport_id=1&timezone=Asia/Phnom_Penh")!
+    func fetchJournals(sportID: Int) {
+        recommended.removeAll()
+        
+        let url = URL(string: "http://89.116.21.222:8000/api/sport/recommended-matches?lang=en&sport_id=\(sportID)&timezone=Asia/Phnom_Penh")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

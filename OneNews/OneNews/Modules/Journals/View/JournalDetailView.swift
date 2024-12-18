@@ -25,7 +25,7 @@ struct JournalDetailView: View {
             /// Full-size Images with Tabiew
             TabView(selection: $selectedIndex) {
                 ForEach(jdVM.JD.indices, id: \.self) { index in
-                    LoadImages(image: jdVM.JD[index].attachments ?? "", maxWidth: .infinity, maxHeight: .infinity, isFit: true)
+                    LoadImages(image: jdVM.JD[index].attachments ?? "", maxWidth: .infinity, maxHeight: .infinity, isFit: true, shadow: 5)
                         .tag(index)
                 }
             }
@@ -45,7 +45,7 @@ struct JournalDetailView: View {
                                 }
                             }) {
                                 VStack {
-                                    LoadImages(image: jdVM.JD[index].attachments ?? "", maxWidth: 90, maxHeight: 140)
+                                    LoadImages(image: jdVM.JD[index].attachments ?? "", maxWidth: 90, maxHeight: 140, shadow: 5)
                                         .padding(5)
                                         .background(Color.optionBtn1)
                                         .overlay(

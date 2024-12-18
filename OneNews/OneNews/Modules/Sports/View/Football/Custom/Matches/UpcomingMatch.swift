@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct UpcomingMatch: View {
-    @State var leftTeamImage: Image = Image(.football)
+    @State var leftTeamImage: String = "football"
     @State var leftTeamName: String = ""
     
-    @State var rightTeamImage: Image = Image(.basketball)
+    @State var rightTeamImage: String = "basketball"
     @State var rightTeamName: String = ""
     
     var body: some View {
@@ -50,8 +50,4 @@ struct UpcomingMatch: View {
         .padding(.horizontal, 16)
     }
    
-}
-
-#Preview {
-    UpcomingMatch()
 }

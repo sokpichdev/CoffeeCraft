@@ -30,7 +30,7 @@ struct FootballMatches: View {
                             
                         }) {
                             NavigationLink(destination: FMatchDetail()) {
-                                UpcomingMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Japan", rightTeamImage: Image(.barceTeam), rightTeamName: "China")
+                                UpcomingMatch(leftTeamImage: "barceTeam", leftTeamName: "Japan", rightTeamImage: "barceTeam", rightTeamName: "China")
                             }
                         }.foregroundStyle(Color.letters)
                     }
@@ -40,7 +40,7 @@ struct FootballMatches: View {
                             
                         }) {
                             NavigationLink(destination: FMatchDetail()) {
-                                FinishedMatch(leftTeamImage: Image(.barceTeam), leftTeamName: "Thailand", leftTeamScore: 1, rightTeamImage: Image(.barceTeam), rightTeamName: "Cambodia", rightTeamScore: 3)
+                                FinishedMatch(leftTeamImage: "barceTeam", leftTeamName: "Thailand", leftTeamScore: "1", rightTeamImage: "barceTeam", rightTeamName: "Cambodia", rightTeamScore: "3")
                             }
                         }.foregroundStyle(Color.letters)
                     }

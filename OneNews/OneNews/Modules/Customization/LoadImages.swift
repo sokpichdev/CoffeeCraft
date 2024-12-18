@@ -13,6 +13,7 @@ struct LoadImages: View {
     var maxHeight: CGFloat?
     var cornerRadius: CGFloat?
     var isFit: Bool = false
+    var shadow: CGFloat = 5
     
     @State private var isLoading = true // Tracks if the image is loading
     
@@ -27,19 +28,21 @@ struct LoadImages: View {
                             isLoading = false
                         }
                     }
+                    .onFailure { _ in
+                        isLoading = false
+                    }
                     .resizable()
-                //                .scaledToFit()
                     .aspectRatio(contentMode: isFit ? .fit : .fill)
                     .frame(maxWidth: maxWidth, maxHeight: maxHeight)
                     .cornerRadius(cornerRadius ?? 10)
-                    .shadow(radius: 5)
+                    .shadow(radius: shadow)
                 
                 if isLoading { // Show loading indicator while the image is loading
                     ProgressView()
                         .frame(maxWidth: maxWidth, maxHeight: maxHeight)
-//                        .background(Color.red.opacity(0.3))
                 }
             }
-        }}
+        }
+    }
     
 }

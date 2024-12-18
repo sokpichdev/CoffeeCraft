@@ -4,96 +4,90 @@
 //
 //  Created by Sok Pich on 12/12/24.
 //
-
-
 import SwiftUI
 
 struct TeamCard: View {
-    @State var title: String = ""
-    @State var leftTeamImage: Image = Image(.football)
-    @State var leftTeamName: String = ""
-    @State var leftTeamScore: Int = 0
+    var title: String = ""
+    var leftTeamImage: String = ""
+    var leftTeamName: String = ""
+    var leftTeamScore: String = "0"
     
-    @State var rightTeamImage: Image = Image(.basketball)
-    @State var rightTeamName: String = ""
-    @State var rightTeamScore: Int = 0
+    var rightTeamImage: String
+    var rightTeamName: String = ""
+    var rightTeamScore: String = "0"
+    
+    var timer: String = ""
+    var formattedDateTime: String = ""
+    var isLive: Bool = false
+    @State private var isLoading = true // Tracks if the image is loading
+
     var body: some View {
-        
-        HStack/*(spacing: 16)*/ {
-            ForEach(1...4, id: \.self) { index in
-                //                            // Background card
-                VStack(spacing: 10) {
-                    Spacer(minLength: 0)
-                    // section 1
-                    HStack {
-                        Text(title)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
+        VStack(spacing: 10) { // Background card
+//            Spacer(minLength: 0)
+            
+            // Title section with a fixed height
+            HStack { // section 1
+                Text(title)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2) // Allow the title to wrap to 2 lines maximum
+                    .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
+                    .frame(maxWidth: .infinity, alignment: .center) // Center the title
+            }
+            .frame(height: 40)
+//            .padding(.horizontal, 16)
+//            Spacer(minLength: 0)
+            
+            HStack { // section 2
+                TeamView(teamImage: leftTeamImage, teamName: leftTeamName) // Left team
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                ZStack { // Score and Live
+                    VStack {
+                        Text("\(leftTeamScore) - \(rightTeamScore)")
+                            .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 16)
-                    
-                    Spacer(minLength: 0)
-                    // section 2
-                    HStack {
-                        // Left team
-                        TeamView(teamImage: leftTeamImage, teamName: leftTeamName)
-                            .frame(maxWidth: .infinity, alignment: .center)
-//                        Spacer()
-                        
-                        // Score and Live
-                        ZStack {
-                            VStack {
-                                Text("\(leftTeamScore) - \(rightTeamScore)")
-                                    .foregroundColor(.white)
-                            }
-                            .frame(width: 65, height: 50)
-                            .background(Color.black.opacity(0.1))
-                            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
-                            .cornerRadius(10)
-                            
-                            Image(.live)
-                                .resizable()
-                                .frame(width: 25, height: 15)
-                                .offset(y: -25) // Position "Live" indicator
-                        }
-                        .frame(width: 65)
-//                        Spacer()
-                        // Right team
-                        TeamView(teamImage: rightTeamImage, teamName: rightTeamName)
-                            .frame(maxWidth: .infinity)
-                        
-                    }.padding(10)
-                    
-                    Spacer(minLength: 0)
-                    VStack{
-                        ZStack(alignment: .bottom) {
-                            HStack {
-                                Text("First Haft 32:44")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text("28 Oct, Sat. 03:30 PM")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.horizontal, 10)
-                        }
-                        .frame(height: 40)
-                        .frame(maxWidth: .infinity, alignment: .bottom)
-                        .background(Color.black.opacity(0.2))
-                        .shadow(radius: 5)
+                    .frame(width: 65, height: 50)
+                    .background(Color.black.opacity(0.1))
+                    .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                    .cornerRadius(10)
+                    if isLive {
+                        LiveIndicator()
+                            .offset(y: -25) // Position "Live" indicator
                     }
-                    
                 }
-                .foregroundColor(Color.white)
-                .frame(width: 330, height: 170)
-                .background(LinearGradient(gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]), startPoint: .top, endPoint: .bottom))
-                
-                .cornerRadius(15)
+                .frame(width: 65)
+                TeamView(teamImage: rightTeamImage, teamName: rightTeamName) // Right team
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(10)
+            Spacer(minLength: 0)
+            
+            // Timer and Date section
+            VStack {
+                ZStack(alignment: .bottom) {
+                    HStack {
+                        Text(isLive ? timer : "FT")
+                            .font(.caption)
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text(formattedDateTime)
+                            .font(.caption)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 10)
+                }
+                .frame(height: 40)
+                .frame(maxWidth: .infinity, alignment: .bottom)
+                .background(Color.black.opacity(0.2))
                 .shadow(radius: 5)
             }
         }
-        .padding(.horizontal, 16) // avoid padding the scrollView
+        .foregroundColor(Color.white)
+        .frame(width: 330, height: 170)
+        .background(LinearGradient(gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]), startPoint: .top, endPoint: .bottom))
+        .cornerRadius(15)
+        .shadow(radius: 5)
     }
 }

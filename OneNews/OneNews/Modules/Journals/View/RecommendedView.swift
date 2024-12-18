@@ -32,7 +32,7 @@ struct RecommendedView: View {
                             } label: {
                                 ZStack(alignment: .bottom) {
                                     
-                                    LoadImages(image: recommended.attachments, maxWidth: 120, maxHeight: 145, cornerRadius: 10)
+                                    LoadImages(image: recommended.attachments, maxWidth: 120, maxHeight: 145, cornerRadius: 10, shadow: 5)
                                     
                                     LinearGradient(// Black overlay with content
                                         gradient: Gradient(colors: [Color.black, Color.clear]), startPoint: .bottom, endPoint: .center)

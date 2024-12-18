@@ -29,7 +29,7 @@ class JournalsViewModel: ObservableObject {
             
             do {
                 // Decode the response into JournalResponseModel
-                let decodedResponse = try JSONDecoder().decode(JournalResponseModel.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(BaseModel<[AlbumModel]>.self, from: data)
                 
                 // Check if 'data' exists and assign to the journals array
                 if let journals = decodedResponse.data {

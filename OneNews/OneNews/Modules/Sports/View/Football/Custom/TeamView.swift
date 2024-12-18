@@ -8,16 +8,15 @@
 import SwiftUI
 
 struct TeamView: View {
-    let teamImage: Image
+    let teamImage: String
     let teamName: String
-    let imageSize: CGSize = CGSize(width: 20, height: 20)
+    let maxWidth: CGFloat = 25
+    let maxHeight: CGFloat = 25
+    
 
     var body: some View {
         VStack {
-            teamImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: imageSize.width, height: imageSize.height)
+            LoadImages(image: teamImage, maxWidth: maxWidth, maxHeight: maxHeight, isFit: false, shadow: 5)
             Text(teamName)
         }
         .foregroundStyle(.letters)
