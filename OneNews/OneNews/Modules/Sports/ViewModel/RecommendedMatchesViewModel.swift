@@ -12,13 +12,14 @@ import Combine
 class RecommendedMatchesViewModel: ObservableObject {
     @Published var recommended: [RecommendedMatchesModel] = []
     
-    func fetchJournals(sportID: Int) {
+    func fetchRecomendedMatches(sportID: Int) {
         recommended.removeAll()
         
         let url = URL(string: "http://89.116.21.222:8000/api/sport/recommended-matches?lang=en&sport_id=\(sportID)&timezone=Asia/Phnom_Penh")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
         
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             if let error = error {
@@ -39,6 +40,8 @@ class RecommendedMatchesViewModel: ObservableObject {
                 if let recommended = decodedResponse.data {
                     DispatchQueue.main.async {
                         self?.recommended = recommended
+                        print(recommended.count)
+
                     }
                 }
             } catch let jsonError {

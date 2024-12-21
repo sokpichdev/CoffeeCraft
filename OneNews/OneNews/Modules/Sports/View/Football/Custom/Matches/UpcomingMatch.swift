@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct UpcomingMatch: View {
-    @State var leftTeamImage: String = "football"
-    @State var leftTeamName: String = ""
+    var leftTeamImage: String = ""
+    var leftTeamName: String = ""
     
-    @State var rightTeamImage: String = "basketball"
-    @State var rightTeamName: String = ""
+    var rightTeamImage: String = ""
+    var rightTeamName: String = ""
+    var schedule: String = "00:00:00"
+    
     
     var body: some View {
         VStack(spacing: 5) {
@@ -28,7 +30,7 @@ struct UpcomingMatch: View {
                 TeamView(teamImage: leftTeamImage, teamName: leftTeamName)
                     .frame(maxWidth: .infinity, alignment: .center)
                 
-                CountDownTimer(countDownTime: 40)
+                CountDownTimer(countDownTime: schedule)
                     .frame(width: 65)
                 
                 TeamView(teamImage: rightTeamImage, teamName: rightTeamName)
@@ -37,6 +39,7 @@ struct UpcomingMatch: View {
             }
             Spacer()
         }
+        .padding(16)
         .frame(maxWidth: .infinity, maxHeight: 120)
         .background(
             LinearGradient(

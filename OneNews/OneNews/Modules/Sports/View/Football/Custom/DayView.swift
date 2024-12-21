@@ -9,14 +9,14 @@ import SwiftUI
 
 struct DayView: View {
     let day: String
-    let date: Int
+    let date: String
     var body: some View {
         VStack {
             Text(day)
                 .font(.system(size: 9, weight: .regular))
                 .frame(width: 20, height: 12)
             
-            Text("\(date)")
+            Text(date)
                 .font(.system(size: 12, weight: .semibold))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

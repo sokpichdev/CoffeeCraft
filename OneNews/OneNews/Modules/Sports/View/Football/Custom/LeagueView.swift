@@ -9,11 +9,12 @@ import SwiftUI
 
 struct SmallLeagueView: View {
     @State var leagueTitle: String = ""
-    @State var leagueImageName: String = ""
+    @State var leagueImage: String = ""
+//    @Observable var matchVM: MatchViewModel
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(leagueImageName)
+            Image(leagueImage)
             Text(leagueTitle)
                 .foregroundStyle(.white)
             
@@ -23,9 +24,9 @@ struct SmallLeagueView: View {
             Button(action: {
                 
             }) {
-                NavigationLink(destination: FootballMatches()){
-                    Image(.frontBtn)
-                }
+//                NavigationLink(destination: FootballMatches()){
+//                    Image(.frontBtn)
+//                }
             }
         }
         .padding(EdgeInsets(top: 10, leading: 16,bottom: 10, trailing: 16))

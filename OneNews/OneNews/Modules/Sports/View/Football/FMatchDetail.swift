@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FMatchDetail: View {
     @State var selectedSummary: Bool = true
+    @StateObject var sDVM: SportDatesViewModel
     var body: some View {
         ScrollView {
         VStack(spacing: 10) {
@@ -17,12 +18,12 @@ struct FMatchDetail: View {
             FinishedMatch(leftTeamImage: "football", leftTeamName: "Thailand", leftTeamScore: "1", rightTeamImage: "basketball", rightTeamName: "Cambodia", rightTeamScore: "3")
             
             HStack(spacing: 0) {
-                MatchToggleButton(title: "Summary", isSelected: selectedSummary) {
+                MatchToggleButton(sportDateVM: sDVM, selectedType: sDVM.matchType, title: "Summary") {
                     withAnimation(.easeInOut){
                         selectedSummary = true
                     }
                 }
-                MatchToggleButton(title: "Stats", isSelected: !selectedSummary) {
+                MatchToggleButton(sportDateVM: sDVM, selectedType: sDVM.matchType, title: "Stats") {
                     withAnimation(.easeInOut){
                         selectedSummary = false
                     }
@@ -43,8 +44,4 @@ struct FMatchDetail: View {
             .background(Color.background)
     }
     }
-}
-
-#Preview {
-    FMatchDetail()
 }

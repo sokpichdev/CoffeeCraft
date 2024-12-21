@@ -16,8 +16,9 @@ struct TeamView: View {
 
     var body: some View {
         VStack {
-            LoadImages(image: teamImage, maxWidth: maxWidth, maxHeight: maxHeight, isFit: false, shadow: 5)
+            LoadImages(image: teamImage, maxWidth: maxWidth, maxHeight: maxHeight, isFit: false, shadow: 0)
             Text(teamName)
+                .font(.subheadline)
         }
         .foregroundStyle(.letters)
     }

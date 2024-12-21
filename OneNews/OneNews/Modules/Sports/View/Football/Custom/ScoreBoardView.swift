@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct ScoreBoardView: View {
-    @State var leftTeamScore: String = "0"
-    @State var rightTeamScore: String = "0"
+    var leftTeamScore: String = "0"
+    var rightTeamScore: String = "0"
     
     var body: some View {
         VStack {
             Text("\(leftTeamScore) - \(rightTeamScore)")
                 .foregroundColor(.letters)
+                .font(.subheadline)
+                .fontWeight(.semibold)
         }
         .frame(width: 65, height: 50)
         .background(Color.letters.opacity(0.1)) /// Background color for the box

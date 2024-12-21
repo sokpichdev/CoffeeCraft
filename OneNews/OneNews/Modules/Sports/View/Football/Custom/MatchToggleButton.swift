@@ -7,17 +7,25 @@
 import SwiftUI
 
 struct MatchToggleButton: View {
+    @ObservedObject var sportDateVM: SportDatesViewModel
+
+    let selectedType: MatchType
     let title: String
-    let isSelected: Bool
     let action: () -> Void
+    
+    var isSelected: Bool {
+        sportDateVM.matchType == selectedType
+    }
     
     var body: some View {
         Button(action: action) {
             Text(title)
+                .font(.subheadline)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
                 .background(isSelected ? Color.main : Color.optionBtn2)
-                .foregroundStyle(isSelected ? Color.white : Color.letters)
+                .foregroundColor(isSelected ? .white : Color.letters)
+                .cornerRadius(8)
         }
     }
 }

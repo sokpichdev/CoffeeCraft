@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CountDownTimer: View {
-    @State var countDownTime: Int = 60
+    @State var countDownTime: String
     
     var body: some View {
         VStack {
@@ -17,11 +17,14 @@ struct CountDownTimer: View {
                 .scaledToFit()
                 .frame(width: 20, height: 20)
             
-            Text("3d 7h 55m")
-            .font(.system(size: 12, weight: .regular))
+            Text(countDownTime)
+            .font(.system(size: 10, weight: .regular))
             .foregroundStyle(.red)
+            .lineLimit(2)
+            .multilineTextAlignment(.center)
+//            .frame(maxWidth: .infinity)
         }
-        .frame(width: 65, height: 50)
+        .frame(width: 80, height: 50)
         .offset(y: -15)
     }
 }

@@ -22,27 +22,25 @@ struct TeamCard: View {
     @State private var isLoading = true // Tracks if the image is loading
 
     var body: some View {
-        VStack(spacing: 10) { // Background card
-//            Spacer(minLength: 0)
-            
-            // Title section with a fixed height
-            HStack { // section 1
+        VStack(spacing: 10) {
+            // Section 1: Title (dynamic height)
+            HStack {
                 Text(title)
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
-                    .lineLimit(2) // Allow the title to wrap to 2 lines maximum
+                    .lineLimit(nil) // Allow unlimited lines
                     .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
-                    .frame(maxWidth: .infinity, alignment: .center) // Center the title
-            }
-            .frame(height: 40)
-//            .padding(.horizontal, 16)
-//            Spacer(minLength: 0)
-            
-            HStack { // section 2
-                TeamView(teamImage: leftTeamImage, teamName: leftTeamName) // Left team
-                    .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .center)
-                ZStack { // Score and Live
+            }
+            .padding(16)
+            
+            .frame(height: 60)
+
+            // Section 2: Teams and Score (static height)
+            HStack {
+                TeamView(teamImage: leftTeamImage, teamName: leftTeamName)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                ZStack {
                     VStack {
                         Text("\(leftTeamScore) - \(rightTeamScore)")
                             .foregroundColor(.white)
@@ -53,18 +51,17 @@ struct TeamCard: View {
                     .cornerRadius(10)
                     if isLive {
                         LiveIndicator()
-                            .offset(y: -25) // Position "Live" indicator
+                            .offset(y: -25)
                     }
                 }
                 .frame(width: 65)
-                TeamView(teamImage: rightTeamImage, teamName: rightTeamName) // Right team
-                    .font(.subheadline)
+                TeamView(teamImage: rightTeamImage, teamName: rightTeamName)
                     .frame(maxWidth: .infinity)
             }
             .padding(10)
-            Spacer(minLength: 0)
-            
-            // Timer and Date section
+            .frame(height: 80)
+
+            // Section 3: Timer and Date (static height)
             VStack {
                 ZStack(alignment: .bottom) {
                     HStack {
@@ -76,16 +73,18 @@ struct TeamCard: View {
                             .font(.caption)
                             .foregroundColor(.white)
                     }
-                    .padding(.horizontal, 10)
+                    .padding(16)
                 }
-                .frame(height: 40)
+                .frame(maxHeight: 40)
                 .frame(maxWidth: .infinity, alignment: .bottom)
                 .background(Color.black.opacity(0.2))
                 .shadow(radius: 5)
+                Spacer()
             }
+            .frame(height: 40)
         }
         .foregroundColor(Color.white)
-        .frame(width: 330, height: 170)
+        .frame(width: 330, height: 180)
         .background(LinearGradient(gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]), startPoint: .top, endPoint: .bottom))
         .cornerRadius(15)
         .shadow(radius: 5)

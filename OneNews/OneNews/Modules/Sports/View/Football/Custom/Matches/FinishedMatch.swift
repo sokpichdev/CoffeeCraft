@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct FinishedMatch: View {
-    @State var leftTeamImage: String = "football"
-    @State var leftTeamName: String = ""
-    @State var leftTeamScore: String = "0"
+    var leftTeamImage: String = "football"
+    var leftTeamName: String = ""
+    var leftTeamScore: String = "0"
     
-    @State var rightTeamImage: String = "basketball"
-    @State var rightTeamName: String = ""
-    @State var rightTeamScore: String = "0"
+    var rightTeamImage: String = "basketball"
+    var rightTeamName: String = ""
+    var rightTeamScore: String = "0"
     
     
     
