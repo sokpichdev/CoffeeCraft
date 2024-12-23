@@ -66,13 +66,15 @@ class SportDatesViewModel: ObservableObject {
         }
         
         if calendar.isDate(date, inSameDayAs: today) {
-            matchType = MatchType.live
+            if matchType == .live {
+                matchType = MatchType.live
+            }
         } else if date < today {
             matchType = .results
         } else if date > today {
             matchType = .fixtures
         } else {
-            matchType = .none
+            matchType = .live
         }
     }
 }

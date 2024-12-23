@@ -1,51 +1,52 @@
 import SwiftUI
 
 struct FootballMatches: View {
-    @ObservedObject var sDVM: SportDatesViewModel
+//    @ObservedObject var sDVM: SportDatesViewModel
+//    @ObservedObject var matchesVM: MatchesViewModel
+    @State var isSelectedFixtures: Bool = true
+//    let leagueID: Int
+    
     var body: some View {
         VStack(spacing: 10) {
             BigLeagueView(leagueTitle: "Cambodia Premier League", leagueImageName: "cpl")
             
             HStack(spacing: 0) {
-                MatchToggleButton(sportDateVM: sDVM, selectedType: sDVM.matchType, title: "Fixtures") {
+                Button (action: {
                     withAnimation(.easeInOut){
-                        sDVM.matchType = .fixtures
+                        isSelectedFixtures = true
                     }
+                }) {
+                    Text("Fixtures")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(isSelectedFixtures ? Color.main : Color.optionBtn1)
+                        .foregroundColor(isSelectedFixtures ? .white : Color.letters)
                 }
-                MatchToggleButton(sportDateVM: sDVM, selectedType: sDVM.matchType, title: "Results") {
+                Button (action: {
                     withAnimation(.easeInOut){
-                        sDVM.matchType = .results
+                        isSelectedFixtures = false
                     }
+                }) {
+                    Text("Results")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(!isSelectedFixtures ? Color.main : Color.optionBtn1)
+                        .foregroundColor(!isSelectedFixtures ? .white : Color.letters)
                 }
             }
             .cornerRadius(10)
-            .padding(.horizontal, 16)
+            .background(Color.optionBtn1)
+            .cornerRadius(10)
             .shadow(radius: 5)
+            .padding(.horizontal, 16)
             
-//            ScrollView {
-//                if selectedFixtures {
-//                    ForEach(1...4, id: \.self) { _ in
-//                        Button(action: {
-//                            
-//                        }) {
-//                            NavigationLink(destination: FMatchDetail()) {
-//                                UpcomingMatch(leftTeamImage: "barceTeam", leftTeamName: "Japan", rightTeamImage: "barceTeam", rightTeamName: "China")
-//                            }
-//                        }.foregroundStyle(Color.letters)
-//                    }
-//                } else {
-//                    ForEach(1...5, id: \.self) { _ in
-//                        Button(action: {
-//                            
-//                        }) {
-//                            NavigationLink(destination: FMatchDetail()) {
-//                                FinishedMatch(leftTeamImage: "barceTeam", leftTeamName: "Thailand", leftTeamScore: "1", rightTeamImage: "barceTeam", rightTeamName: "Cambodia", rightTeamScore: "3")
-//                            }
-//                        }.foregroundStyle(Color.letters)
-//                    }
-//                }
-//            }
-            
+            if isSelectedFixtures {
+                Text("F")
+            } else {
+                Text("R")
+            }
         }
         .background(Color.background)
         .navigationTitle("Football Matches")

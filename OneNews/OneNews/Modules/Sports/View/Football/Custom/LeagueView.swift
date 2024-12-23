@@ -8,26 +8,26 @@
 import SwiftUI
 
 struct SmallLeagueView: View {
-    @State var leagueTitle: String = ""
-    @State var leagueImage: String = ""
-//    @Observable var matchVM: MatchViewModel
+//    @ObservedObject var sdVM: SportDatesViewModel
+//    @ObservedObject var matchVM: MatchesViewModel
+    var leagueName: String = ""
+    var leagueIcon: String = ""
+    
+//    var onTap: () -> Void
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(leagueImage)
-            Text(leagueTitle)
+            Image(leagueIcon)
+            Text(leagueName)
                 .foregroundStyle(.white)
             
             Spacer()
             Image(.star2)
             
-            Button(action: {
-                
-            }) {
-//                NavigationLink(destination: FootballMatches()){
-//                    Image(.frontBtn)
-//                }
+            NavigationLink(destination: FootballMatches()) {
+                Image(.frontBtn)
             }
+
         }
         .padding(EdgeInsets(top: 10, leading: 16,bottom: 10, trailing: 16))
         .background(LinearGradient(gradient: Gradient(colors: [Color.darkPink, Color.lightPink]), startPoint: .leading, endPoint: .trailing))

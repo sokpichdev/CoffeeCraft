@@ -8,7 +8,6 @@
 import SwiftUI
 
 enum MatchType: String, Codable{
-    case none
     case live = "live"
     case fixtures = "fixtures"
     case results = "results"

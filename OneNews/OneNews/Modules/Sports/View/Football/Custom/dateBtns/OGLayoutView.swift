@@ -21,7 +21,7 @@ struct OGLayoutView: View {
                             sportDateVM.chosenDay = index
                             sportDateVM.selectedDate = sportDateVM.getDateArray()[index]
                             sportDateVM.isSelectedDate = false
-                            sportDateVM.updateMatchType(for: sportDateVM.getDateArray()[index])
+//                            sportDateVM.updateMatchType(for: sportDateVM.getDateArray()[index])
                             print("Match Type: \(sportDateVM.matchType) - Selected Date: \(sportDateVM.selectedDate)")
                             
                         }

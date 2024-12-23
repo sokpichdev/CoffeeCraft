@@ -12,11 +12,10 @@ struct SportsView: View {
     @StateObject var matchVM = MatchesViewModel()
     @StateObject var sDVM = SportDatesViewModel()
     
-    
-    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
+                OptionButtons(sportDateVM: sDVM)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
                         if !recommendedVM.recommended.isEmpty {
@@ -39,30 +38,31 @@ struct SportsView: View {
                     }
                 }
                 
-                OptionButtons(sportDateVM: sDVM)
-                
                 HStack(spacing: 4) {
                     MatchToggleButton(sportDateVM: sDVM, selectedType: .live, title: "Live") {
                         withAnimation(.easeInOut) {
                             sDVM.matchType = .live
                         }
                     }
+                    .cornerRadius(8)
                     MatchToggleButton(sportDateVM: sDVM, selectedType: .fixtures, title: "Upcoming") {
                         withAnimation(.easeInOut) {
                             sDVM.matchType = .fixtures
                             sDVM.chosenDay = 0
                         }
                     }
+                    .cornerRadius(8)
                     MatchToggleButton(sportDateVM: sDVM, selectedType: .results, title: "Finished") {
                         withAnimation(.easeInOut) {
                             sDVM.matchType = .results
                             sDVM.chosenDay = 5
                         }
                     }
+                    .cornerRadius(8)
                 }
                 .cornerRadius(10)
                 .padding(4)
-                .background(Color.optionBtn2)
+                .background(Color.optionBtn1)
                 .cornerRadius(10)
                 .shadow(radius: 5)
                 .padding(.horizontal, 16)
@@ -79,11 +79,11 @@ struct SportsView: View {
                 VStack(spacing: 0) { // Match listings (either fixtures or finished matches)
                     if !matchVM.matches.isEmpty {
                         ForEach(matchVM.matches, id: \.id) { match in
-                            SmallLeagueView(
-                                leagueTitle: match.name ?? "",
-                                leagueImage: match.icon ?? ""
-                            )
-//                                if sDVM.selectedDate > sDVM.today {
+//                            print("League Name: \(match.name ?? "N/A"), Icon: \(match.icon ?? "N/A")")
+
+                            SmallLeagueView(leagueName: match.name ?? "Unknown League", leagueIcon: match.icon ?? "")
+                            
+                            //                                if sDVM.selectedDate > sDVM.today {
                             if sDVM.matchType == .fixtures {
                                 ForEach(match.matches ?? [], id: \.id) { match in
                                     UpcomingMatch(

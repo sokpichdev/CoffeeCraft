@@ -23,9 +23,9 @@ struct MatchToggleButton: View {
                 .font(.subheadline)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(isSelected ? Color.main : Color.optionBtn2)
+                .background(isSelected ? Color.main : Color.optionBtn1)
                 .foregroundColor(isSelected ? .white : Color.letters)
-                .cornerRadius(8)
+//                .cornerRadius(8)
         }
     }
 }
