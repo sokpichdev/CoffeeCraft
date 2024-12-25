@@ -8,40 +8,61 @@
 import SwiftUI
 
 struct TabBar: View {
+    @State var isSideMenuOpen: Bool = false
+    @State var dragOffset: CGFloat = 0// tracks the drag offaset
     let tabBarItems = ["News","Journals","Sports","Lottery","Products"]
     @State var selectedTabBarIndex: Int = 0
     var body: some View {
         NavigationView {
-            VStack(spacing: 0){
-                NavBar()
-                Spacer()
-                // Display the selected View
-                selectedView
-                HStack(spacing: 0) { // no spacing for equal distribution
-                    ForEach(tabBarItems.indices, id:\.self) { index in
-                        Button(action: {
-                            // Btn 1
-                            selectedTabBarIndex = index
-                        }) {
-                            
-                            VStack(spacing: 5){
-                                Image(selectedTabBarIndex == index ? "Clicked\(tabBarItems[index])" : "\(tabBarItems[index])")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 20)
+            ZStack{
+                VStack(spacing: 0){
+                    NavBar(isSideMenuOpen: $isSideMenuOpen)
+                    Spacer()
+                    // Display the selected View
+                    selectedView
+                    HStack(spacing: 0) { // no spacing for equal distribution
+                        ForEach(tabBarItems.indices, id:\.self) { index in
+                            Button(action: {
+                                // Btn 1
+                                selectedTabBarIndex = index
+                            }) {
                                 
-                                Text(tabBarItems[index])
-                                    .font(.caption)
-                                    .foregroundColor(selectedTabBarIndex == index ? .main : .gray)
+                                VStack(spacing: 5){
+                                    Image(selectedTabBarIndex == index ? "Clicked\(tabBarItems[index])" : "\(tabBarItems[index])")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 20)
+                                    
+                                    Text(tabBarItems[index])
+                                        .font(.caption)
+                                        .foregroundColor(selectedTabBarIndex == index ? .main : .gray)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(13)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(13)
                         }
                     }
+                    .frame(height: 50)
                 }
-                .frame(height: 50)
+                .background(Color.background)
+                .blur(radius: isSideMenuOpen ? 1: 0)
+                .disabled(isSideMenuOpen) // Disable interactions when the side menu is open
+                .onTapGesture {
+                    withAnimation {
+                        isSideMenuOpen = false
+                        dragOffset = 0
+                    }
+                }
+                
+                
+                HStack {
+                    if isSideMenuOpen {
+                        SideMenuView(isSideMenuOpen: $isSideMenuOpen, dragOffset: $dragOffset)
+                            
+                    }
+                    Spacer()
+                }
             }
-            .background(Color.background)
         }
     }
     @ViewBuilder
@@ -61,8 +82,4 @@ struct TabBar: View {
             Text(" ? ? ? ")
         }
     }
-}
-
-#Preview {
-    TabBar(selectedTabBarIndex: 0)
 }

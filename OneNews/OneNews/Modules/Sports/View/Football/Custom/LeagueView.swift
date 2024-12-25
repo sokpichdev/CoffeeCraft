@@ -8,26 +8,23 @@
 import SwiftUI
 
 struct SmallLeagueView: View {
-//    @ObservedObject var sdVM: SportDatesViewModel
-//    @ObservedObject var matchVM: MatchesViewModel
-    var leagueName: String = ""
-    var leagueIcon: String = ""
-    
-//    var onTap: () -> Void
+    //    @StateObject var matchVM = MatchesViewModel()
+    var leagueName: String
+    var leagueID: Int
+    var leagueCountry: String
     
     var body: some View {
-        HStack(spacing: 16) {
-            Image(leagueIcon)
-            Text(leagueName)
-                .foregroundStyle(.white)
-            
-            Spacer()
-            Image(.star2)
-            
-            NavigationLink(destination: FootballMatches()) {
+        
+        NavigationLink(destination: FootballMatches(leagueID: leagueID, leagueName: leagueName, leagueCountry: leagueCountry)) {
+            HStack {
+                Text(leagueName)
+                    .foregroundStyle(.white)
+                
+                Spacer()
+                Image(.star2)
                 Image(.frontBtn)
             }
-
+            
         }
         .padding(EdgeInsets(top: 10, leading: 16,bottom: 10, trailing: 16))
         .background(LinearGradient(gradient: Gradient(colors: [Color.darkPink, Color.lightPink]), startPoint: .leading, endPoint: .trailing))
@@ -39,23 +36,17 @@ struct SmallLeagueView: View {
 
 
 struct BigLeagueView: View {
-    @State var leagueTitle: String = ""
-    @State var leagueImageName: String = ""
+    var leagueTitle: String
+    var leagueCountry: String
     
     var body: some View {
-        HStack(spacing: 16) {
-            Image(leagueImageName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 35, height: 35)
+        HStack {
             VStack(alignment: .leading){
                 Text(leagueTitle)
                     .foregroundStyle(.white)
-                Text("Cambodia")
+                Text(leagueCountry)
                     .foregroundStyle(Color.white.opacity(0.7))
             }
-            
-            
             Spacer()
             Image(.star2)
                 .resizable()
@@ -63,7 +54,8 @@ struct BigLeagueView: View {
                 .frame(width: 45, height: 45)
             
         }
-        .frame(width: .infinity, height: 60)
+        //        .frame(width: .infinity, height: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(EdgeInsets(top: 10, leading: 16,bottom: 10, trailing: 16))
         .background(LinearGradient(gradient: Gradient(colors: [Color.darkPink, Color.lightPink]), startPoint: .leading, endPoint: .trailing))
         .cornerRadius(10)

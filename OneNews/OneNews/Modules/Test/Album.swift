@@ -6,74 +6,61 @@
 //
 import SwiftUI
 
-struct ContentView: View {
-    // Array to store the dates
-    var days: [Date] {
-        let calendar = Calendar.current
-        let today = Date()
-        
-        var dates: [Date] = []
-        
-        // Add yesterday's date
-        if let yesterday = calendar.date(byAdding: .day, value: -1, to: today) {
-            dates.append(yesterday)
-        }
-        
-        // Add today's date
-        dates.append(today)
-        
-        // Add the next 5 days
-        for i in 1...5 {
-            if let nextDay = calendar.date(byAdding: .day, value: i, to: today) {
-                dates.append(nextDay)
-            }
-        }
-        
-        return dates
-    }
-    
+struct SideMenuView1: View {
+    @State private var showMenu = false
+
     var body: some View {
-        List(days, id: \.self) { day in
-            HStack {
-                Text(dayOfWeek(for: day)) // Show the day of the week
+        ZStack {
+            // Main Content
+            VStack {
+                HStack {
+                    Button(action: {
+                        withAnimation {
+                            showMenu.toggle()
+                        }
+                    }) {
+                        Image(systemName: "line.horizontal.3")
+                            .font(.title)
+                            .foregroundColor(.primary)
+                            .padding()
+                    }
+                    Spacer()
+                }
                 Spacer()
-                Text("\(dayNumber(for: day))") // Show the day number
+                Text("Main Content")
+                    .font(.largeTitle)
+                    .padding()
+                Spacer()
+            }
+            .blur(radius: showMenu ? 10 : 0) // Add blur when the menu is open
+
+            // Side Menu
+            HStack {
+                if showMenu {
+                    VStack(alignment: .leading) {
+                        Text("Menu Item 1")
+                            .padding()
+                        Text("Menu Item 2")
+                            .padding()
+                        Text("Menu Item 3")
+                            .padding()
+                        Spacer()
+                    }
+                    .frame(width: 250) // Adjust the width of the menu
+                    .background(Color.blue.opacity(0.8))
+                    .foregroundColor(.white)
+                    .transition(.move(edge: .leading)) // Smooth animation
+                    .zIndex(1)
+                }
+                Spacer()
+            }
+            .onTapGesture {
+                withAnimation {
+                    showMenu = false
+                }
             }
         }
-        .padding()
-    }
-    
-    // Function to get the day of the week in short format
-    func dayOfWeek(for date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "E" // "E" gives the abbreviated weekday (e.g., "Wed")
-        let dayString = dateFormatter.string(from: date)
-        
-        switch dayString {
-        case "Mon": return "Mon"
-        case "Tue": return "Tue"
-        case "Wed": return "Wed"
-        case "Thu": return "Thu"
-        case "Fri": return "Fri"
-        case "Sat": return "Sat"
-        case "Sun": return "Sun"
-        default: return ""
-        }
-    }
-    
-    // Function to get the day number (e.g., 18, 19, etc.)
-    func dayNumber(for date: Date) -> Int {
-        let calendar = Calendar.current
-        return calendar.component(.day, from: date)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
-
-#Preview {
-    ContentView()
-}

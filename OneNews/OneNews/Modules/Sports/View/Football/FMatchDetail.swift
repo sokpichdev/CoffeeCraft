@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct FMatchDetail: View {
-    @State var selectedSummary: Bool = true
+    @Binding var selectedSummary: Bool
     @StateObject var sDVM: SportDatesViewModel
     var body: some View {
         ScrollView {
         VStack(spacing: 10) {
-            BigLeagueView(leagueTitle: "Cambodia Premier League", leagueImageName: "cpl")
+//            BigLeagueView(leagueTitle: "Cambodia Premier League", leagueImageName: "cpl")
             
-            FinishedMatch(leftTeamImage: "football", leftTeamName: "Thailand", leftTeamScore: "1", rightTeamImage: "basketball", rightTeamName: "Cambodia", rightTeamScore: "3")
+//            FinishedMatch(leftTeamImage: "football", leftTeamName: "Thailand", leftTeamScore: "1", rightTeamImage: "basketball", rightTeamName: "Cambodia", rightTeamScore: "3")
             
             HStack(spacing: 0) {
                 MatchToggleButton(sportDateVM: sDVM, selectedType: sDVM.matchType, title: "Summary") {

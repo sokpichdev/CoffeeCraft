@@ -35,7 +35,7 @@ extension MatchesModel: CustomDebugStringConvertible {
     }
 }
 
-extension MatchesModel.MatchDetailModel: CustomDebugStringConvertible {
+extension MatchDetailModel: CustomDebugStringConvertible {
     var debugDescription: String {
         return """
             MatchDetailModel:

@@ -117,7 +117,7 @@ struct RowItem {
 struct CusImage: View {
     var ImageName: String
     var body: some View {
-        Image(systemName: ImageName)
+        Image(ImageName)
             .resizable()
             .scaledToFit()
             .frame(width: 20, height: 20)

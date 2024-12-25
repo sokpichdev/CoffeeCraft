@@ -8,12 +8,16 @@
 import SwiftUI
 
 struct NavBar: View {
+    @Binding var isSideMenuOpen: Bool
     var body: some View {
         VStack(spacing: 0) {
             // Navigation Bar
             HStack {
                 Button(action: {
-                    // Menu Btn
+                    print("Side Menu seletected")
+                    withAnimation{
+                        isSideMenuOpen = true
+                    }
                 }) {
                     Image("Menu")
                         .resizable()
@@ -67,9 +71,9 @@ struct CusNavbar: View {
         .background(Color.white)
         
         .frame(maxWidth: .infinity, maxHeight: 50)
-       
+        
     }
-
+    
 }
 
 #Preview {

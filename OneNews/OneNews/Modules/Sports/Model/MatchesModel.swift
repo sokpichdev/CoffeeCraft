@@ -30,40 +30,6 @@ struct MatchesModel: Codable, Identifiable{
     var favorite: Bool?
     var sport: Sport?
     
-    struct MatchDetailModel: Codable, Identifiable {
-        var id: Int?
-        var leagueID: Int?
-        var date: String?
-        var status: String? // Finished,
-        var time: String?
-        var timer: String?
-        var isLive: Bool?
-        var homeTeamScore: String?
-        var awayTeamScore: String?
-        var scheduledTime: String?
-        var formattedDateTime: String?
-        var displayDateTime: String?
-        var homeTeam: Team?
-        var awayTeam: Team?
-        
-        private enum CodingKeys: String, CodingKey {
-            case id
-            case leagueID = "league_id"
-            case date
-            case status
-            case time
-            case timer
-            case isLive = "is_live"
-            case homeTeamScore = "home_team_score"
-            case awayTeamScore = "away_team_score"
-            case scheduledTime = "scheduled_time"
-            case formattedDateTime = "formatted_date_time"
-            case displayDateTime = "display_date_time"
-            case homeTeam = "hometeam"
-            case awayTeam = "awayteam"
-        }
-    }
-    
     private enum CodingKeys: String, CodingKey {
         case id
         case icon
@@ -74,6 +40,56 @@ struct MatchesModel: Codable, Identifiable{
         case favorite
         case sport
     }
+}
+
+struct MatchDetailModel: Codable, Identifiable {
+    var id: Int?
+    var league: League?
+    var leagueID: Int?
+    var date: String?
+    var status: String? // Finished,
+    var time: String?
+    var timer: String?
+    var isLive: Bool?
+    var homeTeamScore: String?
+    var awayTeamScore: String?
+    var scheduledTime: String?
+    var formattedDateTime: String?
+    var displayDateTime: String?
+    var homeTeam: Team?
+    var awayTeam: Team?
+    var stats: [StatsModel]?
+    var events: [EventModel]?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case leagueID = "league_id"
+        case date
+        case status
+        case time
+        case timer
+        case isLive = "is_live"
+        case homeTeamScore = "home_team_score"
+        case awayTeamScore = "away_team_score"
+        case scheduledTime = "scheduled_time"
+        case formattedDateTime = "formatted_date_time"
+        case displayDateTime = "display_date_time"
+        case homeTeam = "hometeam"
+        case awayTeam = "awayteam"
+        case stats
+        case events
+    }
+}
+struct StatsModel: Codable {
+    var name: String?
+    var home: String?
+    var away: String
+}
+
+struct EventModel: Codable {
+    var code: String?
+    var minute: String?
+    var value: String?
 }
 
 struct LinksModel: Codable {

@@ -14,6 +14,7 @@ struct OneNewsApp: App {
             TabBar()
 //            AlbumUI()
 //            JournalsView()
+//            SideMenuView1()
         }
     }
 }
