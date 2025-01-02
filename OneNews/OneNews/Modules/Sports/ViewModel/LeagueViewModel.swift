@@ -14,7 +14,7 @@ class LeagueViewModel: ObservableObject {
     func fetchLeagueMatches(sportID: Int, leagueID: Int, matchType: MatchType) {
         matchList.removeAll()
         
-        let urlString = "http://89.116.21.222:8000/api/sport/sports/\(sportID)/leagues/\(leagueID)/\(matchType)?lang=en&page=1"
+        let urlString = "https://gateway.luckyinfos.com/api/sport/sports/\(sportID)/leagues/\(leagueID)/\(matchType)?lang=en&page=1"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
             return

@@ -102,7 +102,6 @@ struct SportsView: View {
                                 }
                             } else if sDVM.matchType == .results {
                                 ForEach(league.matches ?? [], id: \.id) { match in
-//                                        FinishedMatch()
                                         FinishedMatch(
                                             matchID: match.id ?? 0,
                                             leftTeamImage: match.homeTeam?.logoPath ?? "",
@@ -117,7 +116,6 @@ struct SportsView: View {
                                             sDVM.leagueCountry = league.country ?? ""
                                             sDVM.matchID = match.id ?? 0
                                             isNavigatedToDetail = true
-                                            
                                         }
                                 }
                             } else {
@@ -143,7 +141,7 @@ struct SportsView: View {
         }
         .background(
             NavigationLink(
-                destination: FMatchDetail(sDVM: sDVM),
+                destination: FMatchDetail().environmentObject(sDVM),
                 isActive: $isNavigatedToDetail
             ) { EmptyView() }
         )

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct FMatchDetail: View {
     @State private var selectedSummary: Bool = true
-    @ObservedObject var sDVM: SportDatesViewModel
+    @EnvironmentObject var sDVM: SportDatesViewModel
     @StateObject private var mDVM = MatchDetailViewModel()
 //    var matchID: Int
     var body: some View {

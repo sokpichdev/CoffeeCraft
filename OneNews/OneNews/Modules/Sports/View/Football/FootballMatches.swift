@@ -1,8 +1,9 @@
+
 import SwiftUI
 
 struct FootballMatches: View {
     @StateObject var leagueVM = LeagueViewModel()
-    @ObservedObject var sDVM = SportDatesViewModel()
+    @ObservedObject var sDVM: SportDatesViewModel
     @State private var isSelectedFixtures: Bool = true
     @State private var navigatedToDetail: Bool = false
     
@@ -55,8 +56,11 @@ struct FootballMatches: View {
                                     rightTeamName: match.awayTeam?.name ?? "",
                                     rightTeamScore: match.awayTeamScore ?? ""
                                 ) {
-                                    navigatedToDetail = true
                                     sDVM.leagueID = match.leagueID ?? 0
+                                    sDVM.leagueName = match.league?.name ?? ""
+                                    sDVM.leagueCountry = match.league?.country ?? ""
+                                    sDVM.matchID = match.id ?? 0
+                                    navigatedToDetail = true
                                 }
                             }
                         }
@@ -76,9 +80,10 @@ struct FootballMatches: View {
             }
             .background(Color.background)
             .background(
-                NavigationLink("",
-                               destination: FMatchDetail(sDVM: sDVM),
-                               isActive: $navigatedToDetail)
+                NavigationLink(
+                    destination: FMatchDetail().environmentObject(sDVM),
+                    isActive: $navigatedToDetail
+                ) { EmptyView() }
             )
         }
     }

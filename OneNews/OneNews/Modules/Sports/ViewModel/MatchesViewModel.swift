@@ -16,7 +16,7 @@ class MatchesViewModel:  ObservableObject{
         let FixturesResultsUrl = URL(string: "https://gateway.luckyinfos.com/api/sport/sports/\(sportID)/\(matchType)?lang=en&match_date=\(date)&timezone=Asia/Phnom_Penh&page=1&sport=\(sportID)")!
         
         let liveUrl = URL(string: "https://gateway.luckyinfos.com/api/sport/sports/1/live?lang=en&page=1")!
-        
+        //http://89.116.21.222:8000
         var url: URL
         
         if matchType == .live {

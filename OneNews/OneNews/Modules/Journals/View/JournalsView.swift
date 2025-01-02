@@ -40,11 +40,12 @@ struct JournalsView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .background(Color.background)
+            
             .onAppear {
                 journalVM.fetchJournals()  // Fetch journals on view load
             }
         }
+        .background(Color.optionBtn1)
     }
 }
 

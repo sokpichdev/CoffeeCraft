@@ -16,5 +16,6 @@ struct ProductsView: View {
                 .foregroundColor(.orange)
             Spacer()
         }
+        .background(Color.optionBtn1)
     }
 }
