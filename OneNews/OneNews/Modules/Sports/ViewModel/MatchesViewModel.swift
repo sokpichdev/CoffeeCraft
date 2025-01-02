@@ -8,12 +8,12 @@
 import SwiftUI
 
 class MatchesViewModel:  ObservableObject{
-    @Published var matches: [MatchesModel] = []
+    @Published var matches: [LeagueModel] = []
     func fetchMatches(sportID: Int, date: String, matchType: MatchType) {
         matches.removeAll()
         print("Fetching matches for Sport ID: \(sportID), Date: \(date), Match Type: \(matchType)")
         
-        let FixturesResultsUrl = URL(string: "http://89.116.21.222:8000/api/sport/sports/\(sportID)/\(matchType)?lang=en&match_date=\(date)&timezone=Asia/Phnom_Penh&page=1&sport=\(sportID)")!
+        let FixturesResultsUrl = URL(string: "https://gateway.luckyinfos.com/api/sport/sports/\(sportID)/\(matchType)?lang=en&match_date=\(date)&timezone=Asia/Phnom_Penh&page=1&sport=\(sportID)")!
         
         let liveUrl = URL(string: "https://gateway.luckyinfos.com/api/sport/sports/1/live?lang=en&page=1")!
         

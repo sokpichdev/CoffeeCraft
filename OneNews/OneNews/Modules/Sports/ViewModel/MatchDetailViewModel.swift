@@ -9,12 +9,13 @@ import SwiftUI
 import Combine
 
 class MatchDetailViewModel: ObservableObject {
-    @Published var mDVM: [MatchDetailModel] = []
+//    @Published var mDVM: [MatchDetailModel] = []
+    @Published var mDVM: MatchDetailModel = MatchDetailModel()
     
-    func fetchRecomendedMatches(sportID: Int) {
-        mDVM.removeAll()
+    func fetchMatchDetail(sportID: Int, leagueID: Int, matchID: Int) {
+//        mDVM.removeAll()
         
-        let url = URL(string: "https://gateway.luckyinfos.com/api/sport/sports/1/leagues/141/matches/111948?lang=en")!
+        let url = URL(string: "https://gateway.luckyinfos.com/api/sport/sports/\(sportID)/leagues/\(leagueID)/matches/\(matchID)?lang=en")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -38,7 +39,7 @@ class MatchDetailViewModel: ObservableObject {
                 
                 if let matchDetail = decodedResponse.data {
                     DispatchQueue.main.async {
-                        self?.mDVM = [matchDetail]
+                        self?.mDVM = matchDetail
                     }
                 }
             } catch let jsonError {

@@ -27,4 +27,22 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
+    
+    func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let seconds = seconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
 }
+
+enum PasswordType {
+    case password
+    case confirmPassword
+    case newPassword
+}
+enum ButtonType {
+    case login
+    case register
+    case confirm
+}
+

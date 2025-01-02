@@ -4,14 +4,15 @@
 //
 //  Created by Sok Pich on 12/24/24.
 //
+
 import SwiftUI
 import Combine
 
 class LeagueViewModel: ObservableObject {
-    @Published var matches: [MatchDetailModel] = []
+    @Published var matchList: [MatchDetailModel] = []
     
     func fetchLeagueMatches(sportID: Int, leagueID: Int, matchType: MatchType) {
-        matches.removeAll()
+        matchList.removeAll()
         
         let urlString = "http://89.116.21.222:8000/api/sport/sports/\(sportID)/leagues/\(leagueID)/\(matchType)?lang=en&page=1"
         guard let url = URL(string: urlString) else {
@@ -38,7 +39,9 @@ class LeagueViewModel: ObservableObject {
                 let decodedResponse = try JSONDecoder().decode(LeagueMatchesResponse.self, from: data)
                 if let matches = decodedResponse.data?.matches {
                     if let match = matches.data {
-                        self?.matches = match
+                        DispatchQueue.main.async {
+                            self?.matchList = match
+                        }
                     }
                     print("Matches Current Page: \(matches.currentPage ?? 0)")
                     print("First Match Home Team: \(matches.data?.first?.homeTeam?.name ?? "N/A")")

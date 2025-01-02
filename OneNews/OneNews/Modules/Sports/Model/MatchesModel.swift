@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MatchesResponseModel: Codable {
-    var data: [MatchesModel]?
+    var data: [LeagueModel]?
     var links: LinksModel?
     var meta: MetaModel?
     var status: Bool?
@@ -20,7 +20,7 @@ struct MatchesResponseModel: Codable {
     }
 }
 
-struct MatchesModel: Codable, Identifiable{
+struct LeagueModel: Codable, Identifiable{
     var id: Int?
     var icon: String?
     var isCup: Int?
@@ -83,7 +83,7 @@ struct MatchDetailModel: Codable, Identifiable {
 struct StatsModel: Codable {
     var name: String?
     var home: String?
-    var away: String
+    var away: String?
 }
 
 struct EventModel: Codable {

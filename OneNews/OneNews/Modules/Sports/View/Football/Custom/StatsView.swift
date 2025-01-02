@@ -1,26 +1,22 @@
 import SwiftUI
 
 struct StatsView: View {
-    
-    let statsData: [(String, Int, Int)] = [
-        ("Total Shots", 23, 11),
-        ("Shots on Target", 8, 4),
-        ("Shots off Target", 9, 5),
-        ("Blocked Shots", 6, 2),
-        ("Big Chances Created", 4, 2),
-        ("Big Chances Missed", 4, 0),
-        ("Shots-Inside The Box", 16, 7),
-        ("Shots-Outside The Box", 16, 7),
-        ("Goal", 4, 2)
-    ]
+    @ObservedObject var mDVM: MatchDetailViewModel
     
     // Calculate the total points for all stats
     var totalLeftPoints: Int {
-        statsData.reduce(0) { $0 + $1.1 }
+        mDVM.mDVM.stats!.reduce(into: 0) { total, stat in
+            // Convert the .home value (String) into Int, using optional binding
+            let leftPoints = Int(stat.home ?? "0") ?? 0
+            total += leftPoints // Modify total directly
+        }
     }
-    
+
     var totalRightPoints: Int {
-        statsData.reduce(0) { $0 + $1.2 }
+        mDVM.mDVM.stats!.reduce(into: 0) { total, stat in
+            let rightPoints = Int(stat.away ?? "0") ?? 0
+            total += rightPoints
+        }
     }
     
     // Calculate % of points
@@ -34,6 +30,7 @@ struct StatsView: View {
     }
     
     var body: some View {
+        if let stats = mDVM.mDVM.stats, !stats.isEmpty{
         VStack {
             //            VStack{
             //                    // Place ProgressView on top of everything
@@ -65,11 +62,11 @@ struct StatsView: View {
                 ZStack {
                     HStack(spacing: 0) {
                         HStack {/* No content inside, just the background color*/}
-                        .frame(width: (UIScreen.main.bounds.width-64) * leftPercentage, height: 25)
-                        .background(Color.main)
-                         HStack {}
-                        .frame(width: (UIScreen.main.bounds.width-64) * rightPercentage, height: 25)
-                        .background(Color.optionBtn2)
+                            .frame(width: (UIScreen.main.bounds.width-64) * leftPercentage, height: 25)
+                            .background(Color.main)
+                        HStack {}
+                            .frame(width: (UIScreen.main.bounds.width-64) * rightPercentage, height: 25)
+                            .background(Color.optionBtn2)
                     }
                     .cornerRadius(10)
                     .padding(.top, 16)
@@ -92,22 +89,26 @@ struct StatsView: View {
                     .padding(.horizontal, 16)
                 }
             }
-            //                        .padding(.horizontal, 16)
             
             VStack(spacing: 0) {
-                StatsDetailView(team: "Team", leftTeamPoint: "North Koreaaaaaaa", rightTeamPoint: "South Korea")
-                    .background(Color.optionBtn2)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
+                // Display the team names (first entry)
+                StatsDetailView(team: "Team",
+                                leftTeamPoint: mDVM.mDVM.stats?[0].home ?? "0",
+                                rightTeamPoint: mDVM.mDVM.stats?[0].away ?? "0")
+                .background(Color.optionBtn2)
+                .font(.subheadline)
+                .fontWeight(.bold)
                 
-                ForEach(0..<statsData.count, id: \.self) { index in
+                // Display the rest of the stats data, starting from the second entry
+                ForEach(mDVM.mDVM.stats?.dropFirst() ?? [], id: \.name) { stat in
                     StatsDetailView(
-                        team: statsData[index].0,
-                        leftTeamPoint: "\(statsData[index].1)",
-                        rightTeamPoint: "\(statsData[index].2)"
+                        team: stat.name ?? "Unknown",  // Use `name` or another unique property
+                        leftTeamPoint: stat.home ?? "0",
+                        rightTeamPoint: stat.away ?? "0"
                     )
                     Divider()
                 }
+                
             }
             .background(Color.optionBtn1)
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.letters.opacity(0.2), lineWidth: 3))
@@ -117,6 +118,9 @@ struct StatsView: View {
         .background(Color.optionBtn1.opacity(1.5))
         .cornerRadius(10)
         .padding(16)
+        } else {
+            NoDataView()
+        }
     }
 }
 
@@ -144,8 +148,4 @@ struct StatsDetailView: View {
         .padding(.horizontal, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-}
-
-#Preview {
-    StatsView()
 }

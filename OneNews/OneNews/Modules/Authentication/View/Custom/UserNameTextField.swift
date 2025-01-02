@@ -20,28 +20,22 @@ struct UserNameTextField: View {
 
 struct PasswordTextField: View {
     @ObservedObject var authVM: AuthViewModel
-    var body: some View {
-        HStack {
-            TextField("Password", text: $authVM.password)
-            Spacer()
-            
-            Button(action: {
-                authVM.isHidePassword = true
-            }) {
-                CusImage(ImageName: authVM.isHidePassword ? "hide" : "show")
-            }
+    var passType: PasswordType
+    
+    private var passwordText: String {
+        switch passType {
+        case .confirmPassword:
+            return "Confirm Password"
+        case .newPassword:
+            return "New Password"
+        case .password:
+            return "Password"
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, maxHeight: 45)
-        .background(Color.optionBtn1)
-        .cornerRadius(100)
     }
-}
-struct ConfirmPasswordTextField: View {
-    @ObservedObject var authVM: AuthViewModel
     var body: some View {
         HStack {
-            TextField("Confirm Password", text: $authVM.confirmpassword)
+            TextField(passwordText,
+                text: $authVM.password)
             Spacer()
             
             Button(action: {
@@ -57,34 +51,38 @@ struct ConfirmPasswordTextField: View {
     }
 }
 
-struct LoginButton: View {
-    var body: some View  {
-        Button(action: {
-            
-        }) {
-            Text("Login")
-                .padding(16)
-                .frame(maxWidth: .infinity, maxHeight: 45)
-                .background(Color.main)
-                .foregroundStyle(Color.white)
-                .cornerRadius(100)
+struct AuthButton: View {
+    var btnType: ButtonType
+    var maxWidth: CGFloat = .infinity
+    var onTap: (() -> Void)?
+    
+    // Computed property to determine button text
+    private var buttonText: String {
+        switch btnType {
+        case .login:
+            return "Login"
+        case .register:
+            return "Sign Up"
+        case .confirm:
+            return "Confirm"
         }
     }
-}
-struct SignUpButton: View {
+    
     var body: some View {
         Button(action: {
-            
+            onTap?()
         }) {
-            Text("Sign Up")
+            Text(buttonText)
+                .fontWeight(.bold)
                 .padding(16)
-                .frame(maxWidth: .infinity, maxHeight: 45)
+                .frame(maxWidth: maxWidth, maxHeight: 45)
                 .background(Color.main)
-                .foregroundStyle(Color.white)
+                .foregroundColor(.white)
                 .cornerRadius(100)
         }
     }
 }
+
 
 struct LoginOTPButton: View {
     @ObservedObject var authVM: AuthViewModel
@@ -117,14 +115,14 @@ struct OTPTextField: View {
                 if authVM.otpEnded {
                     Button(action: {
                         authVM.otpEnded = false
-                        authVM.timerValue = 90
+                        authVM.timerValue = 20
                     }) {
                         Text("Resend")
                             .padding(8)
                             .cornerRadius(8)
                     }
                 } else {
-                    Text("\(formatTime(authVM.timerValue))")
+                    Text("\(authVM.formatTime(authVM.timerValue))")
                 }
             }
             .foregroundColor(.letters)
@@ -140,10 +138,6 @@ struct OTPTextField: View {
         .cornerRadius(100)
     }
 
-    private func formatTime(_ seconds: Int) -> String {
-        let minutes = seconds / 60
-        let seconds = seconds % 60
-        return String(format: "%d:%02d", minutes, seconds)
-    }
+    
 }
 

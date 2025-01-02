@@ -56,7 +56,7 @@ struct NavBar: View {
     }
 }
 
-struct CusNavbar: View {
+struct CusNav: View {
     var body: some View {
         HStack {
             
@@ -76,6 +76,3 @@ struct CusNavbar: View {
     
 }
 
-#Preview {
-    CusNavbar()
-}

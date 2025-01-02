@@ -8,26 +8,29 @@
 import SwiftUI
 
 struct FinishedMatch: View {
-    var leftTeamImage: String = "football"
-    var leftTeamName: String = ""
-    var leftTeamScore: String = "0"
+    var matchID: Int
+    var leftTeamImage: String
+    var leftTeamName: String
+    var leftTeamScore: String
     
-    var rightTeamImage: String = "basketball"
-    var rightTeamName: String = ""
-    var rightTeamScore: String = "0"
+    var rightTeamImage: String
+    var rightTeamName: String
+    var rightTeamScore: String
+    @State var selectedSummary: Bool = true
     
-    @ObservedObject var sDVM: SportDatesViewModel
-    @State private var selectedSummary: Bool = true
+    var onTap: (() -> Void)?
+
     
     var body: some View {
-        NavigationLink(destination: FMatchDetail(selectedSummary: $selectedSummary, sDVM: sDVM)) {
+        Button {
+            onTap?()
+        } label: {
             VStack(spacing: 5) {
                 HStack {
                     Spacer()
                     Text("FT")
                         .font(.system(size: 12, weight: .regular))
                         .foregroundStyle(.letters.opacity(0.5))
-                        
                 }
                 .padding(.top, 10)
                 .padding(.trailing, 10)
@@ -36,22 +39,24 @@ struct FinishedMatch: View {
                 HStack {
                     TeamView(teamImage: leftTeamImage, teamName: leftTeamName)
                         .frame(maxWidth: .infinity, alignment: .center)
-                    ZStack{
+                    ZStack {
                         ScoreBoardView(leftTeamScore: leftTeamScore, rightTeamScore: rightTeamScore)
                     }
                     .frame(width: 65)
                     TeamView(teamImage: rightTeamImage, teamName: rightTeamName)
                         .frame(maxWidth: .infinity, alignment: .center)
-
                 }
                 .padding(.horizontal, 16)
                 Spacer()
-                
             }
             .frame(maxWidth: .infinity, maxHeight: 120)
             .background(
                 LinearGradient(
-                    gradient: Gradient(colors: [.optionBtn2.opacity(1.5),.optionBtn2.opacity(0.5), .optionBtn2.opacity(1.5)]),
+                    gradient: Gradient(colors: [
+                        .optionBtn2.opacity(1.5),
+                        .optionBtn2.opacity(0.5),
+                        .optionBtn2.opacity(1.5)
+                    ]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -60,5 +65,4 @@ struct FinishedMatch: View {
             .padding(.horizontal, 16)
         }
     }
-    
 }

@@ -11,6 +11,9 @@ struct SportsView: View {
     @StateObject var recommendedVM = RecommendedMatchesViewModel()
     @StateObject var matchVM = MatchesViewModel()
     @StateObject var sDVM = SportDatesViewModel()
+    @State var isNavigatedToDetail: Bool = false
+    @State var isNavigatedToMatches: Bool = false
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .center) {
@@ -65,7 +68,7 @@ struct SportsView: View {
                 .cornerRadius(10)
                 .shadow(radius: 5)
                 .padding(.horizontal, 16)
-
+                
                 
                 if sDVM.matchType == .fixtures  || sDVM.matchType == .results{
                     DateButtons(sportDatesVM: sDVM)
@@ -75,15 +78,20 @@ struct SportsView: View {
                     CustomLabel(text: sDVM.isSelectedFootball ? "Football Matches" : "Basketball Matches")
                     Spacer()
                 }
-                    .padding(.horizontal, 16)
+                .padding(.horizontal, 16)
                 
                 
                 VStack(spacing: 0) { // Match listings (either fixtures or finished matches)
                     if !matchVM.matches.isEmpty {
-                        ForEach(matchVM.matches, id: \.id) { match in
-                            SmallLeagueView(leagueName: match.name ?? "Unknown League", leagueID: match.id ?? 0, leagueCountry: match.country ?? "")
+                        ForEach(matchVM.matches, id: \.id) { league in
+                                SmallLeagueView(leagueName: league.name ?? "Unknown League"){
+                                    sDVM.leagueID = league.id ?? 0
+                                    sDVM.leagueName = league.name ?? ""
+                                    sDVM.leagueCountry = league.country ?? ""
+                                    isNavigatedToMatches = true
+                            }
                             if sDVM.matchType == .fixtures {
-                                ForEach(match.matches ?? [], id: \.id) { match in
+                                ForEach(league.matches ?? [], id: \.id) { match in
                                     UpcomingMatch(
                                         leftTeamImage: match.homeTeam?.logoPath ?? "",
                                         leftTeamName: match.homeTeam?.name ?? "",
@@ -93,19 +101,27 @@ struct SportsView: View {
                                     )
                                 }
                             } else if sDVM.matchType == .results {
-                                ForEach(match.matches ?? [], id: \.id) { match in
-                                    FinishedMatch(
-                                        leftTeamImage: match.homeTeam?.logoPath ?? "",
-                                        leftTeamName: match.homeTeam?.name ?? "",
-                                        leftTeamScore: match.homeTeamScore ?? "",
-                                        rightTeamImage: match.awayTeam?.logoPath ?? "",
-                                        rightTeamName: match.awayTeam?.name ?? "",
-                                        rightTeamScore: match.awayTeamScore ?? "",
-                                        sDVM: sDVM
-                                    )
+                                ForEach(league.matches ?? [], id: \.id) { match in
+//                                        FinishedMatch()
+                                        FinishedMatch(
+                                            matchID: match.id ?? 0,
+                                            leftTeamImage: match.homeTeam?.logoPath ?? "",
+                                            leftTeamName: match.homeTeam?.name ?? "",
+                                            leftTeamScore: match.homeTeamScore ?? "",
+                                            rightTeamImage: match.awayTeam?.logoPath ?? "",
+                                            rightTeamName: match.awayTeam?.name ?? "",
+                                            rightTeamScore: match.awayTeamScore ?? ""
+                                        ) {
+                                            sDVM.leagueID = league.id ?? 0
+                                            sDVM.leagueName = league.name ?? ""
+                                            sDVM.leagueCountry = league.country ?? ""
+                                            sDVM.matchID = match.id ?? 0
+                                            isNavigatedToDetail = true
+                                            
+                                        }
                                 }
                             } else {
-                                ForEach(match.matches ?? [], id: \.id) { match in
+                                ForEach(league.matches ?? [], id: \.id) { match in
                                     LiveMatch(
                                         leftTeamImage: match.homeTeam?.logoPath ?? "",
                                         leftTeamName: match.homeTeam?.name ?? "",
@@ -120,11 +136,23 @@ struct SportsView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                            NoDataView()
+                        NoDataView()
                     }
                 }
             }
         }
+        .background(
+            NavigationLink(
+                destination: FMatchDetail(sDVM: sDVM),
+                isActive: $isNavigatedToDetail
+            ) { EmptyView() }
+        )
+        .background(
+            NavigationLink(
+                destination: FootballMatches(sDVM: sDVM),
+                isActive: $isNavigatedToMatches
+            ) { EmptyView() }
+        )
         .onAppear {
             recommendedVM.fetchRecomendedMatches(sportID: sDVM.isSelectedFootball ? 1 : 2)
             

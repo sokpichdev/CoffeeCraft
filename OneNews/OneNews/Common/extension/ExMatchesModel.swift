@@ -13,7 +13,7 @@
 
 import Foundation
 
-extension MatchesModel: CustomDebugStringConvertible {
+extension LeagueModel: CustomDebugStringConvertible {
     var debugDescription: String {
         let matchDetails = matches?.map { $0.debugDescription }.joined(separator: "\n") ?? "No match details"
         let sportDescription = sport?.debugDescription ?? "No sport data"

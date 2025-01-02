@@ -16,8 +16,14 @@ class SportDatesViewModel: ObservableObject {
     @Published var selectedDate: Date = Date() // Tracks the selected date
     @Published var matchType: MatchType = .live
     @Published var isSelectedDate: Bool = false
-    @Published var calendar = Calendar.current
-    @Published var today = Date()
+    var calendar = Calendar.current
+    var today = Date()
+    
+    
+    var leagueName: String = ""
+    var leagueCountry: String = ""
+    var leagueID: Int = 0
+    var matchID: Int = 0
     
     func getDateArray() -> [Date]{
         var dateArray: [Date] = []
