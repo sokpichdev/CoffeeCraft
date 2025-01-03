@@ -12,21 +12,21 @@ struct ResultVN: View {
     @State var isShowPrize: Bool = false
     @State var isSpecial: Bool = false
 
-    let prizeData: [[Int]] = [
-        [13423], // 1st prize
-        [25368, 93453], // 2nd prize
-        [12211, 55543, 63427, 23423, 54333], // 3rd prize
-        [1343, 8765, 3466], // 4th prize
-        [2343, 7774, 1680, 9898], // 5th prize
-        [123, 555, 744 ,374], // 6th prize
-        [23, 54, 10, 43, 99], // 7th prize
-        [23, 54, 66, 36, 98, 11] // 8th prize
+    let prizeData: [[String]] = [
+        ["13423"], // 1st prize
+        ["25368", "93453"], // 2nd prize
+        ["12211", "55543", "63427", "23423", "54333"], // 3rd prize
+        ["1343", "8765", "3466"], // 4th prize
+        ["2343", "7774", "1680", "9898"], // 5th prize
+        ["123", "555", "744" ,"374"], // 6th prize
+        ["23", "54", "10", "43", "99"], // 7th prize
+        ["23", "54", "66", "36", "98", "11"] // 8th prize
     ]
     
     var body: some View {
         VStack(spacing: 0) {
             SectionResult(imageName: Image(.result1))
-            ResultDetail(lists: [12, 1, 6, 33, 76, 23].shuffled(), isSpecial: true)
+            ResultDetail(lists: ["12", "1","6", "33","76", "23"].shuffled(), isSpecial: true)
             
             if isShowPrize {
                 VStack(alignment: .center) {
@@ -86,8 +86,4 @@ struct ResultVN: View {
         .cornerRadius(5)
         .padding(.horizontal, 16)
     }
-}
-
-#Preview {
-    ResultVN()
 }

@@ -1,19 +1,20 @@
 //
-//  LotteryViewModel.swift
+//  RecommendedLotteryViewModel.swift
 //  OneNews
 //
-//  Created by Sok Pich on 1/2/25.
+//  Created by Sok Pich on 1/3/25.
 //
+
 import SwiftUI
 import Combine
 
-class LotteryViewModel: ObservableObject {
-    @Published var lotteryVM: [LotteryModel] = []
+class RecommendedLotteryViewModel: ObservableObject {
+    @Published var rLVM: [LotteryModel] = []
 
     func fetchLottery() {
-        lotteryVM.removeAll()
+        rLVM.removeAll()
         
-        let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/country/3?page=1&lang=en")!
+        let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/recommended/3?lang=en")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "content-type")
@@ -42,7 +43,7 @@ class LotteryViewModel: ObservableObject {
                 
                 if let lottery = decodedResponse.data {
                     DispatchQueue.main.async {
-                        self?.lotteryVM = lottery
+                        self?.rLVM = lottery
                         print("Lottery Count: \(lottery.count)")
                     }
                 }

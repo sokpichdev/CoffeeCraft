@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CountriesButton: View {
     var countryName: String
-    var numberOfLottery: Int = 0
+    var numberOfLottery: Int
     var isSelected: Bool
     var action: () -> Void
     

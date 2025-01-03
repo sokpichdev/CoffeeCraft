@@ -10,7 +10,8 @@ import SwiftUI
 struct SideMenuView: View {
     @Binding var isSideMenuOpen: Bool
     @Binding var dragOffset: CGFloat// Tracks the drag offset
-
+    @AppStorage("isDarkMode") private var isDarkMode = UserPreference.shared.getIsDarkMode()
+    
     var body: some View  {
         
         VStack (alignment: .leading, spacing: 10) {
@@ -34,7 +35,18 @@ struct SideMenuView: View {
             Divider().padding(.vertical, 16)
             items("Language", "Language")
             items("Profile","Profile")
-            items("LightDarkMode","Light mode")
+            HStack{
+                items("LightDarkMode","Light mode")
+                Spacer()
+                Button(action: {
+                    withAnimation(.linear(duration: 0.5)) {
+                        isDarkMode.toggle()
+                        UserPreference.shared.setIsDarkMode(set: isDarkMode)
+                    }
+                }, label: {
+                    SwitcherView(isOn: $isDarkMode)
+                })
+            }
             items("Support","Support")
             items("Terms & Conditions","Terms & Conditions")
             items("Privacy Policy","Privacy Policy")

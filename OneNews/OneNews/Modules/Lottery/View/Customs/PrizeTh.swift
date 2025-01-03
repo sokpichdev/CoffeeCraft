@@ -9,7 +9,7 @@ import SwiftUI
 struct PrizeTh: View {
     
     @State var prizeTh: String = ""
-    @State var prizeNumber: [Int] = []
+    @State var prizeNumber: [String] = []
     
     var body: some View {
         VStack(alignment: .center){
@@ -19,7 +19,7 @@ struct PrizeTh: View {
             
             HStack {
                 ForEach(prizeNumber.indices, id: \.self){ index in
-                    Text("\(prizeNumber[index])")
+                    Text(prizeNumber[index])
                         .font(.caption)
                         .foregroundStyle(Color.letters)
                         

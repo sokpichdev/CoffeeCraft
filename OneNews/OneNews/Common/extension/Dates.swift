@@ -24,4 +24,5 @@ extension Date {
         formatter.dateFormat = "EEE"
         return formatter.string(from: self)
     }
+    
 }

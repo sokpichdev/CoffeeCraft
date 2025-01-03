@@ -8,23 +8,22 @@
 import SwiftUI
 
 struct LotteryView: View {
+    @StateObject var lotteryVM = LotteryViewModel()
+    @StateObject var countryVM = CountryViewModel()
+    @StateObject var recommededLotteryVM = RecommendedLotteryViewModel()
     @State var selectedCountry: Int = 4
-    let countries = ["Cambodia", "China", "Thailand", "Malaysia", "Vietnam", "Singapore"]
-    let numbersList: [[Int]] = [
-        [12, 1, 6, 33, 76, 19, 23, 23, 54, 22, 12, 66, 89, 34, 56, 78, 90, 45, 34, 11].shuffled(),
-        [66, 89, 34].shuffled(),
-        [76, 19, 23, 23, 51].shuffled(),
-        [45, 34, 11].shuffled(),
-        [12, 1, 6, 33, 76, 19, 23, 23, 54, 22].shuffled()
-    ].shuffled()
     
     var body: some View {
         ScrollView {
             VStack {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
-                        ForEach(0..<numbersList.count, id: \.self) { index in
-                            NumbersCard(lists: numbersList[index])
+                        if !recommededLotteryVM.rLVM.isEmpty {
+                            ForEach(recommededLotteryVM.rLVM.indices, id: \.self) { index in
+                                NumbersCard(lists: recommededLotteryVM.rLVM[index].result?.detail?.code ?? "",
+                                            title: recommededLotteryVM.rLVM[index].title ?? "",
+                                            openDate: recommededLotteryVM.rLVM[index].openDate ?? "")
+                            }
                         }
                     }
                     .padding(.horizontal, 16)
@@ -46,10 +45,13 @@ struct LotteryView: View {
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
-                        ForEach(countries.indices, id: \.self) { index in
-                            CountriesButton(countryName: countries[index], isSelected: selectedCountry == index) {
-                                withAnimation(.smooth){
-                                    selectedCountry = index
+                        ForEach(countryVM.countryVM.indices, id: \.self) { index in
+                            if let countryName = countryVM.countryVM[index].country?.name {
+                                CountriesButton(countryName: countryName,numberOfLottery: countryVM.countryVM[index].country?.lotteriesCount ?? 0, isSelected: selectedCountry == index) {
+                                    withAnimation(.smooth) {
+                                        selectedCountry = index
+                                        print("Country name: \(countryName) - country id: \(countryVM.countryVM[index].countryID ?? 0)")
+                                    }
                                 }
                             }
                         }
@@ -64,18 +66,28 @@ struct LotteryView: View {
                     Spacer()
                 }
                 
-                ForEach(0..<numbersList.count, id: \.self) { index in
-                    if selectedCountry == 1 {
-                        ResultView(lists: numbersList[index])
-                    } else if selectedCountry == 4 {
-                        ResultVN(lists: numbersList[index])
-                    } else {
-                        ResultView(lists: numbersList[index])
-
+//                ForEach(0..<numbersList.count, id: \.self) { index in
+//                    if selectedCountry == 1 {
+//                        ResultView(lists: numbersList[index])
+//                    } else if selectedCountry == 4 {
+//                        ResultVN(lists: numbersList[index])
+//                    } else {
+//                        ResultView(lists: numbersList[index])
+//
+//                    }
+//                }
+                if !lotteryVM.lotteryVM.isEmpty {
+                    ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
+                        
                     }
                 }
             }
         }
         .background(Color.background)
+        .onAppear {
+            countryVM.fetchCountry()
+            lotteryVM.fetchLottery()
+            recommededLotteryVM.fetchLottery()
+        }
     }
 }

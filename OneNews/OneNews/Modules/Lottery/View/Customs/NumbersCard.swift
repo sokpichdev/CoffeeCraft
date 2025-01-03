@@ -7,13 +7,15 @@
 import SwiftUI
 
 struct NumbersCard: View {
-    @State var lists: [Int] = [] // Changed to 1D array
-
+//    @State var lists: [Int] = [] // Changed to 1D array
+    var lists: String
+    var title: String
+    var openDate: String
     var body: some View {
         VStack {
             // Header
             HStack {
-                Text("Gold 4D")
+                Text(title)
                     .font(.subheadline)
                     .multilineTextAlignment(.leading)
                 Spacer()
@@ -24,20 +26,21 @@ struct NumbersCard: View {
             
             // Circles in rows
             VStack {
-                if lists.count >= 20 {
+                let numbersList = convertStringToListOfStrings(lists)
+                if numbersList.count >= 20 {
                     HStack(spacing: -5) {
-                        ForEach(lists.prefix(10), id: \.self) { number in
+                        ForEach(numbersList.prefix(10), id: \.self) { number in
                             CircleView(number: number)
                         }
                     }
                     HStack(spacing: -5) {
-                        ForEach(lists.suffix(10), id: \.self) { number in
+                        ForEach(numbersList.suffix(10), id: \.self) { number in
                             CircleView(number: number)
                         }
                     }
                 } else {
                     HStack(spacing: -5) {
-                        ForEach(lists, id: \.self) { number in
+                        ForEach(numbersList, id: \.self) { number in
                             CircleView(number: number)
                         }
                     }
@@ -51,7 +54,7 @@ struct NumbersCard: View {
                 Text("Result")
                     .font(.caption)
                 Spacer()
-                Text("28 Oct, Sat. 03:30 PM")
+                Text(formatDetailDate(from: openDate) ?? "")
                     .font(.caption)
                     .foregroundColor(.white)
             }
@@ -95,5 +98,34 @@ struct NumbersCard: View {
                 endPoint: .bottom
             )
         }
+    }
+     func formatDetailDate(from input: String) -> String? {
+         // Define the input date format
+         let inputDateFormat = "yyyy-MM-dd HH:mm:ss"
+         let outputDateFormat = "dd MMMM yyyy, EEE hh:mm a"
+
+         // Create a DateFormatter for parsing the input date string
+         let inputFormatter = DateFormatter()
+         inputFormatter.dateFormat = inputDateFormat
+         inputFormatter.locale = Locale(identifier: "en_US_POSIX") // Ensure consistent parsing
+
+         // Parse the input date string
+         guard let date = inputFormatter.date(from: input) else {
+             return nil
+         }
+
+         // Create a DateFormatter for formatting the output
+         let outputFormatter = DateFormatter()
+         outputFormatter.dateFormat = outputDateFormat
+         outputFormatter.locale = Locale(identifier: "en_US_POSIX") // Ensure consistent formatting
+
+         // Format the date into the desired output format
+         return outputFormatter.string(from: date)
+     }
+    
+    func convertStringToListOfStrings(_ input: String) -> [String] {
+        // Split the string by commas and trim whitespaces
+        let numberStrings = input.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        return numberStrings
     }
 }

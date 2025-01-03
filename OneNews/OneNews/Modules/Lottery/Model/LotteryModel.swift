@@ -18,7 +18,7 @@ struct LotteryModel: Codable, Identifiable {
     private enum CodingKeys: String, CodingKey {
         case id, title, icon, result, favorite
         case lotteryCategoryID = "lottery_category_id"
-        case openDate = "open_date"
+        case openDate = "opendate"
         case isPrediction = "is_prediction"
     }
 }
@@ -31,7 +31,8 @@ struct LotteryResultModel: Codable {
     
     private enum CodingKeys: String, CodingKey {
         case lotteryListID = "lottery_list_id"
-        case openDate, detail
+        case openDate = "opendate"
+        case detail
     }
     
     struct Detail: Codable {

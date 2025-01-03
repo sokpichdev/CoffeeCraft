@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct CircleView: View {
-    @State var number: Int = 0
+    @State var number: String = "0"
     var body: some View {
         Circle()
             .fill(Color.white)
             .frame(width: 30, height: 30)
             .overlay(
-                Text("\(number)")
+                Text(number)
                     .font(.caption)
                     .foregroundColor(.black)
             )
@@ -27,13 +27,13 @@ struct CircleView: View {
 }
 
 struct CircleResult: View {
-    @State var number: Int = 0
+    @State var number: String = ""
     var body: some View {
         Circle()
             .fill(Color.percentage)
             .frame(width: 35, height: 35)
             .overlay(
-                Text("\(number)")
+                Text(number)
                     .font(.caption)
                     .foregroundColor(.letters)
             )

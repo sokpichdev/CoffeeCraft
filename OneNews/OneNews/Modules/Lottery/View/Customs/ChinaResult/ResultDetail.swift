@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ResultDetail : View {
-    @State var lists: [Int] = [] // Changed to 1D array
+    @State var lists: [String] = [] // Changed to 1D array
     @State var isSpecial: Bool = true
     var body: some View {
         VStack {
@@ -46,8 +46,4 @@ struct ResultDetail : View {
         .padding(16)
         .background(Color.optionBtn2)
     }
-}
-
-#Preview {
-    ResultDetail(lists: [12, 1, 6, 33, 76, 19, 23, 23, 54, 22].shuffled())
 }

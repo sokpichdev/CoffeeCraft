@@ -14,7 +14,7 @@ struct ResultView: View {
         VStack(alignment: .center, spacing: 0) {
             SectionResult()
             
-            ResultDetail(lists: [12, 1, 6, 33, 76, 19, 23, 23, 54, 22].shuffled(), isSpecial: false)
+            ResultDetail(lists: ["12", "1", "6", "33", "76", "19", "23", "23", "54", "22"].shuffled(), isSpecial: false)
             
             Spacer()
             MoreResultButton()

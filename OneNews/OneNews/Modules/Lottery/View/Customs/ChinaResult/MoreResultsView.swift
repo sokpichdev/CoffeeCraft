@@ -46,7 +46,7 @@ struct MoreResultsView: View {
                 .cornerRadius(5)
                 
                 ForEach(1...5, id: \.self) { _ in
-                    ResultDetail(lists: [12, 1, 6, 33, 76, 19, 23, 23, 54, 22, 12, 66, 89, 34, 56, 78, 90, 45, 34, 11].shuffled())
+                    ResultDetail(lists: ["12", "1", "6", "33", "76", "19", "23", "23", "54", "22", "12", "66", "89", "34", "56", "78", "90", "45", "34", "11"].shuffled())
                         .cornerRadius(5)
                 }
             }
