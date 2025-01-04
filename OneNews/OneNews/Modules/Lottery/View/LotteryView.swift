@@ -78,7 +78,16 @@ struct LotteryView: View {
 //                }
                 if !lotteryVM.lotteryVM.isEmpty {
                     ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
-                        
+                        let lottery = lotteryVM.lotteryVM[index]
+                        ResultView(drawID: lottery.id ?? 0,
+                                   result: lottery.result?.detail?.code ?? "",
+                                   title: lottery.title ?? "",
+                                   openDate: lottery.openDate ?? "",
+                                   iconName: lottery.icon ?? "",
+                                   issue: lottery.result?.detail?.issue ?? "",
+                                   officialIssue: lottery.result?.detail?.officialIssue ?? ""
+                        )
+//                        ResultView(lotteryVM: lotteryVM)
                     }
                 }
             }

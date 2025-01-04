@@ -8,14 +8,20 @@
 import SwiftUI
 
 struct ResultDate: View {
+//    @ObservedObject var lotteryVM: LotteryViewModel
+    var drawID: Int
+    var date: String
+    var issue: String
+    var officialIssue: String
     var body: some View {
-        Text("DRAW ID - 56213")
+        Text("DRAW ID - \(issue + officialIssue)")
             .font(.caption)
+            .foregroundColor(Color.letters.opacity(0.5))
         
         HStack {
-            Text("THURSDAY").fontWeight(.bold)
+            Text(date.formatDetailDate(from: date, type: .day) ?? "").fontWeight(.bold)
             Text(" | ")
-            Text("14 Dec 2023 12:10 PM")
+            Text(date.formatDetailDate(from: date, type: .longDateTime) ?? "")
         }
         .font(.caption)
         .frame(height: 12)

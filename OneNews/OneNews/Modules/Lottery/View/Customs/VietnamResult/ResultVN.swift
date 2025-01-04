@@ -25,8 +25,8 @@ struct ResultVN: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            SectionResult(imageName: Image(.result1))
-            ResultDetail(lists: ["12", "1","6", "33","76", "23"].shuffled(), isSpecial: true)
+//            SectionResult(imageName: Image(.result1))
+//            ResultDetail(lists: ["12", "1","6", "33","76", "23"].shuffled(), isSpecial: true)
             
             if isShowPrize {
                 VStack(alignment: .center) {

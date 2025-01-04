@@ -8,11 +8,17 @@
 import SwiftUI
 
 struct ResultDetail : View {
-    @State var lists: [String] = [] // Changed to 1D array
-    @State var isSpecial: Bool = true
+//    @ObservedObject var lotteryVM: LotteryViewModel
+    var lists: [String] = [] // Changed to 1D array
+    var drawID: Int
+    var date: String
+    var issue: String
+    var officialIssue: String
+    var isSpecial: Bool = true
+    
     var body: some View {
         VStack {
-            ResultDate()
+            ResultDate(drawID: drawID, date: date, issue: issue, officialIssue: officialIssue)
             
             if isSpecial {
                 Text("Special Prize").foregroundStyle(.main).fontWeight(.semibold)

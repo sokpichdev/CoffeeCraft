@@ -8,13 +8,27 @@
 import SwiftUI
 
 struct ResultView: View {
-    @State var lists: [Int] = [] // Changed to 1D array
+//    @State var lists: [Int] = [] // Changed to 1D array
+//    @ObservedObject var lotteryVM: LotteryViewModel
+    var drawID: Int
+    var result: String
+    var title: String
+    var openDate: String
+    var iconName: String
+    var issue: String
+    var officialIssue: String
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            SectionResult()
+            SectionResult(iconName: iconName, title: title)
             
-            ResultDetail(lists: ["12", "1", "6", "33", "76", "19", "23", "23", "54", "22"].shuffled(), isSpecial: false)
+            ResultDetail(lists: result.convertStringToListOfStrings(result),
+                         drawID: drawID,
+                         date: openDate,
+                         issue: issue,
+                         officialIssue: officialIssue,
+                         isSpecial: false)
+//            ResultDetail(lotteryVM: lotteryVM)
             
             Spacer()
             MoreResultButton()
@@ -26,10 +40,5 @@ struct ResultView: View {
         .padding(.horizontal, 16)
         
     }
-}
-
-
-#Preview {
-    ResultView()
 }
 
