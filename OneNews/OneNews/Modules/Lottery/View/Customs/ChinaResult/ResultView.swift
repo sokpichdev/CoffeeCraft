@@ -11,7 +11,7 @@ struct ResultView: View {
 //    @State var lists: [Int] = [] // Changed to 1D array
 //    @ObservedObject var lotteryVM: LotteryViewModel
     var drawID: Int
-    var result: String
+    var result: CodeType?
     var title: String
     var openDate: String
     var iconName: String
@@ -22,12 +22,20 @@ struct ResultView: View {
         VStack(alignment: .center, spacing: 0) {
             SectionResult(iconName: iconName, title: title)
             
-            ResultDetail(lists: result.convertStringToListOfStrings(result),
-                         drawID: drawID,
-                         date: openDate,
-                         issue: issue,
-                         officialIssue: officialIssue,
-                         isSpecial: false)
+            if case let .string(lottery) = result {
+                ResultDetail(lists: lottery.convertStringToListOfStrings(lottery),
+                             drawID: drawID,
+                             date: openDate,
+                             issue: issue,
+                             officialIssue: officialIssue,
+                             isSpecial: false)
+            }
+//            ResultDetail(lists: result.convertStringToListOfStrings(result),
+//                         drawID: drawID,
+//                         date: openDate,
+//                         issue: issue,
+//                         officialIssue: officialIssue,
+//                         isSpecial: false)
 //            ResultDetail(lotteryVM: lotteryVM)
             
             Spacer()

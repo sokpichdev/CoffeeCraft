@@ -8,7 +8,7 @@ import SwiftUI
 
 struct NumbersCard: View {
 //    @State var lists: [Int] = [] // Changed to 1D array
-    var lists: String
+    var lists: CodeType?
     var title: String
     var openDate: String
     var body: some View {
@@ -26,22 +26,25 @@ struct NumbersCard: View {
             
             // Circles in rows
             VStack {
-                let numbersList = lists.convertStringToListOfStrings(lists)
-                if numbersList.count >= 20 {
-                    HStack(spacing: -5) {
-                        ForEach(numbersList.prefix(10), id: \.self) { number in
-                            CircleView(number: number)
+                if case let .string(lottery) = lists{
+                    let lottery = lottery.convertStringToListOfStrings(lottery)
+                    
+                    if lottery.count >= 20 {
+                        HStack(spacing: -5) {
+                            ForEach(lottery.prefix(10), id: \.self) { number in
+                                CircleView(number: number)
+                            }
                         }
-                    }
-                    HStack(spacing: -5) {
-                        ForEach(numbersList.suffix(10), id: \.self) { number in
-                            CircleView(number: number)
+                        HStack(spacing: -5) {
+                            ForEach(lottery.suffix(10), id: \.self) { number in
+                                CircleView(number: number)
+                            }
                         }
-                    }
-                } else {
-                    HStack(spacing: -5) {
-                        ForEach(numbersList, id: \.self) { number in
-                            CircleView(number: number)
+                    } else {
+                        HStack(spacing: -5) {
+                            ForEach(lottery, id: \.self) { number in
+                                CircleView(number: number)
+                            }
                         }
                     }
                 }
@@ -66,39 +69,43 @@ struct NumbersCard: View {
         }
         .foregroundStyle(Color.white)
         .frame(width: 300, height: 190)
-        .background(gradientBackground) // Use computed property
+        .background(LinearGradient(
+            gradient: Gradient(colors: [Color.lightRed, Color.darkRed]),
+            startPoint: .top,
+            endPoint: .bottom
+        )) // Use computed property
         .cornerRadius(15)
         .shadow(radius: 5)
     }
 
     // Computed property for gradient background
-    private var gradientBackground: LinearGradient {
-        switch lists.count {
-        case 20:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.lightRed, Color.darkRed]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        case 10:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.lightYellow, Color.darkYellow]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        case 5:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        default:
-            return LinearGradient(
-                gradient: Gradient(colors: [Color.lightBlueBerry, Color.darkBlueBerry]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
-    }
+//    private var gradientBackground: LinearGradient {
+//        switch lists.count {
+//        case 20:
+//            return LinearGradient(
+//                gradient: Gradient(colors: [Color.lightRed, Color.darkRed]),
+//                startPoint: .top,
+//                endPoint: .bottom
+//            )
+//        case 10:
+//            return LinearGradient(
+//                gradient: Gradient(colors: [Color.lightYellow, Color.darkYellow]),
+//                startPoint: .top,
+//                endPoint: .bottom
+//            )
+//        case 5:
+//            return LinearGradient(
+//                gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]),
+//                startPoint: .top,
+//                endPoint: .bottom
+//            )
+//        default:
+//            return LinearGradient(
+//                gradient: Gradient(colors: [Color.lightBlueBerry, Color.darkBlueBerry]),
+//                startPoint: .top,
+//                endPoint: .bottom
+//            )
+//        }
+//    }
     
 }

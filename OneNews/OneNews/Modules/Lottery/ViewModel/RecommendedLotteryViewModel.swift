@@ -11,10 +11,10 @@ import Combine
 class RecommendedLotteryViewModel: ObservableObject {
     @Published var rLVM: [LotteryModel] = []
 
-    func fetchLottery() {
+    func fetchLottery(countryID: Int) {
         rLVM.removeAll()
         
-        let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/recommended/3?lang=en")!
+        let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/recommended/\(countryID)?lang=en")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "content-type")

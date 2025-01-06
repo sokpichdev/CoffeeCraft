@@ -1,10 +1,3 @@
-//
-//  LotteryModel.swift.swift
-//  OneNews
-//
-//  Created by Sok Pich on 1/2/25.
-//
-
 struct LotteryModel: Codable, Identifiable {
     var id: Int?
     var title: String?
@@ -23,7 +16,6 @@ struct LotteryModel: Codable, Identifiable {
     }
 }
 
-
 struct LotteryResultModel: Codable {
     var lotteryListID: Int?
     var openDate: String?
@@ -35,14 +27,59 @@ struct LotteryResultModel: Codable {
         case detail
     }
     
-    struct Detail: Codable {
-        var code: String?
-        var issue: String?
-        var officialIssue: String?
+}
+
+// MARK: - Detail
+struct Detail: Codable {
+    // when lottery_category_id = 3
+    let issue, officialissue: String?
+    
+    // when lottery_category_id = 4
+    let code: CodeType?
+   
+    enum CodingKeys: String, CodingKey {
+        case code, issue, officialissue
+    }
+}
+
+struct CodeLottery7: Codable {
+    var code, code1: String?
+    var code2, code3, code4, code5, code6, code7: [String]?
+}
+
+struct CodeLottery8: Codable {
+    var code, code1, code2: String?
+    var code3, code4, code5, code6, code7, code8: [String]?
+}
+enum CodeType: Codable {
+    case lottery7(CodeLottery7)
+    case lottery8(CodeLottery8)
+    case string(String)
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
         
-        private enum CodingKeys: String, CodingKey {
-            case code, issue
-            case officialIssue = "officialissue"
+        if let lottery = try? container.decode(CodeLottery7.self) {
+            self = .lottery7(lottery)
+        } else if let lottery = try? container.decode(CodeLottery8.self) {
+            self = .lottery8(lottery)
+        } else if let stringCode = try? container.decode(String.self) {
+            self = .string(stringCode)
+        } else {
+            throw DecodingError.typeMismatch(CodeType.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Failed to decode CodeType"))
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch self {
+        case .lottery7(let lottery):
+            try container.encode(lottery)
+        case .lottery8(let lottery):
+            try container.encode(lottery)
+        case .string(let stringCode):
+            try container.encode(stringCode)
         }
     }
 }

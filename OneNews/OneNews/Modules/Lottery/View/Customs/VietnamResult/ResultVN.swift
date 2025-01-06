@@ -8,57 +8,101 @@
 import SwiftUI
 
 struct ResultVN: View {
-    @State var lists: [Int] = [] // Changed to 1D array
-    @State var isShowPrize: Bool = false
-    @State var isSpecial: Bool = false
+    var drawID: Int
+    var result: String
+    var title: String
+    var openDate: String
+    var iconName: String
+    var issue: String
+    var officialIssue: String
 
-    let prizeData: [[String]] = [
-        ["13423"], // 1st prize
-        ["25368", "93453"], // 2nd prize
-        ["12211", "55543", "63427", "23423", "54333"], // 3rd prize
-        ["1343", "8765", "3466"], // 4th prize
-        ["2343", "7774", "1680", "9898"], // 5th prize
-        ["123", "555", "744" ,"374"], // 6th prize
-        ["23", "54", "10", "43", "99"], // 7th prize
-        ["23", "54", "66", "36", "98", "11"] // 8th prize
-    ]
+    @State private var isShowPrize: Bool = false
+    @State var isSpecial: Bool = false
+    var titleList = ["Special prize",
+                  "First prize",
+                  "Second prize",
+                  "Third prize",
+                  "Fourth prize",
+                  "Fifth prize",
+                  "Sixth prize",
+                  "Seventh prize",
+                  "Eighth prize"]
+    
+    // Function to extract prize data from the lottery result
+//    var prizeData: [[String]] {
+////        guard let detail = lotteryVM.lotteryVM.first?.result?.detail else {
+////            return []
+////        }
+//
+//        switch detail.code {
+//        case .dictionary(let dict):
+//            // Extract the keys and values from the dictionary and sort by keys
+//            return dict.keys.sorted().compactMap { key in
+//                if let value = dict[key]?.value {
+//                    // If the value is a string, use convertStringToListOfStrings
+//                    if let valueString = value as? String {
+////                        return [valueString.convertStringToConcatenatedString(valueString)]
+//                        return valueString.convertStringToListOfStrings(valueString)
+//                    } else if let list = value as? [String] {
+//                        return list
+//                    }
+//                }
+//                return nil
+//            }
+//        case .string(let singleString):
+//            return [[singleString]] // Handle the case where `code` is a single string
+//        case .none:
+//            return []
+//        }
+//    }
+
     
     var body: some View {
         VStack(spacing: 0) {
-//            SectionResult(imageName: Image(.result1))
-//            ResultDetail(lists: ["12", "1","6", "33","76", "23"].shuffled(), isSpecial: true)
-            
+            SectionResult(iconName: iconName, title: title)
+            ResultDetail(lists: result.convertStringToListOfStrings(result),
+                         drawID: drawID,
+                         date: openDate,
+                         issue: issue,
+                         officialIssue: officialIssue,
+                         isSpecial: true)
             if isShowPrize {
                 VStack(alignment: .center) {
                     Divider()
                     
+                    // Loop through the prize data dynamically
+//                    ForEach(prizeData.indices, id: \.self) { index in
+//                        let prizeList = prizeData[index]
+//                        let prizeTitle = titleList[index]
+//                        PrizeTh(prizeTh: prizeTitle, prizeNumber: prizeList)
+//                        Divider()
+//                    }
                     // First and Second Prize
-                    HStack {
-                        PrizeTh(prizeTh: "First prize", prizeNumber: prizeData[0])
-                        Divider().padding(.vertical, 5)
-                        PrizeTh(prizeTh: "Second prize", prizeNumber: prizeData[1])
-                    }
-                    
-                    Divider()
-                    PrizeTh(prizeTh: "Third prize", prizeNumber: prizeData[2])
-                    Divider()
-                    PrizeTh(prizeTh: "Fourth prize", prizeNumber: prizeData[3])
-                    Divider()
-                    PrizeTh(prizeTh: "Fifth prize", prizeNumber: prizeData[4])
-                    Divider()
-                    PrizeTh(prizeTh: "Sixth prize", prizeNumber: prizeData[5])
-                    Divider()
-                    
-                    // Check the count of 'lists' to decide on prizes
-                    if prizeData.count == 5 {
-                        PrizeTh(prizeTh: "Seventh prize", prizeNumber: prizeData[6])
-                    } else {
-                        HStack {
-                            PrizeTh(prizeTh: "Seventh prize", prizeNumber: prizeData[6])
-                            Divider().padding(.vertical, 5)
-                            PrizeTh(prizeTh: "Eighth prize", prizeNumber: prizeData[7])
-                        }
-                    }
+//                    HStack {
+//                        PrizeTh(prizeTh: titleList[1], prizeNumber: prizeData[1])
+//                        Divider().padding(.vertical, 5)
+//                        PrizeTh(prizeTh: titleList[2], prizeNumber: prizeData[2])
+//                    }
+//                    
+//                    Divider()
+//                    PrizeTh(prizeTh: titleList[3], prizeNumber: prizeData[3])
+//                    Divider()
+//                    PrizeTh(prizeTh: titleList[4], prizeNumber: prizeData[4])
+//                    Divider()
+//                    PrizeTh(prizeTh: titleList[5], prizeNumber: prizeData[5])
+//                    Divider()
+//                    PrizeTh(prizeTh: titleList[6], prizeNumber: prizeData[6])
+//                    Divider()
+//                    
+//                    if prizeData[0].count == 5{
+//                        PrizeTh(prizeTh: titleList[7], prizeNumber: prizeData[7])
+//                    } else {
+//                        HStack {
+//                            PrizeTh(prizeTh: titleList[7], prizeNumber: prizeData[7])
+//                            Divider().padding(.vertical, 5)
+//                            PrizeTh(prizeTh: titleList[8], prizeNumber: prizeData[8])
+//                        }
+//                    }
                 }
                 .frame(maxWidth: .infinity)
                 .foregroundStyle(.letters.opacity(0.5))

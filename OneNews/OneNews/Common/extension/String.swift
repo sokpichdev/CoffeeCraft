@@ -6,11 +6,17 @@
 //
 import SwiftUI
 
+
 extension String {
     func convertStringToListOfStrings(_ input: String) -> [String] {
         // Split the string by commas and trim whitespaces
-        let numberStrings = input.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        let numberStrings = self.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         return numberStrings
+    }
+    func convertStringToConcatenatedString(_ input: String) -> String {
+        // Remove commas and trim whitespaces, then concatenate the numbers into a single string
+        let concatenatedString = input.replacingOccurrences(of: ",", with: "")
+        return concatenatedString
     }
     func formatDetailDate(from input: String, type dateType: DateFormatType) -> String? {
         // Define the input date format
@@ -44,6 +50,8 @@ extension String {
         // Format the date into the desired output format
         return outputFormatter.string(from: date)
     }
+    
+    
 }
 
 enum DateFormatType {
