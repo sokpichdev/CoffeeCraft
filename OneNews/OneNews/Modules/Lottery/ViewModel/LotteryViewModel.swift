@@ -10,10 +10,10 @@ import Combine
 class LotteryViewModel: ObservableObject {
     @Published var lotteryVM: [LotteryModel] = []
 
-    func fetchLottery(countryID: Int) {
+    func fetchLottery(countryID: Int, pageNo: Int) {
         lotteryVM.removeAll()
         
-        let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/country/\(countryID)?page=1&lang=en")!
+        let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/country/\(countryID)?page=\(pageNo)&lang=en")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "content-type")

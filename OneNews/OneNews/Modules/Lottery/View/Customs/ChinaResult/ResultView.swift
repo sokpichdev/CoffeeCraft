@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ResultView: View {
-//    @State var lists: [Int] = [] // Changed to 1D array
-//    @ObservedObject var lotteryVM: LotteryViewModel
     var drawID: Int
     var result: CodeType?
     var title: String
@@ -23,7 +21,7 @@ struct ResultView: View {
             SectionResult(iconName: iconName, title: title)
             
             if case let .string(lottery) = result {
-                ResultDetail(lists: lottery.convertStringToListOfStrings(lottery),
+                ResultDetail(result: lottery,
                              drawID: drawID,
                              date: openDate,
                              issue: issue,

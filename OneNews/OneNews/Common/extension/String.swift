@@ -8,15 +8,18 @@ import SwiftUI
 
 
 extension String {
-    func convertStringToListOfStrings(_ input: String) -> [String] {
+    func convertStringToListOfStrings() -> [String] {
         // Split the string by commas and trim whitespaces
         let numberStrings = self.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         return numberStrings
     }
-    func convertStringToConcatenatedString(_ input: String) -> String {
+    func convertStringToConcatenatedString() -> String {
         // Remove commas and trim whitespaces, then concatenate the numbers into a single string
-        let concatenatedString = input.replacingOccurrences(of: ",", with: "")
+        let concatenatedString = self.replacingOccurrences(of: ",", with: "")
         return concatenatedString
+    }
+    func convertconcatedStrToListOfStr() -> [String] {
+        return self.convertStringToConcatenatedString().convertStringToListOfStrings()
     }
     func formatDetailDate(from input: String, type dateType: DateFormatType) -> String? {
         // Define the input date format

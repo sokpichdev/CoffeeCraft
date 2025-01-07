@@ -35,7 +35,7 @@ struct Detail: Codable {
     let issue, officialissue: String?
     
     // when lottery_category_id = 4
-    let code: CodeType?
+    var code: CodeType?
    
     enum CodingKeys: String, CodingKey {
         case code, issue, officialissue
@@ -48,8 +48,8 @@ struct CodeLottery7: Codable {
 }
 
 struct CodeLottery8: Codable {
-    var code, code1, code2: String?
-    var code3, code4, code5, code6, code7, code8: [String]?
+    var code, code1, code2, code5, code7, code8: String?
+    var code3, code4, code6: [String]?
 }
 enum CodeType: Codable {
     case lottery7(CodeLottery7)

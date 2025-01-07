@@ -14,13 +14,11 @@ struct SectionResult: View {
     
     var body: some View {
         HStack(spacing: 5) {
-            Image(iconName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 20, height: 20, alignment: .leading)
-            
+            LoadImages(image: iconName, maxWidth: 20, maxHeight: 20)
             CustomLabel(text: title, textColor: .white, alignment: .center)
+            Spacer()
         }
+        .padding(10)
         .frame(maxWidth: .infinity)
         .frame(height: 40)
         .background(LinearGradient(gradient: Gradient(colors: [Color.darkPurple, Color.lightPurple]), startPoint: .leading, endPoint: .trailing))

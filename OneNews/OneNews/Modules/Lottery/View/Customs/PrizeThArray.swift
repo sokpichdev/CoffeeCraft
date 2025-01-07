@@ -1,25 +1,26 @@
 //
-//  PrizeTh.swift
+//  PrizeThArray.swift
 //  OneNews
 //
 //  Created by Sok Pich on 12/14/24.
 //
 
 import SwiftUI
-struct PrizeTh: View {
+
+struct PrizeThArray: View {
     
-    @State var prizeTh: String = ""
-    @State var prizeNumber: [String] = []
+    var prizeTh: String = ""
+    var prizeNumber: [String]
     
     var body: some View {
         VStack(alignment: .center){
             Text(prizeTh)
-                .fontWeight(.bold)
+                .fontWeight(.semibold)
                 .foregroundStyle(.main)
             
             HStack {
                 ForEach(prizeNumber.indices, id: \.self){ index in
-                    Text(prizeNumber[index])
+                    Text(prizeNumber[index].convertStringToConcatenatedString())
                         .font(.caption)
                         .foregroundStyle(Color.letters)
                         
@@ -28,8 +29,7 @@ struct PrizeTh: View {
             }
             .frame(maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: 40)
         .padding(10)
     }
 }
-

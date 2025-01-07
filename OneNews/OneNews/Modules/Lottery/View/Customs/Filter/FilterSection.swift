@@ -33,26 +33,30 @@ struct FilterSection: View {
 
                 // Tick btn
                 Button(action: {
-                    isTicked.toggle()
-                    // Tick or untick all rows
-                    for i in rowData.indices {
-                        rowData[i].isChecked = isTicked
+                    withAnimation{
+                        isTicked.toggle()
+                        // Tick or untick all rows
+                        for i in rowData.indices {
+                            rowData[i].isChecked = isTicked
+                        }
                     }
                 }) {
-                    CusImage(ImageName: isTicked ? "checkmark" : "")
+                    CusImage(ImageName: isTicked ? "tickBtn" : "unTickBtn")
                         .background(Color.softPink)
                         .foregroundStyle(Color.main)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.main, lineWidth: 1)
-                        )
+//                        .overlay(
+//                            RoundedRectangle(cornerRadius: 4)
+//                                .stroke(Color.main, lineWidth: 1)
+//                        )
                 }
 
                 // Expand/Collapse Button
                 Button(action: {
-                    isShow.toggle()
+                    withAnimation{
+                        isShow.toggle()
+                    }
                 }) {
-                    CusImage(ImageName: isShow ? "chevron.down" : "chevron.up")
+                    CusImage(ImageName: isShow ? "downBtn" : "upBtn")
                         .background(Color.softPink)
                         .foregroundStyle(Color.main)
                         .overlay(
@@ -80,9 +84,11 @@ struct FilterSection: View {
                         Spacer()
 
                         Button(action: {
-                            rowData[index].isChecked.toggle()
+                            withAnimation{
+                                rowData[index].isChecked.toggle()
+                            }
                         }) {
-                            CusImage(ImageName: rowData[index].isChecked ? "checkmark" : "")
+                            CusImage(ImageName: rowData[index].isChecked ? "tickBtn" : "unTickBtn")
                                 .background(Color.optionBtn2)
                                 .foregroundStyle(Color.letters.opacity(0.7))
                                 

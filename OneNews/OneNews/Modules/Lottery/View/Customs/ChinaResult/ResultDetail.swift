@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ResultDetail : View {
 //    @ObservedObject var lotteryVM: LotteryViewModel
-    var lists: [String] = [] // Changed to 1D array
+    var result: String// Changed to 1D array
     var drawID: Int
     var date: String
     var issue: String
@@ -27,29 +27,12 @@ struct ResultDetail : View {
             }
             
             // Circles in rows
-            VStack {
-                if lists.count >= 20 {
-                    HStack(spacing: -5) {
-                        ForEach(lists.prefix(10), id: \.self) { number in
-                            CircleResult(number: number)
-                        }
-                    }
-                    HStack(spacing: -5) {
-                        ForEach(lists.suffix(10), id: \.self) { number in
-                            CircleResult(number: number)
-                        }
-                    }
-                } else {
-                    HStack(spacing: -5) {
-                        ForEach(lists, id: \.self) { number in
-                            CircleResult(number: number)
-                        }
-                    }
-                }
-            }
+            LotteryResultView(result: result, styleResult: .normal)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(16)
         .background(Color.optionBtn2)
     }
 }
+
+

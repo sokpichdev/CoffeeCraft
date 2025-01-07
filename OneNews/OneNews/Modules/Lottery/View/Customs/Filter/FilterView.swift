@@ -60,7 +60,8 @@ struct FilterView: View {
             .padding(.horizontal, 16)
             .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.letters.opacity(0.3), lineWidth: 1))
             .cornerRadius(25)
-            .foregroundStyle(.letters)        })
+            .foregroundStyle(.letters)
+        })
         .background(Color.background)
     }
 }

@@ -33,10 +33,7 @@ struct JournalsView: View {
                         .foregroundStyle(Color.letters)
                     }
                 } else {
-                    Text("No journals available.")
-                        .foregroundColor(.gray)
-                        .font(.caption)
-                        .padding()
+                    NoDataView()
                 }
             }
             .padding(.horizontal, 16)

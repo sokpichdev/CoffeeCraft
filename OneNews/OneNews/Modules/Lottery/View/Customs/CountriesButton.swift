@@ -10,12 +10,13 @@ import SwiftUI
 struct CountriesButton: View {
     var countryName: String
     var numberOfLottery: Int
-    var isSelected: Bool
+    @Binding var isSelected: Bool
     var action: () -> Void
     
     var body: some View {
         Button(action: {
             action() // Call the action closure passed from the parent
+//            isSelected = true
         }) {
             VStack(alignment: .center, spacing: 5) {
                 CountryCircle(countryName: countryName)
