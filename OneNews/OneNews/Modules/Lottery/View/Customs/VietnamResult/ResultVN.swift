@@ -31,7 +31,7 @@ struct ResultVN: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SectionResult(iconName: iconName, title: title)
+            SectionResult(iconName: iconName, title: title, hasStatictAndGenerateNumver: false)
             if case let .lottery7(lottery) = result{
                 ResultDetail(result: lottery.code ?? "",
                              drawID: drawID,
@@ -118,10 +118,12 @@ struct ResultVN: View {
                             .foregroundStyle(.letters)
                     }
                 }
-                MoreResultButton()
+                if isShowPrize {
+                    MoreResultButton()
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.optionBtn1)
+            .background(isShowPrize ? Color.optionBtn1: Color.background)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.optionBtn1)

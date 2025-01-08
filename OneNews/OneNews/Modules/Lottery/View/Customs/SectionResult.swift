@@ -11,12 +11,17 @@ struct SectionResult: View {
 //    @State var imageName: Image = Image(.result)
     var iconName: String
     var title: String
+    var hasStatictAndGenerateNumver: Bool
     
     var body: some View {
         HStack(spacing: 5) {
             LoadImages(image: iconName, maxWidth: 20, maxHeight: 20)
             CustomLabel(text: title, textColor: .white, alignment: .center)
             Spacer()
+            if hasStatictAndGenerateNumver {
+                Image(systemName: "number.square.fill").foregroundColor(.white)
+                Image(systemName: "dice.fill").foregroundColor(.white)
+            }
         }
         .padding(10)
         .frame(maxWidth: .infinity)

@@ -9,9 +9,13 @@ import Combine
 
 class LotteryViewModel: ObservableObject {
     @Published var lotteryVM: [LotteryModel] = []
-
+    private var currentPage = 1
+    private var isFetching = true
+    private var hasMorePages = true
+    
     func fetchLottery(countryID: Int, pageNo: Int) {
-        lotteryVM.removeAll()
+//        isFetching = true
+        
         
         let url = URL(string: "http://89.116.21.222:8000/api/lottery/lotteries/country/\(countryID)?page=\(pageNo)&lang=en")!
         var request = URLRequest(url: url)
@@ -19,6 +23,8 @@ class LotteryViewModel: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "content-type")
         
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            defer { self?.isFetching = false }
+            
             if let error = error {
                 print("Error while fetching data: ", error)
                 return
@@ -30,27 +36,30 @@ class LotteryViewModel: ObservableObject {
             }
             
             do {
-                // Pretty-print the JSON response
-                if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []),
-                   let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted]),
-                   let jsonString = String(data: jsonData, encoding: .utf8) {
-                    print("JSON Response:\n", jsonString)
-                }
-                
-                // Decode the data into the model
                 let decodedResponse = try JSONDecoder().decode(BaseModel<[LotteryModel]>.self, from: data)
                 
-                if let lottery = decodedResponse.data {
+                if let lottery = decodedResponse.data, !lottery.isEmpty {
                     DispatchQueue.main.async {
-                        self?.lotteryVM = lottery
-                        print("Lottery Count: \(lottery.count)")
+                        if pageNo == 1 {
+                            self?.lotteryVM = lottery
+                        } else {
+                            self?.lotteryVM.append(contentsOf: lottery)
+                        }
+                        self?.currentPage = pageNo
+                        self?.hasMorePages = decodedResponse.meta?.currentPage ?? 1 < (decodedResponse.meta?.lastPage ?? 1)
+                        print("Lottery Count: \(self?.lotteryVM.count ?? 0)")
                     }
+                } else {
+                    self?.hasMorePages = false
                 }
-            } catch let jsonError {
-                print("Failed to decode JSON: ", jsonError)
+            } catch {
+                print("Failed to decode JSON: ", error)
             }
         }
         task.resume()
     }
-
+    
+    func loadMore(countryID: Int) {
+        fetchLottery(countryID: countryID, pageNo: currentPage + 1)
+    }
 }

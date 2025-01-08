@@ -6,14 +6,14 @@
 //
 import SwiftUI
 
-struct NumbersCard: View {
-    //    @State var lists: [Int] = [] // Changed to 1D array
-    var result: CodeType?
+struct BaseNumbersCard<Content: View>: View {
     var title: String
     var openDate: String
+    var index: Int
+    @ViewBuilder var content: () -> Content
+    
     var body: some View {
         VStack {
-            // Header
             HStack {
                 Text(title)
                     .font(.subheadline)
@@ -24,20 +24,9 @@ struct NumbersCard: View {
             Divider().frame(height: 1).background(Color.white)
 
             Spacer()
-            
-            if case let .string(lottery) = result {
-                LotteryResultView(result: lottery, styleResult: .recommended)
-            } else if case let .lottery7(lottery) = result {
-                LotteryResultView(result: lottery.code ?? "", styleResult: .recommended)
-            } else if case let .lottery8(lottery) = result {
-                LotteryResultView(result: lottery.code ?? "", styleResult: .recommended)
-            } else {
-                NoDataView()
-            }
-            
+            content()
             Spacer()
             
-            // Footer
             HStack {
                 Text("Result")
                     .font(.caption)
@@ -54,27 +43,49 @@ struct NumbersCard: View {
         .foregroundStyle(Color.white)
         .frame(width: 300, height: 190)
         .background(dynamicBackground)
-
         .cornerRadius(15)
         .shadow(radius: 5)
     }
     
-    private var cardColors: [LinearGradient] {
-        [
-            LinearGradient(gradient: Gradient(colors: [Color.lightRed, Color.darkRed]), startPoint: .top, endPoint: .bottom),
-            LinearGradient(gradient: Gradient(colors: [Color.lightPink, Color.darkPink]), startPoint: .top, endPoint: .bottom),
-            LinearGradient(gradient: Gradient(colors: [Color.lightGreen, Color.darkGreen]), startPoint: .top, endPoint: .bottom),
-            LinearGradient(gradient: Gradient(colors: [Color.lightYellow, Color.darkYellow]), startPoint: .top, endPoint: .bottom),
-            LinearGradient(gradient: Gradient(colors: [Color.lightBlueBerry, Color.darkBlueBerry]), startPoint: .top, endPoint: .bottom)
-        ]
-    }
-
     private var dynamicBackground: LinearGradient {
-        let index = abs(openDate.hashValue) % cardColors.count
-        return cardColors[index]
+        if index % 2 == 0 {
+            return LinearGradient(gradient: Gradient(colors: [Color.lightYellow, Color.darkYellow]), startPoint: .top, endPoint: .bottom)
+        } else {
+            return LinearGradient(gradient: Gradient(colors: [Color.lightRed, Color.darkRed]), startPoint: .top, endPoint: .bottom)
+        }
     }
-
-
-    
 }
 
+struct NumbersCard: View {
+    var result: CodeType?
+    var title: String
+    var openDate: String
+    var index: Int
+    
+    var body: some View {
+        BaseNumbersCard(title: title, openDate: openDate, index: index) {
+            if case let .string(lottery) = result {
+                LotteryResultView(result: lottery, styleResult: .recommended)
+            } else if case let .lottery7(lottery) = result {
+                LotteryResultView(result: lottery.code ?? "", styleResult: .recommended)
+            } else if case let .lottery8(lottery) = result {
+                LotteryResultView(result: lottery.code ?? "", styleResult: .recommended)
+            } else {
+                NoDataView()
+            }
+        }
+    }
+}
+
+struct NumbersCard1: View {
+    var result: String
+    var title: String
+    var openDate: String
+    var index: Int
+    
+    var body: some View {
+        BaseNumbersCard(title: title, openDate: openDate, index: index) {
+            LotteryResultView(result: result, styleResult: .recommended)
+        }
+    }
+}

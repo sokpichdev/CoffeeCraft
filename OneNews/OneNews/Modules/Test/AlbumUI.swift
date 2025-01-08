@@ -7,26 +7,25 @@
 
 import SwiftUI
 
-//struct AlbumUI: View {
-//    @StateObject private var viewModel = LotteryViewModel()
-//
+//struct Ablumbdafasfasf: View {
+//    
+//    let sWM = "1, 2, 3, 4 66"
+//    let sWOM = "123 4"
+//    var array1 = []
+//    
 //    var body: some View {
-//        VStack {
-//            Button("Fetch Lottery Data") {
-//                viewModel.fetchLottery(countryID: 3)
-//            }
-//            List(viewModel.lotteryVM) { lottery in
-//                VStack(alignment: .leading) {
-//                    Text(lottery.title ?? "No Title")
-//                    Text("ID: \(lottery.id ?? 0)")
-//                    Text("detail; \(lottery.result?.detail?.code ?? "")")
-//                }
-//            }
+//        VStack{
+//            array1 = sWM.convertStringToListOfStrings()
+//            Text(array1)
+//                .background(Color.red)
+//            Text("sWM: \(sWM.count)" )
+//            Text(sWOM.convertStringToConcatenatedString())
+//                .background(Color.blue)
+//            Text("sWOM: \(sWOM.count)" )
 //        }
-//        
 //    }
-//}
 //
+//}
 //#Preview {
-//    AlbumUI()
+//    Ablumbdafasfasf()
 //}

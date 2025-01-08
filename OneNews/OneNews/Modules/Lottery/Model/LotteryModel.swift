@@ -36,9 +36,58 @@ struct Detail: Codable {
     
     // when lottery_category_id = 4
     var code: CodeType?
+    
+    // when lottery_category_id = 5
+    var c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 : String?
+    var s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 : String?
+    var p1, p2, p3 : String?
+    var jp1, jp2, jp3 : String?
+    var estjp1, estjp2, estjp3 : String?
+    var jp1won, jp2won, jp3won : String?
+    var dn, complete4d: String?
    
     enum CodingKeys: String, CodingKey {
         case code, issue, officialissue
+        case c1 = "C1"
+        case c2 = "C2"
+        case c3 = "C3"
+        case c4 = "C4"
+        case c5 = "C5"
+        case c6 = "C6"
+        case c7 = "C7"
+        case c8 = "C8"
+        case c9 = "C9"
+        case c10 = "C10"
+        
+        case s1 = "S1"
+        case s2 = "S2"
+        case s3 = "S3"
+        case s4 = "S4"
+        case s5 = "S5"
+        case s6 = "S6"
+        case s7 = "S7"
+        case s8 = "S8"
+        case s9 = "S9"
+        case s10 = "S10"
+        
+        case p1 = "P1"
+        case p2 = "P2"
+        case p3 = "P3"
+        
+        case jp1 = "JP1"
+        case jp2 = "JP2"
+        case jp3 = "JP3"
+        
+        case estjp1 = "ESTJP1"
+        case estjp2 = "ESTJP2"
+        case estjp3 = "ESTJP3"
+        
+        case jp1won = "JP1WON"
+        case jp2won = "JP2WON"
+        case jp3won = "JP3WON"
+        
+        case dn = "DN"
+        case complete4d = "COMPLETE4D"
     }
 }
 

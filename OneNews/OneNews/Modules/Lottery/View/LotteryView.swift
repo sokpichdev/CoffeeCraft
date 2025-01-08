@@ -21,16 +21,27 @@ struct LotteryView: View {
     
     var body: some View {
         ScrollView {
-            VStack {
+            LazyVStack {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         if !recommededLotteryVM.rLVM.isEmpty {
                             ForEach(recommededLotteryVM.rLVM.indices, id: \.self) { index in
-                                NumbersCard(
-                                    result: recommededLotteryVM.rLVM[index].result?.detail?.code,
-                                    title: recommededLotteryVM.rLVM[index].title ?? "",
-                                    openDate: recommededLotteryVM.rLVM[index].openDate ?? ""
-                                )
+                                
+                                if selectedCountry != 5 {
+                                    NumbersCard(
+                                        result: recommededLotteryVM.rLVM[index].result?.detail?.code,
+                                        title: recommededLotteryVM.rLVM[index].title ?? "",
+                                        openDate: recommededLotteryVM.rLVM[index].openDate ?? "",
+                                        index: index
+                                    )
+                                } else {
+                                    NumbersCard1(
+                                        result: recommededLotteryVM.rLVM[index].result?.detail?.p1 ?? "",
+                                        title: recommededLotteryVM.rLVM[index].title ?? "",
+                                        openDate: recommededLotteryVM.rLVM[index].openDate ?? "",
+                                        index: index
+                                    )
+                                }
                             }
                         }
                         
@@ -58,6 +69,8 @@ struct LotteryView: View {
                                                 isSelected: .constant(selectedCountry == (countryVM.countryVM[index].countryID ?? 0))) {
                                     withAnimation(.smooth) {
                                         selectedCountry = countryVM.countryVM[index].countryID ?? 0
+//                                        lotteryVM.fetchLottery(countryID: selectedCountry, pageNo: 1)
+//                                        recommededLotteryVM.fetchLottery(countryID: selectedCountry)
                                         print("Country name: \(countryName) - country id: \(countryVM.countryVM[index].countryID ?? 0)")
                                     }
                                 }
@@ -85,6 +98,15 @@ struct LotteryView: View {
                                        issue: lottery.result?.detail?.issue ?? "",
                                        officialIssue: lottery.result?.detail?.officialissue ?? ""
                             )
+                            if index == lotteryVM.lotteryVM.count - 1 {
+                                GeometryReader { geometry in
+                                    Color.clear
+                                        .onAppear {
+                                            lotteryVM.loadMore(countryID: selectedCountry)
+                                        }
+                                }
+                                .frame(height: 1)
+                            }
                         }
                     } else if selectedCountry == 4 {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
@@ -96,10 +118,39 @@ struct LotteryView: View {
                                      iconName: lottery.icon ?? "",
                                      issue: lottery.result?.detail?.issue ?? "",
                                      officialIssue: lottery.result?.detail?.officialissue ?? "",
-                                     isSpecial: true)
+                                     isSpecial: true
+                            )
+                            if index == lotteryVM.lotteryVM.count - 1 {
+                                GeometryReader { geometry in
+                                    Color.clear
+                                        .onAppear {
+                                            lotteryVM.loadMore(countryID: selectedCountry)
+                                        }
+                                }
+                                .frame(height: 1)
+                            }
                         }
                     } else if selectedCountry == 5 {
-                        NoDataView()
+                        ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
+                            let lottery = lotteryVM.lotteryVM[index]
+                            ResultMalay(drawID: lottery.id ?? 0,
+                                        result: lottery.result?.detail?.p1 ?? "",
+                                        title: lottery.title ?? "",
+                                        openDate: lottery.openDate ?? "",
+                                        iconName: lottery.icon ?? "",
+                                        issue: lottery.result?.detail?.issue ?? "",
+                                        officialIssue: lottery.result?.detail?.officialissue ?? ""
+                             )
+                            if index == lotteryVM.lotteryVM.count - 1 {
+                                GeometryReader { geometry in
+                                    Color.clear
+                                        .onAppear {
+                                            lotteryVM.loadMore(countryID: selectedCountry)
+                                        }
+                                }
+                                .frame(height: 1)
+                            }
+                        }
                     } else {
                         NoDataView()
                     }
@@ -113,6 +164,7 @@ struct LotteryView: View {
             recommededLotteryVM.fetchLottery(countryID: selectedCountry)
         }
         .onChange(of: selectedCountry) { _ in
+            lotteryVM.lotteryVM.removeAll()
             lotteryVM.fetchLottery(countryID: selectedCountry, pageNo: 1)
             recommededLotteryVM.fetchLottery(countryID: selectedCountry)
         }
