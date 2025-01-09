@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CircleView: View {
-    @State var number: String = "0"
+    var number: String = "0"
     var body: some View {
         Circle()
             .fill(Color.white)
@@ -27,20 +27,36 @@ struct CircleView: View {
 }
 
 struct CircleResult: View {
-    @State var number: String = ""
+    var number: String = ""
+    var color: String = "main"
+    var animal: String = ""
+    var lotCatID: Int
     var body: some View {
-        Circle()
-            .fill(Color.percentage)
-            .frame(width: 35, height: 35)
-            .overlay(
-                Text(number)
-                    .font(.caption)
-                    .foregroundColor(.letters)
-            )
-            .overlay(
-                Circle()
-                    .stroke(Color.main, lineWidth: 1) // Adds a border
-            )
-            .shadow(radius: 2, y: 4) // Adds a shadow
+        VStack(alignment: .center, spacing: 5){
+            Circle()
+                .fill(color == "optionBtn2" ? Color.optionBtn2: Color.percentage)
+                .frame(width: 35, height: 35)
+                .overlay(
+                    Text(number)
+                        .font(.caption)
+                        .foregroundColor(.letters)
+                )
+                .overlay(
+                    color != "optionBtn2"
+                    ? Circle()
+                        .stroke(Color.from(string: color), lineWidth: lotCatID == 3 ? 2 : 1) // Adds a border
+                    : nil
+                )
+                .shadow(radius: (lotCatID == 3) ? 0 : 2, y: (lotCatID == 3) ? 0 : 4)
+            if lotCatID == 3 {
+                Text(animal).font(.caption).foregroundColor(.letters)
+            }
+        }
     }
 }
+
+//struct CircleLotto: View {
+//    var body: some View {
+//        Text("lotto")
+//    }
+//}

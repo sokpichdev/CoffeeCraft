@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ResultMalay: View {
-    var drawID: Int
+    var lotCatID: Int
     var result: String
     var title: String
     var openDate: String
@@ -19,8 +19,8 @@ struct ResultMalay: View {
         VStack(alignment: .center, spacing: 0) {
             SectionResult(iconName: iconName, title: title, hasStatictAndGenerateNumver: true)
             
-            ResultDetail(result: result,
-                             drawID: drawID,
+            ResultDetail(result: result.convertStringToListOfStrings(),
+                         lotCatID: lotCatID,
                              date: openDate,
                              issue: issue,
                              officialIssue: officialIssue,

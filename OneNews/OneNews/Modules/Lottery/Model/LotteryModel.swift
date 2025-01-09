@@ -33,6 +33,7 @@ struct LotteryResultModel: Codable {
 struct Detail: Codable {
     // when lottery_category_id = 3
     let issue, officialissue: String?
+    let attrs: [Attrs]?
     
     // when lottery_category_id = 4
     var code: CodeType?
@@ -47,7 +48,7 @@ struct Detail: Codable {
     var dn, complete4d: String?
    
     enum CodingKeys: String, CodingKey {
-        case code, issue, officialissue
+        case code, issue, officialissue, attrs
         case c1 = "C1"
         case c2 = "C2"
         case c3 = "C3"
@@ -99,6 +100,9 @@ struct CodeLottery7: Codable {
 struct CodeLottery8: Codable {
     var code, code1, code2, code5, code7, code8: String?
     var code3, code4, code6: [String]?
+}
+struct Attrs: Codable {
+    var num, color, animal: String?
 }
 enum CodeType: Codable {
     case lottery7(CodeLottery7)

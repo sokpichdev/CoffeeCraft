@@ -18,7 +18,7 @@ struct LotteryView: View {
     @StateObject var countryVM = CountryViewModel()
     @StateObject var recommededLotteryVM = RecommendedLotteryViewModel()
     @State var selectedCountry: Int = 3
-    
+//    @State var currentPage: Int = 1
     var body: some View {
         ScrollView {
             LazyVStack {
@@ -36,7 +36,7 @@ struct LotteryView: View {
                                     )
                                 } else {
                                     NumbersCard1(
-                                        result: recommededLotteryVM.rLVM[index].result?.detail?.p1 ?? "",
+                                        result: recommededLotteryVM.rLVM[index].result?.detail?.p1?.convertStringToListOfStrings() ?? [""],
                                         title: recommededLotteryVM.rLVM[index].title ?? "",
                                         openDate: recommededLotteryVM.rLVM[index].openDate ?? "",
                                         index: index
@@ -90,14 +90,25 @@ struct LotteryView: View {
                     if selectedCountry == 3 {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
                             let lottery = lotteryVM.lotteryVM[index]
-                            ResultView(drawID: lottery.id ?? 0,
-                                       result: lottery.result?.detail?.code,
-                                       title: lottery.title ?? "",
-                                       openDate: lottery.openDate ?? "",
-                                       iconName: lottery.icon ?? "",
-                                       issue: lottery.result?.detail?.issue ?? "",
-                                       officialIssue: lottery.result?.detail?.officialissue ?? ""
-                            )
+                            if lottery.lotteryCategoryID != 3 {
+                                ResultView(lotCatID: lottery.lotteryCategoryID ?? 0,
+                                           result: lottery.result?.detail?.code,
+                                           title: lottery.title ?? "",
+                                           openDate: lottery.openDate ?? "",
+                                           iconName: lottery.icon ?? "",
+                                           issue: lottery.result?.detail?.issue ?? "",
+                                           officialIssue: lottery.result?.detail?.officialissue ?? "",
+                                           isSpecial: false)
+                            } else {
+                                ResultLottoView(lotCatID: lottery.lotteryCategoryID ?? 0,
+                                                attrs: lottery.result?.detail?.attrs ?? [],
+                                                title: lottery.title ?? "",
+                                                openDate: lottery.openDate ?? "",
+                                                iconName: lottery.icon ?? "",
+                                                issue: lottery.result?.detail?.issue ?? "",
+                                                officialIssue: lottery.result?.detail?.officialissue ?? "",
+                                                isSpecial: false)
+                            }
                             if index == lotteryVM.lotteryVM.count - 1 {
                                 GeometryReader { geometry in
                                     Color.clear
@@ -111,7 +122,7 @@ struct LotteryView: View {
                     } else if selectedCountry == 4 {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
                             let lottery = lotteryVM.lotteryVM[index]
-                            ResultVN(drawID: lottery.id ?? 0,
+                            ResultVN(lotCatID: lottery.id ?? 0,
                                      result: lottery.result?.detail?.code,
                                      title: lottery.title ?? "",
                                      openDate: lottery.openDate ?? "",
@@ -133,7 +144,7 @@ struct LotteryView: View {
                     } else if selectedCountry == 5 {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
                             let lottery = lotteryVM.lotteryVM[index]
-                            ResultMalay(drawID: lottery.id ?? 0,
+                            ResultMalay(lotCatID: lottery.id ?? 0,
                                         result: lottery.result?.detail?.p1 ?? "",
                                         title: lottery.title ?? "",
                                         openDate: lottery.openDate ?? "",
@@ -160,12 +171,12 @@ struct LotteryView: View {
         .background(Color.background)
         .onAppear {
             countryVM.fetchCountry()
-            lotteryVM.fetchLottery(countryID: selectedCountry, pageNo: 1)
+            lotteryVM.fetchLottery(countryID: selectedCountry, pageNo: lotteryVM.currentPage)
             recommededLotteryVM.fetchLottery(countryID: selectedCountry)
         }
         .onChange(of: selectedCountry) { _ in
             lotteryVM.lotteryVM.removeAll()
-            lotteryVM.fetchLottery(countryID: selectedCountry, pageNo: 1)
+            lotteryVM.fetchLottery(countryID: selectedCountry, pageNo: lotteryVM.currentPage)
             recommededLotteryVM.fetchLottery(countryID: selectedCountry)
         }
     }

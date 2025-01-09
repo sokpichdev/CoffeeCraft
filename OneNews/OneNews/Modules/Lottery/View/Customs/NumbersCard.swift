@@ -65,11 +65,11 @@ struct NumbersCard: View {
     var body: some View {
         BaseNumbersCard(title: title, openDate: openDate, index: index) {
             if case let .string(lottery) = result {
-                LotteryResultView(result: lottery, styleResult: .recommended)
+                LotteryResultView(result: lottery.convertStringToListOfStrings(), styleResult: .recommended)
             } else if case let .lottery7(lottery) = result {
-                LotteryResultView(result: lottery.code ?? "", styleResult: .recommended)
+                LotteryResultView(result: lottery.code?.convertStringToListOfStrings() ?? [""], styleResult: .recommended)
             } else if case let .lottery8(lottery) = result {
-                LotteryResultView(result: lottery.code ?? "", styleResult: .recommended)
+                LotteryResultView(result: lottery.code?.convertStringToListOfStrings() ?? [""], styleResult: .recommended)
             } else {
                 NoDataView()
             }
@@ -78,7 +78,7 @@ struct NumbersCard: View {
 }
 
 struct NumbersCard1: View {
-    var result: String
+    var result: [String]
     var title: String
     var openDate: String
     var index: Int

@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ResultDetail : View {
 //    @ObservedObject var lotteryVM: LotteryViewModel
-    var result: String// Changed to 1D array
-    var drawID: Int
+    var result: [String]// Changed to 1D array
+    var lotCatID: Int
     var date: String
     var issue: String
     var officialIssue: String
@@ -18,7 +18,17 @@ struct ResultDetail : View {
     
     var body: some View {
         VStack {
-            ResultDate(drawID: drawID, date: date, issue: issue, officialIssue: officialIssue)
+            Text("DRAW ID - \(issue + officialIssue)")
+                .font(.caption)
+                .foregroundColor(Color.letters.opacity(0.5))
+            
+            HStack {
+                Text(date.formatDetailDate(from: date, type: .day) ?? "").fontWeight(.bold)
+                Text(" | ")
+                Text(date.formatDetailDate(from: date, type: .longDateTime) ?? "")
+            }
+            .font(.caption)
+            .frame(height: 12)
             
             if isSpecial {
                 Text("Special Prize").foregroundStyle(.main).fontWeight(.semibold)

@@ -9,7 +9,7 @@ import Combine
 
 class LotteryViewModel: ObservableObject {
     @Published var lotteryVM: [LotteryModel] = []
-    private var currentPage = 1
+    var currentPage = 1
     private var isFetching = true
     private var hasMorePages = true
     
@@ -48,6 +48,7 @@ class LotteryViewModel: ObservableObject {
                         self?.currentPage = pageNo
                         self?.hasMorePages = decodedResponse.meta?.currentPage ?? 1 < (decodedResponse.meta?.lastPage ?? 1)
                         print("Lottery Count: \(self?.lotteryVM.count ?? 0)")
+                        print("Page No: \(self?.currentPage ?? 0)")
                     }
                 } else {
                     self?.hasMorePages = false

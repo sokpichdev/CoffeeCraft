@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ResultVN: View {
-    var drawID: Int
+    var lotCatID: Int
     var result: CodeType?
     var title: String
     var openDate: String
@@ -33,16 +33,16 @@ struct ResultVN: View {
         VStack(spacing: 0) {
             SectionResult(iconName: iconName, title: title, hasStatictAndGenerateNumver: false)
             if case let .lottery7(lottery) = result{
-                ResultDetail(result: lottery.code ?? "",
-                             drawID: drawID,
+                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
+                             lotCatID: lotCatID,
                              date: openDate,
                              issue: issue,
                              officialIssue: officialIssue,
                              isSpecial: true)
             }
             if case let .lottery8(lottery) = result{
-                ResultDetail(result: lottery.code ?? "",
-                             drawID: drawID,
+                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
+                             lotCatID: lotCatID,
                              date: openDate,
                              issue: issue,
                              officialIssue: officialIssue,

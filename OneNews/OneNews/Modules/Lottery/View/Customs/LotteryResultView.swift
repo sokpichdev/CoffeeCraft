@@ -8,38 +8,28 @@
 import SwiftUI
 
 struct LotteryResultView: View {
-    var result: String
+    var result: [String]
     var styleResult: StyleCircleResult
+    var lotCatID: Int = 2
+    var color: String = "main"
+    var animal: String = ""
+    
     var body: some View {
         // Circles in rows
-        VStack {
-            let lists = result.convertStringToListOfStrings()
-            if lists.count >= 20 {
-                HStack(spacing: -5) {
-                    ForEach(lists.prefix(10), id: \.self) { number in
-                        if styleResult == .recommended {
-                            CircleView(number: number)
-                        } else {
-                            CircleResult(number: number)
-                        }
+        VStack(spacing: 5) {
+            let chunks = result.chunked(into: 10) // Split the list into rows dynamically
+            if lotCatID == 3 {
+                HStack(spacing: 5) {
+                    ForEach(result, id: \.self) { row in
+                        CircleViewForStyle(number: row, color: color, animal: animal, styleResult: styleResult, lotteryCategoryID: lotCatID)
                     }
                 }
-                HStack(spacing: -5) {
-                    ForEach(lists.suffix(10), id: \.self) { number in
-                        if styleResult == .recommended {
-                            CircleView(number: number)
-                        } else {
-                            CircleResult(number: number)
-                        }
-                    }
-                }
+                
             } else {
-                HStack(spacing: -5) {
-                    ForEach(lists, id: \.self) { number in
-                        if styleResult == .recommended {
-                            CircleView(number: number)
-                        } else {
-                            CircleResult(number: number)
+                ForEach(chunks, id: \.self) { row in
+                    HStack(spacing: -5) {
+                        ForEach(row, id: \.self) { number in
+                            CircleViewForStyle(number: number, styleResult: styleResult, lotteryCategoryID: lotCatID)
                         }
                     }
                 }
@@ -47,6 +37,25 @@ struct LotteryResultView: View {
         }
     }
 }
+
+struct CircleViewForStyle: View {
+    var number: String
+    var color: String = "main"
+    var animal: String = ""
+    var styleResult: StyleCircleResult
+    var lotteryCategoryID: Int
+    
+    var body: some View {
+        if styleResult == .recommended {
+            CircleView(number: number)
+        } else {
+            CircleResult(number: number, color: color, animal: animal, lotCatID: lotteryCategoryID)
+        }
+    }
+}
+
+
+
 
 enum StyleCircleResult{
     case recommended

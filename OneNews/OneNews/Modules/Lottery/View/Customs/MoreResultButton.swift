@@ -11,8 +11,10 @@ struct MoreResultButton: View {
     var body: some View {
         NavigationLink(destination: MoreResultsView()) {
             Text("MORE RESULTS")
+                .font(.caption)
+                .fontWeight(.bold)
         }
-        .padding(16)
+        .padding(10)
         .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.main, lineWidth: 1))
         .cornerRadius(25)
         .foregroundStyle(.letters)
