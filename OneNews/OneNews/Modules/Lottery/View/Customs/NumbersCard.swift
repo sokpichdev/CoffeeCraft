@@ -31,7 +31,7 @@ struct BaseNumbersCard<Content: View>: View {
                 Text("Result")
                     .font(.caption)
                 Spacer()
-                Text(openDate.formatDetailDate(from: openDate, type: .longDateDayTime) ?? "")
+                Text(openDate.formatDetailDate(type: .longDateDayTime) ?? "")
                     .font(.caption)
                     .foregroundColor(.white)
             }

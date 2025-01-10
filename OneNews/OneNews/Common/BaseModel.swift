@@ -13,8 +13,42 @@ struct BaseModel<T: Codable>: Codable {
     var message: Message?
     var meta: Meta?
     var links: Links?
-    var data: T?
+    var data: T?       // Primary data field (array or dictionary)
+    var list: T?       // Alternate data field (array or dictionary)
+    
+    private enum CodingKeys: String, CodingKey {
+        case status, message, meta, links, data, list
+    }
+    
+    /// Unified data source from either `data` or `list`.
+    var unifiedData: T? {
+        return data ?? list
+    }
+
+    /// Custom decoding to handle dynamic structure of `list` or `data`
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        status = try container.decodeIfPresent(Bool.self, forKey: .status)
+        message = try container.decodeIfPresent(Message.self, forKey: .message)
+        meta = try container.decodeIfPresent(Meta.self, forKey: .meta)
+        links = try container.decodeIfPresent(Links.self, forKey: .links)
+        
+        if let arrayData = try? container.decode(T.self, forKey: .data) {
+            data = arrayData
+        } else {
+            data = nil
+        }
+        
+        if let arrayList = try? container.decode(T.self, forKey: .list) {
+            list = arrayList
+        } else if let objectList = try? container.decode(T.self, forKey: .list) {
+            list = objectList
+        } else {
+            list = nil
+        }
+    }
 }
+
 
 struct Message: Codable {
     var title: String?

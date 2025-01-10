@@ -8,8 +8,13 @@
 import SwiftUI
 
 struct MoreResultButton: View {
+    var lotListID: Int
+    var icon : String
+    var title : String
+    var date: String
+    var selectedCountry: Int
     var body: some View {
-        NavigationLink(destination: MoreResultsView()) {
+        NavigationLink(destination: MoreResultsView(lotListID: lotListID, icon: icon,title: title, date: date, selectedCountry: selectedCountry)) {
             Text("MORE RESULTS")
                 .font(.caption)
                 .fontWeight(.bold)

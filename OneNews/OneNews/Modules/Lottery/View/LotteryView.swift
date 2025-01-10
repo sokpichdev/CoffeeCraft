@@ -18,7 +18,6 @@ struct LotteryView: View {
     @StateObject var countryVM = CountryViewModel()
     @StateObject var recommededLotteryVM = RecommendedLotteryViewModel()
     @State var selectedCountry: Int = 3
-//    @State var currentPage: Int = 1
     var body: some View {
         ScrollView {
             LazyVStack {
@@ -92,22 +91,26 @@ struct LotteryView: View {
                             let lottery = lotteryVM.lotteryVM[index]
                             if lottery.lotteryCategoryID != 3 {
                                 ResultView(lotCatID: lottery.lotteryCategoryID ?? 0,
+                                           lotListID: lottery.result?.lotteryListID ?? 0,
                                            result: lottery.result?.detail?.code,
                                            title: lottery.title ?? "",
                                            openDate: lottery.openDate ?? "",
                                            iconName: lottery.icon ?? "",
                                            issue: lottery.result?.detail?.issue ?? "",
                                            officialIssue: lottery.result?.detail?.officialissue ?? "",
-                                           isSpecial: false)
+                                           isSpecial: false,
+                                           selectedCountry: selectedCountry)
                             } else {
                                 ResultLottoView(lotCatID: lottery.lotteryCategoryID ?? 0,
+                                                lotListID: lottery.result?.lotteryListID ?? 0,
                                                 attrs: lottery.result?.detail?.attrs ?? [],
                                                 title: lottery.title ?? "",
                                                 openDate: lottery.openDate ?? "",
                                                 iconName: lottery.icon ?? "",
                                                 issue: lottery.result?.detail?.issue ?? "",
                                                 officialIssue: lottery.result?.detail?.officialissue ?? "",
-                                                isSpecial: false)
+                                                isSpecial: false,
+                                                selectedCountry: selectedCountry)
                             }
                             if index == lotteryVM.lotteryVM.count - 1 {
                                 GeometryReader { geometry in
@@ -122,14 +125,14 @@ struct LotteryView: View {
                     } else if selectedCountry == 4 {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
                             let lottery = lotteryVM.lotteryVM[index]
-                            ResultVN(lotCatID: lottery.id ?? 0,
+                            ResultVN(lotListID: lottery.result?.lotteryListID ?? 0,
                                      result: lottery.result?.detail?.code,
                                      title: lottery.title ?? "",
                                      openDate: lottery.openDate ?? "",
                                      iconName: lottery.icon ?? "",
                                      issue: lottery.result?.detail?.issue ?? "",
                                      officialIssue: lottery.result?.detail?.officialissue ?? "",
-                                     isSpecial: true
+                                     selectedCountry: selectedCountry, isSpecial: true
                             )
                             if index == lotteryVM.lotteryVM.count - 1 {
                                 GeometryReader { geometry in
@@ -145,12 +148,13 @@ struct LotteryView: View {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
                             let lottery = lotteryVM.lotteryVM[index]
                             ResultMalay(lotCatID: lottery.id ?? 0,
+                                        lotListID: lottery.result?.lotteryListID ?? 0,
                                         result: lottery.result?.detail?.p1 ?? "",
                                         title: lottery.title ?? "",
                                         openDate: lottery.openDate ?? "",
                                         iconName: lottery.icon ?? "",
-                                        issue: lottery.result?.detail?.issue ?? "",
-                                        officialIssue: lottery.result?.detail?.officialissue ?? ""
+                                        dn: lottery.result?.detail?.dn ?? "",
+                                        selectedCountry: selectedCountry
                              )
                             if index == lotteryVM.lotteryVM.count - 1 {
                                 GeometryReader { geometry in

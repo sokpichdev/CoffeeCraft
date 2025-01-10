@@ -16,17 +16,27 @@ struct LotteryModel: Codable, Identifiable {
     }
 }
 
-struct LotteryResultModel: Codable {
+struct LotteryResultModel: Codable, Identifiable {
+    var id: Int?
     var lotteryListID: Int?
     var openDate: String?
     var detail: Detail?
+    var createdAt: String?
     
     private enum CodingKeys: String, CodingKey {
         case lotteryListID = "lottery_list_id"
         case openDate = "opendate"
-        case detail
+        case detail, id
+        case createdAt = "created_at"
     }
     
+}
+struct LotteryListModel: Codable, Identifiable {
+    var id: Int?
+    var title: String?
+    var lotteryCategoryID: Int?
+    var icon: String?
+    var result: [LotteryResultModel]?
 }
 
 // MARK: - Detail

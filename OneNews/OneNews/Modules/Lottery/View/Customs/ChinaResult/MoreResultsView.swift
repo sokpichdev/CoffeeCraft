@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct MoreResultsView: View {
-    
+    @StateObject var lotteryResultVM = LotteryResultViewModel()
+    var lotListID: Int
+    var icon: String
+    var title: String
+    var date: String
+    var selectedCountry: Int
     var body: some View {
         ScrollView {
             VStack {
@@ -16,9 +21,9 @@ struct MoreResultsView: View {
                     Image(.result)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 20, height: 20, alignment: .leading)
+                        .frame(width: 30, height: 30, alignment: .leading)
                     
-                    CustomLabel(text: "Rapid 11*5", textColor: .white, alignment: .center)
+                    CustomLabel(text: title, textColor: .white, alignment: .center)
                     
                     Spacer()
                     Button(action: {
@@ -45,18 +50,53 @@ struct MoreResultsView: View {
                 .background(LinearGradient(gradient: Gradient(colors: [Color.darkPink, Color.lightPink]), startPoint: .leading, endPoint: .trailing))
                 .cornerRadius(5)
                 
-                ForEach(1...5, id: \.self) { _ in
-//                    ResultDetail(lists: ["12", "1", "6", "33", "76", "19", "23", "23", "54", "22", "12", "66", "89", "34", "56", "78", "90", "45", "34", "11"].shuffled())
-//                        .cornerRadius(5)
+                if !lotteryResultVM.lRVM.isEmpty {
+                    if selectedCountry == 3 {
+                        ForEach(lotteryResultVM.lRVM, id: \.id) { result in
+                            if let detail = result.detail, case let .string(lottery) = detail.code {
+                                ResultDetail(result: lottery.convertStringToListOfStrings(),
+                                             date: result.openDate ?? "",
+                                             issue: detail.issue ?? "",
+                                             officialIssue: detail.officialissue ?? "",
+                                             isSpecial: false)
+                            }
+                        }
+                    } else if selectedCountry == 4 {
+                        ForEach(lotteryResultVM.lRVM.indices, id: \.self) { index in
+                            if case let .lottery7(lottery) = lotteryResultVM.lRVM[index].detail?.code{
+                                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
+                                             date: lotteryResultVM.lRVM[index].openDate ?? "",
+                                             issue: lotteryResultVM.lRVM[index].detail?.issue ?? "",
+                                             officialIssue: lotteryResultVM.lRVM[index].detail?.officialissue ?? "",
+                                             isSpecial: true)
+                            } else if case let .lottery8(lottery) = lotteryResultVM.lRVM[index].detail?.code{
+                                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
+                                             date: lotteryResultVM.lRVM[index].openDate ?? "",
+                                             issue: lotteryResultVM.lRVM[index].detail?.issue ?? "",
+                                             officialIssue: lotteryResultVM.lRVM[index].detail?.officialissue ?? "",
+                                             isSpecial: true)
+                            }
+//                            else if case let .lottery8(lottery) = result{
+////                                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
+////                                             date: result.openDate,
+////                                             issue: result.detail.issue,
+////                                             officialIssue: result.detail.officialIssue,
+////                                             isSpecial: true)
+//                            }
+                        }
+                    }
+
                 }
             }
             .padding(.horizontal, 16)
-            .background(Color.background)
-            .navigationTitle("Lottery Results")
+            
+        }
+        .background(Color.background)
+        .navigationTitle("Lottery Results")
+        .onAppear() {
+            lotteryResultVM.fetchLotteryList(lotteryListID: lotListID,
+                                             date: date.formatDetailDate(type: .DateOnly) ?? "")
         }
     }
 }
 
-#Preview {
-    MoreResultsView()
-}

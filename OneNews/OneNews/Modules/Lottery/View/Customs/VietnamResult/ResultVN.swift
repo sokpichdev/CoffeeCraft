@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct ResultVN: View {
-    var lotCatID: Int
+    var lotListID: Int
     var result: CodeType?
     var title: String
     var openDate: String
     var iconName: String
     var issue: String
     var officialIssue: String
-//    private var code,code1, code2, code3, code4, code5, code6, code7, code8: String?
+    var selectedCountry: Int
 
     @State private var isShowPrize: Bool = false
     @State var isSpecial: Bool = false
@@ -34,15 +34,12 @@ struct ResultVN: View {
             SectionResult(iconName: iconName, title: title, hasStatictAndGenerateNumver: false)
             if case let .lottery7(lottery) = result{
                 ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
-                             lotCatID: lotCatID,
                              date: openDate,
                              issue: issue,
                              officialIssue: officialIssue,
                              isSpecial: true)
-            }
-            if case let .lottery8(lottery) = result{
+            } else if case let .lottery8(lottery) = result{
                 ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
-                             lotCatID: lotCatID,
                              date: openDate,
                              issue: issue,
                              officialIssue: officialIssue,
@@ -54,51 +51,40 @@ struct ResultVN: View {
                     // First and Second Prize
                     if case let .lottery7(lottery) = result{
                         HStack {
-                            PrizeThArray(prizeTh: titleList[1], prizeNumber: lottery.code1?.convertconcatedStrToListOfStr() ?? [])
+                            PrizeView(prizeTh: titleList[1], prizeString: lottery.code1 ?? "")
                             Divider().padding(.vertical, 5)
-                            PrizeThArray(prizeTh: titleList[2], prizeNumber: lottery.code2 ?? [])
+                            PrizeView(prizeTh: titleList[2], prizeArray: lottery.code2 ?? [])
                         }
-                        
                         Divider()
-                        PrizeThArray(prizeTh: titleList[3], prizeNumber: lottery.code3 ?? [])
+                        PrizeView(prizeTh: titleList[3], prizeArray: lottery.code3 ?? [])
                         Divider()
-                        PrizeThArray(prizeTh: titleList[4], prizeNumber: lottery.code4 ?? [])
+                        PrizeView(prizeTh: titleList[4], prizeArray: lottery.code4 ?? [])
                         Divider()
-                        PrizeThArray(prizeTh: titleList[5], prizeNumber: lottery.code5 ?? [])
+                        PrizeView(prizeTh: titleList[5], prizeArray: lottery.code5 ?? [])
                         Divider()
-                        PrizeThArray(prizeTh: titleList[6], prizeNumber: lottery.code6 ?? [])
+                        PrizeView(prizeTh: titleList[6], prizeArray: lottery.code6 ?? [])
                         Divider()
-                        PrizeThArray(prizeTh: titleList[7], prizeNumber: lottery.code7 ?? [])
-                        
+                        PrizeView(prizeTh: titleList[7], prizeArray: lottery.code7 ?? [])
                     }
-                    
                     if case let .lottery8(lottery) = result {
                         HStack {
-                            PrizeThArray(prizeTh: titleList[1],
-                                         prizeNumber: lottery.code1?.convertconcatedStrToListOfStr() ?? [])
+                            PrizeView(prizeTh: titleList[1], prizeString: lottery.code1 ?? "")
                             Divider().padding(.vertical, 5)
-                            PrizeThArray(prizeTh: titleList[2],
-                                         prizeNumber: lottery.code2?.convertconcatedStrToListOfStr() ?? [])
+                            PrizeView(prizeTh: titleList[2], prizeString: lottery.code2 ?? "")
                         }
-                        
                         Divider()
-//                        PrizeTh(prizeTh: titleList[3], prizeNumber: lottery.code3 ?? "")
-                        PrizeThArray(prizeTh: titleList[3], prizeNumber: lottery.code3 ?? [])
+                        PrizeView(prizeTh: titleList[3], prizeArray: lottery.code3 ?? [])
                         Divider()
-                        PrizeThArray(prizeTh: titleList[4], prizeNumber: lottery.code4 ?? [])
+                        PrizeView(prizeTh: titleList[4], prizeArray: lottery.code4 ?? [])
                         Divider()
-                        PrizeThArray(prizeTh: titleList[5],
-                                     prizeNumber: lottery.code5?.convertconcatedStrToListOfStr() ?? [])
+                        PrizeView(prizeTh: titleList[5], prizeString: lottery.code5 ?? "")
                         Divider()
-                        PrizeThArray(prizeTh: titleList[6], prizeNumber: lottery.code6 ?? [])
+                        PrizeView(prizeTh: titleList[6], prizeArray: lottery.code6 ?? [])
                         Divider()
                         HStack {
-                            PrizeThArray(prizeTh: titleList[7],
-                                         prizeNumber: lottery.code7?.convertconcatedStrToListOfStr() ?? [])
+                            PrizeView(prizeTh: titleList[7], prizeString: lottery.code7 ?? "")
                             Divider().padding(.vertical, 5)
-                            PrizeThArray(prizeTh: titleList[8],
-                                         prizeNumber: lottery.code8?.convertconcatedStrToListOfStr() ?? [])
-
+                            PrizeView(prizeTh: titleList[8], prizeString: lottery.code8 ?? "")
                         }
                     }
                 }
@@ -119,7 +105,7 @@ struct ResultVN: View {
                     }
                 }
                 if isShowPrize {
-                    MoreResultButton()
+                    MoreResultButton(lotListID: lotListID, icon: iconName, title: title, date: openDate, selectedCountry: selectedCountry)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -8,24 +8,27 @@
 import SwiftUI
 
 struct ResultDetail : View {
-//    @ObservedObject var lotteryVM: LotteryViewModel
-    var result: [String]// Changed to 1D array
-    var lotCatID: Int
+    var result: [String] = [""]
+    
+//    var lotCatID: Int
+//    var lotListID: Int
     var date: String
-    var issue: String
-    var officialIssue: String
+    var issue: String = ""
+    var officialIssue: String = ""
+    var dn : String = ""
     var isSpecial: Bool = true
     
     var body: some View {
         VStack {
-            Text("DRAW ID - \(issue + officialIssue)")
+            let text = dn == "" ? issue + officialIssue : dn
+            Text("DRAW ID - \(text)")
                 .font(.caption)
                 .foregroundColor(Color.letters.opacity(0.5))
             
             HStack {
-                Text(date.formatDetailDate(from: date, type: .day) ?? "").fontWeight(.bold)
+                Text(date.formatDetailDate(type: .day) ?? "").fontWeight(.bold)
                 Text(" | ")
-                Text(date.formatDetailDate(from: date, type: .longDateTime) ?? "")
+                Text(date.formatDetailDate(type: .longDateTime) ?? "")
             }
             .font(.caption)
             .frame(height: 12)
@@ -37,6 +40,7 @@ struct ResultDetail : View {
             }
             
             // Circles in rows
+//            let finalResult = resultType == nil ? result : resultType
             LotteryResultView(result: result, styleResult: .normal)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

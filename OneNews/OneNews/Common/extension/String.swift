@@ -26,7 +26,7 @@ extension String {
         return self.convertStringToConcatenatedString().convertStringToListOfStrings()
     }
     
-    func formatDetailDate(from input: String, type dateType: DateFormatType) -> String? {
+    func formatDetailDate(type dateType: DateFormatType) -> String? {
         let inputDateFormat = "yyyy-MM-dd HH:mm:ss"// Define the input date format
         var outputDateFormat: String
 
@@ -37,6 +37,8 @@ extension String {
             outputDateFormat = "dd MMMM yyyy, hh:mm a"
         case .longDateDayTime:
             outputDateFormat = "dd MMMM yyyy, EEE hh:mm a"
+        case .DateOnly:
+            outputDateFormat = "yyyy-MM-dd"
         }
 
         // Create a DateFormatter for parsing the input date string
@@ -45,7 +47,7 @@ extension String {
         inputFormatter.locale = Locale(identifier: "en_US_POSIX") // Ensure consistent parsing
 
         // Parse the input date string
-        guard let date = inputFormatter.date(from: input) else {
+        guard let date = inputFormatter.date(from: self) else {
             return nil
         }
 
@@ -65,4 +67,5 @@ enum DateFormatType {
     case day
     case longDateTime
     case longDateDayTime
+    case DateOnly
 }

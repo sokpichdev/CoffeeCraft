@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ResultView: View {
     var lotCatID: Int
+    var lotListID: Int
     var result: CodeType?
     var title: String
     var openDate: String
@@ -16,6 +17,7 @@ struct ResultView: View {
     var issue: String
     var officialIssue: String
     var isSpecial: Bool = true
+    var selectedCountry: Int
     var action:(() -> Void)?
     
     var body: some View {
@@ -24,7 +26,6 @@ struct ResultView: View {
             
             if case let .string(lottery) = result {
                 ResultDetail(result: lottery.convertStringToListOfStrings(),
-                             lotCatID: lotCatID,
                              date: openDate,
                              issue: issue,
                              officialIssue: officialIssue,
@@ -34,7 +35,7 @@ struct ResultView: View {
             Button(action: {
                 action?()
             }) {
-                MoreResultButton()
+                MoreResultButton(lotListID: lotListID, icon: iconName, title: title, date: openDate,selectedCountry: selectedCountry)
             }
 
             
@@ -49,6 +50,7 @@ struct ResultView: View {
 }
 struct ResultLottoView: View {
     var lotCatID: Int
+    var lotListID: Int
     var attrs: [Attrs]
     var title: String
     var openDate: String
@@ -56,6 +58,7 @@ struct ResultLottoView: View {
     var issue: String
     var officialIssue: String
     var isSpecial: Bool = true
+    var selectedCountry: Int
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
@@ -66,9 +69,9 @@ struct ResultLottoView: View {
                     .foregroundColor(Color.letters.opacity(0.5))
                 
                 HStack {
-                    Text(openDate.formatDetailDate(from: openDate, type: .day) ?? "").fontWeight(.bold)
+                    Text(openDate.formatDetailDate(type: .day) ?? "").fontWeight(.bold)
                     Text(" | ")
-                    Text(openDate.formatDetailDate(from: openDate, type: .longDateTime) ?? "")
+                    Text(openDate.formatDetailDate(type: .longDateTime) ?? "")
                 }
                 .font(.caption)
                 .frame(height: 12)
@@ -101,7 +104,7 @@ struct ResultLottoView: View {
             .background(Color.optionBtn2)
             
             Spacer()
-            MoreResultButton()
+            MoreResultButton(lotListID: lotCatID, icon: iconName, title: title, date: openDate, selectedCountry: selectedCountry)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.optionBtn2)
