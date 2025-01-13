@@ -87,13 +87,15 @@ struct ResultLottoView: View {
                             CircleViewForStyle(number: "+",
                                                color: "optionBtn2",
                                                styleResult: .normal,
-                                               lotteryCategoryID: lotCatID)
+                                               lotteryCategoryID: lotCatID,
+                                               foregroundColor: .letters)
                         }
                         CircleViewForStyle(number: row.num ?? "",
                                            color: row.color ?? "main",
                                            animal: row.animal ?? "",
                                            styleResult: .normal,
-                                           lotteryCategoryID: lotCatID)
+                                           lotteryCategoryID: lotCatID,
+                                           foregroundColor: .letters)
 //
                     }
                 }

@@ -16,6 +16,7 @@ struct MoreResultsView: View {
     var selectedCountry: Int
     var body: some View {
         ScrollView {
+            CustomNavigation(title: "Lottery Results")
             VStack {
                 HStack(spacing: 5) {
                     Image(.result)
@@ -76,14 +77,9 @@ struct MoreResultsView: View {
                                              officialIssue: lotteryResultVM.lRVM[index].detail?.officialissue ?? "",
                                              isSpecial: true)
                             }
-//                            else if case let .lottery8(lottery) = result{
-////                                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
-////                                             date: result.openDate,
-////                                             issue: result.detail.issue,
-////                                             officialIssue: result.detail.officialIssue,
-////                                             isSpecial: true)
-//                            }
                         }
+                    } else if selectedCountry == 5 {
+                        ResultMalayDetail()
                     }
 
                 }
@@ -92,7 +88,6 @@ struct MoreResultsView: View {
             
         }
         .background(Color.background)
-        .navigationTitle("Lottery Results")
         .onAppear() {
             lotteryResultVM.fetchLotteryList(lotteryListID: lotListID,
                                              date: date.formatDetailDate(type: .DateOnly) ?? "")

@@ -13,6 +13,8 @@ struct LotteryResultView: View {
     var lotCatID: Int = 2
     var color: String = "main"
     var animal: String = ""
+    var backgroundColor: Color = Color.percentage
+    var foregroudColor: Color = Color.letters
     
     var body: some View {
         // Circles in rows
@@ -21,15 +23,23 @@ struct LotteryResultView: View {
             if lotCatID == 3 {
                 HStack(spacing: 5) {
                     ForEach(result, id: \.self) { row in
-                        CircleViewForStyle(number: row, color: color, animal: animal, styleResult: styleResult, lotteryCategoryID: lotCatID)
+                        CircleViewForStyle(number: row, color: color, animal: animal, styleResult: styleResult, lotteryCategoryID: lotCatID, backgroundColor: backgroundColor, foregroundColor: foregroudColor)
                     }
                 }
                 
+            } else if lotCatID == 5 {
+                ForEach(chunks, id: \.self) { row in
+                    HStack(spacing: 15) {
+                        ForEach(row, id: \.self) { number in
+                            CircleViewForStyle(number: number, color: "white", styleResult: styleResult, lotteryCategoryID: lotCatID, backgroundColor: backgroundColor, foregroundColor: foregroudColor)
+                        }
+                    }
+                }
             } else {
                 ForEach(chunks, id: \.self) { row in
                     HStack(spacing: -5) {
                         ForEach(row, id: \.self) { number in
-                            CircleViewForStyle(number: number, styleResult: styleResult, lotteryCategoryID: lotCatID)
+                            CircleViewForStyle(number: number, styleResult: styleResult, lotteryCategoryID: lotCatID, backgroundColor: backgroundColor, foregroundColor: foregroudColor)
                         }
                     }
                 }
@@ -44,12 +54,14 @@ struct CircleViewForStyle: View {
     var animal: String = ""
     var styleResult: StyleCircleResult
     var lotteryCategoryID: Int
+    var backgroundColor: Color = Color.percentage
+    var foregroundColor: Color
     
     var body: some View {
         if styleResult == .recommended {
             CircleView(number: number)
         } else {
-            CircleResult(number: number, color: color, animal: animal, lotCatID: lotteryCategoryID)
+            CircleResult(number: number, color: color, animal: animal, lotCatID: lotteryCategoryID, backgroundColor: backgroundColor, foregroundColor: foregroundColor)
         }
     }
 }

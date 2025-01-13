@@ -31,20 +31,22 @@ struct CircleResult: View {
     var color: String = "main"
     var animal: String = ""
     var lotCatID: Int
+    var backgroundColor: Color = Color.percentage
+    var foregroundColor: Color
     var body: some View {
         VStack(alignment: .center, spacing: 5){
             Circle()
-                .fill(color == "optionBtn2" ? Color.optionBtn2: Color.percentage)
+                .fill(color == "optionBtn2" ? Color.optionBtn2: backgroundColor)
                 .frame(width: 35, height: 35)
                 .overlay(
                     Text(number)
                         .font(.caption)
-                        .foregroundColor(.letters)
+                        .foregroundColor(foregroundColor)
                 )
                 .overlay(
                     color != "optionBtn2"
                     ? Circle()
-                        .stroke(Color.from(string: color), lineWidth: lotCatID == 3 ? 2 : 1) // Adds a border
+                        .stroke(Color.from(string: color), lineWidth: lotCatID == 3 ? 2 : 1)
                     : nil
                 )
                 .shadow(radius: (lotCatID == 3) ? 0 : 2, y: (lotCatID == 3) ? 0 : 4)
@@ -54,7 +56,6 @@ struct CircleResult: View {
         }
     }
 }
-
 //struct CircleLotto: View {
 //    var body: some View {
 //        Text("lotto")

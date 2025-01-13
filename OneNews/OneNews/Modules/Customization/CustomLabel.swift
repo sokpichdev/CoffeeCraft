@@ -16,11 +16,29 @@ struct CustomLabel: View {
     
     var body: some View {
         HStack {
-            Text(text)
-                .font(font)
-                .fontWeight(fontWeight)
-                .foregroundColor(textColor)
+            if alignment == .leading {
+                Text(text)
+                    .font(font)
+                    .fontWeight(fontWeight)
+                    .foregroundColor(textColor)
+                Spacer()
+            } else if alignment == .trailing {
+                Spacer()
+                Text(text)
+                    .font(font)
+                    .fontWeight(fontWeight)
+                    .foregroundColor(textColor)
+            } else {
+                Spacer()
+                Text(text)
+                    .font(font)
+                    .fontWeight(fontWeight)
+                    .foregroundColor(textColor)
+                Spacer()
+            }
+                
         }
+        .frame(maxWidth: .infinity)
     }
 }
 // example uses
