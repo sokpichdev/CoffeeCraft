@@ -9,11 +9,15 @@ import SwiftUI
 
 struct MoreResultsView: View {
     @StateObject var lotteryResultVM = LotteryResultViewModel()
+    @State private var showDatePicker = false
+    @State private var selectedDate = Date()
+    
     var lotListID: Int
     var icon: String
     var title: String
     var date: String
     var selectedCountry: Int
+    
     var body: some View {
         ScrollView {
             CustomNavigation(title: "Lottery Results")
@@ -28,7 +32,7 @@ struct MoreResultsView: View {
                     
                     Spacer()
                     Button(action: {
-                        
+                        // Handle other actions
                     }) {
                         Image(.whiteStar)
                             .padding(10)
@@ -36,7 +40,7 @@ struct MoreResultsView: View {
                             .cornerRadius(5)
                     }
                     Button(action: {
-                        
+                        showDatePicker.toggle()
                     }) {
                         Image(.whiteCalendar)
                             .padding(10)
@@ -46,7 +50,6 @@ struct MoreResultsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 60)
-                
                 .padding(.horizontal, 16)
                 .background(LinearGradient(gradient: Gradient(colors: [Color.darkPink, Color.lightPink]), startPoint: .leading, endPoint: .trailing))
                 .cornerRadius(5)
@@ -64,34 +67,34 @@ struct MoreResultsView: View {
                         }
                     } else if selectedCountry == 4 {
                         ForEach(lotteryResultVM.lRVM.indices, id: \.self) { index in
-                            if case let .lottery7(lottery) = lotteryResultVM.lRVM[index].detail?.code{
-                                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
-                                             date: lotteryResultVM.lRVM[index].openDate ?? "",
-                                             issue: lotteryResultVM.lRVM[index].detail?.issue ?? "",
-                                             officialIssue: lotteryResultVM.lRVM[index].detail?.officialissue ?? "",
-                                             isSpecial: true)
-                            } else if case let .lottery8(lottery) = lotteryResultVM.lRVM[index].detail?.code{
-                                ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
-                                             date: lotteryResultVM.lRVM[index].openDate ?? "",
-                                             issue: lotteryResultVM.lRVM[index].detail?.issue ?? "",
-                                             officialIssue: lotteryResultVM.lRVM[index].detail?.officialissue ?? "",
-                                             isSpecial: true)
-                            }
+                            ResultVN(lotListID: lotteryResultVM.lRVM[index].lotteryListID ?? 0,
+                                     result: lotteryResultVM.lRVM[index].detail?.code,
+                                     title: "",
+                                     openDate: lotteryResultVM.lRVM[index].openDate ?? "",
+                                     iconName: "",
+                                     issue: lotteryResultVM.lRVM[index].detail?.issue ?? "",
+                                     officialIssue: lotteryResultVM.lRVM[index].detail?.officialissue ?? "",
+                                     selectedCountry: selectedCountry,
+                                     hasButton: false)
                         }
                     } else if selectedCountry == 5 {
-                        ResultMalayDetail()
+                        if let result = lotteryResultVM.lRVM.first(where: { $0.lotteryListID == lotListID }) {
+                            ResultMalayDetail(detail: result.detail, date: result.openDate ?? "", issue: result.detail?.issue ?? "")
+                        }
                     }
-
+                } else {
+                    NoDataView()
                 }
             }
             .padding(.horizontal, 16)
-            
         }
         .background(Color.background)
-        .onAppear() {
-            lotteryResultVM.fetchLotteryList(lotteryListID: lotListID,
-                                             date: date.formatDetailDate(type: .DateOnly) ?? "")
-        }
+        .onAppear() { lotteryResultVM.fetchLotteryList(lotteryListID: lotListID, date: date.formatDetailDate(type: .DateOnly) ?? "") }
+        .onChange(of: selectedDate) { newDate in  lotteryResultVM.fetchLotteryList(lotteryListID: lotListID, date: newDate.formattedAsDateOnly()) }
+        .sheet(isPresented: $showDatePicker) { GeneralDatePickerSheet(selectedDate: $selectedDate) }
     }
 }
+
+
+
 

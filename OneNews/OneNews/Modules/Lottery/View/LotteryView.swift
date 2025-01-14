@@ -125,15 +125,22 @@ struct LotteryView: View {
                     } else if selectedCountry == 4 {
                         ForEach(lotteryVM.lotteryVM.indices, id: \.self) { index in
                             let lottery = lotteryVM.lotteryVM[index]
-                            ResultVN(lotListID: lottery.result?.lotteryListID ?? 0,
-                                     result: lottery.result?.detail?.code,
-                                     title: lottery.title ?? "",
-                                     openDate: lottery.openDate ?? "",
-                                     iconName: lottery.icon ?? "",
-                                     issue: lottery.result?.detail?.issue ?? "",
-                                     officialIssue: lottery.result?.detail?.officialissue ?? "",
-                                     selectedCountry: selectedCountry, isSpecial: true
-                            )
+                            VStack(spacing: 0){
+                                SectionResult(iconName: lottery.icon ?? "", title: lottery.title ?? "", hasStatictAndGenerateNumver: false)
+                                ResultVN(lotListID: lottery.result?.lotteryListID ?? 0,
+                                         result: lottery.result?.detail?.code,
+                                         title: lottery.title ?? "",
+                                         openDate: lottery.openDate ?? "",
+                                         iconName: lottery.icon ?? "",
+                                         issue: lottery.result?.detail?.issue ?? "",
+                                         officialIssue: lottery.result?.detail?.officialissue ?? "",
+                                         selectedCountry: selectedCountry
+                                )
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.optionBtn1)
+                            .cornerRadius(10)
+                            .padding(.horizontal, 16)
                             if index == lotteryVM.lotteryVM.count - 1 {
                                 GeometryReader { geometry in
                                     Color.clear

@@ -39,6 +39,10 @@ extension String {
             outputDateFormat = "dd MMMM yyyy, EEE hh:mm a"
         case .DateOnly:
             outputDateFormat = "yyyy-MM-dd"
+        case .EEEEddMMMMyyyy:
+            outputDateFormat = "EEEE dd MMMM yyyy"
+        case .ddMMMMyyyyEEEE:
+            outputDateFormat = "dd MMMM yyyy EEEE"
         }
 
         // Create a DateFormatter for parsing the input date string
@@ -62,10 +66,18 @@ extension String {
     
     
 }
+extension String {
+    var isNumber: Bool {
+        return !self.isEmpty && self.allSatisfy { $0.isNumber }
+    }
+}
+
 
 enum DateFormatType {
     case day
     case longDateTime
     case longDateDayTime
     case DateOnly
+    case EEEEddMMMMyyyy
+    case ddMMMMyyyyEEEE
 }

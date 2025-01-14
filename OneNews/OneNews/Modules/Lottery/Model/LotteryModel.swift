@@ -50,7 +50,7 @@ struct Detail: Codable {
     
     // when lottery_category_id = 5
     var c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 : String?
-    var s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 : String?
+    var s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13 : String?
     var p1, p2, p3 : String?
     var jp1, jp2, jp3 : String?
     var estjp1, estjp2, estjp3 : String?
@@ -80,6 +80,9 @@ struct Detail: Codable {
         case s8 = "S8"
         case s9 = "S9"
         case s10 = "S10"
+        case s11 = "S11"
+        case s12 = "S12"
+        case s13 = "S13"
         
         case p1 = "P1"
         case p2 = "P2"
@@ -144,5 +147,15 @@ enum CodeType: Codable {
         case .string(let stringCode):
             try container.encode(stringCode)
         }
+    }
+}
+
+extension Detail {
+    func specialNumbers() -> [String] {
+        return [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10].compactMap { $0 }
+    }
+    
+    func consolationNumbers() -> [String] {
+        return [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10].compactMap { $0 }
     }
 }

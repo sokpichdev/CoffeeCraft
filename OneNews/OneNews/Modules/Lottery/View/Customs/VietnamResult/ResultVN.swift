@@ -16,22 +16,13 @@ struct ResultVN: View {
     var issue: String
     var officialIssue: String
     var selectedCountry: Int
-
+    var hasButton: Bool = true
+    
     @State private var isShowPrize: Bool = false
-    @State var isSpecial: Bool = false
-    var titleList = ["Special prize",
-                  "First prize",
-                  "Second prize",
-                  "Third prize",
-                  "Fourth prize",
-                  "Fifth prize",
-                  "Sixth prize",
-                  "Seventh prize",
-                  "Eighth prize"]
-
+    var titleList = ["Special prize", "First prize", "Second prize", "Third prize",  "Fourth prize", "Fifth prize", "Sixth prize", "Seventh prize", "Eighth prize"]
+    
     var body: some View {
         VStack(spacing: 0) {
-            SectionResult(iconName: iconName, title: title, hasStatictAndGenerateNumver: false)
             if case let .lottery7(lottery) = result{
                 ResultDetail(result: lottery.code?.convertStringToListOfStrings() ?? [""],
                              date: openDate,
@@ -104,17 +95,12 @@ struct ResultVN: View {
                             .foregroundStyle(.letters)
                     }
                 }
-                if isShowPrize {
+                if hasButton {
                     MoreResultButton(lotListID: lotListID, icon: iconName, title: title, date: openDate, selectedCountry: selectedCountry)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(isShowPrize ? Color.optionBtn1: Color.background)
+            .background(hasButton ? Color.optionBtn1 : Color.background)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.optionBtn1)
-        .cornerRadius(5)
-        .padding(.horizontal, 16)
     }
-
 }
