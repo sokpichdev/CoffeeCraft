@@ -15,7 +15,7 @@ struct LoginAfterChangePassView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 150, height: 150)
-            CustomLabel(text: "Password changed", font: .title, fontWeight: .bold, textColor: .main)
+            CustomLabel(text: "Password changed", font: .title, fontWeight: .bold, textColor: .main, alignment: .center)
             CustomLabel(text: "You’ve successfully reset your password. Please use your new password to login.", font: .caption, fontWeight: .semibold,textColor: .letters, alignment: .center)
             AuthButton(btnType: .login, maxWidth: 150) {
                 NavigatedToLogin = true

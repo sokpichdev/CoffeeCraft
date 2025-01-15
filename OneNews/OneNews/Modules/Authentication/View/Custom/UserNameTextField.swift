@@ -9,18 +9,37 @@ import SwiftUI
 
 struct UserNameTextField: View {
     @ObservedObject var authVM: AuthViewModel
+    
     var body: some View {
-        TextField("Email or Phone Number", text: $authVM.username)
+        VStack(alignment: .leading, spacing: 4) {
+            TextField("Email or Phone Number", text: $authVM.username, onEditingChanged: { _ in
+                authVM.validateUsername()
+            }, onCommit: {
+                authVM.validateUsername()
+            })
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: 45)
             .background(Color.optionBtn1)
             .cornerRadius(100)
+            .onChange(of: authVM.username) { _ in
+                authVM.validateUsername()
+            }
+            
+            if let error = authVM.usernameError {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+            }
+        }
+        .keyboardType(.twitter)
     }
 }
+
 
 struct PasswordTextField: View {
     @ObservedObject var authVM: AuthViewModel
     var passType: PasswordType
+    @State private var isSecure: Bool = true
     
     private var passwordText: String {
         switch passType {
@@ -34,22 +53,36 @@ struct PasswordTextField: View {
     }
     var body: some View {
         HStack {
-            TextField(passwordText,
-                text: $authVM.password)
+            if isSecure {
+                SecureField(passwordText, text: $authVM.password)
+            } else {
+                TextField(passwordText, text: $authVM.password)
+            }
             Spacer()
             
             Button(action: {
-                authVM.isHidePassword = true
+                isSecure.toggle()
             }) {
-                CusImage(ImageName: authVM.isHidePassword ? "hide" : "show")
+                CusImage(ImageName: isSecure ? "hide" : "show")
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: 45)
         .background(Color.optionBtn1)
         .cornerRadius(100)
+        .onChange(of: authVM.password) { _ in
+            authVM.validatePassword()
+        }
+        
+        if let error = authVM.passwordError {
+            Text(error)
+                .font(.footnote)
+                .foregroundColor(.red)
+        }
     }
 }
+
+
 
 struct AuthButton: View {
     var btnType: ButtonType
@@ -132,6 +165,7 @@ struct OTPTextField: View {
             .background(Color.optionBtn2)
             .cornerRadius(100)
         }
+        .keyboardType(.numberPad)
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: 45)
         .background(Color.optionBtn1)

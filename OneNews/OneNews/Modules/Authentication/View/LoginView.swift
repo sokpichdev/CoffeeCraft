@@ -28,7 +28,15 @@ struct LoginView: View {
                         Text("Forgot Password?").foregroundStyle(.letters.opacity(0.5))
                     }
                 }
-                AuthButton(btnType: .login)
+                
+                AuthButton(btnType: .login) {
+                    if authVM.validateInputs() {
+                        print("Login successful!")
+                    } else {
+                        print(authVM.validationError ?? "Unknown error")
+                    }
+                }
+                
                 HStack {
                     Spacer()
                     Text("Or")

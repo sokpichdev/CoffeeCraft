@@ -20,9 +20,8 @@ struct TabBar: View {
                 VStack(spacing: 0) {
                     NavBar(isSideMenuOpen: $isSideMenuOpen)
                     Spacer()
-                    // Display the selected View
                     selectedView
-                    HStack(spacing: 0) { // No spacing for equal distribution
+                    HStack(spacing: 0) {
                         ForEach(tabBarItems.indices, id: \.self) { index in
                             Button(action: {
                                 selectedTabBarIndex = index
@@ -38,20 +37,13 @@ struct TabBar: View {
                                                     .offset(y: -15)
                                             } else {
                                                 // Fallback on earlier versions
-                                            } // Moves up
+                                            }
                                         }
                                         Image(selectedTabBarIndex == index ? "Clicked\(tabBarItems[index])" : "\(tabBarItems[index])")
-                                            .resizable()
-                                            .scaledToFit()
-                                            
-                                            .frame(width: 20, height: 20)
-                                            .background(Color.optionBtn2)
-                                            .offset(y: selectedTabBarIndex == index ? -15 : 0) // Moves up if selected
-                                            
+                                            .resizable().scaledToFit().frame(width: 20, height: 20)
+                                            .background(Color.optionBtn2).offset(y: selectedTabBarIndex == index ? -15 : 0) // Moves up if selected
                                     }
-                                    Text(tabBarItems[index])
-                                        .font(.caption)
-                                        .foregroundColor(selectedTabBarIndex == index ? .main : .gray)
+                                    Text(tabBarItems[index]).font(.caption).foregroundColor(selectedTabBarIndex == index ? .main : .gray)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(13)
@@ -59,7 +51,6 @@ struct TabBar: View {
                         }
                     }
                     .frame(height: 50)
-//                    .clipped()
                 }
                 .background(Color.optionBtn2)
                 .blur(radius: isSideMenuOpen ? 1 : 0)
@@ -70,7 +61,6 @@ struct TabBar: View {
                         dragOffset = 0
                     }
                 }
-                
                 HStack {
                     if isSideMenuOpen {
                         SideMenuView(isSideMenuOpen: $isSideMenuOpen, dragOffset: $dragOffset)
