@@ -34,7 +34,6 @@ struct CustomOptionButtons: View {
                     endPoint: .bottom
                 )
             )
-//            .background(Color.optionBtn)
             .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)

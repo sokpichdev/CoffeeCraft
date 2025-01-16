@@ -29,3 +29,30 @@ struct MatchToggleButton: View {
         }
     }
 }
+
+struct SegmentedButtonWithImage: View {
+    
+    let imageName: String
+    let title: String
+    var isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack{
+                Image(isSelected ? "Clicked\(imageName)" : imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: UIScreen.main.bounds.height * 0.03) // Adjust height relative to screen size
+                
+                Text(title)
+                    .font(.caption)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .foregroundColor(isSelected ? .main : Color.letters)
+                
+            }
+        }
+    }
+}
+

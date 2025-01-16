@@ -30,7 +30,7 @@ struct LoginView: View {
                 }
                 
                 AuthButton(btnType: .login) {
-                    if authVM.validateInputs() {
+                    if authVM.isUsernameValid && authVM.isPasswordValid {
                         print("Login successful!")
                     } else {
                         print(authVM.validationError ?? "Unknown error")
@@ -61,4 +61,7 @@ struct LoginView: View {
         }
         .background(Color.background)
     }
+//    func validateInputs() -> Bool {
+//        return authVM.isUsernameValid && authVM.isPasswordValid
+//    }
 }

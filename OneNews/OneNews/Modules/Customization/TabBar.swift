@@ -10,7 +10,7 @@ import SwiftUI
 struct TabBar: View {
     @State var isSideMenuOpen: Bool = false
     @State var dragOffset: CGFloat = 0 // Tracks the drag offset
-    let tabBarItems = ["News", "Journals", "Sports", "Lottery", "Products"]
+    let tabBarItems = ["News", "Journals", "Sports", "Lottery", "Profile"]
     @State var selectedTabBarIndex: Int = 0
     @AppStorage("isDarkMode") private var isDarkMode = UserPreference.shared.getIsDarkMode()
     
@@ -83,7 +83,7 @@ struct TabBar: View {
         case 3:
             LotteryView()
         case 4:
-            ProductsView()
+            ProfileView()
         default:
             Text(" ? ? ? ")
         }

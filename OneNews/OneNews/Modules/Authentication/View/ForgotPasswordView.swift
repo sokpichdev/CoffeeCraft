@@ -26,7 +26,7 @@ struct ForgotPasswordView: View {
                 PasswordTextField(authVM: authVM, passType: .newPassword)
                 PasswordTextField(authVM: authVM, passType: .confirmPassword)
                 AuthButton(btnType: .confirm) {
-                    if authVM.validateInputs() {
+                    if authVM.isUsernameValid && authVM.isPasswordValid {
                         print("Password changed successfully")
                         navigatedToChangedPassword = true
                     } else {

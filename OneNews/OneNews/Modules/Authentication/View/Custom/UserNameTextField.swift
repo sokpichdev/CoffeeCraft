@@ -13,16 +13,16 @@ struct UserNameTextField: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             TextField("Email or Phone Number", text: $authVM.username, onEditingChanged: { _ in
-                authVM.validateUsername()
+                validateUsername()
             }, onCommit: {
-                authVM.validateUsername()
+                validateUsername()
             })
             .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: 45)
+            .frame(maxWidth: .infinity, maxHeight: 50)
             .background(Color.optionBtn1)
             .cornerRadius(100)
             .onChange(of: authVM.username) { _ in
-                authVM.validateUsername()
+                validateUsername()
             }
             
             if let error = authVM.usernameError {
@@ -33,6 +33,23 @@ struct UserNameTextField: View {
         }
         .keyboardType(.twitter)
     }
+    func validateUsername() {
+        let emailPattern = #"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
+        let phonePattern = #"^\d{9}$"#
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailPattern)
+        let phonePredicate = NSPredicate(format: "SELF MATCHES %@", phonePattern)
+
+        if authVM.username.isEmpty {
+            authVM.usernameError = "Please enter Email or Phone number."
+            authVM.isUsernameValid = false
+        } else if emailPredicate.evaluate(with: authVM.username) || phonePredicate.evaluate(with: authVM.username) {
+            authVM.usernameError = nil
+            authVM.isUsernameValid = true
+        } else {
+            authVM.usernameError = "Please enter a valid email or phone number."
+            authVM.isUsernameValid = false
+        }
+    }
 }
 
 
@@ -40,44 +57,72 @@ struct PasswordTextField: View {
     @ObservedObject var authVM: AuthViewModel
     var passType: PasswordType
     @State private var isSecure: Bool = true
-    
-    private var passwordText: String {
+    @State private var errorMessage: String? = nil
+
+    private var passwordBinding: Binding<String> {
         switch passType {
-        case .confirmPassword:
-            return "Confirm Password"
-        case .newPassword:
-            return "New Password"
-        case .password:
-            return "Password"
+        case .confirmPassword: return $authVM.confirmPassword
+        case .newPassword: return $authVM.newPassword
+        case .currentPassword: return $authVM.currentPassword
+        case .password: return $authVM.password
         }
     }
+
+    private var passwordText: String {
+        switch passType {
+        case .confirmPassword: return "Confirm Password"
+        case .newPassword: return "New Password"
+        case .currentPassword: return "Current Password"
+        case .password: return "Password"
+        }
+    }
+    
     var body: some View {
-        HStack {
-            if isSecure {
-                SecureField(passwordText, text: $authVM.password)
-            } else {
-                TextField(passwordText, text: $authVM.password)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                if isSecure {
+                    SecureField(passwordText, text: passwordBinding)
+                        .onChange(of: passwordBinding.wrappedValue) { _ in
+                            validatePassword()
+                        }
+                } else {
+                    TextField(passwordText, text: passwordBinding)
+                        .onChange(of: passwordBinding.wrappedValue) { _ in
+                            validatePassword()
+                        }
+                }
+                Spacer()
+                Button(action: {
+                    isSecure.toggle()
+                }) {
+                    Image(systemName: isSecure ? "eye.slash" : "eye")
+                }
             }
-            Spacer()
+            .padding(16)
+            .frame(maxWidth: .infinity, maxHeight: 50)
+            .background(Color.optionBtn1)
+            .cornerRadius(100)
             
-            Button(action: {
-                isSecure.toggle()
-            }) {
-                CusImage(ImageName: isSecure ? "hide" : "show")
+            if let error = errorMessage {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundColor(.red)
             }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, maxHeight: 45)
-        .background(Color.optionBtn1)
-        .cornerRadius(100)
-        .onChange(of: authVM.password) { _ in
-            authVM.validatePassword()
-        }
-        
-        if let error = authVM.passwordError {
-            Text(error)
-                .font(.footnote)
-                .foregroundColor(.red)
+    }
+
+    private func validatePassword() {
+        switch passType {
+        case .currentPassword:
+            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please enter your current password." : nil
+        case .newPassword:
+            let pattern = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$"#
+            let isValid = NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: passwordBinding.wrappedValue)
+            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please enter a new password." : !isValid ? "New password must include upper, lower, and numeric characters." : nil
+        case .confirmPassword:
+            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please confirm your password." : passwordBinding.wrappedValue != authVM.newPassword ? "Passwords do not match." : nil
+        case .password:
+            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please enter your password." : nil
         }
     }
 }
@@ -108,7 +153,7 @@ struct AuthButton: View {
             Text(buttonText)
                 .fontWeight(.bold)
                 .padding(16)
-                .frame(maxWidth: maxWidth, maxHeight: 45)
+                .frame(maxWidth: maxWidth, maxHeight: 60)
                 .background(Color.main)
                 .foregroundColor(.white)
                 .cornerRadius(100)
@@ -128,7 +173,7 @@ struct LoginOTPButton: View {
                 Spacer()
             }
             .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: 50)
+            .frame(maxWidth: .infinity, maxHeight: 60)
             .background(Color.optionBtn1.opacity(0.7))
             .cornerRadius(50)
             .overlay(RoundedRectangle(cornerRadius: 50).stroke(Color.main, lineWidth: 1))
@@ -167,7 +212,7 @@ struct OTPTextField: View {
         }
         .keyboardType(.numberPad)
         .padding(16)
-        .frame(maxWidth: .infinity, maxHeight: 45)
+        .frame(maxWidth: .infinity, maxHeight: 50)
         .background(Color.optionBtn1)
         .cornerRadius(100)
     }
