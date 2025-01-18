@@ -52,12 +52,10 @@ struct UserNameTextField: View {
     }
 }
 
-
 struct PasswordTextField: View {
     @ObservedObject var authVM: AuthViewModel
     var passType: PasswordType
     @State private var isSecure: Bool = true
-    @State private var errorMessage: String? = nil
 
     private var passwordBinding: Binding<String> {
         switch passType {
@@ -67,7 +65,7 @@ struct PasswordTextField: View {
         case .password: return $authVM.password
         }
     }
-
+    
     private var passwordText: String {
         switch passType {
         case .confirmPassword: return "Confirm Password"
@@ -83,55 +81,42 @@ struct PasswordTextField: View {
                 if isSecure {
                     SecureField(passwordText, text: passwordBinding)
                         .onChange(of: passwordBinding.wrappedValue) { _ in
-                            validatePassword()
+                            authVM.validatePassword(for: passType)
                         }
                 } else {
                     TextField(passwordText, text: passwordBinding)
                         .onChange(of: passwordBinding.wrappedValue) { _ in
-                            validatePassword()
+                            authVM.validatePassword(for: passType)
                         }
                 }
                 Spacer()
                 Button(action: {
                     isSecure.toggle()
                 }) {
-                    Image(systemName: isSecure ? "eye.slash" : "eye")
+                    CusImage(ImageName: isSecure ? "hide" : "show")
                 }
             }
             .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: 50)
             .background(Color.optionBtn1)
             .cornerRadius(100)
             
-            if let error = errorMessage {
+            if let error = authVM.passwordError {
                 Text(error)
                     .font(.footnote)
                     .foregroundColor(.red)
             }
         }
     }
-
-    private func validatePassword() {
-        switch passType {
-        case .currentPassword:
-            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please enter your current password." : nil
-        case .newPassword:
-            let pattern = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$"#
-            let isValid = NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: passwordBinding.wrappedValue)
-            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please enter a new password." : !isValid ? "New password must include upper, lower, and numeric characters." : nil
-        case .confirmPassword:
-            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please confirm your password." : passwordBinding.wrappedValue != authVM.newPassword ? "Passwords do not match." : nil
-        case .password:
-            errorMessage = passwordBinding.wrappedValue.isEmpty ? "Please enter your password." : nil
-        }
-    }
 }
+
 
 
 
 struct AuthButton: View {
     var btnType: ButtonType
     var maxWidth: CGFloat = .infinity
+    var bgColor: Color = .main
+    var fgColor: Color = .white
     var onTap: (() -> Void)?
     
     // Computed property to determine button text
@@ -154,8 +139,8 @@ struct AuthButton: View {
                 .fontWeight(.bold)
                 .padding(16)
                 .frame(maxWidth: maxWidth, maxHeight: 60)
-                .background(Color.main)
-                .foregroundColor(.white)
+                .background(bgColor)
+                .foregroundColor(fgColor)
                 .cornerRadius(100)
         }
     }

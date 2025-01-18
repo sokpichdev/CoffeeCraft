@@ -30,7 +30,7 @@ struct ForgotPasswordView: View {
                         print("Password changed successfully")
                         navigatedToChangedPassword = true
                     } else {
-                        print(authVM.validationError ?? "Unknowrn Error")
+                        print("Failed to change password")
                     }
                 }
                 
@@ -44,5 +44,8 @@ struct ForgotPasswordView: View {
                            destination: LoginAfterChangePassView(),
                           isActive: $navigatedToChangedPassword)
         )
+        .onAppear() {
+            authVM.clearTextField()
+        }
     }
 }

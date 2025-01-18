@@ -33,6 +33,9 @@ struct LoginOTPView: View {
             }
         }
         .background(Color.background)
+        .onAppear() {
+            authVM.clearTextField()
+        }
     }
 
     

@@ -32,8 +32,10 @@ struct LoginView: View {
                 AuthButton(btnType: .login) {
                     if authVM.isUsernameValid && authVM.isPasswordValid {
                         print("Login successful!")
+                        authVM.clearTextField()
                     } else {
-                        print(authVM.validationError ?? "Unknown error")
+                        print("Login failed!")
+                        
                     }
                 }
                 
@@ -60,6 +62,9 @@ struct LoginView: View {
             Spacer()
         }
         .background(Color.background)
+        .onAppear() {
+            authVM.clearTextField()
+        }
     }
 //    func validateInputs() -> Bool {
 //        return authVM.isUsernameValid && authVM.isPasswordValid

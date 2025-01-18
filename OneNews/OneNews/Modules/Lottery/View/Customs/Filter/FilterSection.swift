@@ -122,15 +122,14 @@ struct RowItem {
 
 struct CusImage: View {
     var ImageName: String
+    var width: CGFloat = 20
+    var height: CGFloat = 20
     var body: some View {
         Image(ImageName)
             .resizable()
             .scaledToFit()
-            .frame(width: 20, height: 20)
+            .frame(width: width, height: height)
             .padding(6)
             .cornerRadius(4)
     }
-}
-#Preview {
-    FilterSection(countryName: "Cambodia", numberOfResults: 3)
 }

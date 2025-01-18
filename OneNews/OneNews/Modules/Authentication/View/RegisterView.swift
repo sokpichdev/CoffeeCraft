@@ -28,9 +28,11 @@ struct RegisterView: View {
                 AuthButton(btnType: .register)
                 Spacer()
             }
-    //        .customNav(title: "Register")
             .padding(16)
         }
         .background(Color.background)
+        .onAppear() {
+            authVM.clearTextField()
+        }
     }
 }
