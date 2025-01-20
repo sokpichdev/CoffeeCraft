@@ -18,6 +18,7 @@ struct LoginOTPView: View {
                         CustomLabel(text: "Login", font: .largeTitle, fontWeight: .semibold, textColor: .main, alignment: .leading)
                         CustomLabel(text: "via OTP", font: .largeTitle, fontWeight: .semibold, textColor: .letters, alignment: .leading)
                     }
+                    .background(Color.blue)
                     UnderLineView()
                 }
                 .padding(.vertical, 30)

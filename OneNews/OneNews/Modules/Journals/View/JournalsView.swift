@@ -45,7 +45,3 @@ struct JournalsView: View {
         .background(Color.optionBtn1)
     }
 }
-
-#Preview {
-    JournalsView()
-}

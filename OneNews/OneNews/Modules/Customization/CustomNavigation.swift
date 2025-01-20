@@ -20,6 +20,8 @@ extension View {
 struct CustomNavigation: View {
     var title: String = ""
     var tintColor: Color = .letters
+    var trailingButtonImage: Image?
+    var trailingButtonAction: (() -> Void)?
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -33,6 +35,9 @@ struct CustomNavigation: View {
                     .fontWeight(.semibold)
             }
             Spacer()
+            if let trailingButtonImage = trailingButtonImage {
+                trailingButton(image: trailingButtonImage, action: trailingButtonAction)
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: 50)
@@ -51,5 +56,16 @@ extension CustomNavigation {
         })
         .foregroundStyle(tintColor)
     }
+    
+    private func trailingButton(image: Image, action: (() -> Void)?) -> some View {
+            Button(action: {
+                action?()
+            }) {
+                image
+                    .resizable()
+                    .frame(width: 20, height: 20)
+            }
+        }
 }
+
 

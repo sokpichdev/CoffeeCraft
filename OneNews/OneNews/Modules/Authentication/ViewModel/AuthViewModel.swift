@@ -10,16 +10,27 @@ import Combine
 
 class AuthViewModel: ObservableObject {
     @Published var username: String = ""
+    
     @Published var password: String = ""
+    @Published var passwordError: String? = nil
+    
     @Published var currentPassword: String = ""
+    @Published var currentPasswordError: String? = nil
+    
     @Published var newPassword: String = ""
+    @Published var newPasswordError: String? = nil
+    
     @Published var confirmPassword: String = ""
+    @Published var confirmPasswordError: String? = nil
+    
     @Published var isHidePassword: Bool = true
+    
     @Published var otp: String = ""
     @Published var otpEnded: Bool = false
+    
     @Published var timerValue: Int = 20
     @Published var usernameError: String? = nil
-    @Published var passwordError: String? = nil
+    
     @Published var isUsernameValid: Bool = false
     @Published var isPasswordValid: Bool = false
     
@@ -45,17 +56,27 @@ class AuthViewModel: ObservableObject {
     func validatePassword(for type: PasswordType) {
         switch type {
         case .currentPassword:
-            passwordError = currentPassword.isEmpty ? "Please enter your current password." : nil
+            currentPasswordError = currentPassword.isEmpty ? "Please enter your current password." : nil
         case .newPassword:
             let pattern = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$"#
             let isValid = NSPredicate(format: "SELF MATCHES %@", pattern).evaluate(with: newPassword)
-            passwordError = newPassword.isEmpty ? "Please enter a new password." : !isValid ? "Password must be 8-20 characters long with upper, lower, and numeric characters." : nil
+            newPasswordError = newPassword.isEmpty ? "Please enter a new password." : !isValid ? "Password must be 8-20 characters long with upper, lower, and numeric characters." : nil
         case .confirmPassword:
-            passwordError = confirmPassword.isEmpty ? "Please confirm your password." : confirmPassword != newPassword ? "Passwords do not match." : nil
+            confirmPasswordError = confirmPassword.isEmpty ? "Please confirm your password." : confirmPassword != newPassword ? "Passwords do not match." : nil
         case .password:
             passwordError = password.isEmpty ? "Please enter your password." : nil
         }
     }
+    
+    func passwordText(for type: PasswordType) -> String {
+        switch type {
+        case .confirmPassword: return "Confirm Password"
+        case .newPassword: return "New Password"
+        case .currentPassword: return "Current Password"
+        case .password: return "Password"
+        }
+    }
+    
     func clearTextField() {
         username = ""
         password = ""
@@ -85,15 +106,4 @@ class AuthViewModel: ObservableObject {
 }
 
 
-enum PasswordType {
-    case password
-    case confirmPassword
-    case newPassword
-    case currentPassword
-}
-enum ButtonType {
-    case login
-    case register
-    case confirm
-}
 

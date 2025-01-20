@@ -12,17 +12,13 @@ struct UserNameTextField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            TextField("Email or Phone Number", text: $authVM.username, onEditingChanged: { _ in
-                validateUsername()
-            }, onCommit: {
-                validateUsername()
-            })
+            TextField("Email or Phone Number", text: $authVM.username)
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: 50)
             .background(Color.optionBtn1)
             .cornerRadius(100)
             .onChange(of: authVM.username) { _ in
-                validateUsername()
+                authVM.validateUsername()
             }
             
             if let error = authVM.usernameError {
@@ -32,23 +28,6 @@ struct UserNameTextField: View {
             }
         }
         .keyboardType(.twitter)
-    }
-    func validateUsername() {
-        let emailPattern = #"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
-        let phonePattern = #"^\d{9}$"#
-        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailPattern)
-        let phonePredicate = NSPredicate(format: "SELF MATCHES %@", phonePattern)
-
-        if authVM.username.isEmpty {
-            authVM.usernameError = "Please enter Email or Phone number."
-            authVM.isUsernameValid = false
-        } else if emailPredicate.evaluate(with: authVM.username) || phonePredicate.evaluate(with: authVM.username) {
-            authVM.usernameError = nil
-            authVM.isUsernameValid = true
-        } else {
-            authVM.usernameError = "Please enter a valid email or phone number."
-            authVM.isUsernameValid = false
-        }
     }
 }
 
@@ -66,25 +45,16 @@ struct PasswordTextField: View {
         }
     }
     
-    private var passwordText: String {
-        switch passType {
-        case .confirmPassword: return "Confirm Password"
-        case .newPassword: return "New Password"
-        case .currentPassword: return "Current Password"
-        case .password: return "Password"
-        }
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 if isSecure {
-                    SecureField(passwordText, text: passwordBinding)
+                    SecureField(authVM.passwordText(for: passType), text: passwordBinding)
                         .onChange(of: passwordBinding.wrappedValue) { _ in
                             authVM.validatePassword(for: passType)
                         }
                 } else {
-                    TextField(passwordText, text: passwordBinding)
+                    TextField(authVM.passwordText(for: passType), text: passwordBinding)
                         .onChange(of: passwordBinding.wrappedValue) { _ in
                             authVM.validatePassword(for: passType)
                         }
@@ -99,21 +69,21 @@ struct PasswordTextField: View {
             .padding(16)
             .background(Color.optionBtn1)
             .cornerRadius(100)
-            
-            if let error = authVM.passwordError {
-                Text(error)
-                    .font(.footnote)
-                    .foregroundColor(.red)
+            if passType == .password {
+                Text(authVM.passwordError ?? "").font(.footnote).foregroundColor(.red)
+            } else if passType == .confirmPassword {
+                Text(authVM.confirmPasswordError ?? "").font(.footnote).foregroundColor(.red)
+            } else if passType == .currentPassword {
+                Text(authVM.currentPasswordError ?? "").font(.footnote).foregroundColor(.red)
+            } else {
+                Text(authVM.newPasswordError ?? "").font(.footnote) .foregroundColor(.red)
             }
         }
     }
 }
 
-
-
-
 struct AuthButton: View {
-    var btnType: ButtonType
+    var btnType: AuthButtonType
     var maxWidth: CGFloat = .infinity
     var bgColor: Color = .main
     var fgColor: Color = .white

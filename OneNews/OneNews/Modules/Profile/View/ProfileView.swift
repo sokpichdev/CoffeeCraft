@@ -21,6 +21,7 @@ struct ProfileView: View {
     @State var feedbackContent: String = ""
     @State var nickname: String = ""
     @State private var isSave: Bool = false
+    @State private var isSheetPresented = false
     let buttonList = [
         ("Profile", "Personal Info"),
         ("Announcement", "Announcement"),
@@ -36,16 +37,18 @@ struct ProfileView: View {
                 HStack(spacing: 0) {
                     ForEach(buttonList.indices, id: \.self) { index in
                         if index == 3 {
-                            VStack{
+                            VStack {
                                 SegmentedButtonWithImage(imageName: buttonList[index].0, title: buttonList[index].1, isSelected: selectedButtonIndex == index) {
-                                    withAnimation(.easeInOut){
+                                    withAnimation(.easeInOut) {
                                         selectedButtonIndex = index
+                                        isSheetPresented = true // Show the deleteAccountPopup
                                     }
                                 }
                                 Divider().frame(height: 5).overlay(Color.gray)
                             }
                             .frame(maxWidth: UIScreen.main.bounds.width * 0.1)
-                        } else {
+                        }
+                        else {
                             VStack{
                                 SegmentedButtonWithImage(imageName: buttonList[index].0, title: buttonList[index].1, isSelected: selectedButtonIndex == index) {
                                     withAnimation(.easeInOut){
@@ -151,11 +154,15 @@ struct ProfileView: View {
                         .foregroundColor(Color.letters)
                         .colorMultiply(Color.optionBtn1)
                 } else {
-                    Text("\(buttonList[3].0)")
                 }
                 Spacer()
             }
             .padding(16)
+        }
+        .sheet(isPresented: $isSheetPresented) {
+            // Pass issueNo as a binding
+            deleteAccountPopupView()
+            .presentationDetents([.height(400)])
         }
     }
     
@@ -164,3 +171,8 @@ struct ProfileView: View {
     }
 }
 
+struct deleteAccountPopupView: View {
+    var body: some View {
+        Text("Hello, World!")
+    }
+}

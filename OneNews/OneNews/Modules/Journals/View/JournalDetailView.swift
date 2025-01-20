@@ -20,8 +20,13 @@ struct JournalDetailView: View {
     @State private var isSheetPresented = false
     
     var body: some View {
-        Divider()
         VStack {
+            CustomNavigation(title: albumTitle,
+                             trailingButtonImage: Image(.calendar),
+                             trailingButtonAction: {
+                isSheetPresented.toggle()
+            }
+            )
             /// Full-size Images with Tabiew
             TabView(selection: $selectedIndex) {
                 ForEach(jdVM.JD.indices, id: \.self) { index in
@@ -73,14 +78,6 @@ struct JournalDetailView: View {
             Spacer()
         }
         .padding(.horizontal, 16)
-        .navigationTitle(albumTitle)
-        .navigationBarItems(trailing: Button(action: {
-            isSheetPresented = true
-        }) {
-            Image(.calendar)
-                .resizable()
-                .frame(width: 20, height: 20)
-        })
         .sheet(isPresented: $isSheetPresented) {
             // Pass issueNo as a binding
             SheetContentView(
