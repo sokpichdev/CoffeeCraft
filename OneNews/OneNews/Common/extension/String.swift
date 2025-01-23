@@ -81,3 +81,22 @@ enum DateFormatType {
     case EEEEddMMMMyyyy
     case ddMMMMyyyyEEEE
 }
+
+// MARK: - Athentication:
+
+extension String {
+    // MARK: - Password Validation
+    var isValidPassword: Bool {
+        let passwordPattern = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$"#
+        return NSPredicate(format: "SELF MATCHES %@", passwordPattern).evaluate(with: self)
+    }
+    
+    var isMediumPassword: Bool {
+        let mediumPasswordPattern = #"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,}$"#
+        return NSPredicate(format: "SELF MATCHES %@", mediumPasswordPattern).evaluate(with: self)
+    }
+    
+    var isWeakPassword: Bool {
+        return self.count >= 4 // Example: At least 4 characters long
+    }
+}

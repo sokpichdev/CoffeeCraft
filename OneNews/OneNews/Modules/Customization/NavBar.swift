@@ -42,6 +42,13 @@ struct NavBar: View {
                             .resizable()
                             .frame(width: 30, height: 30, alignment: .trailing)
                     }
+                    Button(action: {
+                        // Star Btn
+                    }) {
+                        Image("Star")
+                            .resizable()
+                            .frame(width: 30, height: 30, alignment: .trailing)
+                    }
                 }
             }
             .padding()

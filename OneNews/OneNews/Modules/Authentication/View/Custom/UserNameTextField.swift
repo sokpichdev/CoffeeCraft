@@ -63,7 +63,7 @@ struct PasswordTextField: View {
                 Button(action: {
                     isSecure.toggle()
                 }) {
-                    CusImage(ImageName: isSecure ? "hide" : "show", width: 30, height: 30)
+                    CusImage(ImageName: isSecure ? "hide" : "show")
                 }
             }
             .padding(16)
@@ -148,16 +148,17 @@ struct OTPTextField: View {
 
             VStack {
                 if authVM.otpEnded {
-                    Button(action: {
+                    Button("Resend") {
                         authVM.otpEnded = false
                         authVM.timerValue = 20
-                    }) {
-                        Text("Resend")
-                            .padding(8)
-                            .cornerRadius(8)
+                        authVM.startTimer()
                     }
+                    .padding(8)
+                    .cornerRadius(8)
                 } else {
                     Text("\(authVM.formatTime(authVM.timerValue))")
+                        .font(.subheadline)
+                        .foregroundColor(.letters)
                 }
             }
             .foregroundColor(.letters)
