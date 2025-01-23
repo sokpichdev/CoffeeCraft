@@ -4,17 +4,9 @@
 //
 //  Created by Sok Pich on 12/4/24.
 //
-
-import SwiftUI
-//
-//  ProfileView.swift
-//  OneNews
-//
-//  Created by Sok Pich on 12/4/24.
-//
-
 import SwiftUI
 import UIKit
+import PhotosUI
 
 struct ProfileView: View {
     @StateObject var authVM = AuthViewModel()
@@ -23,11 +15,15 @@ struct ProfileView: View {
     @State var nickname: String = ""
     @State private var isSave: Bool = false
     @State private var isSheetPresented = false
-    let buttonList = [
-        ("Profile", "Personal Info"),
-        ("Announcement", "Announcement"),
-        ("Feedback", "Feedback"),
-        ("dotdotdot", "")
+    
+    @State private var showImagePicker = false
+    @State private var showCameraPicker = false
+    @State private var showActionSheet = false
+    @State private var selectedImage: UIImage?
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var isCameraAvailable = UIImagePickerController.isSourceTypeAvailable(.camera)
+    
+    let buttonList = [("Profile", "Personal Info"), ("Announcement", "Announcement"), ("Feedback", "Feedback"), ("dotdotdot", "")
     ]
     
     @State private var selectedButtonIndex: Int = 0
@@ -71,17 +67,28 @@ struct ProfileView: View {
                     )
                 )
                 .cornerRadius(10)
+                
                 if selectedButtonIndex == 0 {
-                    
                     HStack(spacing: 5) {
-                        CusImage(ImageName: "UserPF", width: 50, height: 50)
-                    
-                        if nickname == "" {
-                            Text("Nickname").font(.subheadline).fontWeight(.ultraLight)
-                        } else {
-                            TextField("NicNname", text: $nickname)
+                        Button(action: {
+                            showActionSheet.toggle()
+                        }) {
+                            if let selectedImage = selectedImage {
+                                Image(uiImage: selectedImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                            } else {
+                                CusImage(ImageName: "UserPF", width: 40, height: 40)
+                            }
                         }
-//                            Text("Sok Pich").font(.headline)
+                        .frame(height: 50)
+                        if isSave {
+                            TextField("Enter your nickname", text: $nickname).font(.subheadline)
+                        } else {
+                            Text(nickname.isEmpty ? "Nickname" : nickname).font(.subheadline)
+                        }
                         Spacer()
                         HStack(spacing: 5){
                             Button(action: {
@@ -96,21 +103,18 @@ struct ProfileView: View {
                                         Text("Edit").font(.headline).fontWeight(.ultraLight)
                                     }
                                 } else {
-                                    Text("Save").font(.headline).fontWeight(.bold).foregroundColor(Color.letters)
+                                    Text("Save").font(.headline).fontWeight(.bold).foregroundColor(Color.white)
                                 }
                             }
                             .foregroundColor(Color.letters)
-                            .frame(height: 50)
+                            .frame(height: 30)
                             .padding(.horizontal, 5)
-                            .background(nickname == "" ? Color.optionBtn2 : Color.main)
+                            .background(!isSave ? Color.optionBtn2 : Color.main)
                             .cornerRadius(10)
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.main, lineWidth: 1))
                         }
-                        .padding(.horizontal, 5).background(nickname == "" ? Color.optionBtn2 : Color.main).cornerRadius(10)
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.main, lineWidth: 1))
-
                     }
-                    .frame(maxWidth: .infinity, maxHeight: 75)
+                    .frame(maxWidth: .infinity, maxHeight: 90)
                     .padding(.horizontal, 10)
                     .background(Color.optionBtn1)
                     .cornerRadius(10)
@@ -126,8 +130,6 @@ struct ProfileView: View {
                         AuthButton(btnType: .confirm, bgColor: .optionBtn1, fgColor: .letters)
                     }
                     Spacer()
-                    
-                    
                     
                 } else if selectedButtonIndex == 1 {
                     ForEach(1...6, id:\.self) {_ in
@@ -154,7 +156,6 @@ struct ProfileView: View {
                         .background(Color.optionBtn1)
                         .cornerRadius(100)
                     TextView(text: $feedbackContent, placeholder: "Feedback content*")
-//                        .padding(16)
                         .frame(height: 200)
                         .border(Color.optionBtn1, width: 1)
                         .cornerRadius(15)
@@ -165,9 +166,25 @@ struct ProfileView: View {
             .padding(16)
         }
         .sheet(isPresented: $isSheetPresented) {
-            // Pass issueNo as a binding
             deleteAccountPopupView()
             .presentationDetents([.height(400)])
+        }
+        .sheet(isPresented: $showCameraPicker) {
+            ImagePicker(isPresented: $showCameraPicker, selectedImage: $selectedImage, sourceType: .camera)
+        }
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(isPresented: $showImagePicker, selectedImage: $selectedImage, sourceType: .photoLibrary)
+        }
+        .actionSheet(isPresented: $showActionSheet) {
+            ActionSheet(title: Text("Select Profile Image"), message: Text("Choose an option"), buttons: [
+                .default(Text("Camera")) {
+                    showCameraPicker.toggle()
+                },
+                .default(Text("Gallery")) {
+                    showImagePicker.toggle()
+                },
+                .cancel()
+            ])
         }
     }
     
@@ -175,6 +192,7 @@ struct ProfileView: View {
         return authVM.newPassword == authVM.confirmPassword && !authVM.currentPassword.isEmpty && !authVM.newPassword.isEmpty && !authVM.confirmPassword.isEmpty
     }
 }
+
 
 struct deleteAccountPopupView: View {
     var body: some View {

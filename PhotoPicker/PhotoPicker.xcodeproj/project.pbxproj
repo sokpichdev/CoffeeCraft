@@ -29,9 +29,22 @@
 		6AF1F6D22D40A44C00660558 /* PhotoPickerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PhotoPickerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6AF1F6E62D40A4C900660558 /* Exceptions for "PhotoPicker" folder in "PhotoPicker" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6AF1F6B72D40A44B00660558 /* PhotoPicker */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6AF1F6BA2D40A44B00660558 /* PhotoPicker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6AF1F6E62D40A4C900660558 /* Exceptions for "PhotoPicker" folder in "PhotoPicker" target */,
+			);
 			path = PhotoPicker;
 			sourceTree = "<group>";
 		};
@@ -399,6 +412,8 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhotoPicker/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "$(MARKETING_VERSION) We need access to the camera to take profile pictures.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +443,8 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhotoPicker/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "$(MARKETING_VERSION) We need access to the camera to take profile pictures.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

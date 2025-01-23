@@ -63,7 +63,7 @@ struct PasswordTextField: View {
                 Button(action: {
                     isSecure.toggle()
                 }) {
-                    CusImage(ImageName: isSecure ? "hide" : "show")
+                    CusImage(ImageName: isSecure ? "hide" : "show", width: 30, height: 30)
                 }
             }
             .padding(16)
