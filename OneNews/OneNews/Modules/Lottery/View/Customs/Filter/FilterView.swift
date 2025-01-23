@@ -21,15 +21,12 @@ struct FilterView: View {
                     FilterSection(countryName: "Thailand", numberOfResults: 3)
                     FilterSection(countryName: "Malaysia", numberOfResults: 4)
                     FilterSection(countryName: "Vietnam", numberOfResults: 1)
-                    
-                    
                     Spacer()
                 }
                 .padding(.horizontal, 16)
                 .background(Color.background)
             }
             
-            // Floating butotn at the bottom
             VStack {
                 Spacer()
                 Button(action: {

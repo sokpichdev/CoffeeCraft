@@ -7,6 +7,13 @@
 import SwiftUI
 
 extension Color {
+    static let commonYellowCardGradientBg = LinearGradient(
+        gradient: Gradient(colors: [Color.lightYellow, Color.darkYellow]), startPoint: .top, endPoint: .bottom
+    )
+    static let commonRedCardGradientBg = LinearGradient(gradient: Gradient(colors: [Color.lightRed, Color.darkRed]), startPoint: .top, endPoint: .bottom)
+}
+
+extension Color {
     static func from(string: String) -> Color {
         switch string.lowercased() {
         case "main":

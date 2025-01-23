@@ -24,7 +24,7 @@ struct NavBar: View {
                         .frame(width: 20, height: 20, alignment: .leading)
                 }
                 Spacer()
-                
+//                Image(.appLogo).frame
                 Spacer()
                 
                 HStack(spacing: 5) {
@@ -47,9 +47,10 @@ struct NavBar: View {
             .padding()
             .frame(height: 50)
             .overlay( // to put the title in front of the nav bar
-                Image("title")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .center)
+                Image(.appLogo)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 40, height: 40, alignment: .center)
             )
             Divider().shadow(radius: 5, y: 2)
         }

@@ -38,7 +38,7 @@ struct ForgotPasswordView: View {
             }
             .padding(16)
         }
-        .background(Color.background)
+//        .background(Color.background)
         .background(
             NavigationLink("",
                            destination: LoginAfterChangePassView(),

@@ -41,13 +41,9 @@ struct FilterSection: View {
                         }
                     }
                 }) {
-                    CusImage(ImageName: isTicked ? "tickBtn" : "unTickBtn")
+                    CusImage(ImageName: isTicked ? "activeTickBtn" : "activeUntickBtn     ", width: 30, height: 30)
                         .background(Color.softPink)
                         .foregroundStyle(Color.main)
-//                        .overlay(
-//                            RoundedRectangle(cornerRadius: 4)
-//                                .stroke(Color.main, lineWidth: 1)
-//                        )
                 }
 
                 // Expand/Collapse Button
@@ -59,16 +55,12 @@ struct FilterSection: View {
                     CusImage(ImageName: isShow ? "downBtn" : "upBtn")
                         .background(Color.softPink)
                         .foregroundStyle(Color.main)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.main, lineWidth: 1)
-                        )
                 }
             }
             .padding()
             .background(Color.softPink)
             .frame(maxWidth: .infinity)
-            Divider()/*.frame(height: 1).background(Color.black.opacity(0.3))*/
+            Divider()
 
             // Additional rows
             if isShow {
@@ -88,32 +80,24 @@ struct FilterSection: View {
                                 rowData[index].isChecked.toggle()
                             }
                         }) {
-                            CusImage(ImageName: rowData[index].isChecked ? "tickBtn" : "unTickBtn")
+                            CusImage(ImageName: rowData[index].isChecked ? "tickBtn" : "unTickBtn", width: 30, height: 30)
                                 .background(Color.optionBtn2)
                                 .foregroundStyle(Color.letters.opacity(0.7))
-                                
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .stroke(Color.letters.opacity(0.2), lineWidth: 1)
-                                )
                         }
                     }
                     .padding()
                     .background(Color.optionBtn2)
-                    Divider()/*.frame(height: 1).background(Color.black.opacity(0.1))*/
+                    Divider()
                 }
                 .transition(.slide)
             }
         }
         .cornerRadius(10)
         .frame(maxWidth: .infinity)
-//        .padding(.horizontal, 16)
-        
         .shadow(radius: 3)
     }
 }
 
-// Example row data model
 struct RowItem {
     var imageName: String
     var title: String

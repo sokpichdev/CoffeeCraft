@@ -55,5 +55,6 @@ enum AuthButtonType {
     case login
     case register
     case confirm
+    case submit
 }
 

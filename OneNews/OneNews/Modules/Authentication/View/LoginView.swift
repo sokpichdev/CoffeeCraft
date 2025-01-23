@@ -61,7 +61,7 @@ struct LoginView: View {
             .padding(16)
             Spacer()
         }
-        .background(Color.background)
+//        .background(Color.background)
         .onAppear() {
             authVM.clearTextField()
         }

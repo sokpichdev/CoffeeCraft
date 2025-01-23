@@ -34,9 +34,9 @@ struct SideMenuView: View {
             }
             Divider().padding(.vertical, 16)
             items("Language", "Language")
-            items("Profile","Profile")
+            NavigationLink(destination: ProfileView()) { items("Profile","Profile") }
             HStack{
-                items("LightDarkMode","Light mode")
+                withAnimation(.smooth){  items("LightDarkMode", isDarkMode ? "Dark mode" : "Light mode") }
                 Spacer()
                 Button(action: {
                     withAnimation(.linear(duration: 0.5)) {
@@ -47,9 +47,9 @@ struct SideMenuView: View {
                     SwitcherView(isOn: $isDarkMode)
                 })
             }
-            items("Support","Support")
-            items("Terms & Conditions","Terms & Conditions")
-            items("Privacy Policy","Privacy Policy")
+            NavigationLink(destination: SupportView()) { items("Support","Support") }
+            NavigationLink(destination: TermConditionView()) { items("Terms & Conditions","Terms & Conditions") }
+            NavigationLink(destination: PrivacyPolicyView()) { items("Privacy Policy","Privacy Policy") }
             items("Logout","Logout")
             Divider().padding(.vertical, 16)
             Spacer()

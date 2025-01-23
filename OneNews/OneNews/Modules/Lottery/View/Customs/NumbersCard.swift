@@ -49,9 +49,9 @@ struct BaseNumbersCard<Content: View>: View {
     
     private var dynamicBackground: LinearGradient {
         if index % 2 == 0 {
-            return LinearGradient(gradient: Gradient(colors: [Color.lightYellow, Color.darkYellow]), startPoint: .top, endPoint: .bottom)
+            return Color.commonYellowCardGradientBg
         } else {
-            return LinearGradient(gradient: Gradient(colors: [Color.lightRed, Color.darkRed]), startPoint: .top, endPoint: .bottom)
+            return Color.commonRedCardGradientBg
         }
     }
 }

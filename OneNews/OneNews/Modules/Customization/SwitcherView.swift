@@ -29,7 +29,7 @@ struct SwitcherView: View {
                     Spacer()
                 }
                 Circle()
-                    .fill(!isOn ? Color.blue : switchThumpOff)
+                    .fill(Color.main)
                 if isOn {
                     Spacer()
                 }

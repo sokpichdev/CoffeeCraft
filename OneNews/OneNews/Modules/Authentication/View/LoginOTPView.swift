@@ -33,7 +33,7 @@ struct LoginOTPView: View {
                 authVM.startTimer()
             }
         }
-        .background(Color.background)
+//        .background(Color.background)
         .onAppear() {
             authVM.clearTextField()
         }

@@ -98,6 +98,8 @@ struct AuthButton: View {
             return "Sign Up"
         case .confirm:
             return "Confirm"
+        case .submit:
+            return "Submit"
         }
     }
     

@@ -30,7 +30,7 @@ struct RegisterView: View {
             }
             .padding(16)
         }
-        .background(Color.background)
+//        .background(Color.background)
         .onAppear() {
             authVM.clearTextField()
         }

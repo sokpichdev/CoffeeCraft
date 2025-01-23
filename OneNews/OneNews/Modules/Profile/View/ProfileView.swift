@@ -14,6 +14,7 @@ import SwiftUI
 //
 
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
     @StateObject var authVM = AuthViewModel()
@@ -97,7 +98,13 @@ struct ProfileView: View {
                                 } else {
                                     Text("Save").font(.headline).fontWeight(.bold).foregroundColor(Color.letters)
                                 }
-                            }.foregroundColor(Color.letters)
+                            }
+                            .foregroundColor(Color.letters)
+                            .frame(height: 50)
+                            .padding(.horizontal, 5)
+                            .background(nickname == "" ? Color.optionBtn2 : Color.main)
+                            .cornerRadius(10)
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.main, lineWidth: 1))
                         }
                         .padding(.horizontal, 5).background(nickname == "" ? Color.optionBtn2 : Color.main).cornerRadius(10)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.main, lineWidth: 1))
@@ -146,13 +153,11 @@ struct ProfileView: View {
                         .padding(16)
                         .background(Color.optionBtn1)
                         .cornerRadius(100)
-                    TextEditor(text: $feedbackContent)
-                        .font(.headline)
+                    TextView(text: $feedbackContent, placeholder: "Feedback content*")
+//                        .padding(16)
                         .frame(height: 200)
-                        .background(Color.optionBtn1)
+                        .border(Color.optionBtn1, width: 1)
                         .cornerRadius(15)
-                        .foregroundColor(Color.letters)
-                        .colorMultiply(Color.optionBtn1)
                 } else {
                 }
                 Spacer()
