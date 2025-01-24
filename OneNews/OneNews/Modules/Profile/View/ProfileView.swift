@@ -12,7 +12,7 @@ struct ProfileView: View {
     @StateObject var authVM = AuthViewModel()
     @State var email: String = ""
     @State var feedbackContent: String = ""
-    @State var nickname: String = ""
+//    @State var nickname: String = ""
     @State private var isSave: Bool = false
     @State private var isSheetPresented = false
     
@@ -23,8 +23,7 @@ struct ProfileView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var isCameraAvailable = UIImagePickerController.isSourceTypeAvailable(.camera)
     
-    let buttonList = [("Profile", "Personal Info"), ("Announcement", "Announcement"), ("Feedback", "Feedback"), ("dotdotdot", "")
-    ]
+    let buttonList = [("Profile", "Personal Info"), ("Announcement", "Announcement"), ("Feedback", "Feedback"), ("dotdotdot", "")]
     
     @State private var selectedButtonIndex: Int = 0
     
@@ -85,19 +84,23 @@ struct ProfileView: View {
                         }
                         .frame(height: 50)
                         if isSave {
-                            TextField("Enter your nickname", text: $nickname).font(.subheadline)
+                            TextField("Enter your nickname", text: $authVM.nickname).font(.subheadline)
                         } else {
-                            Text(nickname.isEmpty ? "Nickname" : nickname).font(.subheadline)
+                            Text(authVM.nickname.isEmpty ? "Nickname" : authVM.nickname).font(.subheadline)
                         }
                         Spacer()
                         HStack(spacing: 5){
                             Button(action: {
                                 isSave.toggle()
+                                if !isSave {
+                                    authVM.saveUserData()
+                                }
                             }) {
                                 if !isSave {
-                                    if nickname == ""{
+                                    if authVM.nickname == ""{
                                         CusImage(ImageName: "addSign")
                                         Text("Add").font(.headline).fontWeight(.ultraLight)
+                                        
                                     } else {
                                         CusImage(ImageName: "Edit")
                                         Text("Edit").font(.headline).fontWeight(.ultraLight)
@@ -165,6 +168,9 @@ struct ProfileView: View {
             }
             .padding(16)
         }
+        .onAppear() {
+            authVM.fetchUserData()
+        }
         .sheet(isPresented: $isSheetPresented) {
             deleteAccountPopupView()
             .presentationDetents([.height(400)])
@@ -199,3 +205,4 @@ struct deleteAccountPopupView: View {
         Text("Hello, World!")
     }
 }
+

@@ -20,11 +20,14 @@ struct UserNameTextField: View {
             .onChange(of: authVM.username) { _ in
                 authVM.validateUsername()
             }
-            
             if let error = authVM.usernameError {
-                Text(error)
-                    .font(.footnote)
-                    .foregroundColor(.red)
+                HStack {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
             }
         }
         .keyboardType(.twitter)
@@ -37,12 +40,24 @@ struct PasswordTextField: View {
     @State private var isSecure: Bool = true
 
     private var passwordBinding: Binding<String> {
-        switch passType {
-        case .confirmPassword: return $authVM.confirmPassword
-        case .newPassword: return $authVM.newPassword
-        case .currentPassword: return $authVM.currentPassword
-        case .password: return $authVM.password
-        }
+        Binding(
+            get: {
+                switch passType {
+                case .confirmPassword: return authVM.confirmPassword
+                case .newPassword: return authVM.newPassword
+                case .currentPassword: return authVM.currentPassword
+                case .password: return authVM.password
+                }
+            },
+            set: { newValue in
+                switch passType {
+                case .confirmPassword: authVM.confirmPassword = newValue
+                case .newPassword: authVM.newPassword = newValue
+                case .currentPassword: authVM.currentPassword = newValue
+                case .password: authVM.password = newValue
+                }
+            }
+        )
     }
     
     var body: some View {
@@ -67,20 +82,29 @@ struct PasswordTextField: View {
                 }
             }
             .padding(16)
+            .frame(maxWidth: .infinity, maxHeight: 50)
             .background(Color.optionBtn1)
             .cornerRadius(100)
-            if passType == .password {
-                Text(authVM.passwordError ?? "").font(.footnote).foregroundColor(.red)
-            } else if passType == .confirmPassword {
-                Text(authVM.confirmPasswordError ?? "").font(.footnote).foregroundColor(.red)
-            } else if passType == .currentPassword {
-                Text(authVM.currentPasswordError ?? "").font(.footnote).foregroundColor(.red)
-            } else {
-                Text(authVM.newPasswordError ?? "").font(.footnote) .foregroundColor(.red)
+            
+            // Conditionally show the error Text only if the error is not nil
+            if let error = getErrorText(for: passType) {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundColor(.red)
             }
         }
     }
+    
+    private func getErrorText(for passType: PasswordType) -> String? {
+        switch passType {
+        case .password: return authVM.passwordError
+        case .confirmPassword: return authVM.confirmPasswordError
+        case .currentPassword: return authVM.currentPasswordError
+        case .newPassword: return authVM.newPasswordError
+        }
+    }
 }
+
 
 struct AuthButton: View {
     var btnType: AuthButtonType
@@ -110,7 +134,7 @@ struct AuthButton: View {
             Text(buttonText)
                 .fontWeight(.bold)
                 .padding(16)
-                .frame(maxWidth: maxWidth, maxHeight: 60)
+                .frame(maxWidth: maxWidth, maxHeight: 50)
                 .background(bgColor)
                 .foregroundColor(fgColor)
                 .cornerRadius(100)
@@ -130,7 +154,7 @@ struct LoginOTPButton: View {
                 Spacer()
             }
             .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: 60)
+            .frame(maxWidth: .infinity, maxHeight: 50)
             .background(Color.optionBtn1.opacity(0.7))
             .cornerRadius(50)
             .overlay(RoundedRectangle(cornerRadius: 50).stroke(Color.main, lineWidth: 1))

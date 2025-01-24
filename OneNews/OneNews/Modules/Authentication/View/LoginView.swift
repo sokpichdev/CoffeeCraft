@@ -30,12 +30,14 @@ struct LoginView: View {
                 }
                 
                 AuthButton(btnType: .login) {
-                    if authVM.isUsernameValid && authVM.isPasswordValid {
-                        print("Login successful!")
-                        authVM.clearTextField()
-                    } else {
-                        print("Login failed!")
+                    authVM.validateUsername()
+                    authVM.validatePassword(for: .password)
+                    
+                    if authVM.isUsernameValid, authVM.passwordError == nil {
+                        authVM.loginUser(email: authVM.username, password: authVM.password)
                         
+                    } else {
+                        print("Validation failed. Please check your inputs.")
                     }
                 }
                 
@@ -61,7 +63,6 @@ struct LoginView: View {
             .padding(16)
             Spacer()
         }
-//        .background(Color.background)
         .onAppear() {
             authVM.clearTextField()
         }

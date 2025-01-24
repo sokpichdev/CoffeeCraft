@@ -12,12 +12,16 @@ import FirebaseCore
 import FirebaseFirestore
 
 class AuthViewModel: ObservableObject {
+    @Published var nickname: String = ""
+    @Published var uid: String = ""
+    
     @Published var isUserLoggedIn: Bool = false
 
     @Published var username: String = ""
+    @Published var usernameError: String? = nil
     
     @Published var password: String = ""
-    @Published var passwordError: String? = nil
+    @Published var passwordError: String?
     
     @Published var currentPassword: String = ""
     @Published var currentPasswordError: String? = nil
@@ -28,13 +32,16 @@ class AuthViewModel: ObservableObject {
     @Published var confirmPassword: String = ""
     @Published var confirmPasswordError: String? = nil
     
+    @Published var passwordChangeError: String?
+    @Published var passwordChangeSuccess: Bool = false
+    
     @Published var isHidePassword: Bool = true
     
     @Published var otp: String = "123456"
     @Published var otpEnded: Bool = false
     
     @Published var timerValue: Int = 20
-    @Published var usernameError: String? = nil
+    
     
     @Published var isUsernameValid: Bool = false
     @Published var isPasswordValid: Bool = false
@@ -59,7 +66,7 @@ class AuthViewModel: ObservableObject {
     }
     
     func validatePassword(for type: PasswordType) {
-        let mainPassword: String
+        let mainPassword: String?
         
         if newPassword == "" {
             mainPassword = password
@@ -120,8 +127,8 @@ class AuthViewModel: ObservableObject {
         newPassword = ""
         confirmPassword = ""
         currentPassword = ""
-        passwordError = ""
-        usernameError = ""
+        passwordError = nil
+        usernameError = nil
     }
     
     func startTimer() {
@@ -172,7 +179,7 @@ class AuthViewModel: ObservableObject {
             }
             
             // Optional: Save additional user info to Firestore
-//            self.saveUserDataToFirestore(userID: user.uid)
+            self.saveUserDataToFirestore(userID: user.uid, email: user.email ?? "", username: user.displayName ?? "")
             
             // Clear fields after registration
             DispatchQueue.main.async {
@@ -181,9 +188,10 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    private func saveUserDataToFirestore(userID: String) {
+    private func saveUserDataToFirestore(userID: String, email: String, username: String) {
         let db = Firestore.firestore()
         let userData: [String: Any] = [
+            "name": email,
             "email": username,
             "uid": userID,
             "createdAt": Timestamp(date: Date())
@@ -202,13 +210,26 @@ class AuthViewModel: ObservableObject {
     // MARK: - LOGIN
     func loginUser(email: String, password: String) {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            if let error = error {
-                print("Login failed: \(error.localizedDescription)")
-                return
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.usernameError = error.localizedDescription
+                    self.passwordError = "Incorrect email or password."
+                    print("Login failed: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard authResult?.user != nil else {
+                    print("Unexpected login error. User data is nil.")
+                    return
+                }
+                
+                print("User logged in successfully!")
+                self.isUserLoggedIn = true
+                self.clearTextField()
             }
-            print("User logged in successfully!")
         }
     }
+
     
     // MARK: - FORGOT PASSWORD
     func sendPasswordReset(email: String) {
@@ -222,15 +243,32 @@ class AuthViewModel: ObservableObject {
     }
     
     // MARK: - CHANGE PASSWORD
-    func changePassword(newPassword: String) {
-        Auth.auth().currentUser?.updatePassword(to: newPassword) { error in
-            if let error = error {
-                print("Password change failed: \(error.localizedDescription)")
+    func changePassword(currentPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {
+            // Ensure the user is logged in
+            guard let user = Auth.auth().currentUser else {
+                completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user logged in."])))
                 return
             }
-            print("Password changed successfully!")
+
+            // Reauthenticate the user with the current password
+            let credential = EmailAuthProvider.credential(withEmail: user.email ?? "", password: currentPassword)
+            
+            user.reauthenticate(with: credential) { result, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                // Once reauthenticated, change the password
+                user.updatePassword(to: newPassword) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                }
+            }
         }
-    }
     
     // MARK: - LOGOUT
     func logoutUser() {
@@ -254,7 +292,51 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
+    
+    // MARK: - FETCH
+    init() {
+        if let user = Auth.auth().currentUser {
+            self.uid = user.uid
+            self.username = user.email ?? ""
+            self.nickname = user.displayName ?? ""
+            fetchUserData()
+        }
+    }
+    
+    func fetchUserData() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let docRef = db.collection("users").document(currentUser.uid)
+        
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                let data = document.data()
+                self.nickname = data?["nickname"] as? String ?? ""
+            } else {
+                print("User data not found: \(error?.localizedDescription ?? "Unknown error")")
+            }
+        }
+    }
+    
+    func saveUserData() {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        userRef.updateData([
+            "nickname": self.nickname
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error.localizedDescription)")
+            } else {
+                print("Nickname updated successfully!")
+            }
+        }
+    }
+
 }
-
-
 
