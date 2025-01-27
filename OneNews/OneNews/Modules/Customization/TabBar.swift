@@ -12,7 +12,9 @@ struct TabBar: View {
     @State var dragOffset: CGFloat = 0 // Tracks the drag offset
     let tabBarItems = ["News", "Journals", "Sports", "Lottery", "Profile"]
     @State var selectedTabBarIndex: Int = 0
+    
     @AppStorage("isDarkMode") private var isDarkMode = UserPreference.shared.getIsDarkMode()
+    @AppStorage("setToken") var token = ""
     
     var body: some View {
         NavigationView {

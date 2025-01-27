@@ -15,7 +15,7 @@ struct LoginOTPView: View {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
-                        CustomLabel(text: "Login", font: .largeTitle, fontWeight: .semibold, textColor: .main, alignment: .leading)
+                        CustomLabel(text: "Login", font: .largeTitle, fontWeight: .semibold, textColor: .main, alignment: .leading).background(Color.yellow)
                         CustomLabel(text: "via OTP", font: .largeTitle, fontWeight: .semibold, textColor: .letters, alignment: .leading)
                     }
                     .background(Color.blue)

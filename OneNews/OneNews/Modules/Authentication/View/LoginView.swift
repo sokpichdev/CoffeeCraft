@@ -9,62 +9,66 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject var authVM = AuthViewModel()
+    @AppStorage("authToken") var authToken: String?
     
     var body: some View {
         VStack(spacing: 0){
             CustomNavigation()
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 0) {
-                    CustomLabel(text: "Login", font: .largeTitle, fontWeight: .semibold, textColor: .main)
-                    UnderLineView()
-                }
-                .padding(.vertical, 30)
-                
-                UserNameTextField(authVM: authVM)
-                PasswordTextField(authVM: authVM, passType: .password)
-                HStack {
-                    Spacer()
-                    NavigationLink(destination: ForgotPasswordView(authVM: authVM)) {
-                        Text("Forgot Password?").foregroundStyle(.letters.opacity(0.5))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        CustomLabel(text: "Login", font: .largeTitle, fontWeight: .semibold, textColor: .main)
+                        UnderLineView()
                     }
-                }
-                
-                AuthButton(btnType: .login) {
-                    authVM.validateUsername()
-                    authVM.validatePassword(for: .password)
+                    .padding(.vertical, 30)
                     
-                    if authVM.isUsernameValid, authVM.passwordError == nil {
-                        authVM.loginUser(email: authVM.username, password: authVM.password)
+                    UserNameTextField(authVM: authVM)
+                    PasswordTextField(authVM: authVM, passType: .password)
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: ForgotPasswordView(authVM: authVM)) {
+                            Text("Forgot Password?").foregroundStyle(.letters.opacity(0.5))
+                        }
+                    }
+                    
+                    AuthButton(btnType: .login) {
+                        authVM.validateUsername()
+                        authVM.validatePassword(for: .password)
                         
-                    } else {
-                        print("Validation failed. Please check your inputs.")
+                        if authVM.isUsernameValid, authVM.passwordError == nil {
+                            authVM.loginUser(email: authVM.username, password: authVM.password)
+                            authToken = "bbb"
+                        } else {
+                            print("Validation failed. Please check your inputs.")
+                        }
                     }
-                }
-                
-                HStack {
-                    Spacer()
-                    Text("Or")
-                        .fontWeight(.bold)
-                        .padding(10)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.letters.opacity(0.5), lineWidth: 0.5))
-                    Spacer()
-                }
-                LoginOTPButton(authVM: authVM)
-                NavigationLink(destination: RegisterView(authVM: authVM)) {
-                    HStack(spacing: 5) {
+                    
+                    HStack {
                         Spacer()
-                        Text("Don't have an account?").foregroundColor(.letters)
-                        Text("Sign up here").foregroundColor(.main)
+                        Text("Or")
+                            .fontWeight(.bold)
+                            .padding(10)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.letters.opacity(0.5), lineWidth: 0.5))
                         Spacer()
                     }
+                    LoginOTPButton(authVM: authVM)
+                    NavigationLink(destination: RegisterView(authVM: authVM)) {
+                        HStack(spacing: 5) {
+                            Spacer()
+                            Text("Don't have an account?").foregroundColor(.letters)
+                            Text("Sign up here").foregroundColor(.main)
+                            Spacer()
+                        }
+                    }
                 }
+                .padding(16)
+                Spacer()
             }
-            .padding(16)
-            Spacer()
         }
         .onAppear() {
             authVM.clearTextField()
+            print("Login token: \(authToken)")
         }
     }
 //    func validateInputs() -> Bool {

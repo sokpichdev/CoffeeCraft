@@ -12,6 +12,8 @@ import FirebaseCore
 import FirebaseFirestore
 
 class AuthViewModel: ObservableObject {
+    @AppStorage("authToken") var authToken: String?
+
     @Published var nickname: String = ""
     @Published var uid: String = ""
     
@@ -210,7 +212,7 @@ class AuthViewModel: ObservableObject {
     // MARK: - LOGIN
     func loginUser(email: String, password: String) {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [self] in
                 if let error = error {
                     self.usernameError = error.localizedDescription
                     self.passwordError = "Incorrect email or password."
@@ -224,8 +226,10 @@ class AuthViewModel: ObservableObject {
                 }
                 
                 print("User logged in successfully!")
-                self.isUserLoggedIn = true
-                self.clearTextField()
+                isUserLoggedIn = true
+                authToken = "abc"
+//                print("Token: \(token)")
+                clearTextField()
             }
         }
     }
@@ -274,6 +278,7 @@ class AuthViewModel: ObservableObject {
     func logoutUser() {
         do {
             try Auth.auth().signOut()
+            authToken = ""
             print("User logged out successfully!")
         } catch let error {
             print("Logout failed: \(error.localizedDescription)")

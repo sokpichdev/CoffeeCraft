@@ -8,28 +8,38 @@
 import SwiftUI
 
 struct SideMenuView: View {
+    @StateObject var authVM = AuthViewModel()
     @Binding var isSideMenuOpen: Bool
     @Binding var dragOffset: CGFloat// Tracks the drag offset
     @AppStorage("isDarkMode") private var isDarkMode = UserPreference.shared.getIsDarkMode()
+    @AppStorage("authToken") var authToken: String?
     
     var body: some View  {
         
         VStack (alignment: .leading, spacing: 10) {
             HStack {
-                VStack (alignment: .leading){
-                    Text("Log In or Register").font(.headline).fontWeight(.bold)
-                    Text("Manage Account").font(.subheadline).fontWeight(.light)
-                }
-                Spacer()
-                withAnimation{
-                    NavigationLink(destination: LoginView()) {
-                        Image(.frontBtn)
-                            .resizable()
-                            .frame(width: 7.5, height: 15)
-                            .padding(10)
-                            .background(Color.main)
-                            .clipShape(Circle())
+                if authToken != "" {
+                    VStack (alignment: .leading){
+                        Text("This is me").font(.headline).fontWeight(.bold)
+                        Text("@gmail").font(.subheadline).fontWeight(.light)
                     }
+                } else {
+                    VStack (alignment: .leading){
+                        Text("Login or Register").font(.headline).fontWeight(.bold)
+                        Text("Manage Account").font(.subheadline).fontWeight(.light)
+                    }
+                    Spacer()
+                    withAnimation{
+                        NavigationLink(destination: LoginView()) {
+                            Image(.frontBtn)
+                                .resizable()
+                                .frame(width: 7.5, height: 15)
+                                .padding(10)
+                                .background(Color.main)
+                                .clipShape(Circle())
+                        }
+                    }
+
                 }
             }
             Divider().padding(.vertical, 16)
@@ -50,7 +60,14 @@ struct SideMenuView: View {
             NavigationLink(destination: SupportView()) { items("Support","Support") }
             NavigationLink(destination: TermConditionView()) { items("Terms & Conditions","Terms & Conditions") }
             NavigationLink(destination: PrivacyPolicyView()) { items("Privacy Policy","Privacy Policy") }
-            items("Logout","Logout")
+            if authToken != "" {
+                Button(action: {
+                    authVM.logoutUser()
+//                    authToken = ""
+                }) {
+                    items("Logout","Logout")
+                }
+            }
             Divider().padding(.vertical, 16)
             Spacer()
             
@@ -90,6 +107,9 @@ struct SideMenuView: View {
                 }
         )
         .transition(.move(edge: .leading))
+        .onAppear() {
+            print("token: \(authToken)")
+        }
     }
     
     private var items: (String, String) -> AnyView {

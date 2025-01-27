@@ -10,6 +10,8 @@ import PhotosUI
 
 struct ProfileView: View {
     @StateObject var authVM = AuthViewModel()
+    @AppStorage("setToken") var token = ""
+
     @State var email: String = ""
     @State var feedbackContent: String = ""
 //    @State var nickname: String = ""
