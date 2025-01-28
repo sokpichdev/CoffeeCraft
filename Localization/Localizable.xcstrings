@@ -1,10 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
-    "Chinese" : {
+    "mobile_Chinese" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -13,21 +10,21 @@
             "value" : "Chinese"
           }
         },
-        "km" : {
+        "km-KH" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ភាសាចិន"
+            "value" : "ចិន"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "中國人"
+            "value" : "中文"
           }
         }
       }
     },
-    "English" : {
+    "mobile_English" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -36,10 +33,10 @@
             "value" : "English"
           }
         },
-        "km" : {
+        "km-KH" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ភាសាអង់គ្លេស"
+            "value" : "អង់គ្លេស"
           }
         },
         "zh-Hant" : {
@@ -50,7 +47,7 @@
         }
       }
     },
-    "GoToSecondView" : {
+    "mobile_GoToSecondView" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -59,7 +56,7 @@
             "value" : "Go To Second View"
           }
         },
-        "km" : {
+        "km-KH" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ចូលទៅកាន់ទិដ្ឋភាពទីពីរ"
@@ -73,7 +70,7 @@
         }
       }
     },
-    "Hello" : {
+    "mobile_Hello" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -82,10 +79,10 @@
             "value" : "Hello"
           }
         },
-        "km" : {
+        "km-KH" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "សួស្តី"
+            "value" : "ជំរាបសួរ"
           }
         },
         "zh-Hant" : {
@@ -96,7 +93,7 @@
         }
       }
     },
-    "Khmer" : {
+    "mobile_Khmer" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -105,16 +102,39 @@
             "value" : "Khmer"
           }
         },
-        "km" : {
+        "km-KH" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ភាសាខ្មែរ"
+            "value" : "ខ្មែរ"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "高棉語"
+            "value" : "高棉"
+          }
+        }
+      }
+    },
+    "mobile_One" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1"
+          }
+        },
+        "km-KH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "១"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一"
           }
         }
       }

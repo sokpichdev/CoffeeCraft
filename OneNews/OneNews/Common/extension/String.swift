@@ -100,3 +100,10 @@ extension String {
         return self.count >= 4 // Example: At least 4 characters long
     }
 }
+
+// MARK: - Localization
+extension String {
+    func localized(with arguments: CVarArg...) -> String {
+        String(format: NSLocalizedString(self, comment: ""), arguments: arguments)
+    }
+}

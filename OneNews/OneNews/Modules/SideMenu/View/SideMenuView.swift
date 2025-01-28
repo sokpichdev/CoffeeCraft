@@ -43,7 +43,7 @@ struct SideMenuView: View {
                 }
             }
             Divider().padding(.vertical, 16)
-            items("Language", "Language")
+            NavigationLink(destination: LanguageSelectionView()) { items("Language", "Language") }
             NavigationLink(destination: ProfileView()) { items("Profile","Profile") }
             HStack{
                 withAnimation(.smooth){  items("LightDarkMode", isDarkMode ? "Dark mode" : "Light mode") }
