@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6A921A352D6C6B2900F9C585 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 6A921A342D6C6B2900F9C585 /* SwiftUIIntrospect */; };
+		6A921A392D6C6B2900F9C585 /* SwiftUIIntrospect-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 6A921A382D6C6B2900F9C585 /* SwiftUIIntrospect-Static */; };
+		6AD22CB72D63454A0073A795 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 6AD22CB62D63454A0073A795 /* Algorithms */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		6AFB111A2D599DF80099E4C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -23,15 +29,41 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		6A921A3B2D6C6BDC00F9C585 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		6AFB11092D599DF60099E4C0 /* MyLearningApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyLearningApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFB11192D599DF80099E4C0 /* MyLearningAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyLearningAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFB11232D599DF80099E4C0 /* MyLearningAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyLearningAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6AD22CB92D6345EB0073A795 /* Exceptions for "MyLearningApp" folder in "MyLearningApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6AFB11082D599DF60099E4C0 /* MyLearningApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6AFB110B2D599DF60099E4C0 /* MyLearningApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6AD22CB92D6345EB0073A795 /* Exceptions for "MyLearningApp" folder in "MyLearningApp" target */,
+			);
 			path = MyLearningApp;
 			sourceTree = "<group>";
 		};
@@ -52,6 +84,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6AD22CB72D63454A0073A795 /* Algorithms in Frameworks */,
+				6A921A352D6C6B2900F9C585 /* SwiftUIIntrospect in Frameworks */,
+				6A921A392D6C6B2900F9C585 /* SwiftUIIntrospect-Static in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,9 +110,9 @@
 		6AFB11002D599DF60099E4C0 = {
 			isa = PBXGroup;
 			children = (
-				6AFB110B2D599DF60099E4C0 /* MyLearningApp */,
 				6AFB111C2D599DF80099E4C0 /* MyLearningAppTests */,
 				6AFB11262D599DF80099E4C0 /* MyLearningAppUITests */,
+				6AFB110B2D599DF60099E4C0 /* MyLearningApp */,
 				6AFB110A2D599DF60099E4C0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -102,6 +137,7 @@
 				6AFB11052D599DF60099E4C0 /* Sources */,
 				6AFB11062D599DF60099E4C0 /* Frameworks */,
 				6AFB11072D599DF60099E4C0 /* Resources */,
+				6A921A3B2D6C6BDC00F9C585 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -112,6 +148,9 @@
 			);
 			name = MyLearningApp;
 			packageProductDependencies = (
+				6AD22CB62D63454A0073A795 /* Algorithms */,
+				6A921A342D6C6B2900F9C585 /* SwiftUIIntrospect */,
+				6A921A382D6C6B2900F9C585 /* SwiftUIIntrospect-Static */,
 			);
 			productName = MyLearningApp;
 			productReference = 6AFB11092D599DF60099E4C0 /* MyLearningApp.app */;
@@ -195,6 +234,10 @@
 			);
 			mainGroup = 6AFB11002D599DF60099E4C0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6AD22CB52D63454A0073A795 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+				6A921A332D6C6B2900F9C585 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AFB110A2D599DF60099E4C0 /* Products */;
 			projectDirPath = "";
@@ -399,11 +442,15 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyLearningApp/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera for capturing photos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = 1.0;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -428,11 +475,15 @@
 				DEVELOPMENT_TEAM = BTDYS54RKT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyLearningApp/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera for capturing photos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = 1.0;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -558,6 +609,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6A921A332D6C6B2900F9C585 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
+		6AD22CB52D63454A0073A795 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6A921A342D6C6B2900F9C585 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A921A332D6C6B2900F9C585 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
+		};
+		6A921A382D6C6B2900F9C585 /* SwiftUIIntrospect-Static */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A921A332D6C6B2900F9C585 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = "SwiftUIIntrospect-Static";
+		};
+		6AD22CB62D63454A0073A795 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AD22CB52D63454A0073A795 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6AFB11012D599DF60099E4C0 /* Project object */;
 }
