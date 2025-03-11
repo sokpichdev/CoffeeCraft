@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct ContentView: View {
     @State private var isNavigated: Bool = false
     @State private var selectedButton: Buttontype = .none
+    @StateObject private var locationManager = LocationManager()
 
     var body: some View {
         NavigationStack {
@@ -47,6 +49,15 @@ struct ContentView: View {
                         CustomModuleButton(name: "Scrolling", color: .yellow) {
                             selectButton(.scrolling)
                         }
+                        CustomModuleButton(name: "Download", color: .green) {
+                            selectButton(.download)
+                        }
+                        CustomModuleButton(name: "Map", color: .purple) {
+                            selectButton(.map)
+                        }
+                        CustomModuleButton(name: "Time Zone", color: .orange) {
+                            selectButton(.timeZone)
+                        }
                     }
                     .padding(.horizontal, 16)
                 }
@@ -55,6 +66,9 @@ struct ContentView: View {
             .padding()
             .navigationDestination(isPresented: $isNavigated) {
                 destinationView()
+            }
+            .onAppear {
+                locationManager.requestLocationPermission()
             }
         }
     }
@@ -81,6 +95,12 @@ struct ContentView: View {
             VideoStreamingView()
         case .scrolling:
             ScrollingView()
+        case .download:
+            DownloadView()
+        case .map:
+            MapView()
+        case .timeZone:
+            TimeZoneView()
         case .none:
             EmptyView()
         }
@@ -95,6 +115,9 @@ enum Buttontype {
     case employee
     case videoStreaming
     case scrolling
+    case download
+    case map
+    case timeZone
     case none
 }
 
