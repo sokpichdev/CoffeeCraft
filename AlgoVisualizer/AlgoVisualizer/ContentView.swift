@@ -52,9 +52,13 @@ extension ContentView {
                     
                     Rectangle()
                         .fill(viewModel.items[index].color)
-                        .frame(height: CGFloat(viewModel.items[index].value) * 5)
+                        .frame(height: CGFloat(viewModel.items[index].value) * 10)
                         .clipShape(RoundedCorner(radius: 5, corners: [.topLeft, .topRight]))
                         .shadow(radius: 2)
+
+                    Text("\(viewModel.items[index].value)")
+                        .font(.caption2)
+                        .foregroundColor(.primary)
                 }
             }
         }

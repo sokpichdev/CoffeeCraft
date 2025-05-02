@@ -21,7 +21,7 @@ class SortViewModel: ObservableObject {
 
     private var i = 0
     private var j = 0
-    let itemCount = 30
+    let itemCount = 20
 
     init() {
         reset()
