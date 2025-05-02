@@ -89,6 +89,10 @@ extension ContentView {
                         Task { await viewModel.insertionSort() }
                     })
                     
+                    SortingButton(title: "Selection Sort", action: {
+                        Task {await viewModel.selectionSort() }
+                    })
+                    
                     SortingButton(title: "Quick Sort", action: {
                         Task { await viewModel.quickSort() }
                     })

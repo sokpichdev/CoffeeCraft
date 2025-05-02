@@ -369,4 +369,40 @@ class SortViewModel: ObservableObject {
             await heapify(n, largest)
         }
     }
+    
+    // MARK: - Selection Sort
+    func selectionSort() async {
+        currentAlgorithm = "Selection Sort"
+        stepCount = 0
+        controlState = .running
+        for i in 0..<items.count - 1 {
+            var minIndex = i
+            for j in i + 1..<items.count {
+                log("Comparing: \(items[j].value) and \(items[minIndex].value)") // Log comparison
+
+                highlightComparison(i: j, minIndex)
+                await waitForStepOrSleep()
+
+                if items[j].value < items[minIndex].value {
+                    minIndex = j
+                }
+                clearHighlights(i: j, minIndex)
+
+                if controlState == .idle { return }
+            }
+
+            // Swap the minimum element with the current element
+            if minIndex != i {
+                log("Swapping: \(items[i].value) and \(items[minIndex].value)") // Log swap
+                items.swapAt(i, minIndex)
+                highlightSwap(i: i, minIndex)
+                await waitForStepOrSleep()
+                clearHighlights(i: i, minIndex)
+            }
+
+            if controlState == .idle { return }
+        }
+        controlState = .idle
+    }
+
 }
