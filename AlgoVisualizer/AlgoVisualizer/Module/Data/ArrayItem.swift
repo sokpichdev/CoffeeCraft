@@ -12,3 +12,10 @@ struct ArrayItem: Identifiable {
     var value: Int
     var color: Color = .blue
 }
+
+enum SortControlState {
+    case idle
+    case running
+    case paused
+    case stepping
+}
