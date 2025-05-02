@@ -4,9 +4,9 @@
 //
 //  Created by Sok Pich on 3/6/25.
 //
+
 import Foundation
 import CoreLocation
-import UIKit
 import SwiftUI
 import MapKit
 
@@ -76,24 +76,89 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 }
 
-
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
+    @State private var region: MKCoordinateRegion = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+    )
+    
+    @State private var searchQuery = ""
+    @State private var places: [Place] = []
+    @State private var selectedPlace: Place? = nil
+
+    // Custom structure that wraps MKMapItem and conforms to Identifiable
+    struct Place: Identifiable {
+        var id: String {
+            return mapItem.name ?? UUID().uuidString
+        }
+        let mapItem: MKMapItem
+    }
+
+    private func searchPlaces(query: String) {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.region = region  // Restrict search to the current region
+        
+        let search = MKLocalSearch(request: request)
+        search.start { response, error in
+            guard let response = response else {
+                print("Error searching places: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+            places = response.mapItems.map { Place(mapItem: $0) }
+        }
+    }
 
     var body: some View {
         VStack {
             if let location = locationManager.userLocation {
                 Text("Latitude: \(location.latitude)")
                 Text("Longitude: \(location.longitude)")
-                
-                // Show on Map
-                Map(coordinateRegion: .constant(MKCoordinateRegion(
-                    center: location,
-                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-                )))
-                .frame(height: 300)
+
+                // Show on Map with dynamically updated region
+                Map(coordinateRegion: $region, annotationItems: places) { place in
+                    MapAnnotation(coordinate: place.mapItem.placemark.coordinate) {
+                        VStack {
+                            Image(systemName: "mappin")
+                                .foregroundColor(.red)
+                                .font(.title)
+                            
+                            // Tap gesture to show info
+                            Button(action: {
+                                // Safe state update
+                                withAnimation {
+                                    selectedPlace = place
+                                }
+                            }) {
+                                Text("Tap for Info")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                }
+                .onAppear {
+                    // Set region to the user's location when it's available
+                    if let location = locationManager.userLocation {
+                        region.center = location
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity) // Full-screen map
             } else {
                 Text("Fetching location...")
+            }
+
+            // Search bar
+            TextField("Search for places", text: $searchQuery, onCommit: {
+                searchPlaces(query: searchQuery)  // Perform search when the user presses return
+            })
+            .padding()
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .onChange(of: searchQuery) { newQuery in
+                if newQuery.isEmpty {
+                    places.removeAll()  // Clear places when search query is empty
+                }
             }
 
             Button("Request Location Again") {
@@ -103,6 +168,26 @@ struct MapView: View {
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(10)
+
+            // Display selected place info when tapped
+            if let selectedPlace = selectedPlace {
+                VStack {
+                    Text("Place Info")
+                        .font(.headline)
+                    Text("Name: \(selectedPlace.mapItem.name ?? "Unknown")")
+                    Text("Address: \(selectedPlace.mapItem.placemark.title ?? "Unknown")")
+                    Button("Close") {
+                        self.selectedPlace = nil  // Close info view
+                    }
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(10)
+                .shadow(radius: 5)
+                .padding(.top, 10)
+                .transition(.move(edge: .bottom))
+                .animation(.spring())
+            }
         }
         .alert("Location Permission Needed", isPresented: $locationManager.showPermissionAlert) {
             Button("Allow") {
@@ -118,3 +203,4 @@ struct MapView: View {
         .padding()
     }
 }
+
