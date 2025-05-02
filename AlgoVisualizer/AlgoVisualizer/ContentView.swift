@@ -88,6 +88,10 @@ extension ContentView {
                     SortingButton(title: "Quick Sort", action: {
                         Task { await viewModel.quickSort() }
                     })
+                    
+                    SortingButton(title: "Merge Sort", action: {
+                        Task { await viewModel.mergeSort() }
+                    })
                 }
             }
         }

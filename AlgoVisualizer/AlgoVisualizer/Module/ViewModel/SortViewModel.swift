@@ -17,6 +17,7 @@ class SortViewModel: ObservableObject {
     @Published var stepCount: Int = 0
     @Published var stepLogs: [String] = []
     @Published var pivotIndex: Int? = nil
+    @Published var midIndex: Int? = nil
 
     private var i = 0
     private var j = 0
@@ -35,6 +36,7 @@ class SortViewModel: ObservableObject {
                 stepCount = 0
                 currentAlgorithm = ""
                 pivotIndex = nil
+                midIndex = nil
                 i = 0
                 j = 0
             }
@@ -217,6 +219,88 @@ class SortViewModel: ObservableObject {
         DispatchQueue.main.async {
             // Insert the new log at the top
             self.stepLogs.insert(message, at: 0)
+        }
+    }
+    
+    // MARK: - Merge Sort
+    func mergeSort() async {
+        currentAlgorithm = "Merge Sort"
+        stepCount = 0
+        controlState = .running
+        await mergeSortHelper(start: 0, end: items.count - 1)
+        controlState = .idle
+    }
+
+    private func mergeSortHelper(start: Int, end: Int) async {
+        if start >= end { return }
+
+        let mid = (start + end) / 2
+        await MainActor.run {
+            midIndex = mid
+            highlightMidpoint(mid)
+        }
+
+        await mergeSortHelper(start: start, end: mid)
+        await mergeSortHelper(start: mid + 1, end: end)
+        await merge(start: start, mid: mid, end: end)
+
+        await MainActor.run {
+            midIndex = nil
+            if mid < items.count {
+                items[mid].color = .blue
+            }
+        }
+    }
+
+    private func merge(start: Int, mid: Int, end: Int) async {
+        var temp: [ArrayItem] = []
+        var i = start
+        var j = mid + 1
+
+        while i <= mid && j <= end {
+            highlightComparison(i: i, j)
+            log("Comparing: \(items[i].value) and \(items[j].value)")
+            await waitForStepOrSleep()
+
+            let a = i
+            let b = j
+
+            if items[i].value <= items[j].value {
+                temp.append(items[i])
+                i += 1
+            } else {
+                temp.append(items[j])
+                j += 1
+            }
+            clearHighlights(i: a, b)
+
+            if controlState == .idle { return }
+        }
+
+        while i <= mid {
+            temp.append(items[i])
+            i += 1
+            if controlState == .idle { return }
+        }
+
+        while j <= end {
+            temp.append(items[j])
+            j += 1
+            if controlState == .idle { return }
+        }
+
+        for idx in 0..<temp.count {
+            items[start + idx] = temp[idx]
+            highlightSwap(i: start + idx, start + idx)
+            log("Placing: \(temp[idx].value) at position \(start + idx)")
+            await waitForStepOrSleep()
+            clearHighlights(i: start + idx, start + idx)
+        }
+    }
+
+    private func highlightMidpoint(_ mid: Int) {
+        if mid < items.count {
+            items[mid].color = .purple
         }
     }
 }
