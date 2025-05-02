@@ -40,9 +40,17 @@ struct ContentView: View {
                     .disabled(viewModel.isSorting)
 
                     Button("Bubble Sort") {
-                        Task {
-                            await viewModel.bubbleSort()
-                        }
+                        Task { await viewModel.bubbleSort() }
+                    }
+                    .disabled(viewModel.isSorting)
+
+                    Button("Insertion Sort") {
+                        Task { await viewModel.insertionSort() }
+                    }
+                    .disabled(viewModel.isSorting)
+
+                    Button("Quick Sort") {
+                        Task { await viewModel.quickSort() }
                     }
                     .disabled(viewModel.isSorting)
 
