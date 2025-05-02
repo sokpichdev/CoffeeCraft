@@ -92,6 +92,10 @@ extension ContentView {
                     SortingButton(title: "Merge Sort", action: {
                         Task { await viewModel.mergeSort() }
                     })
+                    
+                    SortingButton(title: "Heap Sort", action: {
+                        Task {await viewModel.heapSort() }
+                    })
                 }
             }
         }

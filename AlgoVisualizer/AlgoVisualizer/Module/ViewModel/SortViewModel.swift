@@ -303,4 +303,70 @@ class SortViewModel: ObservableObject {
             items[mid].color = .purple
         }
     }
+    
+    //MARK: - Heap Sort
+    func heapSort() async {
+        currentAlgorithm = "Heap Sort"
+        stepCount = 0
+        controlState = .running
+        let n = items.count
+
+        // Build max heap
+        for i in stride(from: n / 2 - 1, through: 0, by: -1) {
+            await heapify(n, i)
+            if controlState == .idle { return }
+        }
+
+        // One by one extract elements from heap
+        for i in stride(from: n - 1, through: 1, by: -1) {
+            log("Swapping: \(items[0].value) and \(items[i].value)")
+            highlightSwap(i: 0, i)
+            items.swapAt(0, i)
+            await waitForStepOrSleep()
+            clearHighlights(i: 0, i)
+
+            await heapify(i, 0)
+            if controlState == .idle { return }
+        }
+
+        controlState = .idle
+    }
+
+    private func heapify(_ n: Int, _ i: Int) async {
+        var largest = i
+        let left = 2 * i + 1
+        let right = 2 * i + 2
+
+        if left < n {
+            highlightComparison(i: i, left)
+            log("Comparing: \(items[i].value) and \(items[left].value)")
+            await waitForStepOrSleep()
+            clearHighlights(i: i, left)
+            
+            if items[left].value > items[largest].value {
+                largest = left
+            }
+        }
+
+        if right < n {
+            highlightComparison(i: largest, right)
+            log("Comparing: \(items[largest].value) and \(items[right].value)")
+            await waitForStepOrSleep()
+            clearHighlights(i: largest, right)
+
+            if items[right].value > items[largest].value {
+                largest = right
+            }
+        }
+
+        if largest != i {
+            log("Swapping: \(items[i].value) and \(items[largest].value)")
+            highlightSwap(i: i, largest)
+            items.swapAt(i, largest)
+            await waitForStepOrSleep()
+            clearHighlights(i: i, largest)
+
+            await heapify(n, largest)
+        }
+    }
 }
