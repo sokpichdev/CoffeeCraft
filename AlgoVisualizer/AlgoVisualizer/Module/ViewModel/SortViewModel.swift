@@ -18,15 +18,15 @@ class SortViewModel: ObservableObject {
     @Published var stepLogs: [String] = []
     @Published var pivotIndex: Int? = nil
     @Published var midIndex: Int? = nil
-
+    
     private var i = 0
     private var j = 0
     let itemCount = 20
-
+    
     init() {
         reset()
     }
-
+    
     func reset() {
         Task {
             controlState = .idle
@@ -42,25 +42,25 @@ class SortViewModel: ObservableObject {
             }
         }
     }
-
+    
     func pause() {
         if controlState == .running {
             controlState = .paused
         }
     }
-
+    
     func step() {
         if controlState == .paused {
             controlState = .stepping
         }
     }
-
+    
     func resume() {
         if controlState == .paused || controlState == .stepping {
             controlState = .running
         }
     }
-
+    
     // MARK: - Bubble Sort
     func bubbleSort() async {
         currentAlgorithm = "Bubble Sort"
@@ -71,25 +71,25 @@ class SortViewModel: ObservableObject {
             for j in 0..<items.count - i - 1 {
                 self.j = j
                 log("Comparing: \(items[j].value) and \(items[j + 1].value)") // Log comparison
-
+                
                 highlightComparison(i: j, j + 1)
                 await waitForStepOrSleep()
-
+                
                 if items[j].value > items[j + 1].value {
                     items.swapAt(j, j + 1)
                     log("Swapping: \(items[j].value) and \(items[j + 1].value)") // Log swap
                     highlightSwap(i: j, j + 1)
                     await waitForStepOrSleep()
                 }
-
+                
                 clearHighlights(i: j, j + 1)
-
+                
                 if controlState == .idle { return } // early exit on reset
             }
         }
         controlState = .idle
     }
-
+    
     // MARK: - Insertion Sort
     func insertionSort() async {
         currentAlgorithm = "Insertion Sort"
@@ -99,24 +99,24 @@ class SortViewModel: ObservableObject {
             var j = i
             while j > 0 && items[j].value < items[j - 1].value {
                 log("Comparing: \(items[j].value) and \(items[j - 1].value)") // Log comparison
-
+                
                 highlightComparison(i: j, j - 1)
                 await waitForStepOrSleep()
-
+                
                 items.swapAt(j, j - 1)
                 log("Swapping: \(items[j].value) and \(items[j - 1].value)") // Log swap
                 highlightSwap(i: j, j - 1)
                 await waitForStepOrSleep()
-
+                
                 clearHighlights(i: j, j - 1)
                 j -= 1
-
+                
                 if controlState == .idle { return }
             }
         }
         controlState = .idle
     }
-
+    
     // MARK: - Quick Sort
     func quickSort() async {
         currentAlgorithm = "Quick Sort"
@@ -125,27 +125,27 @@ class SortViewModel: ObservableObject {
         await quickSortHelper(low: 0, high: items.count - 1)
         controlState = .idle
     }
-
+    
     private func quickSortHelper(low: Int, high: Int) async {
         guard low < high else { return }
-
+        
         let pi = await partition(low: low, high: high)
-
+        
         pivotIndex = nil  // Clear the pivot marker here
-
+        
         await quickSortHelper(low: low, high: pi - 1)
         await quickSortHelper(low: pi + 1, high: high)
     }
-
+    
     private func partition(low: Int, high: Int) async -> Int {
         let pivotValue = items[high].value
         var i = low
-
+        
         for j in low..<high {
             log("Comparing: \(items[j].value) and pivot \(pivotValue)") // Log comparison with pivot
             highlightComparison(i: j, high)
             await waitForStepOrSleep()
-
+            
             if items[j].value < pivotValue {
                 items.swapAt(i, j)
                 log("Swapping: \(items[i].value) and \(items[j].value)") // Log swap
@@ -156,21 +156,21 @@ class SortViewModel: ObservableObject {
             } else {
                 clearHighlights(i: j, high)
             }
-
+            
             if controlState == .idle { return i }
         }
-
+        
         items.swapAt(i, high)
         log("Swapping: \(items[i].value) and pivot \(pivotValue)") // Log final swap with pivot
         highlightSwap(i: i, high)
         await waitForStepOrSleep()
         clearHighlights(i: i, high)
-
+        
         return i
     }
-
+    
     // MARK: - Control Helpers
-
+    
     private func waitForStepOrSleep() async {
         while true {
             switch controlState {
@@ -189,32 +189,32 @@ class SortViewModel: ObservableObject {
             }
         }
     }
-
+    
     private func sleepAnimation() async {
         let speedScale = 1.0 - speed
         let delay = UInt64((speedScale * 900_000_000) + 100_000_000)
         try? await Task.sleep(nanoseconds: delay)
     }
-
+    
     // MARK: - Highlight Helpers
-
+    
     private func highlightComparison(i: Int, _ j: Int) {
         items[i].color = .red
         items[j].color = .red
     }
-
+    
     private func highlightSwap(i: Int, _ j: Int) {
         items[i].color = .green
         items[j].color = .green
     }
-
+    
     private func clearHighlights(i: Int, _ j: Int) {
         items[i].color = .blue
         items[j].color = .blue
     }
-
+    
     // MARK: - Step Log
-
+    
     private func log(_ message: String) {
         DispatchQueue.main.async {
             // Insert the new log at the top
@@ -230,20 +230,20 @@ class SortViewModel: ObservableObject {
         await mergeSortHelper(start: 0, end: items.count - 1)
         controlState = .idle
     }
-
+    
     private func mergeSortHelper(start: Int, end: Int) async {
         if start >= end { return }
-
+        
         let mid = (start + end) / 2
         await MainActor.run {
             midIndex = mid
             highlightMidpoint(mid)
         }
-
+        
         await mergeSortHelper(start: start, end: mid)
         await mergeSortHelper(start: mid + 1, end: end)
         await merge(start: start, mid: mid, end: end)
-
+        
         await MainActor.run {
             midIndex = nil
             if mid < items.count {
@@ -251,20 +251,20 @@ class SortViewModel: ObservableObject {
             }
         }
     }
-
+    
     private func merge(start: Int, mid: Int, end: Int) async {
         var temp: [ArrayItem] = []
         var i = start
         var j = mid + 1
-
+        
         while i <= mid && j <= end {
             highlightComparison(i: i, j)
             log("Comparing: \(items[i].value) and \(items[j].value)")
             await waitForStepOrSleep()
-
+            
             let a = i
             let b = j
-
+            
             if items[i].value <= items[j].value {
                 temp.append(items[i])
                 i += 1
@@ -273,22 +273,22 @@ class SortViewModel: ObservableObject {
                 j += 1
             }
             clearHighlights(i: a, b)
-
+            
             if controlState == .idle { return }
         }
-
+        
         while i <= mid {
             temp.append(items[i])
             i += 1
             if controlState == .idle { return }
         }
-
+        
         while j <= end {
             temp.append(items[j])
             j += 1
             if controlState == .idle { return }
         }
-
+        
         for idx in 0..<temp.count {
             items[start + idx] = temp[idx]
             highlightSwap(i: start + idx, start + idx)
@@ -297,7 +297,7 @@ class SortViewModel: ObservableObject {
             clearHighlights(i: start + idx, start + idx)
         }
     }
-
+    
     private func highlightMidpoint(_ mid: Int) {
         if mid < items.count {
             items[mid].color = .purple
@@ -310,13 +310,13 @@ class SortViewModel: ObservableObject {
         stepCount = 0
         controlState = .running
         let n = items.count
-
+        
         // Build max heap
         for i in stride(from: n / 2 - 1, through: 0, by: -1) {
             await heapify(n, i)
             if controlState == .idle { return }
         }
-
+        
         // One by one extract elements from heap
         for i in stride(from: n - 1, through: 1, by: -1) {
             log("Swapping: \(items[0].value) and \(items[i].value)")
@@ -324,19 +324,19 @@ class SortViewModel: ObservableObject {
             items.swapAt(0, i)
             await waitForStepOrSleep()
             clearHighlights(i: 0, i)
-
+            
             await heapify(i, 0)
             if controlState == .idle { return }
         }
-
+        
         controlState = .idle
     }
-
+    
     private func heapify(_ n: Int, _ i: Int) async {
         var largest = i
         let left = 2 * i + 1
         let right = 2 * i + 2
-
+        
         if left < n {
             highlightComparison(i: i, left)
             log("Comparing: \(items[i].value) and \(items[left].value)")
@@ -347,25 +347,25 @@ class SortViewModel: ObservableObject {
                 largest = left
             }
         }
-
+        
         if right < n {
             highlightComparison(i: largest, right)
             log("Comparing: \(items[largest].value) and \(items[right].value)")
             await waitForStepOrSleep()
             clearHighlights(i: largest, right)
-
+            
             if items[right].value > items[largest].value {
                 largest = right
             }
         }
-
+        
         if largest != i {
             log("Swapping: \(items[i].value) and \(items[largest].value)")
             highlightSwap(i: i, largest)
             items.swapAt(i, largest)
             await waitForStepOrSleep()
             clearHighlights(i: i, largest)
-
+            
             await heapify(n, largest)
         }
     }
@@ -379,18 +379,18 @@ class SortViewModel: ObservableObject {
             var minIndex = i
             for j in i + 1..<items.count {
                 log("Comparing: \(items[j].value) and \(items[minIndex].value)") // Log comparison
-
+                
                 highlightComparison(i: j, minIndex)
                 await waitForStepOrSleep()
-
+                
                 if items[j].value < items[minIndex].value {
                     minIndex = j
                 }
                 clearHighlights(i: j, minIndex)
-
+                
                 if controlState == .idle { return }
             }
-
+            
             // Swap the minimum element with the current element
             if minIndex != i {
                 log("Swapping: \(items[i].value) and \(items[minIndex].value)") // Log swap
@@ -399,10 +399,80 @@ class SortViewModel: ObservableObject {
                 await waitForStepOrSleep()
                 clearHighlights(i: i, minIndex)
             }
-
+            
             if controlState == .idle { return }
         }
         controlState = .idle
     }
+    // MARK: - Shell Sort
+    func shellSort() async {
+        currentAlgorithm = "Shell Sort"
+        stepCount = 0
+        controlState = .running
+        
+        var gap = items.count / 2
+        while gap > 0 {
+            for i in gap..<items.count {
+                var j = i
+                while j >= gap && items[j - gap].value > items[j].value {
+                    highlightComparison(i: j, j - gap)
+                    log("Comparing: \(items[j].value) and \(items[j - gap].value)")
+                    await waitForStepOrSleep()
+                    
+                    items.swapAt(j, j - gap)
+                    highlightSwap(i: j, j - gap)
+                    log("Swapping: \(items[j].value) and \(items[j - gap].value)")
+                    await waitForStepOrSleep()
+                    clearHighlights(i: j, j - gap)
+                    
+                    j -= gap
+                    
+                    if controlState == .idle { return }
+                }
+            }
+            gap /= 2
+        }
+        controlState = .idle
+    }
+    
+    // MARK: - Counting Sort
+    func countingSort() async {
+        currentAlgorithm = "Counting Sort"
+        stepCount = 0
+        controlState = .running
 
+        guard let maxValue = items.map({ $0.value }).max() else { return }
+
+        var count = [Int](repeating: 0, count: maxValue + 1)
+
+        // Count occurrences
+        for i in 0..<items.count {
+            let val = items[i].value
+            count[val] += 1
+            log("Counting: \(val)")
+            highlightComparison(i: i, i)
+            await waitForStepOrSleep()
+            clearHighlights(i: i, i)
+
+            if controlState == .idle { return }
+        }
+
+        // Build sorted array
+        var index = 0
+        for val in 0...maxValue {
+            while count[val] > 0 {
+                items[index].value = val
+                log("Placing: \(val) at index \(index)")
+                highlightSwap(i: index, index)
+                await waitForStepOrSleep()
+                clearHighlights(i: index, index)
+                index += 1
+                count[val] -= 1
+
+                if controlState == .idle { return }
+            }
+        }
+
+        controlState = .idle
+    }
 }
