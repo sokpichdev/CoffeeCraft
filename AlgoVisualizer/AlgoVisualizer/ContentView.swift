@@ -105,7 +105,7 @@ extension ContentView {
                         Task {await viewModel.heapSort() }
                     })
                     
-                    SortingButton(title: "Shell", action: {
+                    SortingButton(title: "Shell Sort", action: {
                         Task {await viewModel.shellSort() }
                     })
                     
