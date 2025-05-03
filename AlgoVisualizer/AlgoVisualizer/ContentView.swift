@@ -9,9 +9,24 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = SortViewModel()
+    @StateObject private var searchViewModel = SearchViewModel()
     @State private var showSteps = false
-    
+    @State private var searchText = ""
+
     var body: some View {
+        TabView {
+            sortingScreen
+                .tag(0)
+
+            searchingScreen
+                .tag(1)
+        }
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+    }
+}
+
+extension ContentView {
+    var sortingScreen: some View {
         ScrollView {
             VStack(spacing: 24) {
                 headerView
@@ -23,6 +38,23 @@ struct ContentView: View {
             }
             .padding(.horizontal, 16)
         }
+        .scrollDismissesKeyboard(.immediately)
+    }
+    var searchingScreen: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                
+                headerView
+                searchBarTextField
+                showStepsView
+                searchingBarView
+                searchingMethodController
+                speedControllerView
+                controlPanel
+            }
+            .padding(.horizontal, 16)
+        }
+        .scrollDismissesKeyboard(.immediately)
     }
 }
 
@@ -57,6 +89,25 @@ extension ContentView {
                         .shadow(radius: 2)
 
                     Text("\(viewModel.items[index].value)")
+                        .font(.caption2)
+                        .foregroundColor(.primary)
+                }
+            }
+        }
+        .frame(height: 300)
+    }
+    
+    var searchingBarView: some View {
+        HStack(alignment: .bottom, spacing: 4) {
+            ForEach(searchViewModel.items.indices, id: \.self) { index in
+                VStack(spacing: 2) {
+                    Rectangle()
+                        .fill(searchViewModel.items[index].color)
+                        .frame(height: CGFloat(searchViewModel.items[index].value) * 10)
+                        .clipShape(RoundedCorner(radius: 5, corners: [.topLeft, .topRight]))
+                        .shadow(radius: 2)
+
+                    Text("\(searchViewModel.items[index].value)")
                         .font(.caption2)
                         .foregroundColor(.primary)
                 }
@@ -128,6 +179,17 @@ extension ContentView {
             }
         }
     }
+    var searchingMethodController: some View {
+        GroupBox(label: Text("Searching Methods").font(.headline)) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    SortingButton(title: "Linear Search", action: {
+                        Task { await searchViewModel.linearSearch()}
+                    })
+                }
+            }
+        }
+    }
 
     var controlPanel: some View {
         GroupBox(label: Text("Controls").font(.headline)) {
@@ -192,21 +254,44 @@ extension ContentView {
             .shadow(radius: 3)
             .frame(maxWidth: .infinity, alignment: .leading) // ← ensures leading alignment
             if showSteps {
-                VStack(alignment: .leading, spacing: 8) {
-                    ScrollView {
-                        VStack(spacing: 4) {
-                            ForEach(viewModel.stepLogs.prefix(5), id: \.self) { log in
-                                Text(log)
-                            }
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(viewModel.stepLogs, id: \.self) { log in
+                            Text(log)
                         }
                     }
-                    .frame(height: 120)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(8)
-                    .shadow(radius: 2)
                 }
+                .frame(height: 120)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.systemBackground))
+                .cornerRadius(8)
+                .shadow(radius: 2)
             }
         }
+    }
+}
+
+extension ContentView {
+    var searchBarTextField: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("Enter number", value: $searchViewModel.searchTarget, formatter: NumberFormatter())
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .keyboardType(.numberPad)
+
+            
+            if !searchText.isEmpty {
+                Button(action: {
+                    searchText = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+                .padding(.trailing)
+            }
+        }
+        .frame(height: 40)
     }
 }
