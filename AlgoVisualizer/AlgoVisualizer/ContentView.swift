@@ -112,6 +112,18 @@ extension ContentView {
                     SortingButton(title: "Counting Sort", action: {
                         Task {await viewModel.countingSort() }
                     })
+                    
+                    SortingButton(title: "Radix Sort", action: {
+                        Task {await viewModel.radixSort() }
+                    })
+                    
+                    SortingButton(title: "Bucket Sort", action: {
+                        Task {await viewModel.bucketSort() }
+                    })
+                    
+                    SortingButton(title: "Pancake Sort", action: {
+                        Task {await viewModel.pancakeSort() }
+                    })
                 }
             }
         }

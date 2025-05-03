@@ -475,4 +475,193 @@ class SortViewModel: ObservableObject {
 
         controlState = .idle
     }
+    
+    // MARK: - Bucket Sort
+    func bucketSort() async {
+        currentAlgorithm = "Bucket Sort"
+        stepCount = 0
+        controlState = .running
+
+        guard items.count > 0 else { return }
+
+        let minValue = items.map { $0.value }.min() ?? 0
+        let maxValue = items.map { $0.value }.max() ?? 0
+        let bucketCount = items.count
+        let bucketRange = Double(maxValue - minValue + 1) / Double(bucketCount)
+
+        var buckets = Array(repeating: [ArrayItem](), count: bucketCount)
+
+        // 1. Distribute into buckets
+        for item in items {
+            let index = Int(Double(item.value - minValue) / bucketRange)
+            let bucketIndex = min(index, bucketCount - 1) // Prevent overflow
+            buckets[bucketIndex].append(item)
+
+            log("Placing \(item.value) into bucket \(bucketIndex)")
+            await waitForStepOrSleep()
+
+            if controlState == .idle { return }
+        }
+
+        // 2. Sort each bucket using Insertion Sort
+        for i in 0..<bucketCount {
+            log("Sorting bucket \(i)")
+            await insertionSortBucket(&buckets[i])
+            if controlState == .idle { return }
+        }
+
+        // 3. Concatenate buckets
+        var index = 0
+        for bucket in buckets {
+            for item in bucket {
+                items[index] = item
+                highlightComparison(i: index, index)
+                await waitForStepOrSleep()
+                clearHighlights(i: index, index)
+                index += 1
+
+                if controlState == .idle { return }
+            }
+        }
+
+        controlState = .idle
+    }
+
+    // MARK: - Insertion Sort for a Bucket
+    private func insertionSortBucket(_ bucket: inout [ArrayItem]) async {
+        for i in 1..<bucket.count {
+            var j = i
+            while j > 0 && bucket[j].value < bucket[j - 1].value {
+                bucket.swapAt(j, j - 1)
+                log("Swapping \(bucket[j].value) and \(bucket[j-1].value) in bucket")
+                await waitForStepOrSleep()
+                j -= 1
+
+                if controlState == .idle { return }
+            }
+        }
+    }
+
+    // MARK: - Radix Sort
+    func radixSort() async {
+        currentAlgorithm = "Radix Sort"
+        stepCount = 0
+        controlState = .running
+
+        guard let maxValue = items.map({ $0.value }).max() else { return }
+
+        var place = 1
+        while maxValue / place > 0 {
+            await countingSortByDigit(place: place)
+            place *= 10
+
+            if controlState == .idle { return }
+        }
+
+        controlState = .idle
+    }
+
+    // MARK: - Counting Sort by Digit (Stable sort for Radix)
+    private func countingSortByDigit(place: Int) async {
+        var count = [Int](repeating: 0, count: 10)
+        var output = items
+
+        // Count digits
+        for i in 0..<items.count {
+            let digit = (items[i].value / place) % 10
+            count[digit] += 1
+            log("Counting digit \(digit) at place \(place) for value \(items[i].value)")
+            highlightComparison(i: i, i)
+            await waitForStepOrSleep()
+            clearHighlights(i: i, i)
+
+            if controlState == .idle { return }
+        }
+
+        // Compute cumulative count
+        for i in 1..<10 {
+            count[i] += count[i - 1]
+        }
+
+        // Build output array in reverse (stable)
+        for i in stride(from: items.count - 1, through: 0, by: -1) {
+            let digit = (items[i].value / place) % 10
+            let pos = count[digit] - 1
+            output[pos] = items[i]
+            count[digit] -= 1
+
+            log("Placing value \(items[i].value) at index \(pos) based on digit \(digit)")
+            highlightSwap(i: i, pos)
+            await waitForStepOrSleep()
+            clearHighlights(i: i, pos)
+
+            if controlState == .idle { return }
+        }
+
+        // Copy to original array
+        for i in 0..<items.count {
+            items[i] = output[i]
+            highlightComparison(i: i, i)
+            await waitForStepOrSleep()
+            clearHighlights(i: i, i)
+
+            if controlState == .idle { return }
+        }
+    }
+
+    // MARK: - Pancake Sort
+    func pancakeSort() async {
+        currentAlgorithm = "Pancake Sort"
+        stepCount = 0
+        controlState = .running
+
+        guard items.count > 1 else { return }
+
+        for size in stride(from: items.count, to: 1, by: -1) {
+            // 1. Find the index of the max value in the unsorted portion
+            var maxIndex = 0
+            for i in 1..<size {
+                highlightComparison(i: i, maxIndex)
+                await waitForStepOrSleep()
+                if items[i].value > items[maxIndex].value {
+                    maxIndex = i
+                }
+                clearHighlights(i: i, maxIndex)
+
+                if controlState == .idle { return }
+            }
+
+            if maxIndex != size - 1 {
+                // 2. Flip max to front
+                if maxIndex != 0 {
+                    log("Flipping first \(maxIndex + 1) items to bring max to front")
+                    await flip(end: maxIndex)
+                    if controlState == .idle { return }
+                }
+
+                // 3. Flip to move max to its correct position
+                log("Flipping first \(size) items to move max to position \(size - 1)")
+                await flip(end: size - 1)
+                if controlState == .idle { return }
+            }
+        }
+
+        controlState = .idle
+    }
+
+    // MARK: - Flip Function
+    private func flip(end: Int) async {
+        var start = 0
+        var end = end
+
+        while start < end {
+            highlightComparison(i: start, end)
+            items.swapAt(start, end)
+            log("Swapping \(items[start].value) and \(items[end].value)")
+            await waitForStepOrSleep()
+            clearHighlights(i: start, end)
+            start += 1
+            end -= 1
+        }
+    }
 }
