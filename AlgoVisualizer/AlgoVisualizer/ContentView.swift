@@ -9,9 +9,24 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = SortViewModel()
+    @StateObject private var searchViewModel = SearchViewModel()
     @State private var showSteps = false
-    
+    @State private var searchText = ""
+
     var body: some View {
+        TabView {
+            sortingScreen
+                .tag(0)
+
+            searchingScreen
+                .tag(1)
+        }
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+    }
+}
+
+extension ContentView {
+    var sortingScreen: some View {
         ScrollView {
             VStack(spacing: 24) {
                 headerView
@@ -23,6 +38,23 @@ struct ContentView: View {
             }
             .padding(.horizontal, 16)
         }
+        .scrollDismissesKeyboard(.immediately)
+    }
+    var searchingScreen: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                
+                headerView
+                searchBarTextField
+                showStepsView
+                searchingBarView
+                searchingMethodController
+                speedControllerView
+                controlPanel
+            }
+            .padding(.horizontal, 16)
+        }
+        .scrollDismissesKeyboard(.immediately)
     }
 }
 
@@ -57,6 +89,25 @@ extension ContentView {
                         .shadow(radius: 2)
 
                     Text("\(viewModel.items[index].value)")
+                        .font(.caption2)
+                        .foregroundColor(.primary)
+                }
+            }
+        }
+        .frame(height: 300)
+    }
+    
+    var searchingBarView: some View {
+        HStack(alignment: .bottom, spacing: 4) {
+            ForEach(searchViewModel.items.indices, id: \.self) { index in
+                VStack(spacing: 2) {
+                    Rectangle()
+                        .fill(searchViewModel.items[index].color)
+                        .frame(height: CGFloat(searchViewModel.items[index].value) * 10)
+                        .clipShape(RoundedCorner(radius: 5, corners: [.topLeft, .topRight]))
+                        .shadow(radius: 2)
+
+                    Text("\(searchViewModel.items[index].value)")
                         .font(.caption2)
                         .foregroundColor(.primary)
                 }
@@ -103,6 +154,37 @@ extension ContentView {
                     
                     SortingButton(title: "Heap Sort", action: {
                         Task {await viewModel.heapSort() }
+                    })
+                    
+                    SortingButton(title: "Shell Sort", action: {
+                        Task {await viewModel.shellSort() }
+                    })
+                    
+                    SortingButton(title: "Counting Sort", action: {
+                        Task {await viewModel.countingSort() }
+                    })
+                    
+                    SortingButton(title: "Radix Sort", action: {
+                        Task {await viewModel.radixSort() }
+                    })
+                    
+                    SortingButton(title: "Bucket Sort", action: {
+                        Task {await viewModel.bucketSort() }
+                    })
+                    
+                    SortingButton(title: "Pancake Sort", action: {
+                        Task {await viewModel.pancakeSort() }
+                    })
+                }
+            }
+        }
+    }
+    var searchingMethodController: some View {
+        GroupBox(label: Text("Searching Methods").font(.headline)) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    SortingButton(title: "Linear Search", action: {
+                        Task { await searchViewModel.linearSearch()}
                     })
                 }
             }
@@ -172,64 +254,44 @@ extension ContentView {
             .shadow(radius: 3)
             .frame(maxWidth: .infinity, alignment: .leading) // ← ensures leading alignment
             if showSteps {
-                VStack(alignment: .leading, spacing: 8) {
-                    ScrollView {
-                        VStack(spacing: 4) {
-                            ForEach(viewModel.stepLogs.prefix(5), id: \.self) { log in
-                                Text(log)
-                            }
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(viewModel.stepLogs, id: \.self) { log in
+                            Text(log)
                         }
                     }
-                    .frame(height: 120)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(8)
-                    .shadow(radius: 2)
                 }
+                .frame(height: 120)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.systemBackground))
+                .cornerRadius(8)
+                .shadow(radius: 2)
             }
         }
     }
 }
 
+extension ContentView {
+    var searchBarTextField: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("Enter number", value: $searchViewModel.searchTarget, formatter: NumberFormatter())
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .keyboardType(.numberPad)
 
-// Custom button for sorting algorithms with improved styling
-struct SortingButton: View {
-    let title: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .shadow(radius: 3)
-        }
-    }
-}
-
-struct ColoredControlButton: View {
-    let title: String
-    let action: () -> Void
-    let isDisabled: Bool
-    let enabledColor: Color
-    let disabledColor: Color
-
-    var body: some View {
-        Button(action: {
-            if !isDisabled {
-                action()
+            
+            if !searchText.isEmpty {
+                Button(action: {
+                    searchText = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+                .padding(.trailing)
             }
-        }) {
-            Text(title)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(isDisabled ? disabledColor : enabledColor)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .shadow(radius: isDisabled ? 0 : 3)
         }
-        .disabled(isDisabled)
+        .frame(height: 40)
     }
 }
