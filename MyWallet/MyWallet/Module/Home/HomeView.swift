@@ -18,6 +18,7 @@ struct HomeView: View {
                 actionButtonsView
                 paymentListView
                 promoAndDiscountView
+                blackFridayView
                 specialOfferView
             }
             .background(Color(.white))
@@ -267,7 +268,7 @@ struct HomeView: View {
         .padding(.horizontal, 16)
     }
     // MARK: - Special Offer View
-    private var specialOfferView: some View {
+    private var blackFridayView: some View {
         ZStack {
             // Base card with rounded corners and background
             RoundedRectangle(cornerRadius: 16)
@@ -298,6 +299,44 @@ struct HomeView: View {
                         .font(.system(size: 12, design: .default))
                     Text("top up, transfer and payment")
                         .foregroundColor(Color(hex: "#BDBDBD"))
+                        .font(.system(size: 12, design: .default))
+                }
+            }
+            .padding(16)
+            .frame(width: 320, height: 170, alignment: .leading)
+        }
+    }
+    private var specialOfferView: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(hex: "#FFD2A6"))
+                .frame(width: 320, height: 170)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color(hex: "#00373E"))
+                        .frame(width: 100, height: 120)
+                        .rotationEffect(.degrees(25))
+                        .offset(x: 110, y: 50) // Adjusted offset to position at bottom right
+                )
+                .clipped()
+            // Text content
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Special Offer for")
+                        .foregroundColor(Color(hex: "#030319"))
+                        .font(.system(size: 20, design: .default))
+                        .fontWeight(.bold)
+                    Text("Today's Top Up")
+                        .foregroundColor(Color(hex: "#030319"))
+                        .font(.system(size: 20, design: .default))
+                        .fontWeight(.bold)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Get discount for every top up,")
+                        .foregroundColor(Color(hex: "#030319"))
+                        .font(.system(size: 12, design: .default))
+                    Text("transfer and payment")
+                        .foregroundColor(Color(hex: "#030319"))
                         .font(.system(size: 12, design: .default))
                 }
             }
