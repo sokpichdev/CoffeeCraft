@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: 32) {
                 ForEach(0..<8) { index in
                     AnimatedRotatedCard(animationType: index)
@@ -56,20 +56,20 @@ struct AnimatedRotatedCard: View {
         case 0:
             // Left <-> Right
             withAnimation(.linear(duration: 2).repeatForever(autoreverses: true)) {
-                offset = CGSize(width: cardWidth / 2 - 60, height: 0)
+                offset = CGSize(width: cardWidth - 60, height: 0)
             }
 
         case 1:
             // Top <-> Bottom
             withAnimation(.linear(duration: 2).repeatForever(autoreverses: true)) {
-                offset = CGSize(width: 0, height: cardHeight / 2 - 40)
+                offset = CGSize(width: 0, height: cardHeight - 40)
             }
 
         case 2:
             // Left → Top → Right → Bottom → Left (loop)
             movePath(positions: [
-                CGSize(width: -cardWidth/2 + 60, height: 0),
-                CGSize(width: 0, height: -cardHeight/2 + 40),
+                CGSize(width: -cardWidth + 60, height: 0),
+                CGSize(width: 0, height: -cardHeight + 40),
                 CGSize(width: cardWidth/2 - 60, height: 0),
                 CGSize(width: 0, height: cardHeight/2 - 40),
                 CGSize(width: -cardWidth/2 + 60, height: 0)
