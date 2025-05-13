@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		6A4C56D82DD331E5002A48BC /* E-Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "E-Wallet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A4C57852DD353B3002A48BC /* E-Wallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "E-Wallet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		6A4C56DA2DD331E5002A48BC /* E-Wallet */ = {
+		6A4C57872DD353B3002A48BC /* E-Wallet */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "E-Wallet";
 			sourceTree = "<group>";
@@ -19,7 +19,7 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6A4C56D52DD331E5002A48BC /* Frameworks */ = {
+		6A4C57822DD353B3002A48BC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6A4C56CF2DD331E5002A48BC = {
+		6A4C577C2DD353B3002A48BC = {
 			isa = PBXGroup;
 			children = (
-				6A4C56DA2DD331E5002A48BC /* E-Wallet */,
-				6A4C56D92DD331E5002A48BC /* Products */,
+				6A4C57872DD353B3002A48BC /* E-Wallet */,
+				6A4C57862DD353B3002A48BC /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		6A4C56D92DD331E5002A48BC /* Products */ = {
+		6A4C57862DD353B3002A48BC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6A4C56D82DD331E5002A48BC /* E-Wallet.app */,
+				6A4C57852DD353B3002A48BC /* E-Wallet.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6A4C56D72DD331E5002A48BC /* E-Wallet */ = {
+		6A4C57842DD353B3002A48BC /* E-Wallet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A4C56E62DD331E6002A48BC /* Build configuration list for PBXNativeTarget "E-Wallet" */;
+			buildConfigurationList = 6A4C57932DD353B4002A48BC /* Build configuration list for PBXNativeTarget "E-Wallet" */;
 			buildPhases = (
-				6A4C56D42DD331E5002A48BC /* Sources */,
-				6A4C56D52DD331E5002A48BC /* Frameworks */,
-				6A4C56D62DD331E5002A48BC /* Resources */,
+				6A4C57812DD353B3002A48BC /* Sources */,
+				6A4C57822DD353B3002A48BC /* Frameworks */,
+				6A4C57832DD353B3002A48BC /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				6A4C56DA2DD331E5002A48BC /* E-Wallet */,
+				6A4C57872DD353B3002A48BC /* E-Wallet */,
 			);
 			name = "E-Wallet";
 			packageProductDependencies = (
 			);
 			productName = "E-Wallet";
-			productReference = 6A4C56D82DD331E5002A48BC /* E-Wallet.app */;
+			productReference = 6A4C57852DD353B3002A48BC /* E-Wallet.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		6A4C56D02DD331E5002A48BC /* Project object */ = {
+		6A4C577D2DD353B3002A48BC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
-					6A4C56D72DD331E5002A48BC = {
+					6A4C57842DD353B3002A48BC = {
 						CreatedOnToolsVersion = 16.1;
 					};
 				};
 			};
-			buildConfigurationList = 6A4C56D32DD331E5002A48BC /* Build configuration list for PBXProject "E-Wallet" */;
+			buildConfigurationList = 6A4C57802DD353B3002A48BC /* Build configuration list for PBXProject "E-Wallet" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 6A4C56CF2DD331E5002A48BC;
+			mainGroup = 6A4C577C2DD353B3002A48BC;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6A4C56D92DD331E5002A48BC /* Products */;
+			productRefGroup = 6A4C57862DD353B3002A48BC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6A4C56D72DD331E5002A48BC /* E-Wallet */,
+				6A4C57842DD353B3002A48BC /* E-Wallet */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		6A4C56D62DD331E5002A48BC /* Resources */ = {
+		6A4C57832DD353B3002A48BC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		6A4C56D42DD331E5002A48BC /* Sources */ = {
+		6A4C57812DD353B3002A48BC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		6A4C56E42DD331E6002A48BC /* Debug */ = {
+		6A4C57912DD353B4002A48BC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -188,7 +188,7 @@
 			};
 			name = Debug;
 		};
-		6A4C56E52DD331E6002A48BC /* Release */ = {
+		6A4C57922DD353B4002A48BC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -244,7 +244,7 @@
 			};
 			name = Release;
 		};
-		6A4C56E72DD331E6002A48BC /* Debug */ = {
+		6A4C57942DD353B4002A48BC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -273,7 +273,7 @@
 			};
 			name = Debug;
 		};
-		6A4C56E82DD331E6002A48BC /* Release */ = {
+		6A4C57952DD353B4002A48BC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -305,25 +305,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6A4C56D32DD331E5002A48BC /* Build configuration list for PBXProject "E-Wallet" */ = {
+		6A4C57802DD353B3002A48BC /* Build configuration list for PBXProject "E-Wallet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A4C56E42DD331E6002A48BC /* Debug */,
-				6A4C56E52DD331E6002A48BC /* Release */,
+				6A4C57912DD353B4002A48BC /* Debug */,
+				6A4C57922DD353B4002A48BC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6A4C56E62DD331E6002A48BC /* Build configuration list for PBXNativeTarget "E-Wallet" */ = {
+		6A4C57932DD353B4002A48BC /* Build configuration list for PBXNativeTarget "E-Wallet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A4C56E72DD331E6002A48BC /* Debug */,
-				6A4C56E82DD331E6002A48BC /* Release */,
+				6A4C57942DD353B4002A48BC /* Debug */,
+				6A4C57952DD353B4002A48BC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 6A4C56D02DD331E5002A48BC /* Project object */;
+	rootObject = 6A4C577D2DD353B3002A48BC /* Project object */;
 }
