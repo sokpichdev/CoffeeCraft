@@ -266,7 +266,7 @@ struct HomeView: View {
         .padding(.bottom, 16)
         .padding(.horizontal, 16)
     }
-    // MARK: - Special Offer View
+    // MARK: - BLack Friday View
     private var blackFridayView: some View {
         ZStack {
             // Base card with rounded corners and background
@@ -305,6 +305,7 @@ struct HomeView: View {
             .frame(width: 320, height: 170, alignment: .leading)
         }
     }
+    // MARK: - Special Offer View
     private var specialOfferView: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16)
