@@ -307,43 +307,52 @@ struct HomeView: View {
     }
     // MARK: - Special Offer View
     private var specialOfferView: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(hex: "#FFD2A6"))
-                .frame(width: 320, height: 170)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(Color(hex: "#00373E"))
-                        .frame(width: 100, height: 120)
-                        .rotationEffect(.degrees(25))
-                        .offset(x: 110, y: 50) // Adjusted offset to position at bottom right
-                )
-                .clipped()
-            // Text content
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Special Offer for")
-                        .foregroundColor(Color(hex: "#030319"))
-                        .font(.system(size: 20, design: .default))
-                        .fontWeight(.bold)
-                    Text("Today's Top Up")
-                        .foregroundColor(Color(hex: "#030319"))
-                        .font(.system(size: 20, design: .default))
-                        .fontWeight(.bold)
-                }
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Get discount for every top up,")
-                        .foregroundColor(Color(hex: "#030319"))
-                        .font(.system(size: 12, design: .default))
-                    Text("transfer and payment")
-                        .foregroundColor(Color(hex: "#030319"))
-                        .font(.system(size: 12, design: .default))
-                }
-            }
-            .padding(16)
-            .frame(width: 320, height: 170, alignment: .leading)
-        }
-    }
+         ZStack {
+             RoundedRectangle(cornerRadius: 16)
+                 .fill(Color(hex: "#FFD2A6"))
+                 .frame(width: 320, height: 170)
+                 .overlay(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color(hex: "#00373E"))
+                            .frame(width: 100, height: 120)
+                            .rotationEffect(.degrees(25))
+                         RoundedRectangle(cornerRadius: 15)
+                            .fill(Color(hex: "#4CD080"))
+                            .frame(width: 100, height: 120)
+                            .rotationEffect(.degrees(25))
+                            .offset(x: 20, y: 20)
+                    }
+                   .offset(x: 110, y: 50)
+                 )
+                 .clipped()
+
+             // Text content
+             VStack(alignment: .leading, spacing: 16) {
+                 VStack(alignment: .leading, spacing: 0) {
+                     Text("Special Offer for")
+                         .foregroundColor(Color(hex: "#030319"))
+                         .font(.system(size: 20, design: .default))
+                         .fontWeight(.bold)
+                     Text("Today's Top Up")
+                         .foregroundColor(Color(hex: "#030319"))
+                         .font(.system(size: 20, design: .default))
+                         .fontWeight(.bold)
+                 }
+                 VStack(alignment: .leading, spacing: 0) {
+                     Text("Get discount for every top up,")
+                         .foregroundColor(Color(hex: "#030319"))
+                         .font(.system(size: 12, design: .default))
+                     Text("transfer and payment")
+                         .foregroundColor(Color(hex: "#030319"))
+                         .font(.system(size: 12, design: .default))
+                 }
+             }
+             .padding(16)
+             .frame(width: 320, height: 170, alignment: .leading)
+         }
+     }
+
     // MARK: - Special Oferr Scroll
     private var specialOffersViewScroll: some View {
            ScrollView(.horizontal, showsIndicators: false) {
