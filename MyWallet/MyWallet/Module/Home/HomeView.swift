@@ -18,8 +18,7 @@ struct HomeView: View {
                 actionButtonsView
                 paymentListView
                 promoAndDiscountView
-                blackFridayView
-                specialOfferView
+                specialOffersViewScroll
             }
             .background(Color(.white))
         }
@@ -344,6 +343,16 @@ struct HomeView: View {
             .frame(width: 320, height: 170, alignment: .leading)
         }
     }
+    // MARK: - Special Oferr Scroll
+    private var specialOffersViewScroll: some View {
+           ScrollView(.horizontal, showsIndicators: false) {
+               HStack(spacing: 16) {
+                   blackFridayView
+                   specialOfferView
+               }
+               .padding(.horizontal, 16)
+           }
+       }
     
     // MARK: - Footer View
     private var footerView: some View {
