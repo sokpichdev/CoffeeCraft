@@ -8,20 +8,21 @@
 import SwiftUI
 
 struct TabBarView3: View {
+    let bgColor: Color = .init(white: 0.9)
     
     var body: some View {
         TabsLayoutView()
             .padding()
             .background(
-                Capsule().fill(.white)
+                Capsule()
+                    .fill(.white)
             )
             .frame(height: 70)
             .shadow(radius: 30)
     }
 }
 
-fileprivate
-struct TabsLayoutView: View {
+fileprivate struct TabsLayoutView: View {
     @State var selectedTab: Tab = .home
     @Namespace var namespace
     
@@ -46,10 +47,10 @@ struct TabsLayoutView: View {
         var body: some View {
             Button {
                 withAnimation(.easeInOut) {
-                  selectedTab = tab
+                    selectedTab = tab
                 }
                 selectedOffset = -60
-                if tab < selectedTab  {
+                if tab < selectedTab {
                     rotationAngle += 360
                 } else {
                     rotationAngle -= 360
@@ -57,9 +58,9 @@ struct TabsLayoutView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     selectedOffset = 0
                     if tab < selectedTab {
-                        rotationAngle += 270
+                        rotationAngle += 720
                     } else {
-                        rotationAngle -= 270
+                        rotationAngle -= 720
                     }
                 }
             } label: {
@@ -75,7 +76,7 @@ struct TabsLayoutView: View {
                             .foregroundColor(isSelected ? tab.color : .black.opacity(0.6))
                             .rotationEffect(.degrees(rotationAngle))
                             .scaleEffect(isSelected ? 1 : 0.9)
-                            .animation(.easeOut, value: rotationAngle)
+                            .animation(.easeInOut, value: rotationAngle)
                             .opacity(isSelected ? 1 : 0.7)
                             .padding(.leading, isSelected ? 20 : 0)
                             .padding(.horizontal, selectedTab != tab ? 10 : 0)
