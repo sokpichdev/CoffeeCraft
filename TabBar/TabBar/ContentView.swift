@@ -15,6 +15,7 @@ struct ContentView: View {
             bgColor.ignoresSafeArea()
             VStack(spacing: 70) {
                 TabBarView1()
+                TabBarView2()
             }
             .padding(.horizontal)
         }
