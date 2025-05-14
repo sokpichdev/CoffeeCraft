@@ -42,11 +42,11 @@ struct TabBarView1: View {
             }
             
             var body: some View {
-                Button(action: {
+                Button {
                     withAnimation {
                         selectedTab = tab
                     }
-                }, label: {
+                } label: {
                     ZStack {
                         if isSelected {
                             Circle()
@@ -67,8 +67,8 @@ struct TabBarView1: View {
                             .offset(y: isSelected ? -40 : 0)
                             .animation(isSelected ? .spring(response: 0.5, dampingFraction: 0.3, blendDuration: 1) : .spring(), value: selectedTab)
                     }
-                    .buttonStyle(.plain)
-                })
+                }
+                .buttonStyle(.plain)
             }
         }
     }
