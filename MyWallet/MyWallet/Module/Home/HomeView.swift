@@ -278,7 +278,7 @@ struct HomeView: View {
                         .fill(Color(hex: "#4CD080"))
                         .frame(width: 100, height: 120)
                         .rotationEffect(.degrees(25))
-                        .offset(x: 110, y: 50) // Adjusted offset to position at bottom right
+                        .offset(x: 115, y: 55)
                 )
                 .clipped()
 
