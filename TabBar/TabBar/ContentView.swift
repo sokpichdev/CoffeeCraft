@@ -16,6 +16,7 @@ struct ContentView: View {
             VStack(spacing: 70) {
                 TabBarView1()
                 TabBarView2()
+                TabBarView3()
             }
             .padding(.horizontal)
         }
