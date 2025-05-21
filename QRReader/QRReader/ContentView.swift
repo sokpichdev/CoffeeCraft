@@ -103,7 +103,6 @@ struct ScanOverlayView: View {
     }
 }
 
-
 struct ScanCorners: View {
     let size: CGFloat
     let length: CGFloat
@@ -111,61 +110,36 @@ struct ScanCorners: View {
 
     var body: some View {
         ZStack {
-            topLeftCorner // Top Left Corner
-                .offset(x: -size / 2, y: -size / 2)
-            topRightCorner  // Top Right Corner
-                .offset(x: size / 2 - length, y: -size / 2)
-            bottomLeftCorner // Bottom Left Corner
-                .offset(x: -size / 2, y: size / 2 - length)
-            bottomRightCorner // Bottom Right Corner
-                .offset(x: size / 2 - length, y: size / 2 - length)
+            corner
+                .rotationEffect(.degrees(0))
+                .position(x: length / 2, y: length / 2)
+
+            corner
+                .rotationEffect(.degrees(90))
+                .position(x: size - length / 2, y: length / 2)
+
+            corner
+                .rotationEffect(.degrees(-90))
+                .position(x: length / 2, y: size - length / 2)
+
+            corner
+                .rotationEffect(.degrees(180))
+                .position(x: size - length / 2, y: size - length / 2)
         }
+        .frame(width: size, height: size)
     }
 
-    var topLeftCorner: some View {
-        ZStack(alignment: .topLeading) {
+    var corner: some View {
+        ZStack {
             Rectangle()
                 .fill(Color.white)
                 .frame(width: length, height: thickness)
-            Rectangle()
-                .fill(Color.white)
-                .frame(width: thickness, height: length)
-        }
-        .frame(width: length, height: length)
-    }
+                .offset(y: -(length - thickness) / 2) // move up for L shape
 
-    var topRightCorner: some View {
-        ZStack(alignment: .topTrailing) {
-            Rectangle()
-                .fill(Color.white)
-                .frame(width: length, height: thickness)
             Rectangle()
                 .fill(Color.white)
                 .frame(width: thickness, height: length)
-        }
-        .frame(width: length, height: length)
-    }
-
-    var bottomLeftCorner: some View {
-        ZStack(alignment: .bottomLeading) {
-            Rectangle()
-                .fill(Color.white)
-                .frame(width: length, height: thickness)
-            Rectangle()
-                .fill(Color.white)
-                .frame(width: thickness, height: length)
-        }
-        .frame(width: length, height: length)
-    }
-
-    var bottomRightCorner: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Rectangle()
-                .fill(Color.white)
-                .frame(width: length, height: thickness)
-            Rectangle()
-                .fill(Color.white)
-                .frame(width: thickness, height: length)
+                .offset(x: -(length - thickness) / 2) // move left for L shape
         }
         .frame(width: length, height: length)
     }
