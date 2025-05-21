@@ -80,24 +80,34 @@ struct LinkedDevicesView: View {
                             .foregroundColor(.red)
                     }
                 }
-
-                Section(header: Text("Active Sessions"), footer: Text("This official Telegram app is available for iPhone, iPad, Android, and Windows, macOS and Linux. Learn More")) {
+                
+                Section(
+                    header: Text("Active Sessions"),
+                    footer: Text("This official Telegram app is available for iPhone, iPad, Android, and Windows, macOS and Linux. Learn More")
+                ) {
                     ForEach(sessions.filter { !$0.isCurrentDevice }) { session in
                         HStack {
                             if isEditing {
-                                withAnimation {
-                                    Button(action: {
-                                        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
-                                            sessions.remove(at: index)
-                                        }
-                                    }) {
-                                        Image(systemName: "minus.circle.fill")
-                                            .foregroundColor(.red)
+                                Button(action: {
+                                    if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+                                        sessions.remove(at: index)
                                     }
+                                }) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(.red)
                                 }
                             }
                             DeviceRow(session: session)
                             Spacer()
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+                                    sessions.remove(at: index)
+                                }
+                            } label: {
+                                Label("Terminate", systemImage: "trash")
+                            }
                         }
                     }
                 }
@@ -173,9 +183,6 @@ struct AutoTerminateSheet: View {
                     }
                 }
             }
-//            .navigationTitle("Auto-Terminate After")
-            .navigationBarTitleDisplayMode(.inline)
-            .background(Color.clear)
         }
     }
 }

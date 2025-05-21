@@ -9,89 +9,151 @@ import AVFoundation
 import Vision
 
 struct ContentView: View {
-    
-    @State private var scannedString: String = "Find a code to scan"
-    @State private var isFlashOn: Bool = false
-    @State private var isScanning: Bool = false
+    @State private var scannedString: String = ""
+    @State private var isScanning: Bool = true
     @State private var shouldReset: Bool = false
-    @State var scanningFrameView: UIView?
+    @State private var animateScanLine = false
+
     let captureSession = AVCaptureSession()
+    
     var body: some View {
-        ZStack(alignment: .bottom) {
-            ScannerView(scannedString: $scannedString, isFlashOn: $isFlashOn, isScanning: $isScanning, shouldReset: $shouldReset, captureSession: captureSession, scanningFrameView: $scanningFrameView)
-                .edgesIgnoringSafeArea(.all)
+        ZStack {
+            ScannerView(
+                scannedString: $scannedString,
+                isFlashOn: .constant(false),
+                isScanning: $isScanning,
+                shouldReset: $shouldReset,
+                captureSession: captureSession,
+                scanningFrameView: .constant(nil)
+            )
+            .edgesIgnoringSafeArea(.all)
             
-            VStack {
-                Spacer()
-                
-                Button(action: {
-                    toggleFlash()
-                }) {
-                    Image(systemName: isFlashOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                        .font(.system(size: 30))
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .clipShape(Circle())
-                }
-                .padding(.bottom, 30)
-                
-                Text(scannedString)
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.7))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding()
+            ScanOverlayView(animateScanLine: $animateScanLine)
+        }
+        .onAppear {
+            animateScanLine = true
+            NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+                captureSession.stopRunning()
             }
+            NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+                captureSession.startRunning()
+            }
+        }
+        .onDisappear {
+            NotificationCenter.default.removeObserver(self)
         }
         .onChange(of: scannedString) { newValue in
             handleScannedQR(newValue)
         }
-        .onAppear {
-            NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
-                DispatchQueue.global(qos: .background).async {
-                    captureSession.stopRunning()
-                }
-            }
-            
-            NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
-                DispatchQueue.global(qos: .background).async {
-                    captureSession.startRunning()
-                }
-            }
-        }
-        .onDisappear {
-            NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
-            NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
-        }
-
-    }
-    func resetScanner() {
-        scanningFrameView?.removeFromSuperview() // Remove existing scanning frame if any
-        scannedString = "Find a code to scan"
-        shouldReset = false
     }
 
     func handleScannedQR(_ scannedData: String) {
         if let url = URL(string: scannedData), UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
-            
-        } else {
-            print("Scanned data is not a valid URL")
         }
         resetScreen()
     }
-    
+
     func resetScreen() {
-        // Reset the scanned string and flashlight state
-        scannedString = "Find a code to scan"
-        isFlashOn = false
+        scannedString = ""
         shouldReset = true
     }
+}
+
+struct ScanOverlayView: View {
+    @Binding var animateScanLine: Bool
+
+    let boxSize: CGFloat = 280
+    let cornerLength: CGFloat = 24
+    let cornerThickness: CGFloat = 4
+    let scanLineHeight: CGFloat = 2
     
-    func toggleFlash() {
-        isFlashOn.toggle()
+    @State private var scanLineOffset: CGFloat = -140
+
+    var body: some View {
+        ZStack {
+            // Corner brackets
+            ScanCorners(size: boxSize, length: cornerLength, thickness: cornerThickness)
+
+            // Animated blue scan line
+            Rectangle()
+                .fill(Color.blue)
+                .frame(width: boxSize, height: scanLineHeight)
+                .offset(y: scanLineOffset)
+                .onAppear {
+                    withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: true)) {
+                        scanLineOffset = 140
+                    }
+                }
+        }
+        .frame(width: boxSize, height: boxSize)
+    }
+}
+
+struct ScanCorners: View {
+    let size: CGFloat
+    let length: CGFloat
+    let thickness: CGFloat
+
+    var body: some View {
+        ZStack {
+            topLeftCorner // Top Left Corner
+                .offset(x: -size / 2, y: -size / 2)
+            topRightCorner  // Top Right Corner
+                .offset(x: size / 2 - length, y: -size / 2)
+            bottomLeftCorner // Bottom Left Corner
+                .offset(x: -size / 2, y: size / 2 - length)
+            bottomRightCorner // Bottom Right Corner
+                .offset(x: size / 2 - length, y: size / 2 - length)
+        }
+    }
+
+    var topLeftCorner: some View {
+        ZStack(alignment: .topLeading) {
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: length, height: thickness)
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: thickness, height: length)
+        }
+        .frame(width: length, height: length)
+    }
+
+    var topRightCorner: some View {
+        ZStack(alignment: .topTrailing) {
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: length, height: thickness)
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: thickness, height: length)
+        }
+        .frame(width: length, height: length)
+    }
+
+    var bottomLeftCorner: some View {
+        ZStack(alignment: .bottomLeading) {
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: length, height: thickness)
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: thickness, height: length)
+        }
+        .frame(width: length, height: length)
+    }
+
+    var bottomRightCorner: some View {
+        ZStack(alignment: .bottomTrailing) {
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: length, height: thickness)
+            Rectangle()
+                .fill(Color.white)
+                .frame(width: thickness, height: length)
+        }
+        .frame(width: length, height: length)
     }
 }
 
@@ -146,7 +208,7 @@ struct ScannerView: UIViewControllerRepresentable {
         }
         
         // Show the scanning area effect (zoom-in frame)
-        isScanning ? applyScanningFrame(to: uiViewController.view) : nil
+//        isScanning ? applyScanningFrame(to: uiViewController.view) : nil
     }
     
     func resetScanner(in view: UIView) {
