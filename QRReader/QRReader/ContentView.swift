@@ -17,7 +17,7 @@ struct ContentView: View {
     let captureSession = AVCaptureSession()
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .center) {
             ScannerView(
                 scannedString: $scannedString,
                 isFlashOn: .constant(false),
@@ -26,10 +26,9 @@ struct ContentView: View {
                 captureSession: captureSession,
                 scanningFrameView: .constant(nil)
             )
-            .edgesIgnoringSafeArea(.all)
-            
             ScanOverlayView(animateScanLine: $animateScanLine)
         }
+        .ignoresSafeArea(.all)
         .onAppear {
             animateScanLine = true
             NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
@@ -67,28 +66,43 @@ struct ScanOverlayView: View {
     let cornerLength: CGFloat = 24
     let cornerThickness: CGFloat = 4
     let scanLineHeight: CGFloat = 2
-    
+
     @State private var scanLineOffset: CGFloat = -140
 
     var body: some View {
-        ZStack {
-            // Corner brackets
-            ScanCorners(size: boxSize, length: cornerLength, thickness: cornerThickness)
+        GeometryReader { geometry in
+            ZStack(alignment: .center) {
+                // Dimmed background with a transparent center hole
+                Color.black.opacity(0.6)
+                    .mask(
+                        Rectangle()
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 0)
+                                    .frame(width: boxSize, height: boxSize)
+                                    .blendMode(.destinationOut)
+                            )
+                    )
+                    .compositingGroup()
 
-            // Animated blue scan line
-            Rectangle()
-                .fill(Color.blue)
-                .frame(width: boxSize, height: scanLineHeight)
-                .offset(y: scanLineOffset)
-                .onAppear {
-                    withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: true)) {
-                        scanLineOffset = 140
+                // L-shaped corners
+                ScanCorners(size: boxSize, length: cornerLength, thickness: cornerThickness)
+
+                // Blue scan line
+                Rectangle()
+                    .fill(Color.blue)
+                    .frame(width: boxSize, height: scanLineHeight)
+                    .offset(y: scanLineOffset)
+                    .onAppear {
+                        withAnimation(Animation.linear(duration: 2).repeatForever(autoreverses: true)) {
+                            scanLineOffset = boxSize / 2
+                        }
                     }
-                }
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
-        .frame(width: boxSize, height: boxSize)
     }
 }
+
 
 struct ScanCorners: View {
     let size: CGFloat
