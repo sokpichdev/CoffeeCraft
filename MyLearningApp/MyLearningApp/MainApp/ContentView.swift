@@ -32,10 +32,10 @@ struct ContentView: View {
 //                        CustomModuleButton(name: "📷 QR Reader", color: .blue) {
 //                            selectButton(.qrReader)
 //                        }
-//                        
-//                        CustomModuleButton(name: "📦 Drag & Drop", color: .green) {
-//                            selectButton(.dragdrop)
-//                        }
+                        
+                        CustomModuleButton(name: "📦 Drag & Drop", color: .green) {
+                            selectButton(.dragdrop)
+                        }
 //                        
 //                        CustomModuleButton(name: "🔍 Code Detector", color: .purple) {
 //                            selectButton(.codeDetector)
@@ -44,13 +44,13 @@ struct ContentView: View {
 //                        CustomModuleButton(name: "Video Streaming", color: .yellow) {
 //                            selectButton(.videoStreaming)
 //                        }
-                        
-                        Menu {
-                            Button("Fixed Scrolling View") { selectDropdownOption(1) }
-                            Button("Gesture Scrolling View - Volume Slider") { selectDropdownOption(2) }
-                        } label: {
-                            CustomModuleButton(name: "Scrolling Options", color: .blue) { }
-                        }
+//                        
+//                        Menu {
+//                            Button("Fixed Scrolling View") { selectDropdownOption(1) }
+//                            Button("Gesture Scrolling View - Volume Slider") { selectDropdownOption(2) }
+//                        } label: {
+//                            CustomModuleButton(name: "Scrolling Options", color: .blue) { }
+//                        }
 //                        CustomModuleButton(name: "Download", color: .green) {
 //                            selectButton(.download)
 //                        }

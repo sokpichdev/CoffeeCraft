@@ -86,6 +86,7 @@ struct MapView: View {
     @State private var searchQuery = ""
     @State private var places: [Place] = []
     @State private var selectedPlace: Place? = nil
+    @State private var hasSetRegion = false
 
     // Custom structure that wraps MKMapItem and conforms to Identifiable
     struct Place: Identifiable {
@@ -139,9 +140,9 @@ struct MapView: View {
                     }
                 }
                 .onAppear {
-                    // Set region to the user's location when it's available
-                    if let location = locationManager.userLocation {
+                    if !hasSetRegion, let location = locationManager.userLocation {
                         region.center = location
+                        hasSetRegion = true
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity) // Full-screen map
