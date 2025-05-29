@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		6A9AD3152DDD87B90058D967 /* RickAndMorty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RickAndMorty.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A09B13C2DE719AC00AC6221 /* TelegramBotMessage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramBotMessage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		6A9AD3172DDD87B90058D967 /* RickAndMorty */ = {
+		6A09B13E2DE719AC00AC6221 /* TelegramBotMessage */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RickAndMorty;
+			path = TelegramBotMessage;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6A9AD3122DDD87B90058D967 /* Frameworks */ = {
+		6A09B1392DE719AC00AC6221 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6A9AD30C2DDD87B90058D967 = {
+		6A09B1332DE719AC00AC6221 = {
 			isa = PBXGroup;
 			children = (
-				6A9AD3162DDD87B90058D967 /* Products */,
-				6A9AD3172DDD87B90058D967 /* RickAndMorty */,
+				6A09B13E2DE719AC00AC6221 /* TelegramBotMessage */,
+				6A09B13D2DE719AC00AC6221 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		6A9AD3162DDD87B90058D967 /* Products */ = {
+		6A09B13D2DE719AC00AC6221 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6A9AD3152DDD87B90058D967 /* RickAndMorty.app */,
+				6A09B13C2DE719AC00AC6221 /* TelegramBotMessage.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6A9AD3142DDD87B90058D967 /* RickAndMorty */ = {
+		6A09B13B2DE719AC00AC6221 /* TelegramBotMessage */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A9AD3232DDD87BB0058D967 /* Build configuration list for PBXNativeTarget "RickAndMorty" */;
+			buildConfigurationList = 6A09B14A2DE719AE00AC6221 /* Build configuration list for PBXNativeTarget "TelegramBotMessage" */;
 			buildPhases = (
-				6A9AD3112DDD87B90058D967 /* Sources */,
-				6A9AD3122DDD87B90058D967 /* Frameworks */,
-				6A9AD3132DDD87B90058D967 /* Resources */,
+				6A09B1382DE719AC00AC6221 /* Sources */,
+				6A09B1392DE719AC00AC6221 /* Frameworks */,
+				6A09B13A2DE719AC00AC6221 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				6A9AD3172DDD87B90058D967 /* RickAndMorty */,
+				6A09B13E2DE719AC00AC6221 /* TelegramBotMessage */,
 			);
-			name = RickAndMorty;
+			name = TelegramBotMessage;
 			packageProductDependencies = (
 			);
-			productName = RickAndMorty;
-			productReference = 6A9AD3152DDD87B90058D967 /* RickAndMorty.app */;
+			productName = TelegramBotMessage;
+			productReference = 6A09B13C2DE719AC00AC6221 /* TelegramBotMessage.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		6A9AD30D2DDD87B90058D967 /* Project object */ = {
+		6A09B1342DE719AC00AC6221 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
-					6A9AD3142DDD87B90058D967 = {
+					6A09B13B2DE719AC00AC6221 = {
 						CreatedOnToolsVersion = 16.1;
 					};
 				};
 			};
-			buildConfigurationList = 6A9AD3102DDD87B90058D967 /* Build configuration list for PBXProject "RickAndMorty" */;
+			buildConfigurationList = 6A09B1372DE719AC00AC6221 /* Build configuration list for PBXProject "TelegramBotMessage" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 6A9AD30C2DDD87B90058D967;
+			mainGroup = 6A09B1332DE719AC00AC6221;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6A9AD3162DDD87B90058D967 /* Products */;
+			productRefGroup = 6A09B13D2DE719AC00AC6221 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6A9AD3142DDD87B90058D967 /* RickAndMorty */,
+				6A09B13B2DE719AC00AC6221 /* TelegramBotMessage */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		6A9AD3132DDD87B90058D967 /* Resources */ = {
+		6A09B13A2DE719AC00AC6221 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		6A9AD3112DDD87B90058D967 /* Sources */ = {
+		6A09B1382DE719AC00AC6221 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		6A9AD3212DDD87BB0058D967 /* Debug */ = {
+		6A09B1482DE719AE00AC6221 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -188,7 +188,7 @@
 			};
 			name = Debug;
 		};
-		6A9AD3222DDD87BB0058D967 /* Release */ = {
+		6A09B1492DE719AE00AC6221 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -244,14 +244,14 @@
 			};
 			name = Release;
 		};
-		6A9AD3242DDD87BB0058D967 /* Debug */ = {
+		6A09B14B2DE719AE00AC6221 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"RickAndMorty/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"TelegramBotMessage/Preview Content\"";
 				DEVELOPMENT_TEAM = K6KHZK67R9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -265,7 +265,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RickAndMorty;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.TelegramBotMessage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -273,14 +273,14 @@
 			};
 			name = Debug;
 		};
-		6A9AD3252DDD87BB0058D967 /* Release */ = {
+		6A09B14C2DE719AE00AC6221 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"RickAndMorty/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"TelegramBotMessage/Preview Content\"";
 				DEVELOPMENT_TEAM = K6KHZK67R9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -294,7 +294,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.RickAndMorty;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sokpich.TelegramBotMessage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -305,25 +305,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6A9AD3102DDD87B90058D967 /* Build configuration list for PBXProject "RickAndMorty" */ = {
+		6A09B1372DE719AC00AC6221 /* Build configuration list for PBXProject "TelegramBotMessage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A9AD3212DDD87BB0058D967 /* Debug */,
-				6A9AD3222DDD87BB0058D967 /* Release */,
+				6A09B1482DE719AE00AC6221 /* Debug */,
+				6A09B1492DE719AE00AC6221 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6A9AD3232DDD87BB0058D967 /* Build configuration list for PBXNativeTarget "RickAndMorty" */ = {
+		6A09B14A2DE719AE00AC6221 /* Build configuration list for PBXNativeTarget "TelegramBotMessage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A9AD3242DDD87BB0058D967 /* Debug */,
-				6A9AD3252DDD87BB0058D967 /* Release */,
+				6A09B14B2DE719AE00AC6221 /* Debug */,
+				6A09B14C2DE719AE00AC6221 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 6A9AD30D2DDD87B90058D967 /* Project object */;
+	rootObject = 6A09B1342DE719AC00AC6221 /* Project object */;
 }
