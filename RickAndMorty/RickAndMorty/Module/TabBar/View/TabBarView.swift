@@ -40,15 +40,6 @@ struct TabBarView1: View {
     }
 }
 
-struct LocationsView: View {
-    var body: some View {
-        Text("Locations Screen")
-            .font(.largeTitle)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(bgColor)
-    }
-}
-
 struct EpisodesView: View {
     var body: some View {
         Text("Episodes Screen")
