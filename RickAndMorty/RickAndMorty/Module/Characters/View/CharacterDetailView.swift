@@ -8,6 +8,7 @@ import SwiftUI
 
 struct CharacterDetailView: View {
     let character: Character
+    @ObservedObject var favorites = FavoritesManager.shared
 
     var body: some View {
         VStack(spacing: 16) {
@@ -32,6 +33,15 @@ struct CharacterDetailView: View {
             Text("Location: \(character.location.name)")
 
             Spacer()
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    favorites.toggleFavorite(character)
+                } label: {
+                    Image(systemName: favorites.isFavorite(character) ? "heart.fill" : "heart")
+                }
+            }
         }
         .padding()
         .navigationTitle(character.name)

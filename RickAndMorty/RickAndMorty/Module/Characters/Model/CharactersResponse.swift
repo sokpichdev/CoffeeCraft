@@ -18,7 +18,7 @@ struct Info: Codable {
     let prev: String?
 }
 
-struct Character: Codable, Identifiable, Hashable {
+struct Character: Codable, Identifiable, Hashable, Equatable {
     let id: Int
     let name: String
     let status: String

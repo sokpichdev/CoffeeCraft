@@ -43,9 +43,11 @@ struct CharacterCardView: View {
                 .frame(maxWidth: .infinity)
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
         .frame(height: 230) // total card height (adjust if needed)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
+        )
     }
 }

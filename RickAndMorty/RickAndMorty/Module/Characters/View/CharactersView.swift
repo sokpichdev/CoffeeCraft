@@ -62,6 +62,7 @@ struct CharactersView: View {
                     }
                 }
             }
+            .background(bgColor)
             .onAppear {
                 viewModel.resetAndFetch()
             }

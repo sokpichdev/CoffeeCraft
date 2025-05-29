@@ -1,29 +1,29 @@
 //
-//  LocationCardView.swift
+//  EpisodeCardView.swift
 //  RickAndMorty
 //
 //  Created by Sok Pich on 5/29/25.
 //
 import SwiftUI
 
-struct LocationCardView: View {
-    let location: Location
+struct EpisodeCardView: View {
+    let episode: Episode
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(location.name)
+            Text(episode.name)
                 .font(.headline)
                 .foregroundColor(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
 
-            Text(location.type)
+            Text(episode.episode)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.leading)
 
-            Text(location.dimension)
-                .font(.caption)
+            Text("Air Date: \(episode.air_date)")
+                .font(.footnote)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.leading)
             Spacer()

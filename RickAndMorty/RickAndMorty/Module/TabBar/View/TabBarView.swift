@@ -39,21 +39,3 @@ struct TabBarView1: View {
         .edgesIgnoringSafeArea(.bottom)
     }
 }
-
-struct EpisodesView: View {
-    var body: some View {
-        Text("Episodes Screen")
-            .font(.largeTitle)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(bgColor)
-    }
-}
-
-struct FavoritesView: View {
-    var body: some View {
-        Text("Favorites Screen")
-            .font(.largeTitle)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(bgColor)
-    }
-}

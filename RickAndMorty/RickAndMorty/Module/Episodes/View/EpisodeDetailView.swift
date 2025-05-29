@@ -1,14 +1,14 @@
 //
-//  LocationDetailView.swift
+//  EpisodeDetailView.swift
 //  RickAndMorty
 //
 //  Created by Sok Pich on 5/29/25.
 //
 import SwiftUI
 
-struct LocationDetailView: View {
-    let location: Location
-    @StateObject private var viewModel = LocationDetailViewModel()
+struct EpisodeDetailView: View {
+    let episode: Episode
+    @StateObject private var viewModel = LocationDetailViewModel() // reuse to fetch characters by URLs
     @ObservedObject var favorites = FavoritesManager.shared
 
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
@@ -16,29 +16,24 @@ struct LocationDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Header Info
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(location.name)
+                    Text(episode.name)
                         .font(.largeTitle)
                         .bold()
 
-                    Text("Type: \(location.type)")
-                    Text("Dimension: \(location.dimension)")
+                    Text("Air Date: \(episode.air_date)")
+                    Text("Episode Code: \(episode.episode)")
                 }
                 .padding(.horizontal)
 
                 Divider()
 
-                Text("Residents")
+                Text("Characters")
                     .font(.headline)
                     .padding(.horizontal)
 
                 if viewModel.isLoading {
                     ProgressView().padding()
-                } else if viewModel.residents.isEmpty {
-                    Text("No known residents.")
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
                 } else {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(viewModel.residents) { character in
@@ -55,16 +50,16 @@ struct LocationDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    favorites.toggleFavorite(location)
+                    favorites.toggleFavorite(episode)
                 } label: {
-                    Image(systemName: favorites.isFavorite(location) ? "heart.fill" : "heart")
+                    Image(systemName: favorites.isFavorite(episode) ? "heart.fill" : "heart")
                 }
             }
         }
-        .navigationTitle(location.name)
+        .navigationTitle(episode.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            viewModel.fetchResidents(from: location.residents)
+            viewModel.fetchResidents(from: episode.characters)
         }
     }
 }
