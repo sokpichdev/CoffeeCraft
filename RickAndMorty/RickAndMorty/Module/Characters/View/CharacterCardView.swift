@@ -10,31 +10,42 @@ struct CharacterCardView: View {
     let character: Character
 
     var body: some View {
-        HStack {
-            AsyncImage(url: URL(string: character.image)) { image in
-                image.resizable()
-            } placeholder: {
-                ProgressView()
+        VStack(spacing: 8) {
+            // Fixed-height image with consistent layout
+            AsyncImage(url: URL(string: character.image)) { phase in
+                switch phase {
+                case .empty:
+                    Color.gray.opacity(0.2)
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                case .failure:
+                    Image(systemName: "photo")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.gray)
+                @unknown default:
+                    EmptyView()
+                }
             }
-            .frame(width: 80, height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .frame(height: 150)
+            .frame(maxWidth: .infinity)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 12))
 
-            VStack(alignment: .leading) {
-                Text(character.name)
-                    .font(.headline)
-                Text(character.species)
-                    .font(.subheadline)
-                Text(character.status)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-
-            Spacer()
+            // Fixed-height name text (limit to 2 lines)
+            Text(character.name)
+                .font(.headline)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .frame(height: 40) // force consistent height for all names
+                .frame(maxWidth: .infinity)
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
-        .shadow(radius: 2)
-        .padding(.horizontal)
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .frame(height: 230) // total card height (adjust if needed)
     }
 }
