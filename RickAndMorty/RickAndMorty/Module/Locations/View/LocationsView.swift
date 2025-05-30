@@ -41,6 +41,9 @@ struct LocationsView: View {
                 viewModel.resetAndFetch()
             }
             .background(Color(.systemBackground))
+            .refreshable {
+                viewModel.resetAndFetch()
+            }
         }
     }
 }

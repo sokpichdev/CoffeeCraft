@@ -67,6 +67,9 @@ struct CharactersView: View {
             .onAppear {
                 viewModel.resetAndFetch()
             }
+            .refreshable {
+                viewModel.resetAndFetch()
+            }
         }
     }
 }

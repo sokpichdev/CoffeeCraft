@@ -30,6 +30,9 @@ struct EpisodesView: View {
                 }
                 .padding()
             }
+            .refreshable {
+                viewModel.resetAndFetch()
+            }
             .navigationTitle("Episodes")
             .scrollDismissesKeyboard(.immediately)
             .searchable(text: $viewModel.searchQuery, prompt: "Search episodes")
