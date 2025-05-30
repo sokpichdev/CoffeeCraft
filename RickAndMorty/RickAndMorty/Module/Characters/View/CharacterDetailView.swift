@@ -36,26 +36,8 @@ struct CharacterDetailView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    favorites.toggleFavorite(character)
-                } label: {
-                    Image(systemName: favorites.isFavorite(character) ? "heart.fill" : "heart")
-                        .foregroundColor(Color(.secondaryLabel))
-                }
-            }
-        }
         .padding()
         .navigationTitle(character.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            tabBarManager.isVisible = false
-        }
-        .onDisappear {
-            withAnimation(.easeInOut(duration: 0.05)) {
-                tabBarManager.isVisible = true
-            }
-        }
     }
 }
