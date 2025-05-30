@@ -25,10 +25,7 @@ struct CharacterDetailPagerView: View {
                 CharacterDetailView(character: character)
                     .tag(index)
                     .onAppear {
-                        currentIndex = index
-                        print("Current index: \(index) / Total: \(characters.count)")
-
-                        // Fetch more if we're at the last item
+                        // Only fetch more if we're at the end
                         if index == characters.count - 1 {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 fetchMoreCharactersIfNeeded(character)
@@ -39,6 +36,7 @@ struct CharacterDetailPagerView: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // Explicit page style
         .navigationBarTitleDisplayMode(.inline)
+        .indexViewStyle(.page(backgroundDisplayMode: .never))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if characters.indices.contains(currentIndex) {
