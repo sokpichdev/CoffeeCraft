@@ -30,8 +30,9 @@ class CharactersViewModel: ObservableObject {
             return
         }
 
-        let thresholdIndex = characters.index(characters.endIndex, offsetBy: -5)
+        let thresholdIndex = characters.index(characters.endIndex, offsetBy: -1) // last item
         if characters.firstIndex(where: { $0.id == current.id }) == thresholdIndex {
+            print("Triggering API fetch for page \(currentPage)")
             fetchCharacters()
         }
     }

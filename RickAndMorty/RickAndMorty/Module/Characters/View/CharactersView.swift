@@ -22,8 +22,14 @@ struct CharactersView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.characters) { character in
                         NavigationLink {
-                            CharacterDetailPagerView(characters: viewModel.characters, initialCharacter: character)
-                                .environmentObject(tabBarManager)
+                            CharacterDetailPagerView(
+                                characters: viewModel.characters,
+                                initialCharacter: character,
+                                fetchMoreCharactersIfNeeded: { currentChar in
+                                    viewModel.fetchCharactersIfNeeded(currentCharacter: currentChar)
+                                }
+                            )
+                            .environmentObject(tabBarManager)
                         } label: {
                             CharacterCardView(character: character)
                         }
@@ -74,33 +80,5 @@ struct CharactersView: View {
                 viewModel.resetAndFetch()
             }
         }
-    }
-}
-
-struct CharacterRow: View {
-    let character: Character
-
-    var body: some View {
-        VStack {
-            AsyncImage(url: URL(string: character.image)) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-            } placeholder: {
-                Color.gray.opacity(0.2)
-            }
-            .frame(width: 120, height: 120)
-            .clipShape(Circle())
-
-            Text(character.name)
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .frame(width: 120)
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(radius: 3)
     }
 }

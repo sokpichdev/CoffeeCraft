@@ -8,23 +8,38 @@ import SwiftUI
 
 struct CharacterDetailPagerView: View {
     let characters: [Character]
+    let fetchMoreCharactersIfNeeded: (Character) -> Void
     @State private var currentIndex: Int
     @ObservedObject var favorites = FavoritesManager.shared
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
-    init(characters: [Character], initialCharacter: Character) {
+    init(characters: [Character], initialCharacter: Character, fetchMoreCharactersIfNeeded: @escaping (Character) -> Void) {
         self.characters = characters
-        self._currentIndex = State(initialValue: characters.firstIndex(where: { $0.id == initialCharacter.id }) ?? 0)
+        self.fetchMoreCharactersIfNeeded = fetchMoreCharactersIfNeeded
+        _currentIndex = State(initialValue: characters.firstIndex(where: { $0.id == initialCharacter.id }) ?? 0)
     }
 
     var body: some View {
         TabView(selection: $currentIndex) {
-            ForEach(Array(characters.enumerated()), id: \.1.id) { index, character in
+            ForEach(Array(characters.enumerated()), id: \.element.id) { index, character in
                 CharacterDetailView(character: character)
                     .tag(index)
+                    .onAppear {
+                        currentIndex = index
+                        print("Current index: \(index) / Total: \(characters.count)")
+
+                        // Fetch more if we're at the last item
+                        if index == characters.count - 1 {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                fetchMoreCharactersIfNeeded(character)
+                            }
+                        }
+                    }
             }
         }
-        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .navigationTitle(characters[currentIndex].name)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if characters.indices.contains(currentIndex) {
@@ -42,9 +57,7 @@ struct CharacterDetailPagerView: View {
             tabBarManager.isVisible = false
         }
         .onDisappear {
-            withAnimation(.easeInOut(duration: 0.05)) {
-                tabBarManager.isVisible = true
-            }
+            tabBarManager.isVisible = true
         }
     }
 }
