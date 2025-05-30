@@ -12,7 +12,7 @@ struct LocationsView: View {
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.locations) { location in
@@ -32,6 +32,7 @@ struct LocationsView: View {
                 .padding()
             }
             .navigationTitle("Locations")
+            .scrollDismissesKeyboard(.immediately)
             .searchable(text: $viewModel.searchQuery, prompt: "Search locations")
             .onChange(of: viewModel.searchQuery) {
                 viewModel.resetAndFetch()

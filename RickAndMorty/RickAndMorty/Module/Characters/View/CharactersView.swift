@@ -17,7 +17,7 @@ struct CharactersView: View {
     let genderOptions = ["", "male", "female", "genderless", "unknown"]
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.characters) { character in

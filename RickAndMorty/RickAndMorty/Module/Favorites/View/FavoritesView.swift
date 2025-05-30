@@ -11,8 +11,8 @@ struct FavoritesView: View {
     @State private var selection = 0
 
     var body: some View {
-        NavigationView {
-            VStack {
+        NavigationStack {
+            VStack(spacing: 0) {
                 Picker("Favorite Type", selection: $selection) {
                     Text("Characters").tag(0)
                     Text("Episodes").tag(1)
@@ -51,6 +51,7 @@ struct FavoritesView: View {
                         EmptyView()
                     }
                 }
+                .scrollDismissesKeyboard(.immediately)
             }
             .navigationTitle("Favorites")
             .background(Color(.systemBackground))
