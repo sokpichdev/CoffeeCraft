@@ -39,11 +39,11 @@ struct TabsLayoutView: View {
                 ZStack {
                     if isSelected {
                         Circle()
-                            .shadow(radius: 10)
+                            .fill(.ultraThickMaterial)
                             .background {
                                 Circle()
                                     .stroke(lineWidth: 15)
-                                    .foregroundColor(bgColor)
+                                    .fill(.ultraThinMaterial.opacity(0.5))
                             }
                             .offset(y: -40)
                             .matchedGeometryEffect(id: "Selected Tab", in: namespace)
@@ -51,7 +51,7 @@ struct TabsLayoutView: View {
                     }
                     Image(systemName: tab.icon)
                         .font(.system(size: 23, weight: .semibold, design: .rounded))
-                        .foregroundColor(isSelected ? .init(white: 0.9) : .gray)
+                        .foregroundColor(isSelected ? Color(.label) : Color(.secondaryLabel))
                         .scaleEffect(isSelected ? 1 : 0.8)
                         .offset(y: isSelected ? -40 : 0)
                         .animation(isSelected ? .spring(response: 0.5, dampingFraction: 0.3, blendDuration: 1) : .spring(), value: selectedTab)
