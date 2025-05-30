@@ -12,28 +12,29 @@ struct CharacterDetailView: View {
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
     var body: some View {
-        VStack(spacing: 16) {
-            AsyncImage(url: URL(string: character.image)) { image in
-                image.resizable()
-            } placeholder: {
-                ProgressView()
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 16) {
+                AsyncImage(url: URL(string: character.image)) { image in
+                    image.resizable()
+                } placeholder: {
+                    ProgressView()
+                }
+                .frame(width: 200, height: 200)
+                .clipShape(Circle())
+
+                Text(character.name)
+                    .font(.largeTitle)
+                    .bold()
+
+                Text("\(character.status) - \(character.species)")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+
+                Text("Gender: \(character.gender)")
+                Text("Origin: \(character.origin.name)")
+                Text("Location: \(character.location.name)")
             }
-            .frame(width: 200, height: 200)
-            .clipShape(Circle())
-
-            Text(character.name)
-                .font(.largeTitle)
-                .bold()
-
-            Text("\(character.status) - \(character.species)")
-                .font(.headline)
-                .foregroundColor(.secondary)
-
-            Text("Gender: \(character.gender)")
-            Text("Origin: \(character.origin.name)")
-            Text("Location: \(character.location.name)")
-
-            Spacer()
+            .frame(maxWidth: .infinity)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

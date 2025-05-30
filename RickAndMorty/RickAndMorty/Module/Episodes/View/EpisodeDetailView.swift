@@ -15,7 +15,7 @@ struct EpisodeDetailView: View {
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(episode.name)

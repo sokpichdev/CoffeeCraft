@@ -21,7 +21,7 @@ struct FavoritesView: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     switch selection {
                     case 0:
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 16) {

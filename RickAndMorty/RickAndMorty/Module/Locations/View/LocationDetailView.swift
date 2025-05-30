@@ -14,7 +14,7 @@ struct LocationDetailView: View {
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 // Header Info
                 VStack(alignment: .leading, spacing: 8) {
