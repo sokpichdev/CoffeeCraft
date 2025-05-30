@@ -53,7 +53,7 @@ struct FavoritesView: View {
                 }
             }
             .navigationTitle("Favorites")
-            .background(bgColor)
+            .background(Color(.systemBackground))
         }
     }
 }

@@ -33,7 +33,7 @@ struct LocationCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(.systemBackground))
+                .fill(Color(.secondarySystemBackground))
                 .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
         )
     }

@@ -40,6 +40,7 @@ struct CharacterDetailView: View {
                     favorites.toggleFavorite(character)
                 } label: {
                     Image(systemName: favorites.isFavorite(character) ? "heart.fill" : "heart")
+                        .foregroundColor(Color(.secondaryLabel))
                 }
             }
         }

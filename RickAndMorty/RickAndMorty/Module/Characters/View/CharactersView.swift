@@ -62,7 +62,7 @@ struct CharactersView: View {
                     }
                 }
             }
-            .background(bgColor)
+            .background(Color(.systemBackground))
             .onAppear {
                 viewModel.resetAndFetch()
             }

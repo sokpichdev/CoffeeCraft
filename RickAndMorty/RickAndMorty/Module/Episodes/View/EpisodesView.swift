@@ -38,7 +38,7 @@ struct EpisodesView: View {
             .onAppear {
                 viewModel.resetAndFetch()
             }
-            .background(bgColor)
+            .background(Color(.systemBackground))
         }
     }
 }

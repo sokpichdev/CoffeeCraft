@@ -39,7 +39,7 @@ struct LocationsView: View {
             .onAppear {
                 viewModel.resetAndFetch()
             }
-            .background(bgColor)
+            .background(Color(.systemBackground))
         }
     }
 }

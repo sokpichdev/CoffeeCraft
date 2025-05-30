@@ -36,6 +36,7 @@ struct CharacterCardView: View {
 
             // Fixed-height name text (limit to 2 lines)
             Text(character.name)
+                .foregroundColor(Color(.label))
                 .font(.headline)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -46,7 +47,7 @@ struct CharacterCardView: View {
         .frame(height: 230) // total card height (adjust if needed)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.systemBackground))
+                .fill(Color(.secondarySystemBackground))
                 .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
         )
     }
