@@ -9,6 +9,7 @@ import SwiftUI
 struct TabBarView1: View {
     @State private var selectedTab: Tab = .characters
     @Namespace private var namespace
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,14 +27,22 @@ struct TabBarView1: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            ZStack {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .shadow(color: .gray.opacity(0.4), radius: 20, x: 0, y: 20)
-                TabsLayoutView(selectedTab: $selectedTab, namespace: namespace)
+            if tabBarManager.isVisible {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .shadow(color: .gray.opacity(0.4), radius: 20, x: 0, y: 20)
+
+                    TabsLayoutView(selectedTab: $selectedTab, namespace: namespace)
+                }
+                .frame(height: 70)
+                .transition(.move(edge: .bottom))
             }
-            .frame(height: 70)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
+}
+
+final class TabBarVisibilityManager: ObservableObject {
+    @Published var isVisible: Bool = true
 }

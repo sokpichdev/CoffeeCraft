@@ -10,6 +10,7 @@ struct EpisodeDetailView: View {
     let episode: Episode
     @StateObject private var viewModel = LocationDetailViewModel() // reuse to fetch characters by URLs
     @ObservedObject var favorites = FavoritesManager.shared
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
@@ -59,7 +60,14 @@ struct EpisodeDetailView: View {
         .navigationTitle(episode.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            tabBarManager.isVisible = false
+
             viewModel.fetchResidents(from: episode.characters)
+        }
+        .onDisappear {
+            withAnimation(.easeInOut(duration: 0.05)) {
+                tabBarManager.isVisible = true
+            }
         }
     }
 }

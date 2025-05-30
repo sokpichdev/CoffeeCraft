@@ -10,7 +10,7 @@ struct LocationDetailView: View {
     let location: Location
     @StateObject private var viewModel = LocationDetailViewModel()
     @ObservedObject var favorites = FavoritesManager.shared
-
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
     var body: some View {
@@ -65,6 +65,12 @@ struct LocationDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.fetchResidents(from: location.residents)
+            tabBarManager.isVisible = false
+        }
+        .onDisappear {
+            withAnimation(.easeInOut(duration: 0.05)) {
+                tabBarManager.isVisible = true
+            }
         }
     }
 }

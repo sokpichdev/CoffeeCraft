@@ -9,9 +9,10 @@ import SwiftUI
 
 @main
 struct RickAndMortyApp: App {
+    @StateObject private var tabBarManager = TabBarVisibilityManager()
     var body: some Scene {
         WindowGroup {
-            TabBarView1()
+            TabBarView1().environmentObject(tabBarManager)
         }
     }
 }

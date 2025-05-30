@@ -9,6 +9,7 @@ import SwiftUI
 struct CharacterDetailView: View {
     let character: Character
     @ObservedObject var favorites = FavoritesManager.shared
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
     var body: some View {
         VStack(spacing: 16) {
@@ -47,5 +48,13 @@ struct CharacterDetailView: View {
         .padding()
         .navigationTitle(character.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            tabBarManager.isVisible = false
+        }
+        .onDisappear {
+            withAnimation(.easeInOut(duration: 0.05)) {
+                tabBarManager.isVisible = true
+            }
+        }
     }
 }
