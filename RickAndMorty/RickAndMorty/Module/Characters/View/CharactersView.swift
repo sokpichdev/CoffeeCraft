@@ -59,6 +59,7 @@ struct CharactersView: View {
                         }
                     } label: {
                         Image(systemName: "line.horizontal.3.decrease.circle")
+                            .foregroundColor(Color.primary)
                     }
                 }
             }
