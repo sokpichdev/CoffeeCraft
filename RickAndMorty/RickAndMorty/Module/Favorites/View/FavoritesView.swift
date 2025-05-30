@@ -10,6 +10,9 @@ struct FavoritesView: View {
     @ObservedObject var favorites = FavoritesManager.shared
     @State private var selection = 0
 
+    let columns = [
+        GridItem(.adaptive(minimum: 150), spacing: 16)
+    ]
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -19,34 +22,34 @@ struct FavoritesView: View {
                     Text("Locations").tag(2)
                 }
                 .pickerStyle(SegmentedPickerStyle())
-                .padding()
+                .padding(16)
 
                 ScrollView(showsIndicators: false) {
                     switch selection {
                     case 0:
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(favorites.favoriteCharacters) { character in
                                 NavigationLink(destination: CharacterDetailView(character: character)) {
                                     CharacterCardView(character: character)
                                 }
                             }
-                        }.padding()
+                        }.padding(16)
                     case 1:
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(favorites.favoriteEpisodes) { episode in
                                 NavigationLink(destination: EpisodeDetailView(episode: episode)) {
                                     EpisodeCardView(episode: episode)
                                 }
                             }
-                        }.padding()
+                        }.padding(16)
                     case 2:
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(favorites.favoriteLocations) { location in
                                 NavigationLink(destination: LocationDetailView(location: location)) {
                                     LocationCardView(location: location)
                                 }
                             }
-                        }.padding()
+                        }.padding(16)
                     default:
                         EmptyView()
                     }

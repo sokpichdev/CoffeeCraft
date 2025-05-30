@@ -38,7 +38,7 @@ struct CharactersView: View {
                         }
                     }
                 }
-                .padding()
+                .padding(16)
 
                 if viewModel.isLoading {
                     ProgressView().padding()
