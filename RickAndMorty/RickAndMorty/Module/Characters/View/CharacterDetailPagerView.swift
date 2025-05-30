@@ -37,8 +37,7 @@ struct CharacterDetailPagerView: View {
                     }
             }
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .navigationTitle(characters[currentIndex].name)
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // Explicit page style
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
