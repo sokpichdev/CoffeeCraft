@@ -52,15 +52,6 @@ struct LocationDetailView: View {
             }
             .padding(.top)
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    favorites.toggleFavorite(location)
-                } label: {
-                    Image(systemName: favorites.isFavorite(location) ? "heart.fill" : "heart")
-                }
-            }
-        }
         .navigationTitle(location.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

@@ -17,7 +17,18 @@ struct LocationsView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 24) {
                     ForEach(viewModel.locations) { location in
-                        NavigationLink(destination: LocationDetailView(location: location)) {
+//                        NavigationLink(destination: LocationDetailView(location: location)) {
+//                            LocationCardView(location: location)
+//                        }
+                        NavigationLink {
+                            LocationDetailPagerView(
+                                locations: viewModel.locations,
+                                initialLocation: location,
+                                fetchMoreLocationIfNeeded: { currentLoc in
+                                    viewModel.fetchLocationsIfNeeded(currentLocation: currentLoc)
+                                })
+                            .environmentObject(tabBarManager)
+                        } label: {
                             LocationCardView(location: location)
                         }
                         .onAppear {

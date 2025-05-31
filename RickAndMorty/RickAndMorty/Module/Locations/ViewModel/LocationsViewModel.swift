@@ -50,4 +50,15 @@ class LocationsViewModel: ObservableObject {
             fetchLocations()
         }
     }
+    func fetchLocationsIfNeeded(currentLocation: Location?) {
+        guard let current = currentLocation else {
+            fetchLocations()
+            return
+        }
+        let thresholdIndex = locations.index(locations.endIndex, offsetBy: -1)
+        if locations.firstIndex(where: { $0.id == current.id }) == thresholdIndex {
+            print("Triggering API fetch for page \(page)")
+            fetchLocations()
+        }
+    }
 }
