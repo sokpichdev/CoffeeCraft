@@ -10,12 +10,12 @@ struct EpisodesView: View {
     @StateObject private var viewModel = EpisodesViewModel()
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     
-    let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
+    let columns = [GridItem(.adaptive(minimum: 150), spacing: 24)]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
+                LazyVGrid(columns: columns, spacing: 24) {
                     ForEach(viewModel.episodes) { episode in
                         NavigationLink {
                             EpisodeDetailPagerView(
@@ -55,11 +55,6 @@ struct EpisodesView: View {
                 }
                 viewModel.resetAndFetch()
             }
-//            .onDisappear {
-//                withAnimation(.easeInOut(duration: 0.1)) {
-//                    tabBarManager.isVisible = false
-//                }
-//            }
             .background(Color(.systemBackground))
         }
     }

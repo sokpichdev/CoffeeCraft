@@ -11,7 +11,7 @@ struct LocationDetailView: View {
     @StateObject private var viewModel = LocationDetailViewModel()
     @ObservedObject var favorites = FavoritesManager.shared
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
-    let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
+    let columns = [GridItem(.adaptive(minimum: 150), spacing: 24)]
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -40,7 +40,7 @@ struct LocationDetailView: View {
                         .foregroundColor(.gray)
                         .padding(.horizontal)
                 } else {
-                    LazyVGrid(columns: columns, spacing: 16) {
+                    LazyVGrid(columns: columns, spacing: 24) {
                         ForEach(viewModel.residents) { character in
                             NavigationLink(destination: CharacterDetailView(character: character)) {
                                 CharacterCardView(character: character)

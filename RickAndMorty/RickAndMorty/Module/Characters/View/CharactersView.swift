@@ -10,7 +10,7 @@ struct CharactersView: View {
     @StateObject var viewModel = CharactersViewModel()
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     let columns = [
-        GridItem(.adaptive(minimum: 150), spacing: 16)
+        GridItem(.adaptive(minimum: 150), spacing: 24)
     ]
 
     let statusOptions = ["", "alive", "dead", "unknown"]
@@ -19,7 +19,7 @@ struct CharactersView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
+                LazyVGrid(columns: columns, spacing: 24) {
                     ForEach(viewModel.characters) { character in
                         NavigationLink {
                             CharacterDetailPagerView(

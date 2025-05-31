@@ -11,7 +11,7 @@ struct FavoritesView: View {
     @State private var selection = 0
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     let columns = [
-        GridItem(.adaptive(minimum: 150), spacing: 16)
+        GridItem(.adaptive(minimum: 150), spacing: 24)
     ]
     var body: some View {
         NavigationStack {
@@ -27,7 +27,7 @@ struct FavoritesView: View {
                 ScrollView(showsIndicators: false) {
                     switch selection {
                     case 0:
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(favorites.favoriteCharacters) { character in
                                 NavigationLink(destination: CharacterDetailView(character: character)) {
                                     CharacterCardView(character: character)
@@ -35,7 +35,7 @@ struct FavoritesView: View {
                             }
                         }.padding(16)
                     case 1:
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(favorites.favoriteEpisodes) { episode in
                                 NavigationLink(destination: EpisodeDetailView(episode: episode)) {
                                     EpisodeCardView(episode: episode)
@@ -43,7 +43,7 @@ struct FavoritesView: View {
                             }
                         }.padding(16)
                     case 2:
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(favorites.favoriteLocations) { location in
                                 NavigationLink(destination: LocationDetailView(location: location)) {
                                     LocationCardView(location: location)

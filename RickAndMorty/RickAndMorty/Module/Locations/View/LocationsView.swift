@@ -10,12 +10,12 @@ struct LocationsView: View {
     @StateObject var viewModel = LocationsViewModel()
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     
-    let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
+    let columns = [GridItem(.adaptive(minimum: 150), spacing: 24)]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
+                LazyVGrid(columns: columns, spacing: 24) {
                     ForEach(viewModel.locations) { location in
                         NavigationLink(destination: LocationDetailView(location: location)) {
                             LocationCardView(location: location)
@@ -44,11 +44,6 @@ struct LocationsView: View {
                 }
                 viewModel.resetAndFetch()
             }
-//            .onDisappear {
-//                withAnimation(.easeInOut(duration: 0.1)) {
-//                    tabBarManager.isVisible = false
-//                }
-//            }
             .background(Color(.systemBackground))
             .refreshable {
                 viewModel.resetAndFetch()
