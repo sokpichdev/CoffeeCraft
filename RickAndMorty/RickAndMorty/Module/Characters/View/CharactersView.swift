@@ -54,11 +54,11 @@ struct CharactersView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Picker("Status", selection: $viewModel.selectedStatus) {
-                            ForEach(statusOptions, id: \.self) { Text($0.capitalized) }
+                            ForEach(["", "alive", "dead", "unknown"], id: \.self) { Text($0.capitalized) }
                         }
 
                         Picker("Gender", selection: $viewModel.selectedGender) {
-                            ForEach(genderOptions, id: \.self) { Text($0.capitalized) }
+                            ForEach(["", "male", "female", "genderless", "unknown"], id: \.self) { Text($0.capitalized) }
                         }
 
                         Divider()

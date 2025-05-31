@@ -39,7 +39,7 @@ struct EpisodeDetailView: View {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(viewModel.residents) { character in
                             NavigationLink(destination: CharacterDetailView(character: character)) {
-                                CharacterCardView(character: character)
+                                CharacterCardView(character: character).environmentObject(tabBarManager)
                             }
                         }
                     }
@@ -48,26 +48,10 @@ struct EpisodeDetailView: View {
             }
             .padding(.top)
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    favorites.toggleFavorite(episode)
-                } label: {
-                    Image(systemName: favorites.isFavorite(episode) ? "heart.fill" : "heart")
-                }
-            }
-        }
         .navigationTitle(episode.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            tabBarManager.isVisible = false
-
             viewModel.fetchResidents(from: episode.characters)
-        }
-        .onDisappear {
-            withAnimation(.easeInOut(duration: 0.05)) {
-                tabBarManager.isVisible = true
-            }
         }
     }
 }

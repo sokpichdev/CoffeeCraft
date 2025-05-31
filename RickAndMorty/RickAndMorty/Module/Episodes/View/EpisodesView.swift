@@ -8,6 +8,7 @@ import SwiftUI
 
 struct EpisodesView: View {
     @StateObject private var viewModel = EpisodesViewModel()
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
@@ -16,7 +17,16 @@ struct EpisodesView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.episodes) { episode in
-                        NavigationLink(destination: EpisodeDetailView(episode: episode)) {
+                        NavigationLink {
+                            EpisodeDetailPagerView(
+                                episodes: viewModel.episodes,
+                                initialEpisode: episode,
+                                fetchMoreEpisodesIfNeeded: { currentEpi in
+                                    viewModel.fetchEpisodesIfNeeded(currentEpisode: currentEpi)
+                                }
+                            )
+                            .environmentObject(tabBarManager)
+                        } label: {
                             EpisodeCardView(episode: episode)
                         }
                         .onAppear {

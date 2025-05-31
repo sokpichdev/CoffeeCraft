@@ -8,7 +8,7 @@ import SwiftUI
 
 struct CharacterCardView: View {
     let character: Character
-
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     var body: some View {
         VStack(spacing: 8) {
             // Fixed-height image with consistent layout
@@ -45,6 +45,7 @@ struct CharacterCardView: View {
         }
         .padding()
         .frame(height: 230) // total card height (adjust if needed)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color(.secondarySystemBackground))

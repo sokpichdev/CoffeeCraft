@@ -50,4 +50,17 @@ class EpisodesViewModel: ObservableObject {
             fetchEpisodes()
         }
     }
+    
+    func fetchEpisodesIfNeeded(currentEpisode: Episode?) {
+        guard let current = currentEpisode else {
+            fetchEpisodes()
+            return
+        }
+        
+        let thresholdIndex = episodes.index(episodes.endIndex, offsetBy: -1)
+        if episodes.firstIndex(where: { $0.id == current.id }) == thresholdIndex {
+            print("Triggering API fetch for page \(page)")
+            fetchEpisodes()
+        }
+    }
 }
