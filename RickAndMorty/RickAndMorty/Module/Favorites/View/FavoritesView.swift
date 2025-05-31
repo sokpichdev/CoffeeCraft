@@ -9,7 +9,7 @@ import SwiftUI
 struct FavoritesView: View {
     @ObservedObject var favorites = FavoritesManager.shared
     @State private var selection = 0
-
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     let columns = [
         GridItem(.adaptive(minimum: 150), spacing: 16)
     ]
@@ -58,6 +58,16 @@ struct FavoritesView: View {
             }
             .navigationTitle("Favorites")
             .background(Color(.systemBackground))
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.05)) {
+                    tabBarManager.isVisible = true
+                }
+            }
+//            .onDisappear {
+//                withAnimation(.easeInOut(duration: 0.1)) {
+//                    tabBarManager.isVisible = false
+//                }
+//            }
         }
     }
 }

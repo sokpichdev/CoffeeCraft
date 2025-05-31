@@ -50,8 +50,16 @@ struct EpisodesView: View {
                 viewModel.resetAndFetch()
             }
             .onAppear {
+                withAnimation(.easeInOut(duration: 0.05)) {
+                    tabBarManager.isVisible = true
+                }
                 viewModel.resetAndFetch()
             }
+//            .onDisappear {
+//                withAnimation(.easeInOut(duration: 0.1)) {
+//                    tabBarManager.isVisible = false
+//                }
+//            }
             .background(Color(.systemBackground))
         }
     }

@@ -51,6 +51,9 @@ struct EpisodeDetailView: View {
         .navigationTitle(episode.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                tabBarManager.isVisible = false
+            }
             viewModel.fetchResidents(from: episode.characters)
         }
     }

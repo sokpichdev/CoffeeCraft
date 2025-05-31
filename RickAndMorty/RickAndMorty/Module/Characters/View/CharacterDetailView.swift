@@ -39,5 +39,10 @@ struct CharacterDetailView: View {
         .padding()
         .navigationTitle(character.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                tabBarManager.isVisible = false
+            }
+        }
     }
 }

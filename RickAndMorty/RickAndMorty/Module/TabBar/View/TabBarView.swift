@@ -16,13 +16,13 @@ struct TabBarView1: View {
             Group {
                 switch selectedTab {
                 case .characters:
-                    CharactersView()
+                    CharactersView().environmentObject(tabBarManager)
                 case .locations:
-                    LocationsView()
+                    LocationsView().environmentObject(tabBarManager)
                 case .episodes:
-                    EpisodesView()
+                    EpisodesView().environmentObject(tabBarManager)
                 case .favorites:
-                    FavoritesView()
+                    FavoritesView().environmentObject(tabBarManager)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

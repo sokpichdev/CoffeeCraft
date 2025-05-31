@@ -64,13 +64,10 @@ struct LocationDetailView: View {
         .navigationTitle(location.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            viewModel.fetchResidents(from: location.residents)
-            tabBarManager.isVisible = false
-        }
-        .onDisappear {
-            withAnimation(.easeInOut(duration: 0.05)) {
-                tabBarManager.isVisible = true
+            withAnimation(.easeInOut(duration: 0.1)) {
+                tabBarManager.isVisible = false
             }
+            viewModel.fetchResidents(from: location.residents)
         }
     }
 }

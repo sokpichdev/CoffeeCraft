@@ -8,7 +8,8 @@ import SwiftUI
 
 struct LocationsView: View {
     @StateObject var viewModel = LocationsViewModel()
-
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
+    
     let columns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
 
     var body: some View {
@@ -38,8 +39,16 @@ struct LocationsView: View {
                 viewModel.resetAndFetch()
             }
             .onAppear {
+                withAnimation(.easeInOut(duration: 0.05)) {
+                    tabBarManager.isVisible = true
+                }
                 viewModel.resetAndFetch()
             }
+//            .onDisappear {
+//                withAnimation(.easeInOut(duration: 0.1)) {
+//                    tabBarManager.isVisible = false
+//                }
+//            }
             .background(Color(.systemBackground))
             .refreshable {
                 viewModel.resetAndFetch()

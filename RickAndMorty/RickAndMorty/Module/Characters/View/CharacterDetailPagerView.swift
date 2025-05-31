@@ -51,10 +51,9 @@ struct CharacterDetailPagerView: View {
             }
         }
         .onAppear {
-            tabBarManager.isVisible = false
-        }
-        .onDisappear {
-            tabBarManager.isVisible = true
+            withAnimation(.easeInOut(duration: 0.1)) {
+                tabBarManager.isVisible = false
+            }
         }
     }
 }

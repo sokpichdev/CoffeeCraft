@@ -74,6 +74,9 @@ struct CharactersView: View {
             }
             .background(Color(.systemBackground))
             .onAppear {
+                withAnimation(.easeInOut(duration: 0.05)) {
+                    tabBarManager.isVisible = true
+                }
                 viewModel.resetAndFetch()
             }
             .refreshable {
