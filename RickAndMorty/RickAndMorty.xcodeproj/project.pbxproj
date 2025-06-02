@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6A20F5F12DE8482000F21241 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 6A20F5F02DE8482000F21241 /* Alamofire */; };
+		6A5BA5C62DEADDC30016B065 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 6A5BA5C52DEADDC30016B065 /* SwiftUIIntrospect */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6A20F5F12DE8482000F21241 /* Alamofire in Frameworks */,
+				6A5BA5C62DEADDC30016B065 /* SwiftUIIntrospect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +87,7 @@
 			name = RickAndMorty;
 			packageProductDependencies = (
 				6A20F5F02DE8482000F21241 /* Alamofire */,
+				6A5BA5C52DEADDC30016B065 /* SwiftUIIntrospect */,
 			);
 			productName = RickAndMorty;
 			productReference = 6A9AD3152DDD87B90058D967 /* RickAndMorty.app */;
@@ -116,6 +119,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6A20F5EF2DE8482000F21241 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				6A5BA5C42DEADDC30016B065 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6A9AD3162DDD87B90058D967 /* Products */;
@@ -357,6 +361,14 @@
 				minimumVersion = 5.10.2;
 			};
 		};
+		6A5BA5C42DEADDC30016B065 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -364,6 +376,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6A20F5EF2DE8482000F21241 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		6A5BA5C52DEADDC30016B065 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A5BA5C42DEADDC30016B065 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

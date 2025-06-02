@@ -13,6 +13,7 @@ struct RickAndMortyApp: App {
     var body: some Scene {
         WindowGroup {
             TabBarView1().environmentObject(tabBarManager)
+//            ContentView()
         }
     }
 }

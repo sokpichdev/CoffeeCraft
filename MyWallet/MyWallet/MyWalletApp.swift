@@ -11,8 +11,8 @@ import SwiftUI
 struct MyWalletApp: App {
     var body: some Scene {
         WindowGroup {
-//            HomeView()
-            CustomTabView()
+            HomeView()
+//            CustomTabView()
         }
     }
 }
