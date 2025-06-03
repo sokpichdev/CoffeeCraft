@@ -20,6 +20,10 @@ struct CharactersView: View {
     @State private var scrollDirection: String = "Idle"
     @State private var isDragging: Bool = false
     let directionChangeThreshold: CGFloat = 10
+    
+    @State private var lastUpdateTime = Date.distantPast
+    let updateInterval: TimeInterval = 0.1
+    
     @State var isRefreshing: Bool = false
     var body: some View {
         NavigationStack {
@@ -31,25 +35,56 @@ struct CharactersView: View {
                         .onAppear {
                             lastScrollOffset = offset
                         }
-                        .onChange(of: offset) { newOffset, _ in
-                            if !isRefreshing {
-                                guard isDragging else { return } // only detect while dragging
+                    .onChange(of: offset) { newOffset, _ in
+                        guard !isRefreshing else { return }
+                        guard isDragging else { return }
+                        guard newOffset <= -10 else { return }
 
-                                let delta = newOffset - lastScrollOffset
+                        let now = Date()
+                        if now.timeIntervalSince(lastUpdateTime) < updateInterval {
+                            return
+                        }
 
-                                if delta > directionChangeThreshold && scrollDirection != "Scrolling Up" {
-                                    lastScrollOffset = newOffset
-                                    withAnimation(.easeInOut(duration: 0.05)) {
-                                        tabBarManager.isVisible = true
-                                    }
-                                } else if delta < -directionChangeThreshold && scrollDirection != "Scrolling Down" {
-                                    lastScrollOffset = newOffset
-                                    withAnimation(.easeInOut(duration: 0.05)) {
-                                        tabBarManager.isVisible = false
+                        lastUpdateTime = now
+
+                        let delta = newOffset - lastScrollOffset
+
+                        let hideTabBarThreshold: CGFloat = -10
+                        let showTabBarThreshold: CGFloat = 30
+
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            var shouldShowTabBar = false
+                            var shouldHideTabBar = false
+
+                            if delta > showTabBarThreshold && scrollDirection != "Scrolling Up" {
+                                shouldShowTabBar = true
+                            } else if delta < hideTabBarThreshold && scrollDirection != "Scrolling Down" {
+                                shouldHideTabBar = true
+                            }
+
+                            if shouldShowTabBar || shouldHideTabBar {
+                                DispatchQueue.main.async {
+                                    if shouldShowTabBar {
+                                        scrollDirection = "Scrolling Up"
+                                        lastScrollOffset = newOffset
+                                        if !tabBarManager.isVisible {
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                tabBarManager.isVisible = true
+                                            }
+                                        }
+                                    } else if shouldHideTabBar {
+                                        scrollDirection = "Scrolling Down"
+                                        lastScrollOffset = newOffset
+                                        if tabBarManager.isVisible {
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                tabBarManager.isVisible = false
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
                 }
                 .frame(height: 0)
                 
@@ -85,6 +120,7 @@ struct CharactersView: View {
                     }
                     .onEnded { _ in
                         isDragging = false
+                        scrollDirection = "Idle"
                     }
             )
             .navigationTitle("Characters")
@@ -125,6 +161,9 @@ struct CharactersView: View {
             .refreshable {
                 isRefreshing = true
                 viewModel.resetAndFetch()
+                withAnimation(.easeInOut(duration: 0.05)) {
+                    tabBarManager.isVisible = true
+                }
                 isRefreshing = false
             }
         }

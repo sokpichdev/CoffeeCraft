@@ -46,7 +46,7 @@ struct EpisodesView: View {
             .navigationTitle("Episodes")
             .scrollDismissesKeyboard(.immediately)
             .searchable(text: $viewModel.searchQuery, prompt: "Search episodes")
-            .onChange(of: viewModel.searchQuery) {
+            .onChange(of: viewModel.searchQuery) { _ in
                 viewModel.resetAndFetch()
             }
             .onAppear {

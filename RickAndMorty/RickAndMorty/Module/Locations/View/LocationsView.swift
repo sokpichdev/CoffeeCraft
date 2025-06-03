@@ -46,7 +46,7 @@ struct LocationsView: View {
             .navigationTitle("Locations")
             .scrollDismissesKeyboard(.immediately)
             .searchable(text: $viewModel.searchQuery, prompt: "Search locations")
-            .onChange(of: viewModel.searchQuery) {
+            .onChange(of: viewModel.searchQuery) { _ in
                 viewModel.resetAndFetch()
             }
             .onAppear {
