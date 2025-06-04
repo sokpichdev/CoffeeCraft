@@ -27,67 +27,13 @@ struct CharactersView: View {
     @State var isRefreshing: Bool = false
     var body: some View {
         NavigationStack {
-            ScrollView {
-                GeometryReader { geo in
-                    let offset = geo.frame(in: .global).minY
-
-                    Color.clear
-                        .onAppear {
-                            lastScrollOffset = offset
-                        }
-                    .onChange(of: offset) { newOffset, _ in
-                        guard !isRefreshing else { return }
-                        guard isDragging else { return }
-                        guard newOffset <= -10 else { return }
-
-                        let now = Date()
-                        if now.timeIntervalSince(lastUpdateTime) < updateInterval {
-                            return
-                        }
-
-                        lastUpdateTime = now
-
-                        let delta = newOffset - lastScrollOffset
-
-                        let hideTabBarThreshold: CGFloat = -10
-                        let showTabBarThreshold: CGFloat = 30
-
-                        DispatchQueue.global(qos: .userInitiated).async {
-                            var shouldShowTabBar = false
-                            var shouldHideTabBar = false
-
-                            if delta > showTabBarThreshold && scrollDirection != "Scrolling Up" {
-                                shouldShowTabBar = true
-                            } else if delta < hideTabBarThreshold && scrollDirection != "Scrolling Down" {
-                                shouldHideTabBar = true
-                            }
-
-                            if shouldShowTabBar || shouldHideTabBar {
-                                DispatchQueue.main.async {
-                                    if shouldShowTabBar {
-                                        scrollDirection = "Scrolling Up"
-                                        lastScrollOffset = newOffset
-                                        if !tabBarManager.isVisible {
-                                            withAnimation(.easeInOut(duration: 0.2)) {
-                                                tabBarManager.isVisible = true
-                                            }
-                                        }
-                                    } else if shouldHideTabBar {
-                                        scrollDirection = "Scrolling Down"
-                                        lastScrollOffset = newOffset
-                                        if tabBarManager.isVisible {
-                                            withAnimation(.easeInOut(duration: 0.2)) {
-                                                tabBarManager.isVisible = false
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            TabBarAwareScrollView(
+                viewModel: viewModel,
+                searchQuery: $viewModel.searchQuery,
+                onSearchQueryChange: {
+                    viewModel.resetAndFetch()
                 }
-                .frame(height: 0)
-                
+            ) {
                 LazyVGrid(columns: columns, spacing: 24) {
                     ForEach(viewModel.characters) { character in
                         NavigationLink {
@@ -112,22 +58,6 @@ struct CharactersView: View {
                 if viewModel.isLoading {
                     ProgressView().padding()
                 }
-            }
-            .simultaneousGesture(
-                DragGesture()
-                    .onChanged { _ in
-                        isDragging = true
-                    }
-                    .onEnded { _ in
-                        isDragging = false
-                        scrollDirection = "Idle"
-                    }
-            )
-            .navigationTitle("Characters")
-            .searchable(text: $viewModel.searchQuery, prompt: "Search by name")
-            .scrollDismissesKeyboard(.immediately)
-            .onChange(of: viewModel.searchQuery) {
-                viewModel.resetAndFetch()
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
