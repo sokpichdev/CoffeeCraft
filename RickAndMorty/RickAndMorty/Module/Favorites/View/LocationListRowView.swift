@@ -10,7 +10,7 @@ struct LocationListRowView: View {
     let location: Location
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(location.name)
                 .font(.headline)
                 .foregroundColor(.primary)

@@ -10,7 +10,7 @@ struct EpisodeListRowView: View {
     let episode: Episode
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(episode.name)
                 .font(.headline)
                 .foregroundColor(.primary)
