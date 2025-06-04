@@ -46,8 +46,7 @@ struct FavoritesView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
+                            .padding(16)
                         }
                     case 1:
                         if isGridView {
@@ -66,8 +65,7 @@ struct FavoritesView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
+                            .padding(16)
                         }
                             
                     case 2:
@@ -87,8 +85,7 @@ struct FavoritesView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
+                            .padding(16)
                         }
                     default:
                         EmptyView()

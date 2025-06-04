@@ -28,7 +28,7 @@ struct EpisodeCardView: View {
                 .multilineTextAlignment(.leading)
             Spacer()
         }
-        .padding(12)
+        .padding()
         .frame(height: 140) // 👈 fixed height
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
