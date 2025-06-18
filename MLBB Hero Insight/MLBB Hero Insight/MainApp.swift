@@ -14,8 +14,7 @@ struct MainApp: View {
             Group {
                 switch selectedTab {
                 case .home:
-                    EmptyView()
-//                    HomeView()
+                    HomeView()
                 case .ranking:
                     EmptyView()
 //                    HeroRankingView()
