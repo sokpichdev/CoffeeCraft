@@ -22,7 +22,9 @@ class HomeViewModel: ObservableObject {
             
             let rawResponse = try JSONDecoder().decode([String: String].self, from: data)
             let mappedHeroes = rawResponse.map { Hero(id: $0.key, name: $0.value) }
-                .sorted { $0.name < $1.name }
+                .sorted {
+                    (Int($0.id) ?? 0) > (Int($1.id) ?? 0)
+                }
             
             heroes = mappedHeroes
             isLoading = false

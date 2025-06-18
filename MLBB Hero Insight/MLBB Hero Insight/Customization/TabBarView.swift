@@ -13,10 +13,12 @@ struct TabBarView: View {
 
     var body: some View {
         TabsLayoutView(selectedTab: $selectedTab)
-            .padding()
+            .padding(EdgeInsets(top: 16, leading: 16, bottom: 40, trailing: 16))
             .background(
-                Capsule()
-                    .fill(.white)
+                Color.white
+                        .mask(
+                            RoundedCorner(radius: 30, corners: [.topLeft, .topRight])
+                        )
             )
             .frame(height: 70)
             .shadow(radius: 30)
@@ -147,5 +149,19 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         case .settings:
             return .teal
         }
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = 25
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }

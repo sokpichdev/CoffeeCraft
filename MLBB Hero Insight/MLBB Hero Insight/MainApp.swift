@@ -10,23 +10,23 @@ struct MainApp: View {
     @State private var selectedTab: Tab = .home
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             Group {
                 switch selectedTab {
                 case .home:
                     HomeView()
                 case .ranking:
-                    EmptyView()
-//                    HeroRankingView()
+                    HomeView()
                 case .position:
-                    EmptyView()
-//                    HeroPositionView()
+                    HomeView()
                 case .settings:
-                    EmptyView()
-//                    SettingsView()
+                    HomeView()
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)  // fill space above tab bar
+
             TabBarView(selectedTab: $selectedTab)
         }
+        .edgesIgnoringSafeArea(.bottom)  // let tab bar reach device bottom (optional)
     }
 }
