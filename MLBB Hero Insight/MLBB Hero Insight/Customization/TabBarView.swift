@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct TabBarView: View {
+    @Binding var selectedTab: Tab
     let bgColor: Color = .init(white: 0.9)
-    
+
     var body: some View {
-        TabsLayoutView()
+        TabsLayoutView(selectedTab: $selectedTab)
             .padding()
             .background(
                 Capsule()
@@ -23,7 +24,7 @@ struct TabBarView: View {
 }
 
 fileprivate struct TabsLayoutView: View {
-    @State var selectedTab: Tab = .home
+    @Binding var selectedTab: Tab
     @Namespace var namespace
     
     var body: some View {
@@ -101,43 +102,49 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
     static func < (lhs: Tab, rhs: Tab) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
-    case home, game, apps, movie
-    
-    internal var id: Int { rawValue }
-    
+
+    case home       // Hero Listing
+    case ranking    // Hero Ranking
+    case position   // Hero Lane Position
+    case settings   // Settings
+
+    var id: Int { rawValue }
+
     var icon: String {
         switch self {
         case .home:
-            return "house.fill"
-        case .game:
-            return "gamecontroller.fill"
-        case .apps:
-            return "square.stack.3d.up.fill"
-        case .movie:
-            return "play.tv.fill"
+            return "list.bullet.rectangle.portrait.fill" // Hero list
+        case .ranking:
+            return "chart.bar.fill"                      // Ranking chart
+        case .position:
+            return "map.fill"                            // Lane map
+        case .settings:
+            return "gearshape.fill"                      // Settings
         }
     }
+
     var title: String {
         switch self {
         case .home:
-            return "Home"
-        case .game:
-            return "Games"
-        case .apps:
-            return "Apps"
-        case .movie:
-            return "Movies"
+            return "Heroes"
+        case .ranking:
+            return "Ranking"
+        case .position:
+            return "Position"
+        case .settings:
+            return "Settings"
         }
     }
+
     var color: Color {
         switch self {
         case .home:
             return .indigo
-        case .game:
+        case .ranking:
             return .pink
-        case .apps:
+        case .position:
             return .orange
-        case .movie:
+        case .settings:
             return .teal
         }
     }

@@ -11,7 +11,7 @@ import SwiftUI
 struct MLBB_Hero_InsightApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainApp()
         }
     }
 }
