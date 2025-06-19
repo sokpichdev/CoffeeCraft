@@ -12,8 +12,8 @@ struct HeroRankingView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                filterSection
-                Divider().padding(.bottom)
+//                filterSection
+//                Divider().padding(.bottom)
 
                 if viewModel.isLoading {
                     ProgressView("Loading Rankings...")
@@ -26,13 +26,13 @@ struct HeroRankingView: View {
                     List(viewModel.rankings) { record in
                         rankingCard(for: record)
                     }
+                    .scrollIndicators(.hidden)
                     .listStyle(.plain)
                     .refreshable {
                         Task {await viewModel.loadRankings()}
                     }
                 }
             }
-            .padding()
             .navigationTitle("Hero Rankings")
             .onAppear {
                 Task { await viewModel.loadRankings()}
@@ -84,7 +84,7 @@ struct HeroRankingView: View {
                         Text("Pick: \(String(format: "%.2f", record.data.mainHeroAppearanceRate * 100))%")
                         Text("Ban: \(String(format: "%.2f", record.data.mainHeroBanRate * 100))%")
                     }
-                    .font(.caption)
+                    .font(.body)
                     .foregroundColor(.secondary)
                 }
             }
@@ -115,6 +115,6 @@ struct HeroRankingView: View {
                 }
             }
         }
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
     }
 }
