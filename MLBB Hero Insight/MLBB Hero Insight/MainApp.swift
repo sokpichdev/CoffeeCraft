@@ -24,7 +24,7 @@ struct MainApp: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)  // fill space above tab bar
-
+            .padding(.bottom, 16)
             TabBarView(selectedTab: $selectedTab)
         }
         .edgesIgnoringSafeArea(.bottom)  // let tab bar reach device bottom (optional)

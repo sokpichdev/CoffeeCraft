@@ -23,13 +23,26 @@ struct HeroRankingView: View {
                         .foregroundColor(.red)
                         .frame(maxHeight: .infinity)
                 } else {
-                    List(viewModel.rankings) { record in
-                        rankingCard(for: record)
+                    ScrollView {
+                        LazyVStack(spacing: 0, pinnedViews: []) {
+                            ForEach(viewModel.rankings.indices, id: \.self) { index in
+                                let record = viewModel.rankings[index]
+
+                                VStack(spacing: 0) {
+                                    rankingCard(for: record)
+                                        .padding(.vertical, 12)
+
+                                    if index < viewModel.rankings.count - 1 {
+                                        Divider()
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.top)
                     }
                     .scrollIndicators(.hidden)
-                    .listStyle(.plain)
                     .refreshable {
-                        Task {await viewModel.loadRankings()}
+                        Task { await viewModel.loadRankings() }
                     }
                 }
             }
@@ -88,10 +101,12 @@ struct HeroRankingView: View {
                     .foregroundColor(.secondary)
                 }
             }
+            .padding(.horizontal)
 
             Text("Counter Heroes:")
                 .font(.subheadline)
                 .bold()
+                .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
@@ -113,6 +128,7 @@ struct HeroRankingView: View {
                         .padding(4)
                     }
                 }
+                .padding(.horizontal) // align with screen edges
             }
         }
         .frame(maxWidth: .infinity)
