@@ -15,6 +15,7 @@ struct HeroRankingFilterView: View {
     @Binding var sortOrder: String
 
     var onApply: () -> Void
+    var onReset: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -65,6 +66,13 @@ struct HeroRankingFilterView: View {
                     Button("Apply") {
                         onApply()
                     }
+                }
+                
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Reset") {
+                        onReset()
+                    }
+                    .foregroundColor(.red)
                 }
             }
         }

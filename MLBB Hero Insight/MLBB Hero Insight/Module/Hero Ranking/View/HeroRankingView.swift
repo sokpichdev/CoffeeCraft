@@ -49,7 +49,18 @@ struct HeroRankingView: View {
                     Button {
                         showFilterSheet = true
                     } label: {
-                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                .font(.title3)
+
+                            if viewModel.isBeingFiltered {
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 8, height: 8)
+                                    .offset(x: 6, y: -6)
+                            }
+                        }
+                        .accessibilityLabel("Filter")
                     }
                 }
             }
@@ -66,9 +77,14 @@ struct HeroRankingView: View {
                     sortOrder: $viewModel.sortOrder,
                     onApply: {
                         showFilterSheet = false
+                        viewModel.isBeingFiltered = true
+                        viewModel.isAlreadyReset = false
                         Task {
                             await viewModel.loadRankings()
                         }
+                    },
+                    onReset: {
+                        viewModel.resetFilters()
                     }
                 )
                 .presentationDetents([.medium, .large])

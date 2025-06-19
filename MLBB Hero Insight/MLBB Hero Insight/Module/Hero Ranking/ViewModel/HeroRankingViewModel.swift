@@ -10,8 +10,10 @@ class HeroRankingViewModel: ObservableObject {
     @Published var rankings: [HeroRankingRecord] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var isAlreadyReset: Bool = false
+    @Published var isBeingFiltered: Bool = false
     
-    
+    // for filter
     @Published var selectedDay: Int = 7
     @Published var selectedRank: String = "mythic"
     @Published var size: String = "10"
@@ -26,7 +28,23 @@ class HeroRankingViewModel: ObservableObject {
             errorMessage = nil
         }
 
-        let url = URL(string: "https://mlbb-stats.ridwaanhall.com/api/hero-rank/")!
+        var components = URLComponents(string: "https://mlbb-stats.ridwaanhall.com/api/hero-rank/")!
+        components.queryItems = [
+            URLQueryItem(name: "day", value: "\(selectedDay)"),
+            URLQueryItem(name: "rank", value: selectedRank),
+            URLQueryItem(name: "size", value: size),
+            URLQueryItem(name: "index", value: index),
+            URLQueryItem(name: "sort_field", value: sortField),
+            URLQueryItem(name: "sort_order", value: sortOrder)
+        ]
+
+        guard let url = components.url else {
+            await MainActor.run {
+                errorMessage = "Invalid filter parameters."
+                isLoading = false
+            }
+            return
+        }
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
@@ -46,6 +64,20 @@ class HeroRankingViewModel: ObservableObject {
                 self.errorMessage = "Failed to load rankings."
                 self.isLoading = false
             }
+        }
+    }
+    
+    func resetFilters() {
+        selectedDay = 7
+        selectedRank = "mythic"
+        size = "10"
+        index = "0"
+        sortField = "win_rate"
+        sortOrder = "desc"
+        if !isAlreadyReset {
+            Task { await self.loadRankings() }
+            self.isAlreadyReset = true
+            self.isBeingFiltered = false
         }
     }
 }
