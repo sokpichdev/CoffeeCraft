@@ -10,6 +10,15 @@ class HeroRankingViewModel: ObservableObject {
     @Published var rankings: [HeroRankingRecord] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    
+    
+    @Published var selectedDay: Int = 7
+    @Published var selectedRank: String = "mythic"
+    @Published var size: String = "10"
+    @Published var index: String = "0"
+    @Published var sortField: String = "win_rate"
+    @Published var sortOrder: String = "desc"
+
 
     func loadRankings() async {
         await MainActor.run {

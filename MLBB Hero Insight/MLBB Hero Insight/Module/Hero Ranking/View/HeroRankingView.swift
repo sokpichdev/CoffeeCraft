@@ -8,13 +8,10 @@ import SwiftUI
 
 struct HeroRankingView: View {
     @StateObject private var viewModel = HeroRankingViewModel()
-
+    @State private var showFilterSheet = false
     var body: some View {
         NavigationStack {
             VStack {
-//                filterSection
-//                Divider().padding(.bottom)
-
                 if viewModel.isLoading {
                     ProgressView("Loading Rankings...")
                         .frame(maxHeight: .infinity)
@@ -47,8 +44,34 @@ struct HeroRankingView: View {
                 }
             }
             .navigationTitle("Hero Rankings")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showFilterSheet = true
+                    } label: {
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                    }
+                }
+            }
             .onAppear {
                 Task { await viewModel.loadRankings()}
+            }
+            .sheet(isPresented: $showFilterSheet) {
+                HeroRankingFilterView(
+                    day: $viewModel.selectedDay,
+                    rank: $viewModel.selectedRank,
+                    size: $viewModel.size,
+                    index: $viewModel.index,
+                    sortField: $viewModel.sortField,
+                    sortOrder: $viewModel.sortOrder,
+                    onApply: {
+                        showFilterSheet = false
+                        Task {
+                            await viewModel.loadRankings()
+                        }
+                    }
+                )
+                .presentationDetents([.medium, .large])
             }
         }
     }
@@ -57,17 +80,63 @@ struct HeroRankingView: View {
 
     private var filterSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Filters").font(.headline)
+            Text("Filters")
+                .font(.headline)
+
+            // Day and Rank
             HStack {
-                Text("Day: Today")
+                Picker("Day", selection: $viewModel.selectedDay) {
+                    ForEach([1, 3, 7, 15, 30], id: \.self) { day in
+                        Text("\(day)").tag(day)
+                    }
+                }
+                .pickerStyle(.menu)
+
                 Spacer()
-                Text("Rank: Mythic")
+
+                Picker("Rank", selection: $viewModel.selectedRank) {
+                    ForEach(["all", "epic", "legend", "mythic", "honor", "glory"], id: \.self) { rank in
+                        Text(rank.capitalized).tag(rank)
+                    }
+                }
+                .pickerStyle(.menu)
             }
+
+            // Size and Index
             HStack {
-                Text("Sort: Win Rate")
+                TextField("Size", text: $viewModel.size)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+
+                TextField("Index", text: $viewModel.index)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            // Sort Field and Order
+            HStack {
+                Picker("Sort By", selection: $viewModel.sortField) {
+                    ForEach(["win_rate", "pick_rate", "ban_rate"], id: \.self) { field in
+                        Text(field.replacingOccurrences(of: "_", with: " ").capitalized).tag(field)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Picker("Order", selection: $viewModel.sortOrder) {
+                    ForEach(["asc", "desc"], id: \.self) { order in
+                        Text(order.uppercased()).tag(order)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+
+            // Filter Button
+            HStack {
                 Spacer()
                 Button("Apply Filter") {
-                    Task { await viewModel.loadRankings() }
+                    Task {
+                        await viewModel.loadRankings()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
             }
