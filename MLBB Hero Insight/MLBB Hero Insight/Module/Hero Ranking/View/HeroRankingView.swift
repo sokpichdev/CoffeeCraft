@@ -32,8 +32,6 @@ struct HeroRankingView: View {
                         .frame(maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        Text("total size hero: \(viewModel.size)")
-                        
                         LazyVStack(spacing: 0, pinnedViews: []) {
                             ForEach(filteredHeroes.indices, id: \.self) { index in
                                 let record = filteredHeroes[index]
