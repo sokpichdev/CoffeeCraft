@@ -8,7 +8,18 @@ import SwiftUI
 
 struct HeroRankingView: View {
     @StateObject private var viewModel = HeroRankingViewModel()
+    @State private var searchText = ""
     @State private var showFilterSheet = false
+    
+    var filteredHeroes: [HeroRankingRecord] {
+        if searchText.isEmpty {
+            return viewModel.rankings ?? []
+        } else {
+            return viewModel.rankings?.filter {
+                $0.data.mainHero?.data?.name?.localizedCaseInsensitiveContains(searchText) == true
+            } ?? viewModel.rankings ?? []
+        }
+    }
     var body: some View {
         NavigationStack {
             VStack {
@@ -21,15 +32,16 @@ struct HeroRankingView: View {
                         .frame(maxHeight: .infinity)
                 } else {
                     ScrollView {
+                        Text("total size hero: \(viewModel.size)")
+                        
                         LazyVStack(spacing: 0, pinnedViews: []) {
-                            ForEach(viewModel.rankings.indices, id: \.self) { index in
-                                let record = viewModel.rankings[index]
-
+                            ForEach(filteredHeroes.indices, id: \.self) { index in
+                                let record = filteredHeroes[index]
                                 VStack(spacing: 0) {
                                     rankingCard(for: record)
                                         .padding(.vertical, 12)
 
-                                    if index < viewModel.rankings.count - 1 {
+                                    if index < filteredHeroes.count - 1 {
                                         Divider()
                                     }
                                 }
@@ -44,6 +56,7 @@ struct HeroRankingView: View {
                 }
             }
             .navigationTitle("Hero Rankings")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -163,9 +176,10 @@ struct HeroRankingView: View {
     }
 
     private func rankingCard(for record: HeroRankingRecord) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        let data = record.data
+        return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
-                AsyncImage(url: URL(string: record.data.mainHero.data.head)) { image in
+                AsyncImage(url: URL(string: data.mainHero?.data?.head ?? "")) { image in
                     image.resizable()
                 } placeholder: {
                     Color.gray.opacity(0.2)
@@ -174,13 +188,13 @@ struct HeroRankingView: View {
                 .clipShape(Circle())
 
                 VStack(alignment: .leading) {
-                    Text(record.data.mainHero.data.name ?? "")
+                    Text(data.mainHero?.data?.name ?? "")
                         .font(.headline)
 
                     HStack {
-                        Text("Win: \(String(format: "%.1f", record.data.mainHeroWinRate * 100))%")
-                        Text("Pick: \(String(format: "%.2f", record.data.mainHeroAppearanceRate * 100))%")
-                        Text("Ban: \(String(format: "%.2f", record.data.mainHeroBanRate * 100))%")
+                        Text("Win: \(String(format: "%.1f", (data.mainHeroWinRate ?? 1) * 100))%")
+                        Text("Pick: \(String(format: "%.2f",(data.mainHeroAppearanceRate ?? 1) * 100))%")
+                        Text("Ban: \(String(format: "%.2f", (data.mainHeroBanRate ?? 1) * 100))%")
                     }
                     .font(.body)
                     .foregroundColor(.secondary)
@@ -195,22 +209,24 @@ struct HeroRankingView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
-                    ForEach(record.data.subHero.indices, id: \.self) { index in
-                        let sub = record.data.subHero[index]
-                        VStack(spacing: 4) {
-                            AsyncImage(url: URL(string: sub.hero.data.head)) { image in
-                                image.resizable()
-                            } placeholder: {
-                                Color.gray.opacity(0.2)
+                    if let subHeroes = data.subHero, !subHeroes.isEmpty {
+                        ForEach(subHeroes.indices, id: \.self) { index in
+                            let sub = subHeroes[index]
+                            VStack(spacing: 4) {
+                                AsyncImage(url: URL(string: sub.hero?.data?.head ?? "")) { image in
+                                    image.resizable()
+                                } placeholder: {
+                                    Color.gray.opacity(0.2)
+                                }
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+//
+                                Text("+\(String(format: "%.1f", (sub.increaseWinRate ?? 1) * 100))%")
+                                    .font(.caption2)
+                                    .foregroundColor(.green)
                             }
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-
-                            Text("+\(String(format: "%.1f", sub.increaseWinRate * 100))%")
-                                .font(.caption2)
-                                .foregroundColor(.green)
+                            .padding(4)
                         }
-                        .padding(4)
                     }
                 }
                 .padding(.horizontal) // align with screen edges

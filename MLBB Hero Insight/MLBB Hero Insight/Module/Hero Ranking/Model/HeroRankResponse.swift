@@ -7,29 +7,29 @@
 import SwiftUI
 
 struct HeroRankingResponse: Decodable {
-    let code: Int
-    let message: String
-    let data: HeroRankingData
+    let code: Int?
+    let message: String?
+    let data: HeroRankingData?
 }
 
 struct HeroRankingData: Decodable {
-    let records: [HeroRankingRecord]
-    let total: Int
+    let records: [HeroRankingRecord]?
+    let total: Int?
 }
 
 struct HeroRankingRecord: Identifiable, Decodable {
-    var id: Int { data.mainHeroId }
+    var id: Int { data.mainHeroId ?? 0 }
     let data: HeroRankingDetail
 }
 
 struct HeroRankingDetail: Decodable {
-    let mainHero: HeroDataWrapper
-    let mainHeroAppearanceRate: Double
-    let mainHeroBanRate: Double
-    let mainHeroChannel: ChannelInfo
-    let mainHeroWinRate: Double
-    let mainHeroId: Int
-    let subHero: [SubHero]
+    let mainHero: HeroDataWrapper?
+    let mainHeroAppearanceRate: Double?
+    let mainHeroBanRate: Double?
+    let mainHeroChannel: ChannelInfo?
+    let mainHeroWinRate: Double?
+    let mainHeroId: Int?
+    let subHero: [SubHero]?
 
     enum CodingKeys: String, CodingKey {
         case mainHero = "main_hero"
@@ -43,23 +43,23 @@ struct HeroRankingDetail: Decodable {
 }
 
 struct HeroDataWrapper: Decodable {
-    let data: HeroBasicInfo
+    let data: HeroBasicInfo?
 }
 
 struct HeroBasicInfo: Decodable {
-    let head: String
+    let head: String?
     let name: String?
 }
 
 struct ChannelInfo: Decodable {
-    let id: Int
+    let id: Int?
 }
 
 struct SubHero: Decodable {
-    let hero: HeroDataWrapper
-    let heroChannel: ChannelInfo
-    let heroId: Int
-    let increaseWinRate: Double
+    let hero: HeroDataWrapper?
+    let heroChannel: ChannelInfo?
+    let heroId: Int?
+    let increaseWinRate: Double?
 
     enum CodingKeys: String, CodingKey {
         case hero

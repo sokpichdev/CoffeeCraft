@@ -7,20 +7,30 @@
 import Foundation
 
 class HeroRankingViewModel: ObservableObject {
-    @Published var rankings: [HeroRankingRecord] = []
+    @Published var rankings: [HeroRankingRecord]? = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isAlreadyReset: Bool = false
     @Published var isBeingFiltered: Bool = false
-    
+    @Published var totalHeroSize: Int = 0 {
+        didSet {
+            if !isBeingFiltered {
+                size = "\(totalHeroSize)"
+            }
+        }
+    }
+
     // for filter
     @Published var selectedDay: Int = 7
     @Published var selectedRank: String = "mythic"
-    @Published var size: String = "10"
+    @Published var size: String = "0"
     @Published var index: String = "0"
     @Published var sortField: String = "win_rate"
     @Published var sortOrder: String = "desc"
 
+    init() {
+        size = "\(totalHeroSize)" // Safe to reference now
+    }
 
     func loadRankings() async {
         await MainActor.run {
@@ -52,7 +62,12 @@ class HeroRankingViewModel: ObservableObject {
 
             if response.code == 0 {
                 await MainActor.run {
-                    self.rankings = response.data.records
+                    if let ranking = response.data?.records {
+                        self.rankings = ranking
+                    }
+                    if let totalHeroSize = response.data?.total {
+                        self.totalHeroSize = totalHeroSize
+                    }
                     self.isLoading = false
                 }
             } else {
@@ -70,7 +85,7 @@ class HeroRankingViewModel: ObservableObject {
     func resetFilters() {
         selectedDay = 7
         selectedRank = "mythic"
-        size = "10"
+        size = "\(totalHeroSize)"
         index = "0"
         sortField = "win_rate"
         sortOrder = "desc"
