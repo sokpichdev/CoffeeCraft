@@ -13,11 +13,11 @@ struct HeroPositionReponse: Codable {
 }
 
 struct HeroDataContainer: Codable {
-    let records: [HeroRecord]?
+    let records: [HeroPositionRecord]?
     let total: Int?
 }
 
-struct HeroRecord: Codable {
+struct HeroPositionRecord: Codable {
     let data: HeroRecordData?
     let id: Int?
 }
