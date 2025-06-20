@@ -72,7 +72,7 @@ class HeroPositionViewModel: ObservableObject {
         } catch {
             await MainActor.run {
                 print("🔴 Error: \(error.localizedDescription)")
-                self.errorMessage = "Failed to load rankings."
+                self.errorMessage = "Failed to load Position."
                 self.isLoading = false
             }
         }

@@ -18,7 +18,7 @@ struct MainApp: View {
                 case .ranking:
                     HeroRankingView()
                 case .position:
-                    HomeView()
+                    HeroPositionView()
                 case .settings:
                     HomeView()
                 }
