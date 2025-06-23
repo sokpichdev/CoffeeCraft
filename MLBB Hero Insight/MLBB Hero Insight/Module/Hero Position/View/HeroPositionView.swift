@@ -50,7 +50,7 @@ struct HeroPositionView: View {
                 }
             }
             .navigationTitle("Hero Positions")
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
             .onAppear {
                 Task { await viewModel.loadPosition()}
             }
@@ -134,16 +134,6 @@ struct FlippableHeroCard: View {
                         }
                     }
                 }
-//                VStack(alignment: .leading, spacing: 8) {
-//                    Text("Wrapped Items:")
-//                        .font(.headline)
-//
-//                    WrapHStack(items: dummyItems, idKey: \.id) { item in
-//                        badgeView(title: "Jungler", iconURL: "", background: .green.opacity(0.1))
-//                    }
-//                    .background(Color.yellow.opacity(0.2)) // debug wrapping area
-//                }
-
                 Spacer()
             }
             .padding()
@@ -306,10 +296,3 @@ struct ViewHeightKey: PreferenceKey {
         value = max(value, nextValue())
     }
 }
-
-struct Dummy: Identifiable {
-    let id: Int
-    let title: String
-}
-
-let dummyItems: [Dummy] = (1...19).map { Dummy(id: $0, title: "Item \($0)") }
