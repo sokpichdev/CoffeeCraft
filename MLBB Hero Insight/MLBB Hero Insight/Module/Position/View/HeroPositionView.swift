@@ -8,6 +8,7 @@ import SwiftUI
 
 struct HeroPositionView: View {
     @StateObject private var viewModel = HeroPositionViewModel()
+    @EnvironmentObject var homeVM: HomeViewModel
     @State private var searchText = ""
     @State private var showFilterSheet = false
     

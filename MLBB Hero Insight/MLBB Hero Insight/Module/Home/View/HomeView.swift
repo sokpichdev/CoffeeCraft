@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var viewModel = HomeViewModel()
+    @EnvironmentObject var viewModel: HomeViewModel
     @State private var searchText = ""
 
     var filteredHeroes: [Hero] {

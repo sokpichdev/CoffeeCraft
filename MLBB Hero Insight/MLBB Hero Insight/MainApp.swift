@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct MainApp: View {
+    @StateObject var homeVM = HomeViewModel()
     @State private var selectedTab: Tab = .position
 
     var body: some View {
@@ -15,10 +16,12 @@ struct MainApp: View {
                 switch selectedTab {
                 case .home:
                     HomeView()
+                        .environmentObject(homeVM)
                 case .ranking:
                     HeroRankingView()
                 case .position:
                     HeroPositionView()
+                        .environmentObject(homeVM)
                 case .settings:
                     HomeView()
                 }

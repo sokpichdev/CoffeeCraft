@@ -10,6 +10,7 @@ import Foundation
 class HomeViewModel: ObservableObject {
     @Published var heroes: [Hero] = []
     @Published var isLoading: Bool = false
+    @Published var isFetched: Bool = false
     @Published var errorMessage: String?
 
     func loadHeroes() async {
@@ -27,12 +28,14 @@ class HomeViewModel: ObservableObject {
                 }
             
             heroes = mappedHeroes
+            isFetched = true
             isLoading = false
         } catch is CancellationError {
             print("🟡 Load cancelled.")
         } catch {
             print("🔴 Load error: \(error.localizedDescription)")
             errorMessage = "Failed to load heroes. Please try again."
+            isFetched = true
             isLoading = false
         }
     }
