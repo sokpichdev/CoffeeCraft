@@ -250,14 +250,15 @@ struct WrapHStack<Data: RandomAccessCollection, Content: View, ID: Hashable>: Vi
     private func generateContent(in geometry: GeometryProxy) -> some View {
         var width = CGFloat.zero
         var height = CGFloat.zero
-        let rowSpacing: CGFloat = 5 // 👈 this is the vertical spacing between lines
+        let rowSpacing: CGFloat = 5
+        let maxWidth = geometry.size.width
 
         return ZStack(alignment: .topLeading) {
             ForEach(items, id: idKey) { item in
                 content(item)
                     .padding(.horizontal, 4)
                     .alignmentGuide(.leading) { d in
-                        if abs(width - d.width) > geometry.size.width {
+                        if abs(width - d.width) > maxWidth {
                             width = 0
                             height -= d.height + rowSpacing
                         }
