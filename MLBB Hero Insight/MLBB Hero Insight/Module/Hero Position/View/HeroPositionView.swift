@@ -75,7 +75,6 @@ struct FlippableHeroCard: View {
                 .opacity(isFlipped ? 1.0 : 0.0)
                 .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
         }
-        .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
@@ -91,7 +90,7 @@ struct FlippableHeroCard: View {
         let hero = record.data?.hero?.data
 
         return VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .top, spacing: 0) {
                 // Left: Info VStack
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .center, spacing: 4) {
@@ -141,34 +140,35 @@ struct FlippableHeroCard: View {
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
-                // Right: Hero image - tall, fixed max height & width, keep aspect ratio
                 AsyncImage(url: URL(string: hero?.smallmap ?? "")) { phase in
                     switch phase {
                     case .success(let image):
                         image
                             .resizable()
-                            .scaledToFit()
+                            .scaledToFit() // <--- shows whole image, keeps aspect ratio
+                            .frame(maxHeight: .infinity)
+                            .clipped()
                     case .failure(_):
                         Image(systemName: "photo")
                             .resizable()
                             .scaledToFit()
+                            .frame(maxHeight: .infinity)
                             .foregroundColor(.gray.opacity(0.5))
                     case .empty:
                         ProgressView()
+                            .frame(maxHeight: .infinity)
                     @unknown default:
                         EmptyView()
                     }
                 }
-                .frame(maxHeight: 180)
-                .frame(maxWidth: 80)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .frame(maxHeight: .infinity)
+                .clipped()
                 .shadow(radius: 2)
             }
         }
         .opacity(isFlipped ? 0 : 1)
     }
-    // MARK: - Back of Card (unchanged)
+    // MARK: - Back of Card
     private var backView: some View {
         let relation = record.data?.relation
 
@@ -197,7 +197,7 @@ struct FlippableHeroCard: View {
         .opacity(isFlipped ? 1 : 0)
     }
 
-    // MARK: - Helpers (unchanged)
+    // MARK: - Helpers
     private func badgeView(title: String?, iconURL: String?, background: Color) -> some View {
         HStack(spacing: 4) {
             if let iconURL = iconURL {
