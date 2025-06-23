@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct MainApp: View {
-    @State private var selectedTab: Tab = .home
+    @State private var selectedTab: Tab = .position
 
     var body: some View {
         VStack(spacing: 0) {

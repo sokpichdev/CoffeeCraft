@@ -20,7 +20,6 @@ struct HeroDataContainer: Codable {
 struct HeroPositionRecord: Identifiable, Codable {
     let data: HeroRecordData?
     let id: Int?
-    //    var id: Int { data?.heroID ?? 0}
 }
 
 struct HeroRecordData: Codable {
@@ -36,6 +35,16 @@ struct HeroRecordData: Codable {
 
 struct HeroWrapper: Codable {
     let data: HeroDetail?
+}
+
+struct HeroRelation: Codable {
+    let assist: HeroTargetRelation?
+    let strong: HeroTargetRelation?
+    let weak: HeroTargetRelation?
+}
+
+struct HeroTargetRelation: Codable {
+    let target_hero_id: [Int]?
 }
 
 struct HeroDetail: Codable {
@@ -130,14 +139,4 @@ struct SortIDData: Codable {
     let sort_icon: String?
     let sort_id: String?
     let sort_title: String?
-}
-
-struct HeroRelation: Codable {
-    let assist: HeroTargetRelation?
-    let strong: HeroTargetRelation?
-    let weak: HeroTargetRelation?
-}
-
-struct HeroTargetRelation: Codable {
-    let target_hero_id: [Int]?
 }

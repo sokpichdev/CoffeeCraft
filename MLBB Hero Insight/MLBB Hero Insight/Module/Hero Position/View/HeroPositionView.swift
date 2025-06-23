@@ -60,6 +60,8 @@ struct HeroPositionView: View {
     // MARK: - UI Components
 }
 
+
+let cardHeight: CGFloat = 220
 struct FlippableHeroCard: View {
     let record: HeroPositionRecord
 
@@ -75,6 +77,7 @@ struct FlippableHeroCard: View {
                 .opacity(isFlipped ? 1.0 : 0.0)
                 .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
         }
+        .frame(height: cardHeight)
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
@@ -88,86 +91,96 @@ struct FlippableHeroCard: View {
     // MARK: - Front Card
     private var frontView: some View {
         let hero = record.data?.hero?.data
+        let aspectRatioWidth = cardHeight * 9 / 16
 
-        return VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 0) {
-                // Left: Info VStack
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .center, spacing: 4) {
-                        Text(hero?.name ?? "Unknown")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
+        return HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .center, spacing: 10) {
+                    Text(hero?.name ?? "Unknown")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
 
-                        Text("(\(record.data?.heroID ?? 0))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    if let lanes = hero?.roadsort?.compactMap({ $0 }), !lanes.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Lanes")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-
-                            WrapHStack(items: lanes, idKey: \.id) { lane in
-                                badgeView(title: lane.data?.road_sort_title ?? lane.caption,
-                                          iconURL: lane.data?.road_sort_icon,
-                                          background: .blue.opacity(0.1))
-                            }
-                        }
-                    }
-
-                    if let roles = hero?.sortid?.compactMap({ $0 }), !roles.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Roles")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-
-                            WrapHStack(items: roles, idKey: \.id) { role in
-                                badgeView(title: role.data.sort_title ?? role.caption,
-                                          iconURL: role.data.sort_icon,
-                                          background: .green.opacity(0.1))
-                            }
-                        }
-                    }
-
-                    Spacer()
-
-                    Text("Tap to view relations")
+                    Text("(\(record.data?.heroID ?? 0))")
                         .font(.caption)
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.secondary)
                 }
-                AsyncImage(url: URL(string: hero?.smallmap ?? "")) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit() // <--- shows whole image, keeps aspect ratio
-                            .frame(maxHeight: .infinity)
-                            .clipped()
-                    case .failure(_):
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: .infinity)
-                            .foregroundColor(.gray.opacity(0.5))
-                    case .empty:
-                        ProgressView()
-                            .frame(maxHeight: .infinity)
-                    @unknown default:
-                        EmptyView()
+
+                if let lanes = hero?.roadsort?.compactMap({ $0 }), !lanes.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Lanes")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        WrapHStack(items: lanes, idKey: \.id) { lane in
+                            badgeView(title: lane.data?.road_sort_title ?? lane.caption,
+                                      iconURL: lane.data?.road_sort_icon,
+                                      background: .blue.opacity(0.1))
+                        }
                     }
                 }
-                .frame(maxHeight: .infinity)
-                .clipped()
-                .shadow(radius: 2)
+
+                if let roles = hero?.sortid?.compactMap({ $0 }), !roles.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Roles")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        WrapHStack(items: roles, idKey: \.id) { role in
+                            badgeView(title: role.data.sort_title ?? role.caption,
+                                      iconURL: role.data.sort_icon,
+                                      background: .green.opacity(0.1))
+                        }
+                    }
+                }
+//                VStack(alignment: .leading, spacing: 8) {
+//                    Text("Wrapped Items:")
+//                        .font(.headline)
+//
+//                    WrapHStack(items: dummyItems, idKey: \.id) { item in
+//                        badgeView(title: "Jungler", iconURL: "", background: .green.opacity(0.1))
+//                    }
+//                    .background(Color.yellow.opacity(0.2)) // debug wrapping area
+//                }
+
+                Spacer()
             }
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: cardHeight, alignment: .topLeading)
+
+            // Image
+            AsyncImage(url: URL(string: hero?.smallmap ?? "")) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: aspectRatioWidth, height: cardHeight)
+                        .clipped()
+                        .frame(maxHeight: .infinity, alignment: .top)
+                case .failure(_):
+                    Image(systemName: "photo")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: aspectRatioWidth, height: cardHeight)
+                        .clipped()
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .foregroundColor(.gray.opacity(0.5))
+                case .empty:
+                    ProgressView()
+                        .frame(width: aspectRatioWidth, height: cardHeight)
+                @unknown default:
+                    EmptyView()
+                }
+            }
+            .frame(width: aspectRatioWidth, height: cardHeight)
+            .shadow(radius: 2)
         }
+        .frame(height: cardHeight)
         .opacity(isFlipped ? 0 : 1)
     }
+
     // MARK: - Back of Card
     private var backView: some View {
         let relation = record.data?.relation
@@ -247,6 +260,7 @@ struct WrapHStack<Data: RandomAccessCollection, Content: View, ID: Hashable>: Vi
     private func generateContent(in geometry: GeometryProxy) -> some View {
         var width = CGFloat.zero
         var height = CGFloat.zero
+        let rowSpacing: CGFloat = 5 // 👈 this is the vertical spacing between lines
 
         return ZStack(alignment: .topLeading) {
             ForEach(items, id: idKey) { item in
@@ -255,7 +269,7 @@ struct WrapHStack<Data: RandomAccessCollection, Content: View, ID: Hashable>: Vi
                     .alignmentGuide(.leading) { d in
                         if abs(width - d.width) > geometry.size.width {
                             width = 0
-                            height -= d.height
+                            height -= d.height + rowSpacing
                         }
                         let result = width
                         if item[keyPath: idKey] == items.last?[keyPath: idKey] {
@@ -293,3 +307,9 @@ struct ViewHeightKey: PreferenceKey {
     }
 }
 
+struct Dummy: Identifiable {
+    let id: Int
+    let title: String
+}
+
+let dummyItems: [Dummy] = (1...19).map { Dummy(id: $0, title: "Item \($0)") }
