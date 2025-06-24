@@ -37,8 +37,9 @@ struct HeroPositionView: View {
                             ForEach(filteredHeros.indices, id: \.self) { index in
                                 let record = filteredHeros[index]
                                 VStack(spacing: 0) {
-                                    FlippableHeroCard(record: record)
-                                        .padding(.vertical, 12)
+                                    FlippableHeroCard(heroes: homeVM.heroes, record: record)
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal)
                                 }
                             }
                         }
@@ -61,19 +62,18 @@ struct HeroPositionView: View {
     // MARK: - UI Components
 }
 
-
-let cardHeight: CGFloat = 220
 struct FlippableHeroCard: View {
+    let heroes: [Hero]
     let record: HeroPositionRecord
-
+    let cardHeight: CGFloat = 220
     @State private var isFlipped = false
-
+    
     var body: some View {
         ZStack {
             frontView
                 .opacity(isFlipped ? 0.0 : 1.0)
                 .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-
+            
             backView
                 .opacity(isFlipped ? 1.0 : 0.0)
                 .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
@@ -82,18 +82,21 @@ struct FlippableHeroCard: View {
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
-        .padding(.horizontal)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
+        )
         .animation(.easeInOut(duration: 0.4), value: isFlipped)
         .onTapGesture {
             isFlipped.toggle()
         }
     }
-
+    
     // MARK: - Front Card
     private var frontView: some View {
         let hero = record.data?.hero?.data
         let aspectRatioWidth = cardHeight * 9 / 16
-
+        
         return HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .center, spacing: 10) {
@@ -102,18 +105,18 @@ struct FlippableHeroCard: View {
                         .fontWeight(.semibold)
                         .lineLimit(1)
                         .truncationMode(.tail)
-
+                    
                     Text("(\(record.data?.heroID ?? 0))")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-
+                
                 if let lanes = hero?.roadsort?.compactMap({ $0 }), !lanes.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Lanes")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-
+                        
                         WrapHStack(items: lanes, idKey: \.id) { lane in
                             badgeView(title: lane.data?.road_sort_title ?? lane.caption,
                                       iconURL: lane.data?.road_sort_icon,
@@ -121,13 +124,13 @@ struct FlippableHeroCard: View {
                         }
                     }
                 }
-
+                
                 if let roles = hero?.sortid?.compactMap({ $0 }), !roles.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Roles")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-
+                        
                         WrapHStack(items: roles, idKey: \.id) { role in
                             badgeView(title: role.data.sort_title ?? role.caption,
                                       iconURL: role.data.sort_icon,
@@ -139,7 +142,7 @@ struct FlippableHeroCard: View {
             }
             .padding()
             .frame(maxWidth: .infinity, maxHeight: cardHeight, alignment: .topLeading)
-
+            
             // Image
             AsyncImage(url: URL(string: hero?.smallmap ?? "")) { phase in
                 switch phase {
@@ -171,36 +174,46 @@ struct FlippableHeroCard: View {
         .frame(height: cardHeight)
         .opacity(isFlipped ? 0 : 1)
     }
-
+    
     // MARK: - Back of Card
+    
     private var backView: some View {
+        let heroName = record.data?.hero?.data?.name
         let relation = record.data?.relation
-
-        return VStack(alignment: .leading, spacing: 16) {
-            Text("Hero Relations")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            if let assists = relation?.assist?.target_hero_id, !assists.isEmpty {
-                relationLine("🫱 Assists", ids: assists, color: .orange)
+        
+        return VStack(spacing: 8) {
+            HStack {
+                Text("Hero Relations")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .padding(.bottom, 4)
+                Spacer()
+                Text(heroName ?? "Unknown")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .padding(.bottom, 4)
             }
-            if let strongs = relation?.strong?.target_hero_id, !strongs.isEmpty {
-                relationLine("💪 Strong Against", ids: strongs, color: .red)
+            .padding(.top)
+            .padding(.horizontal)
+            
+            VStack(spacing: 6) {
+                if let assists = relation?.assist?.target_hero_id, !assists.isEmpty {
+                    relationSection(title: "Assists", ids: assists, dotColor: .orange)
+                }
+                if let strongs = relation?.strong?.target_hero_id, !strongs.isEmpty {
+                    relationSection(title: "Strong Against", ids: strongs, dotColor: .green)
+                }
+                if let weaks = relation?.weak?.target_hero_id, !weaks.isEmpty {
+                    relationSection(title: "Weak Against", ids: weaks, dotColor: .red)
+                }
             }
-            if let weaks = relation?.weak?.target_hero_id, !weaks.isEmpty {
-                relationLine("💔 Weak Against", ids: weaks, color: .purple)
-            }
-
             Spacer()
-
-            Text("Tap to flip back")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
         }
+        .frame(height: cardHeight)
+        .background(Color(.secondarySystemBackground))
         .opacity(isFlipped ? 1 : 0)
     }
-
+    
     // MARK: - Helpers
     private func badgeView(title: String?, iconURL: String?, background: Color) -> some View {
         HStack(spacing: 4) {
@@ -220,16 +233,38 @@ struct FlippableHeroCard: View {
         .background(background)
         .cornerRadius(6)
     }
+    
+    private func relationSection(title: String, ids: [Int], dotColor: Color) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(dotColor)
+                    .frame(width: 8, height: 8)
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.medium)
+                    .foregroundColor(dotColor)
+                Spacer()
+            }
+            .padding(.leading, 6)
 
-    private func relationLine(_ title: String, ids: [Int], color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(color)
-            Text(ids.map(String.init).joined(separator: ", "))
-                .font(.caption)
-                .foregroundColor(.secondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    
+                    Spacer() // Trailing indentation
+                        .frame(width: 16)
+                    
+                    ForEach(ids, id: \.self) { id in
+                        if let hero = heroes.first(where: { $0.id == String(id) }) {
+                            Text(hero.name)
+                                .font(.subheadline)
+                                .foregroundColor(dotColor)
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+                .padding(.leading, 6)
+            }
         }
     }
 }

@@ -8,7 +8,8 @@ import SwiftUI
 
 struct MainApp: View {
     @StateObject var homeVM = HomeViewModel()
-    @State private var selectedTab: Tab = .position
+    @State private var selectedTab: Tab = .home
+    
 
     var body: some View {
         VStack(spacing: 0) {
