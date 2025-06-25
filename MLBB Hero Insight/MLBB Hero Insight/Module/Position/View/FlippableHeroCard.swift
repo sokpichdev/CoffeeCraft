@@ -1,3 +1,10 @@
+//
+//  FlippableHeroCard.swift
+//  MLBB Hero Insight
+//
+//  Created by Sok Pich on 6/25/25.
+//
+import SwiftUI
 
 struct FlippableHeroCard: View {
     let heroes: [Hero]

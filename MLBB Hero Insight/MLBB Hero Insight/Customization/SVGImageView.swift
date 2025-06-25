@@ -1,3 +1,12 @@
+//
+//  SVGImageView.swift
+//  MLBB Hero Insight
+//
+//  Created by Sok Pich on 6/25/25.
+//
+import SwiftUI
+import SVGKit
+
 struct SVGImageView: View {
     let url: URL
     @State private var image: UIImage?

@@ -1,3 +1,11 @@
+//
+//  FlipView.swift
+//  MLBB Hero Insight
+//
+//  Created by Sok Pich on 6/25/25.
+//
+import SwiftUI
+
 struct FlipView<Front: View, Back: View>: View {
     let front: Front
     let back: Back

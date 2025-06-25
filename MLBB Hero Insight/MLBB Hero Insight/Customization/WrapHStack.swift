@@ -1,3 +1,11 @@
+//
+//  WrapHStack.swift
+//  MLBB Hero Insight
+//
+//  Created by Sok Pich on 6/25/25.
+//
+import SwiftUI
+
 struct WrapHStack<Data: RandomAccessCollection, Content: View, ID: Hashable>: View {
     let items: Data
     let idKey: KeyPath<Data.Element, ID>
