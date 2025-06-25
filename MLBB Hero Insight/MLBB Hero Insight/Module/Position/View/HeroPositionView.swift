@@ -5,6 +5,7 @@
 //  Created by Sok Pich on 6/20/25.
 //
 import SwiftUI
+import SVGKit
 
 struct HeroPositionView: View {
     @StateObject private var viewModel = HeroPositionViewModel()
@@ -69,24 +70,9 @@ struct FlippableHeroCard: View {
     @State private var isFlipped = false
     
     var body: some View {
-        ZStack {
-            frontView
-                .opacity(isFlipped ? 0.0 : 1.0)
-                .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-            
-            backView
-                .opacity(isFlipped ? 1.0 : 0.0)
-                .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
-        }
+        FlipView(front: frontView, back: backView, isFlipped: $isFlipped)
         .frame(height: cardHeight)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
-        )
-        .animation(.easeInOut(duration: 0.4), value: isFlipped)
+        .contentShape(Rectangle())
         .onTapGesture {
             isFlipped.toggle()
         }
@@ -120,7 +106,7 @@ struct FlippableHeroCard: View {
                         WrapHStack(items: lanes, idKey: \.id) { lane in
                             badgeView(title: lane.data?.road_sort_title ?? lane.caption,
                                       iconURL: lane.data?.road_sort_icon,
-                                      background: .blue.opacity(0.1))
+                                      background: .brown.opacity(0.1))
                         }
                     }
                 }
@@ -172,7 +158,12 @@ struct FlippableHeroCard: View {
             .shadow(radius: 2)
         }
         .frame(height: cardHeight)
-        .opacity(isFlipped ? 0 : 1)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
+        )
     }
     
     // MARK: - Back of Card
@@ -211,20 +202,35 @@ struct FlippableHeroCard: View {
         }
         .frame(height: cardHeight)
         .background(Color(.secondarySystemBackground))
-        .opacity(isFlipped ? 1 : 0)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
+        )
     }
-    
     // MARK: - Helpers
     private func badgeView(title: String?, iconURL: String?, background: Color) -> some View {
         HStack(spacing: 4) {
-            if let iconURL = iconURL {
-                AsyncImage(url: URL(string: iconURL)) { phase in
-                    phase.image?
-                        .resizable()
-                        .scaledToFit()
+            if let iconURL = iconURL, let url = URL(string: iconURL) {
+                if url.pathExtension.lowercased() == "svg" {
+                    SVGImageView(url: url)
+                        .frame(width: 28, height: 28)
+                } else {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        default:
+                            EmptyView()
+                        }
+                    }
+                    .frame(width: 20, height: 20)
                 }
-                .frame(width: 14, height: 14)
             }
+
             Text(title ?? "")
                 .font(.caption2)
         }
@@ -331,5 +337,58 @@ struct ViewHeightKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = max(value, nextValue())
+    }
+}
+
+struct FlipView<Front: View, Back: View>: View {
+    let front: Front
+    let back: Back
+    @Binding var isFlipped: Bool
+
+    var body: some View {
+        ZStack {
+                front
+                    .opacity(isFlipped ? 0.0 : 1.0)
+                    .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+
+                back
+                    .opacity(isFlipped ? 1.0 : 0.0)
+                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0)) // flips to front
+                    .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0)) // outer flip
+        }
+        .animation(.easeInOut(duration: 0.4), value: isFlipped)
+    }
+}
+
+struct SVGImageView: View {
+    let url: URL
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image = image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                ProgressView() // Or any placeholder
+            }
+        }
+        .onAppear {
+            loadSVGAsync(from: url)
+        }
+    }
+
+    private func loadSVGAsync(from url: URL) {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data,
+                  let svgImage = SVGKImage(data: data),
+                  let uiImage = svgImage.uiImage else {
+                return
+            }
+            DispatchQueue.main.async {
+                self.image = uiImage
+            }
+        }.resume()
     }
 }

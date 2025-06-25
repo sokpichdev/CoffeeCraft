@@ -25,6 +25,7 @@ struct MainApp: View {
                         .environmentObject(homeVM)
                 case .settings:
                     HomeView()
+                        .environmentObject(homeVM)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)  // fill space above tab bar

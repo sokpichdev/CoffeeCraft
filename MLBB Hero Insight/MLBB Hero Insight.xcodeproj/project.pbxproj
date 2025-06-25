@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6A0212672E0BF9A100E4E393 /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6A0212662E0BF9A100E4E393 /* SVGKit */; };
+		6A0212692E0BF9A100E4E393 /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6A0212682E0BF9A100E4E393 /* SVGKitSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		6AD9EADF2E0278D000800D85 /* MLBB Hero Insight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MLBB Hero Insight.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A0212692E0BF9A100E4E393 /* SVGKitSwift in Frameworks */,
+				6A0212672E0BF9A100E4E393 /* SVGKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = "MLBB Hero Insight";
 			packageProductDependencies = (
+				6A0212662E0BF9A100E4E393 /* SVGKit */,
+				6A0212682E0BF9A100E4E393 /* SVGKitSwift */,
 			);
 			productName = "MLBB Hero Insight";
 			productReference = 6AD9EADF2E0278D000800D85 /* MLBB Hero Insight.app */;
@@ -94,6 +103,9 @@
 			);
 			mainGroup = 6AD9EAD62E0278D000800D85;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6A0212652E0BF9A100E4E393 /* XCRemoteSwiftPackageReference "SVGKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AD9EAE02E0278D000800D85 /* Products */;
 			projectDirPath = "";
@@ -324,6 +336,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6A0212652E0BF9A100E4E393 /* XCRemoteSwiftPackageReference "SVGKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6A0212662E0BF9A100E4E393 /* SVGKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A0212652E0BF9A100E4E393 /* XCRemoteSwiftPackageReference "SVGKit" */;
+			productName = SVGKit;
+		};
+		6A0212682E0BF9A100E4E393 /* SVGKitSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A0212652E0BF9A100E4E393 /* XCRemoteSwiftPackageReference "SVGKit" */;
+			productName = SVGKitSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6AD9EAD72E0278D000800D85 /* Project object */;
 }

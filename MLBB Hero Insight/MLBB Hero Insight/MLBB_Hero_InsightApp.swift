@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SVGKitSwift
 
 @main
 struct MLBB_Hero_InsightApp: App {
