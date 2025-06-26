@@ -97,6 +97,7 @@ struct HeroDetail: Codable {
 // A dummy type to discard invalid values
 private struct DummyCodable: Codable {}
 
+// ✅ Road Sort Info
 struct HeroRoadSort: Codable {
     let _id: String?
     let caption: String?
@@ -119,6 +120,7 @@ struct RoadSortData: Codable {
     let road_sort_title: String?
 }
 
+// ✅ Sort ID Info
 struct HeroSortID: Codable {
     let _id: String?
     let caption: String?
