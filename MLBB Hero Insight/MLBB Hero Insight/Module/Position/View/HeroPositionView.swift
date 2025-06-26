@@ -76,6 +76,22 @@ struct HeroPositionView: View {
             .onAppear {
                 Task { await viewModel.loadPosition()}
             }
+            .sheet(isPresented: $showFilterSheet) {
+                HeroPositionFilterView(
+                    lane: $viewModel.lane,
+                    role: $viewModel.role, onApply: {
+                        showFilterSheet = false
+                        viewModel.isBeingFiltered = true
+                        viewModel.isAlreadyReset = false
+                        Task {
+                            await viewModel.loadPosition()
+                        }
+                    }, onReset:  {
+                        viewModel.resetFilter()
+                    }
+                )
+                .presentationDetents([.medium, .large])
+            }
         }
     }
     
