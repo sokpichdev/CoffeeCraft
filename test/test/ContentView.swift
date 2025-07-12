@@ -15,10 +15,10 @@ struct BullBullDisplayView: View {
         let containerHeight = totalHeight
         let cardSpacing: CGFloat = 4
         let cardHeight = containerHeight * 0.9
-        let containerPadding: CGFloat = 4
+        let containerPadding: CGFloat = 6
 
-        HStack(spacing: 8) {
-            // Left Red Rounded Box with "B"
+        HStack(spacing: cardSpacing) {
+            // MARK: Red Box ("B")
             ZStack {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.black.opacity(0.1))
@@ -41,9 +41,10 @@ struct BullBullDisplayView: View {
                     .font(.system(size: cardHeight * 0.6, weight: .bold))
                     .foregroundColor(.white)
             }
-            .frame(width: cardHeight * 0.7 * 5/6, height: cardHeight) // same shape as cards
+            .frame(height: cardHeight)
+            .aspectRatio(5/7, contentMode: .fit)
 
-            // Card Row with Overlay
+            // MARK: Cards with Overlay
             ZStack(alignment: .bottom) {
                 HStack(spacing: cardSpacing) {
                     ForEach(0..<cardCount, id: \.self) { index in
@@ -54,7 +55,7 @@ struct BullBullDisplayView: View {
                     }
                 }
 
-                // "Bull Bull" Overlay
+                // "Bull Bull" overlay only on cards
                 Rectangle()
                     .fill(Color.black.opacity(0.6))
                     .frame(height: cardHeight * 0.4)
@@ -65,7 +66,7 @@ struct BullBullDisplayView: View {
                     )
             }
         }
-        .padding(6)
+        .padding(containerPadding)
         .frame(height: totalHeight)
         .background(Color.blue)
         .overlay {
