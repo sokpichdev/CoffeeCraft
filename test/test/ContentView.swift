@@ -7,6 +7,48 @@
 
 import SwiftUI
 
+struct NiuNiuCardsDisplayView: View {
+    var body: some View {
+        GeometryReader { geometry in
+            let itemWidth = geometry.size.width / 2
+            let itemHeight = geometry.size.height / 2
+            let cardWidth = itemWidth / (6 - itemWidth * 0.2)
+            let cardHeight = itemHeight * (0.9 - itemWidth * 0.2)
+
+            VStack(spacing: 0) {
+                ForEach(0..<2) { _ in
+                    HStack(spacing: 0) {
+                        ForEach(0..<2) { _ in
+                            HStack(spacing: 0) {
+                                ForEach(0..<6) { _ in
+                                    Image("101")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: cardWidth, height: cardHeight)
+                                }
+                            }
+                            .frame(width: itemWidth, height: itemHeight)
+                            .border(Color.green, width: 2)
+                        }
+                    }
+                }
+            }
+            .background(Color.blue)
+        }
+        .frame(height: UIScreen.main.bounds.height * 0.12)
+    }
+}
+
+enum ActiveSheet: Identifiable {
+    case first, second
+
+    var id: Int {
+        switch self {
+        case .first: return 1
+        case .second: return 2
+        }
+    }
+}
 struct ContentView: View {
     var body: some View {
         VStack {
