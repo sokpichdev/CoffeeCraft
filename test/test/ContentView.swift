@@ -7,6 +7,79 @@
 
 import SwiftUI
 
+struct BullBullDisplayView: View {
+    let totalHeight: CGFloat = UIScreen.main.bounds.height * 0.12 / 2
+    let cardCount = 5
+
+    var body: some View {
+        let containerHeight = totalHeight
+        let cardHeight = containerHeight * 0.9
+        let cardSpacing: CGFloat = 4
+
+        HStack(spacing: 8) {
+            // Left Red Rounded Box with "B"
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.black.opacity(0.1))
+
+                // Simulated inset shadow from bottom-right
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.black.opacity(0.25), lineWidth: 4)
+                    .blur(radius: 3.56)
+                    .offset(x: 3.56, y: 3.56)
+                    .mask(RoundedRectangle(cornerRadius: 12))
+
+                // Simulated inset shadow from top-left
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.black.opacity(0.25), lineWidth: 4)
+                    .blur(radius: 3.56)
+                    .offset(x: -3.56, y: -3.56)
+                    .mask(RoundedRectangle(cornerRadius: 12))
+
+                Text("B")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+            }
+            .frame(width: containerHeight / 2, height: containerHeight - cardSpacing * 2)
+
+            // Card Row with Overlay
+            ZStack(alignment: .bottom) {
+                HStack(spacing: cardSpacing) {
+                    ForEach(0..<cardCount, id: \.self) { index in
+                        Image("101")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: cardHeight)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.white)
+                                    .shadow(color: index % 2 == 0 ? Color.green : .clear,
+                                            radius: 4, x: 0, y: 0)
+                            )
+                    }
+                }
+
+                // "Bull Bull" Overlay
+                Rectangle()
+                    .fill(Color.black.opacity(0.6))
+                    .frame(height: cardHeight * 0.4)
+                    .overlay(
+                        Text("Bull Bull")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(Color.yellow)
+                    )
+            }
+        }
+        .padding(6)
+        .frame(height: totalHeight)
+        .background(Color.blue) // Optional background
+        .overlay {
+            RoundedRectangle(cornerRadius: 3)
+                .stroke(Color.red, lineWidth: 2)
+        }
+    }
+}
+
 struct NiuNiuCardsDisplayView: View {
     var body: some View {
         GeometryReader { geometry in
