@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct BullBullDisplayView: View {
-    let totalHeight: CGFloat = UIScreen.main.bounds.height * 0.12 / 2
+    let totalHeight: CGFloat
     let cardCount = 5
 
     var body: some View {
         let containerHeight = totalHeight
-        let cardHeight = containerHeight * 0.9
         let cardSpacing: CGFloat = 4
+        let cardRowHeight = containerHeight * 0.9
 
         HStack(spacing: 8) {
             // Left Red Rounded Box with "B"
@@ -22,14 +22,14 @@ struct BullBullDisplayView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.black.opacity(0.1))
 
-                // Simulated inset shadow from bottom-right
+                // Inset shadow bottom-right
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.black.opacity(0.25), lineWidth: 4)
                     .blur(radius: 3.56)
                     .offset(x: 3.56, y: 3.56)
                     .mask(RoundedRectangle(cornerRadius: 12))
 
-                // Simulated inset shadow from top-left
+                // Inset shadow top-left
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.black.opacity(0.25), lineWidth: 4)
                     .blur(radius: 3.56)
@@ -40,7 +40,7 @@ struct BullBullDisplayView: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
             }
-            .frame(width: containerHeight / 2, height: containerHeight - cardSpacing * 2)
+            .frame(width: cardRowHeight, height: cardRowHeight ) // Match card row height
 
             // Card Row with Overlay
             ZStack(alignment: .bottom) {
@@ -49,20 +49,14 @@ struct BullBullDisplayView: View {
                         Image("101")
                             .resizable()
                             .scaledToFit()
-                            .frame(height: cardHeight)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.white)
-                                    .shadow(color: index % 2 == 0 ? Color.green : .clear,
-                                            radius: 4, x: 0, y: 0)
-                            )
+                            .frame(height: cardRowHeight)
                     }
                 }
 
                 // "Bull Bull" Overlay
                 Rectangle()
                     .fill(Color.black.opacity(0.6))
-                    .frame(height: cardHeight * 0.4)
+                    .frame(height: cardRowHeight * 0.4)
                     .overlay(
                         Text("Bull Bull")
                             .font(.system(size: 22, weight: .bold))
