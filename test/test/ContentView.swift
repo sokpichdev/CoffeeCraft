@@ -9,53 +9,19 @@ import SwiftUI
 
 struct BullBullDisplayView: View {
     let playerBankerName: String
+    let isOnRight: Bool
     let totalHeight: CGFloat
     let cardCount = 5
 
+    var cardSpacing: CGFloat = 4
+    var containerPadding: CGFloat = 6
+    var cardHeight: CGFloat { totalHeight * 0.9}
     var body: some View {
-        let containerHeight = totalHeight
-        let cardSpacing: CGFloat = 4
-        let cardHeight = containerHeight * 0.9
-        let containerPadding: CGFloat = 6
-
         HStack(spacing: cardSpacing) {
             // MARK: Red Box ("B")
-            ZStack {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.black.opacity(0.1))
-
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.black.opacity(0.25), lineWidth: 4)
-                    .blur(radius: 3.56)
-                    .offset(x: 3.56, y: 3.56)
-                    .mask(RoundedRectangle(cornerRadius: 6))
-
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.black.opacity(0.25), lineWidth: 4)
-                    .blur(radius: 3.56)
-                    .offset(x: -3.56, y: -3.56)
-                    .mask(RoundedRectangle(cornerRadius: 6))
-
-                if playerBankerName.count > 1 {
-                    let firstChar = String(playerBankerName.prefix(1))
-                    let secondChar = String(playerBankerName.suffix(1))
-                    
-                    VStack(spacing: 0) {
-                        Text(firstChar)
-                        if playerBankerName.count > 1{
-                            Text(secondChar)
-                        }
-                    }
-                    .font(.system(size: cardHeight * 0.4, weight: .bold))
-                    .foregroundColor(.white)
-                } else {
-                    Text(playerBankerName)
-                        .font(.system(size: cardHeight * 0.4, weight: .bold))
-                        .foregroundColor(.white)
-                }
+            if isOnRight {
+                leftOrRightCard
             }
-            .frame(height: cardHeight)
-            .aspectRatio(5 / 7, contentMode: .fit)
 
             // MARK: Cards with Overlay
             ZStack(alignment: .bottom) {
@@ -77,6 +43,9 @@ struct BullBullDisplayView: View {
                             .foregroundColor(Color.yellow)
                     )
             }
+            if !isOnRight {
+                leftOrRightCard
+            }
         }
         .padding(containerPadding)
         .frame(height: totalHeight)
@@ -85,6 +54,47 @@ struct BullBullDisplayView: View {
             RoundedRectangle(cornerRadius: 3)
                 .stroke(Color.normalRed, lineWidth: 2)
         }
+    }
+    
+    @ViewBuilder
+    var leftOrRightCard: some View {
+        // MARK: Red Box ("B")
+        ZStack {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.black.opacity(0.1))
+            
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color.black.opacity(0.25), lineWidth: 4)
+                .blur(radius: 3.56)
+                .offset(x: 3.56, y: 3.56)
+                .mask(RoundedRectangle(cornerRadius: 6))
+            
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color.black.opacity(0.25), lineWidth: 4)
+                .blur(radius: 3.56)
+                .offset(x: -3.56, y: -3.56)
+                .mask(RoundedRectangle(cornerRadius: 6))
+            
+            if playerBankerName.count > 1 {
+                let firstChar = String(playerBankerName.prefix(1))
+                let secondChar = String(playerBankerName.suffix(1))
+                
+                VStack(spacing: 0) {
+                    Text(firstChar)
+                    if playerBankerName.count > 1{
+                        Text(secondChar)
+                    }
+                }
+                .font(.system(size: cardHeight * 0.4, weight: .bold))
+                .foregroundColor(.white)
+            } else {
+                Text(playerBankerName)
+                    .font(.system(size: cardHeight * 0.4, weight: .bold))
+                    .foregroundColor(.white)
+            }
+        }
+        .frame(height: cardHeight)
+        .aspectRatio(5 / 7, contentMode: .fit)
     }
 }
 
@@ -97,7 +107,7 @@ struct NiuNiuCardsDisplayView: View {
         
         LazyVGrid(columns: columns, spacing: gridSpacing) {
             ForEach(0..<4) { index in
-                BullBullDisplayView(playerBankerName: index == 0 ? "B" : "P \(index)", totalHeight: (totalHeight / 2) - gridSpacing)
+                BullBullDisplayView(playerBankerName: index == 0 ? "B" : "P \(index)", isOnRight: (index + 1) % 2 == 0 ? false : true, totalHeight: (totalHeight / 2) - gridSpacing)
                     .padding(2)
             }
         }
