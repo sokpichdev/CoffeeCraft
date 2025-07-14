@@ -49,10 +49,13 @@ struct BullBullDisplayView: View {
         }
         .padding(containerPadding)
         .frame(height: totalHeight)
-        .background(Color.darkerRed)
+        .background(playerBankerName.prefix(1) == "B" ? Color.darkerRed : Color.darkerBlue)
         .overlay {
             RoundedRectangle(cornerRadius: 3)
-                .stroke(Color.normalRed, lineWidth: 2)
+                .stroke(
+                    playerBankerName.prefix(1) == "B" ? Color.normalRed : Color.normalBlue,
+                    lineWidth: 2
+                )
         }
     }
     
