@@ -23,14 +23,12 @@ struct BullBullDisplayView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.black.opacity(0.1))
 
-                // Inset shadow bottom-right
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(Color.black.opacity(0.25), lineWidth: 4)
                     .blur(radius: 3.56)
                     .offset(x: 3.56, y: 3.56)
                     .mask(RoundedRectangle(cornerRadius: 6))
 
-                // Inset shadow top-left
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(Color.black.opacity(0.25), lineWidth: 4)
                     .blur(radius: 3.56)
@@ -42,7 +40,7 @@ struct BullBullDisplayView: View {
                     .foregroundColor(.white)
             }
             .frame(height: cardHeight)
-            .aspectRatio(5/7, contentMode: .fit)
+            .aspectRatio(5 / 7, contentMode: .fit)
 
             // MARK: Cards with Overlay
             ZStack(alignment: .bottom) {
@@ -55,7 +53,6 @@ struct BullBullDisplayView: View {
                     }
                 }
 
-                // "Bull Bull" overlay only on cards
                 Rectangle()
                     .fill(Color.black.opacity(0.6))
                     .frame(height: cardHeight * 0.4)
@@ -68,43 +65,31 @@ struct BullBullDisplayView: View {
         }
         .padding(containerPadding)
         .frame(height: totalHeight)
-        .background(Color.blue)
+        .background(Color.darkerRed)
         .overlay {
             RoundedRectangle(cornerRadius: 3)
-                .stroke(Color.red, lineWidth: 2)
+                .stroke(Color.normalRed, lineWidth: 2)
         }
     }
 }
 
 struct NiuNiuCardsDisplayView: View {
+    let totalHeight: CGFloat = UIScreen.main.bounds.height * 0.12
+    let gridSpacing: CGFloat = 4
+    
     var body: some View {
-        GeometryReader { geometry in
-            let itemWidth = geometry.size.width / 2
-            let itemHeight = geometry.size.height / 2
-            let cardWidth = itemWidth / (6 - itemWidth * 0.2)
-            let cardHeight = itemHeight * (0.9 - itemWidth * 0.2)
-
-            VStack(spacing: 0) {
-                ForEach(0..<2) { _ in
-                    HStack(spacing: 0) {
-                        ForEach(0..<2) { _ in
-                            HStack(spacing: 0) {
-                                ForEach(0..<6) { _ in
-                                    Image("101")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: cardWidth, height: cardHeight)
-                                }
-                            }
-                            .frame(width: itemWidth, height: itemHeight)
-                            .border(Color.green, width: 2)
-                        }
-                    }
-                }
+        let columns = Array(repeating: GridItem(.flexible(), spacing: gridSpacing), count: 2)
+        
+        LazyVGrid(columns: columns, spacing: gridSpacing) {
+            ForEach(0..<4) { _ in
+                BullBullDisplayView(totalHeight: (totalHeight / 2) - gridSpacing)
+                    .padding(2)
             }
-            .background(Color.blue)
         }
-        .frame(height: UIScreen.main.bounds.height * 0.12)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 4)
+        .frame(height: totalHeight)
+        .background(Color.blue)
     }
 }
 
