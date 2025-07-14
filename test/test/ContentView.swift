@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct BullBullDisplayView: View {
+    let playerBankerName: String
     let totalHeight: CGFloat
     let cardCount = 5
 
@@ -95,15 +96,15 @@ struct NiuNiuCardsDisplayView: View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: gridSpacing), count: 2)
         
         LazyVGrid(columns: columns, spacing: gridSpacing) {
-            ForEach(0..<4) { _ in
-                BullBullDisplayView(totalHeight: (totalHeight / 2) - gridSpacing)
+            ForEach(0..<4) { index in
+                BullBullDisplayView(playerBankerName: index == 0 ? "B" : "P \(index)", totalHeight: (totalHeight / 2) - gridSpacing)
                     .padding(2)
             }
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
         .frame(height: totalHeight)
-        .background(Color.blue)
+        .background(Color.muteDarkBlue)
     }
 }
 
