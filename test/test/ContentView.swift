@@ -35,9 +35,23 @@ struct BullBullDisplayView: View {
                     .offset(x: -3.56, y: -3.56)
                     .mask(RoundedRectangle(cornerRadius: 6))
 
-                Text("B")
-                    .font(.system(size: cardHeight * 0.6, weight: .bold))
+                if playerBankerName.count > 1 {
+                    let firstChar = String(playerBankerName.prefix(1))
+                    let secondChar = String(playerBankerName.suffix(1))
+                    
+                    VStack(spacing: 0) {
+                        Text(firstChar)
+                        if playerBankerName.count > 1{
+                            Text(secondChar)
+                        }
+                    }
+                    .font(.system(size: cardHeight * 0.4, weight: .bold))
                     .foregroundColor(.white)
+                } else {
+                    Text(playerBankerName)
+                        .font(.system(size: cardHeight * 0.4, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
             .frame(height: cardHeight)
             .aspectRatio(5 / 7, contentMode: .fit)
