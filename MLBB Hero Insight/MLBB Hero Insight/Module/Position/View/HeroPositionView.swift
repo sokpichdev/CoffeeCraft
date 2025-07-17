@@ -94,6 +94,4 @@ struct HeroPositionView: View {
             }
         }
     }
-    
-    // MARK: - UI Components
 }
