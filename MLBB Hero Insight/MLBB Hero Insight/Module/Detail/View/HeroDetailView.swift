@@ -1,8 +1,14 @@
+//
+//  HeroDetailView.swift
+//  MLBB Hero Insight
+//
+//  Created by Sok Pich on 6/26/25.
+//
 import SwiftUI
 
 struct HeroDetailView: View {
     @StateObject var viewModel = DetailViewModel()
-    let heroID: Int
+    let heroID: String
 
     var body: some View {
         VStack {

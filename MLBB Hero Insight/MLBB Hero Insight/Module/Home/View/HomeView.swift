@@ -9,6 +9,8 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var viewModel: HomeViewModel
     @State private var searchText = ""
+    @State var isNavigateToDetail: Bool = false
+    @State var selectedHeroID: String = "0"
 
     var filteredHeroes: [Hero] {
         if searchText.isEmpty {
@@ -22,7 +24,7 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            VStack {
                 if viewModel.isLoading {
                     ProgressView("Loading heroes...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -36,28 +38,41 @@ struct HomeView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List {
-                        ForEach(filteredHeroes) { hero in
-                            HStack(spacing: 16) {
-                                Circle()
-                                    .fill(Color.indigo.opacity(0.2))
-                                    .frame(width: 40, height: 40)
-                                    .overlay(Text(hero.id).font(.footnote))
-                                Text(hero.name)
-                                    .font(.body)
-                                    .fontWeight(.medium)
+                    ScrollView {
+                        LazyVStack(spacing: 0, pinnedViews: []) {
+                            ForEach(filteredHeroes) { hero in
+                                Button(action: {
+                                    isNavigateToDetail = true
+                                    selectedHeroID = hero.id
+                                }, label: {
+                                    HStack(spacing: 16) {
+                                        Circle()
+                                            .fill(Color.indigo.opacity(0.2))
+                                            .frame(width: 40, height: 40)
+                                            .overlay(Text(hero.id).font(.footnote))
+                                        Text(hero.name)
+                                            .font(.body)
+                                            .fontWeight(.medium)
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 4)
+                                })
+                                .buttonStyle(.plain)
                             }
-                            .padding(.vertical, 4)
                         }
+                        .padding()
                     }
-                    .listStyle(.insetGrouped)
-                    .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+                    .scrollIndicators(.hidden)
                     .refreshable {
                         Task { await viewModel.loadHeroes() }
                     }
                 }
             }
             .navigationTitle("MLBB Heroes")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+            .navigationDestination(isPresented: $isNavigateToDetail, destination: {
+                HeroDetailView(heroID: selectedHeroID)
+            })
         }
         .task {
             await viewModel.loadHeroes()
