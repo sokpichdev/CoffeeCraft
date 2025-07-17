@@ -8,6 +8,8 @@ import SwiftUI
 
 struct MainApp: View {
     @StateObject var homeVM = HomeViewModel()
+    @StateObject var heroPosVM = HeroPositionViewModel()
+
     @State private var selectedTab: Tab = .home
     
 
@@ -23,6 +25,7 @@ struct MainApp: View {
                 case .position:
                     HeroPositionView()
                         .environmentObject(homeVM)
+                        .environmentObject(heroPosVM)
                 case .settings:
                     HomeView()
                         .environmentObject(homeVM)

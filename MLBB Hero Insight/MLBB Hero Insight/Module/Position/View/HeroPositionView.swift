@@ -7,27 +7,27 @@
 import SwiftUI
 
 struct HeroPositionView: View {
-    @StateObject private var viewModel = HeroPositionViewModel()
+    @EnvironmentObject var heroPosVM: HeroPositionViewModel
     @EnvironmentObject var homeVM: HomeViewModel
     @State private var searchText = ""
     @State private var showFilterSheet = false
     
     var filteredHeros: [HeroPositionRecord] {
         if searchText.isEmpty {
-            return viewModel.positions ?? []
+            return heroPosVM.positions ?? []
         } else {
-            return viewModel.positions?.filter {
+            return heroPosVM.positions?.filter {
                 $0.data?.hero?.data?.name?.localizedCaseInsensitiveContains(searchText) == true
-            } ?? viewModel.positions ?? []
+            } ?? heroPosVM.positions ?? []
         }
     }
     var body: some View {
         NavigationStack {
             VStack {
-                if viewModel.isLoading {
+                if heroPosVM.isLoading {
                     ProgressView("Loading Positions...")
                         .frame(maxHeight: .infinity)
-                } else if let error = viewModel.errorMessage {
+                } else if let error = heroPosVM.errorMessage {
                     Text(error)
                         .foregroundColor(.red)
                         .frame(maxHeight: .infinity)
@@ -47,7 +47,7 @@ struct HeroPositionView: View {
                     }
                     .scrollIndicators(.hidden)
                     .refreshable {
-                        Task { await viewModel.loadPosition()}
+                        Task { await heroPosVM.loadPosition()}
                     }
                 }
             }
@@ -62,7 +62,7 @@ struct HeroPositionView: View {
                             Image(systemName: "line.3.horizontal.decrease.circle")
                                 .font(.title3)
                             
-                            if viewModel.isBeingFiltered {
+                            if heroPosVM.isBeingFiltered {
                                 Circle()
                                     .fill(Color.red)
                                     .frame(width: 8, height: 8)
@@ -74,20 +74,20 @@ struct HeroPositionView: View {
                 }
             }
             .onAppear {
-                Task { await viewModel.loadPosition()}
+                Task { if !heroPosVM.isFetched {await heroPosVM.loadPosition()}}
             }
             .sheet(isPresented: $showFilterSheet) {
                 HeroPositionFilterView(
-                    lane: $viewModel.lane,
-                    role: $viewModel.role, onApply: {
+                    lane: $heroPosVM.lane,
+                    role: $heroPosVM.role, onApply: {
                         showFilterSheet = false
-                        viewModel.isBeingFiltered = true
-                        viewModel.isAlreadyReset = false
+                        heroPosVM.isBeingFiltered = true
+                        heroPosVM.isAlreadyReset = false
                         Task {
-                            await viewModel.loadPosition()
+                            await heroPosVM.loadPosition()
                         }
                     }, onReset:  {
-                        viewModel.resetFilter()
+                        heroPosVM.resetFilter()
                     }
                 )
                 .presentationDetents([.medium, .large])

@@ -9,6 +9,7 @@ import SwiftUI
 class HeroPositionViewModel: ObservableObject {
     @Published var positions: [HeroPositionRecord]? = []
     @Published var isLoading = false
+    @Published var isFetched: Bool = false
     @Published var errorMessage: String?
     @Published var isAlreadyReset: Bool = false
     @Published var isBeingFiltered: Bool = false
@@ -64,6 +65,7 @@ class HeroPositionViewModel: ObservableObject {
                     if let totalHeroSize = response.data?.total {
                         self.totalHeroSize = totalHeroSize
                     }
+                    self.isFetched = true
                     self.isLoading = false
                 }
             } else {
@@ -73,6 +75,7 @@ class HeroPositionViewModel: ObservableObject {
             await MainActor.run {
                 print("🔴 Error: \(error.localizedDescription)")
                 self.errorMessage = "Failed to load Position."
+                self.isFetched = true
                 self.isLoading = false
             }
         }

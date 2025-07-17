@@ -75,7 +75,9 @@ struct HomeView: View {
             })
         }
         .task {
-            await viewModel.loadHeroes()
+            if !viewModel.isFetched {
+                await viewModel.loadHeroes()
+            }
         }
     }
 }
