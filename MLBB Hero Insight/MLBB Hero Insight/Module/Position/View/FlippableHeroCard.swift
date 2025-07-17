@@ -10,40 +10,114 @@ struct FlippableHeroCard: View {
     let heroes: [Hero]
     let record: HeroPositionRecord
     let cardHeight: CGFloat = 220
-    @State private var isFlipped = false
-    // State to track the drag amount, used for visual feedback during the swipe
-    @State private var dragAmount: CGSize = .zero
-    // Threshold to determine if a swipe is enough to trigger a flip
-    private let flipThreshold: CGFloat = 50
+    
+    // Tracks the total Y-axis rotation of the card.
+    // 0 degrees for front, 180 or -180 for back, can accumulate beyond.
+    @State private var rotationY: Double = 0.0
+    
+    // Used for real-time visual feedback during the drag gesture.
+    @State private var liveDragRotation: Double = 0.0
+    
+    // The minimum horizontal swipe distance to trigger a flip.
+    private let flipThreshold: CGFloat = 50.0
     
     var body: some View {
-        FlipView(front: frontView, back: backView, isFlipped: $isFlipped)
-            .frame(height: cardHeight)
-            .contentShape(Rectangle())
-            // Apply rotation based on drag for a more interactive swipe
-            .rotation3DEffect(.degrees(dragAmount.width / 10), axis: (x: 0, y: 1, z: 0))
-            .gesture(
-                DragGesture()
-                    .onChanged { gesture in
-                        // Update dragAmount as the user drags
-                        self.dragAmount = gesture.translation
-                    }
-                    .onEnded { gesture in
-                        // If the horizontal drag is beyond the threshold, toggle isFlipped
-                        if abs(gesture.translation.width) > flipThreshold {
-                            isFlipped.toggle()
+        ZStack {
+            // MARK: Front View
+            // The front view is shown when the card is facing "forward" (0, 360, -360 degrees, etc.)
+            frontView
+                .opacity(isFrontFaceVisible ? 1.0 : 0.0)
+            
+            // MARK: Back View
+            // The back view is shown when the card is facing "backward" (180, -180, 540 degrees, etc.)
+            backView
+                .opacity(isBackFaceVisible ? 1.0 : 0.0)
+                // This internal rotation ensures the back content is readable
+                // when it's rotated into the user's view (i.e., it starts "upside down" from the front's perspective).
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+        }
+        .frame(height: cardHeight)
+        // Apply the combined rotation (base rotation + live drag offset) to the entire card.
+        .rotation3DEffect(
+            .degrees(rotationY + liveDragRotation),
+            axis: (x: 0, y: 1, z: 0),
+            perspective: 0.5 // Adds a subtle 3D perspective effect
+        )
+        .contentShape(Rectangle()) // Makes the entire card area responsive to gestures
+        .gesture(
+            DragGesture()
+                .onChanged { gesture in
+                    // Update `liveDragRotation` to provide real-time interactive tilt during the swipe.
+                    // The multiplier (0.5) controls the sensitivity of this live tilt.
+                    self.liveDragRotation = gesture.translation.width * 0.5
+                }
+                .onEnded { gesture in
+                    let swipeAmount = gesture.translation.width
+                    
+                    if abs(swipeAmount) > flipThreshold {
+                        // Determine if the card is currently showing its front face.
+                        // We check the normalized angle of `rotationY` (ignoring `liveDragRotation` here,
+                        // as we care about the *actual* state of the card, not just the momentary drag).
+                        let currentNormalizedRotation = rotationY.truncatingRemainder(dividingBy: 360)
+                        let currentlyFrontFacing = (currentNormalizedRotation >= -90 && currentNormalizedRotation <= 90) ||
+                                                   (currentNormalizedRotation >= 270 || currentNormalizedRotation <= -270)
+                        
+                        if currentlyFrontFacing {
+                            // If currently showing front:
+                            if swipeAmount > 0 { // Swiped right: flip front to back by adding 180 degrees.
+                                rotationY += 180
+                            } else { // Swiped left: flip front to back by subtracting 180 degrees.
+                                rotationY -= 180
+                            }
+                        } else {
+                            // If currently showing back:
+                            if swipeAmount > 0 { // Swiped right: flip back to front by adding 180 degrees.
+                                // E.g., from -180 -> 0, or 180 -> 360 (effectively 0)
+                                rotationY += 180
+                            } else { // Swiped left: flip back to front by subtracting 180 degrees.
+                                // E.g., from 180 -> 0, or -180 -> -360 (effectively 0)
+                                rotationY -= 180
+                            }
                         }
-                        // Reset dragAmount after the gesture ends
-                        self.dragAmount = .zero
                     }
-            )
-            .onTapGesture {
-                // Keep the existing tap gesture for convenience
-                isFlipped.toggle()
-            }
+                    
+                    // Reset `liveDragRotation` to 0 after the gesture ends.
+                    // This allows the primary flip animation (controlled by `rotationY`) to take over smoothly.
+                    self.liveDragRotation = 0
+                }
+        )
+        .onTapGesture {
+            // For a simple tap, we'll always perform a "forward" flip (adding 180 degrees).
+            // You can adjust this if you want tap to mirror the last swipe direction or have a specific behavior.
+            rotationY += 180
+        }
+        // Animate the main card flip (changes in `rotationY`).
+        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: rotationY)
+        // Animate the interactive drag feedback more subtly and responsively.
+        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: liveDragRotation)
     }
     
-    // MARK: - Front Card
+    // MARK: - View Visibility Helpers
+    // Determines if the front face of the card should be visible based on its current rotation.
+    private var isFrontFaceVisible: Bool {
+        // Calculate the total effective rotation (base + live drag) and normalize it to 0-360 degrees.
+        let totalRotation = rotationY + liveDragRotation
+        var adjustedRotation = totalRotation.truncatingRemainder(dividingBy: 360)
+        if adjustedRotation < 0 {
+            adjustedRotation += 360 // Ensure the angle is always positive
+        }
+        
+        // The front face is visible when the card is rotated roughly between -90 and +90 degrees relative to its front.
+        // This corresponds to 0-90 degrees and 270-360 degrees in the normalized [0, 360) range.
+        return (adjustedRotation >= 0 && adjustedRotation < 90) || (adjustedRotation >= 270 && adjustedRotation < 360)
+    }
+    
+    // Determines if the back face of the card should be visible. It's simply the inverse of `isFrontFaceVisible`.
+    private var isBackFaceVisible: Bool {
+        !isFrontFaceVisible
+    }
+
+    // MARK: - Front Card (No changes from previous)
     private var frontView: some View {
         let hero = record.data?.hero?.data
         let aspectRatioWidth = cardHeight * 9 / 16
@@ -131,8 +205,7 @@ struct FlippableHeroCard: View {
         )
     }
     
-    // MARK: - Back of Card
-    
+    // MARK: - Back of Card (No changes from previous)
     private var backView: some View {
         let heroName = record.data?.hero?.data?.name
         let relation = record.data?.relation
@@ -174,11 +247,13 @@ struct FlippableHeroCard: View {
                 .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
         )
     }
-    // MARK: - Helpers
+    
+    // MARK: - Helpers (No changes from previous)
     private func badgeView(title: String?, iconURL: String?, background: Color) -> some View {
         HStack(spacing: 4) {
             if let iconURL = iconURL, let url = URL(string: iconURL) {
                 if url.pathExtension.lowercased() == "svg" {
+                    // Assuming SVGImageView is defined elsewhere in your project
                     SVGImageView(url: url)
                         .frame(width: 28, height: 28)
                 } else {
@@ -195,7 +270,7 @@ struct FlippableHeroCard: View {
                     .frame(width: 20, height: 20)
                 }
             }
-
+            
             Text(title ?? "")
                 .font(.caption2)
         }
@@ -218,7 +293,7 @@ struct FlippableHeroCard: View {
                 Spacer()
             }
             .padding(.leading, 6)
-
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     
@@ -237,5 +312,34 @@ struct FlippableHeroCard: View {
                 .padding(.leading, 6)
             }
         }
+    }
+}
+
+// Extension to Double for approximate comparison, useful in visibility logic.
+extension Double {
+    func isApproximately(_ value: Double, within tolerance: Double) -> Bool {
+        return abs(self - value) <= tolerance
+    }
+}
+
+// NOTE: The previous `FlipView` struct is no longer needed and should be removed from your project.
+
+struct FlipView<Front: View, Back: View>: View {
+    let front: Front
+    let back: Back
+    @Binding var isFlipped: Bool
+    
+    var body: some View {
+        ZStack {
+            front
+                .opacity(isFlipped ? 0.0 : 1.0)
+                .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+            
+            back
+                .opacity(isFlipped ? 1.0 : 0.0)
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0)) // flips to front
+                .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0)) // outer flip
+        }
+        .animation(.easeInOut(duration: 0.4), value: isFlipped)
     }
 }
