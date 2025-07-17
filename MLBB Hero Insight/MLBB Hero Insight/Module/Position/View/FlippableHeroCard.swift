@@ -11,14 +11,36 @@ struct FlippableHeroCard: View {
     let record: HeroPositionRecord
     let cardHeight: CGFloat = 220
     @State private var isFlipped = false
+    // State to track the drag amount, used for visual feedback during the swipe
+    @State private var dragAmount: CGSize = .zero
+    // Threshold to determine if a swipe is enough to trigger a flip
+    private let flipThreshold: CGFloat = 50
     
     var body: some View {
         FlipView(front: frontView, back: backView, isFlipped: $isFlipped)
-        .frame(height: cardHeight)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            isFlipped.toggle()
-        }
+            .frame(height: cardHeight)
+            .contentShape(Rectangle())
+            // Apply rotation based on drag for a more interactive swipe
+            .rotation3DEffect(.degrees(dragAmount.width / 10), axis: (x: 0, y: 1, z: 0))
+            .gesture(
+                DragGesture()
+                    .onChanged { gesture in
+                        // Update dragAmount as the user drags
+                        self.dragAmount = gesture.translation
+                    }
+                    .onEnded { gesture in
+                        // If the horizontal drag is beyond the threshold, toggle isFlipped
+                        if abs(gesture.translation.width) > flipThreshold {
+                            isFlipped.toggle()
+                        }
+                        // Reset dragAmount after the gesture ends
+                        self.dragAmount = .zero
+                    }
+            )
+            .onTapGesture {
+                // Keep the existing tap gesture for convenience
+                isFlipped.toggle()
+            }
     }
     
     // MARK: - Front Card
