@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "Mute4x.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
