@@ -8,91 +8,92 @@ import SwiftUI
 
 // ✅ Top-Level Response Model
 struct HeroResponse: Codable {
-    let code: Int
-    let message: String
-    let data: HeroDetailDataContainer
+    let code: Int?
+    let message: String?
+    let data: HeroDetailDataContainer?
 }
 
 struct HeroDetailDataContainer: Codable {
-    let records: [HeroDetailRecord]
-    let total: Int
+    let records: [HeroDetailRecord]?
+    let total: Int?
 }
 
 // ✅ Main Record Model
 struct HeroDetailRecord: Codable, Identifiable {
-    let id: Int
-    let _id: String
-    let caption: String
-    let configId: Int
-    let createdAt: Int64
-    let createdUser: String
-    let data: HeroDetailRecordData
-    let updatedAt: Int64
-    let updatedUser: String
+    let id: Int?
+    let _id: String?
+    let caption: String?
+    let configId: Int?
+    let createdAt: Int?
+    let createdUser: String?
+    let data: HeroDetailRecordData?
+    let updatedAt: Int?
+    let updatedUser: String?
+    let sort: Int?
+    let linkId: [Int]?
 }
 
 // ✅ Hero Metadata
 struct HeroDetailRecordData: Codable {
-    let _object: Int
-    let head: URL
-    let head_big: URL
-    let hero: HeroCoreData
-    let hero_id: Int
-    let relation: HeroRelation
-    let url: URL
+    let _object: Int?
+    let head: String?
+    let head_big: String?
+    let hero: HeroCoreData?
+    let hero_id: Int?
+    let relation: HeroDetailRelation?
 }
 
 // ✅ Hero Core Info
 struct HeroCoreData: Codable {
-    let _createdAt: Int64
-    let _id: String
-    let _updatedAt: Int64
-    let data: HeroDetails
-    let id: Int
-    let sourceId: Int
+    let _createdAt: Int?
+    let _id: String?
+    let _updatedAt: Int?
+    let data: HeroDetails?
+    let id: Int?
+    let sourceId: Int?
 }
 
 // ✅ Hero Details
 struct HeroDetails: Codable {
-    let abilityshow: [String]
-    let difficulty: String
-    let head: URL
-    let heroid: Int
-    let heroskilllist: [HeroSkillContainer]
-    let name: String
-    let painting: URL
-    let recommendlevel: [String]
-    let recommendlevellabel: String
-    let roadsort: [HeroRoadSort?]
-    let roadsorticon1: URL
-    let roadsorticon2: String
-    let roadsortlabel: [String]
-    let smallmap: URL
-    let sorticon1: URL
-    let sorticon2: String
-    let sortid: [HeroSortID?]
-    let sortlabel: [String]
-    let speciality: [String]
-    let squarehead: URL
-    let squareheadbig: URL
-    let story: String
+    let abilityshow: [String]?
+    let difficulty: String?
+    let head: String?
+    let heroid: Int?
+    let heroskilllist: [HeroSkillContainer]?
+    let name: String?
+    let painting: String?
+    let recommendlevel: [String]?
+    let recommendlevellabel: String?
+    let roadsort: [HeroRoadSort?]?
+    let roadsorticon1: String?
+    let roadsorticon2: String?
+    let roadsortlabel: [String]?
+    let smallmap: String?
+    let sorticon1: String?
+    let sorticon2: String?
+    let sortid: [HeroSortID?]?
+    let sortlabel: [String]?
+    let speciality: [String]?
+    let squarehead: String?
+    let squareheadbig: String?
+    let story: String?
     let tale: String?
 }
 
 // ✅ Hero Skill Info
 struct HeroSkillContainer: Codable {
-    let skilllist: [HeroSkill]
-    let skilllistid: String
+    let skilllist: [HeroSkill]?
+    let skilllistid: String?
 }
 
 struct HeroSkill: Codable {
-    let skillcdCost: String
-    let skilldesc: String
-    let skillicon: URL
-    let skillid: Int
-    let skillname: String
-    let skilltag: [HeroSkillTag]
-    let skillvideo: String
+    let skillcdCost: String?
+    let skilldesc: String?
+    let skillicon: String?
+    let skillid: Int?
+    let skillname: String?
+    let skilltag: [HeroSkillTag]?
+    let skillvideo: String?
 
     private enum CodingKeys: String, CodingKey {
         case skillcdCost = "skillcd&cost"
@@ -101,28 +102,47 @@ struct HeroSkill: Codable {
 }
 
 struct HeroSkillTag: Codable {
-    let tagid: Int
-    let tagname: String
-    let tagrgb: String
+    let tagid: Int?
+    let tagname: String?
+    let tagrgb: String?
 }
 
 // ✅ Hero Relationship Info
 struct HeroDetailRelation: Codable {
-    let assist: HeroRelationType
-    let strong: HeroRelationType
-    let weak: HeroRelationType
+    let assist: HeroRelationType?
+    let strong: HeroRelationType?
+    let weak: HeroRelationType?
 }
 
 struct HeroRelationType: Codable {
-    let desc: String
-    let target_hero: [HeroImageWrapper?]
-    let target_hero_id: [Int]
+    let desc: String?
+    let target_hero: [HeroImageWrapper?]?
+    let target_hero_id: [Int]?
 }
 
-struct HeroImageWrapper: Codable {
-    let data: HeroImageData
+// Wrapper for "target_hero" items which can be either an object or a string/other invalid type
+struct HeroImageWrapper: Codable, Identifiable {
+    // Add an id for ForEach convenience; use UUID if no id in JSON
+    let id = UUID()
+    let data: HeroImage?
+
+    struct HeroImage: Codable {
+        let head: String?
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        // Try decode as dictionary with "data" key
+        if let obj = try? container.decode([String: HeroImage].self) {
+            self.data = obj["data"]
+        } else {
+            // If decoding fails (string, number, etc), assign nil
+            self.data = nil
+        }
+    }
 }
 
 struct HeroImageData: Codable {
-    let head: URL
+    let head: String?
 }

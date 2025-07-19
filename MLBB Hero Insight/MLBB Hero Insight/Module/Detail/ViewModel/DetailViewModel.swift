@@ -21,16 +21,29 @@ class DetailViewModel: ObservableObject {
         do {
             let url = URL(string: "https://mlbb-stats.ridwaanhall.com/api/hero-detail/\(id)")!
             let (data, _) = try await URLSession.shared.data(from: url)
+
+            do {
+                let decoded = try JSONDecoder().decode(HeroResponse.self, from: data)
+                self.detail = decoded.data?.records ?? []
+            } catch let DecodingError.keyNotFound(key, context) {
+                print("❌ Missing key: \(key.stringValue) in \(context)")
+            } catch let DecodingError.typeMismatch(type, context) {
+                print("❌ Type mismatch for type \(type) in \(context)")
+            } catch let DecodingError.valueNotFound(value, context) {
+                print("❌ Value \(value) not found in \(context)")
+            } catch let DecodingError.dataCorrupted(context) {
+                print("❌ Data corrupted: \(context)")
+            } catch {
+                print("❌ Other error: \(error.localizedDescription)")
+            }
             
-            let decoded = try JSONDecoder().decode(HeroResponse.self, from: data)
-            self.detail = decoded.data.records
         } catch is CancellationError {
             print("🟡 Load cancelled.")
         } catch {
             print("🔴 Load error: \(error.localizedDescription)")
             errorMessage = "Failed to load hero details. Please try again."
         }
-        
+
         isFetched = true
         isLoading = false
     }

@@ -22,7 +22,7 @@ struct HeroDetailView: View {
             } else if let hero = viewModel.detail.first {
                 ScrollView {
                     VStack(spacing: 16) {
-                        AsyncImage(url: hero.data.hero.data.squareheadbig) { image in
+                        AsyncImage(url: URL(string: hero.data?.hero?.data?.squareheadbig ?? "")) { image in
                             image
                                 .resizable()
                                 .scaledToFit()
@@ -32,17 +32,17 @@ struct HeroDetailView: View {
                         }
                         .frame(height: 200)
 
-                        Text(hero.data.hero.data.name)
+                        Text(hero.data?.hero?.data?.name ?? "")
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        Text(hero.data.hero.data.story)
+                        Text(hero.data?.hero?.data?.story ?? "")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .padding()
 
                         HStack {
-                            ForEach(hero.data.hero.data.sortlabel.filter { !$0.isEmpty }, id: \.self) { role in
+                            ForEach(hero.data?.hero?.data?.sortlabel?.filter { !$0.isEmpty } ?? [], id: \.self) { role in
                                 Text(role)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
