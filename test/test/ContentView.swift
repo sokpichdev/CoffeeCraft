@@ -7,6 +7,183 @@
 
 import SwiftUI
 
+
+struct MainShimmer: View {
+    var body: some View {
+        ZStack {
+            Color.blue
+            VStack(spacing: 0) {
+                HStack {
+                    ShimmerView()
+                        .frame(width: 40, height: 40)
+                        .clipShape(.circle)
+                    Spacer()
+                    ShimmerView()
+                        .frame(width: 30, height: 30)
+                        .clipShape(.circle)
+                    ShimmerView()
+                        .frame(width: 70, height: 30)
+                    ShimmerView()
+                        .frame(width: 70, height: 30)
+                }
+                .padding(.horizontal, Dimens.largePadding)
+                HomeShimmer()
+                HStack {
+                    ForEach(0..<6) { _ in
+                        VStack {
+                            ShimmerView()
+                                .frame(width: 30, height: 30)
+                            ShimmerView()
+                                .frame(width: 30, height: 10)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 70)
+                    }
+                }
+                .padding(.horizontal, Dimens.largePadding)
+                .frame(height: 70)
+                .background(Color.red.ignoresSafeArea())
+                .cornerRadius(16, corners: [.topLeft, .topRight])
+            }
+        }
+    }
+}
+
+struct EdgeBorder: Shape {
+    var width: CGFloat
+    var edges: [Edge]
+
+    func path(in rect: CGRect) -> Path {
+        edges.map { edge -> Path in
+            switch edge {
+            case .top: return Path(.init(x: rect.minX, y: rect.minY, width: rect.width, height: width))
+            case .bottom: return Path(.init(x: rect.minX, y: rect.maxY - width, width: rect.width, height: width))
+            case .leading: return Path(.init(x: rect.minX, y: rect.minY, width: width, height: rect.height))
+            case .trailing: return Path(.init(x: rect.maxX - width, y: rect.minY, width: width, height: rect.height))
+            }
+        }.reduce(into: Path()) { $0.addPath($1) }
+    }
+}
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape( RoundedCorner(radius: radius, corners: corners) )
+    }
+    func border(width: CGFloat, edges: [Edge], color: Color) -> some View {
+        overlay(EdgeBorder(width: width, edges: edges).foregroundColor(color))
+    }
+}
+struct RoundedCorner: Shape {
+
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
+}
+
+extension UIScreen {
+   static let screenWidth = UIScreen.main.bounds.size.width
+   static let screenHeight = UIScreen.main.bounds.size.height
+   static let screenSize = UIScreen.main.bounds.size
+}
+
+struct HomeShimmer: View {
+    var body: some View {
+        GeometryReader { geometry in
+            VStack {
+                ShimmerView()
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, Dimens.largePadding)
+                    .frame(height: (UIScreen.screenWidth-32)/3)
+                
+                ShimmerView()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 35)
+                    .padding(.horizontal, Dimens.largePadding)
+                HStack {
+                    ForEach(0..<5) { _ in
+                        VStack {
+                            ShimmerView()
+                                .frame(width: 40, height: 40)
+                            ShimmerView()
+                                .frame(width: 40, height: 10)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 80)
+                    }
+                }
+                .padding(.horizontal, Dimens.largePadding)
+                .background(Color.green)
+                .border(width: 1, edges: [.bottom], color: Color.yellow)
+                VStack(spacing: Dimens.gaps) {
+                    HStack {
+                        ShimmerView()
+                            .frame(width: UIScreen.screenWidth*0.6, height: 40)
+                           Spacer()
+                        ShimmerView()
+                            .frame(width: UIScreen.screenWidth*0.2, height: 40)
+                    }.padding(.horizontal, Dimens.largePadding)
+                    HStack {
+                        ShimmerView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: (UIScreen.screenWidth-(Dimens.largePadding*2) - Dimens.gaps)/2)
+                        ShimmerView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: (UIScreen.screenWidth-(Dimens.largePadding*2) - Dimens.gaps)/2)
+                    }
+                    .padding(.horizontal, Dimens.largePadding)
+                    HStack {
+                        ShimmerView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: (UIScreen.screenWidth-(Dimens.largePadding*2) - Dimens.gaps)/2)
+                        ShimmerView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: (UIScreen.screenWidth-(Dimens.largePadding*2) - Dimens.gaps)/2)
+                    }
+                    .padding(.horizontal, Dimens.largePadding)
+                }
+            }
+            .padding(.top, 7)
+            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+            .clipped()
+        }
+    }
+}
+
+
+struct ShimmerView: View {
+    
+    @State private var startPoint: UnitPoint = .init(x: -1, y: 0.5)
+    @State private var endPoint: UnitPoint = .init(x: 0, y: 0.5)
+    
+    private var gradientColors = [Color("B5B5B5").opacity(0.5), Color("B5B5B5").opacity(0.9), Color("B5B5B5").opacity(0.5)]
+    
+    var body: some View {
+        LinearGradient(colors: gradientColors, startPoint: startPoint, endPoint: endPoint)
+            .cornerRadius(Dimens.cornerRadius)
+            .onAppear {
+                withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                    startPoint = .init(x: 1, y: 0.5)
+                    endPoint = .init(x: 2, y: 0.5)
+                }
+            }
+    }
+}
+
+class Dimens {
+    // for all
+    static let mediumPadding: CGFloat = 12
+    static let largePadding: CGFloat = 16
+    static let extraLargePadding: CGFloat = 20
+    
+    static let cornerRadius: CGFloat = 10
+    static let largeCornerRadius: CGFloat = 16
+    
+    static let gaps: CGFloat = 10
+}
+
 struct BullBullDisplayView: View {
     let playerBankerName: String
     let isOnRight: Bool
