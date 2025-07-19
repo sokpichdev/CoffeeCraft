@@ -64,7 +64,7 @@ struct HeroDetails: Codable {
     let painting: String?
     let recommendlevel: [String]?
     let recommendlevellabel: String?
-    let roadsort: [HeroRoadSort?]?
+    let roadsort: [RoadSortItem?]?
     let roadsorticon1: String?
     let roadsorticon2: String?
     let roadsortlabel: [String]?
@@ -78,6 +78,34 @@ struct HeroDetails: Codable {
     let squareheadbig: String?
     let story: String?
     let tale: String?
+}
+
+enum RoadSortItem: Codable {
+    case roadSort(HeroRoadSort)
+    case string(String)
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let roadSort = try? container.decode(HeroRoadSort.self) {
+            self = .roadSort(roadSort)
+        } else if let string = try? container.decode(String.self) {
+            self = .string(string)
+        } else {
+            throw DecodingError.typeMismatch(RoadSortItem.self,
+                                           DecodingError.Context(codingPath: decoder.codingPath,
+                                           debugDescription: "Expected HeroRoadSort or String"))
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .roadSort(let roadSort):
+            try container.encode(roadSort)
+        case .string(let string):
+            try container.encode(string)
+        }
+    }
 }
 
 // ✅ Hero Skill Info
