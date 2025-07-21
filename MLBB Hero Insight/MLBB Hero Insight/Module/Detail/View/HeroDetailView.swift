@@ -87,26 +87,48 @@ struct HeroDetailView: View {
                 }
             }
             
-            // Specialties
-            if let specialties = hero.data?.hero?.data?.speciality, !specialties.isEmpty {
-                HStack(spacing: 8) {
-                    Text(specialties.count > 1 ? "Specialties:" : "Specialty:")
-                        .font(.headline)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(specialties, id: \.self) { specialty in
-                                Text(specialty)
-                                    .font(.caption)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 4)
-                                    .background(Color.blue.opacity(0.2))
-                                    .cornerRadius(12)
+            VStack {
+                // Roles Section
+                if let roles = hero.data?.hero?.data?.sortid?.compactMap({ $0 }), !roles.isEmpty {
+                    HStack(spacing: 8) {
+                        HStack {
+                            Text(roles.count > 1 ? "Roles:" : "Role:")
+                                .font(.headline)
+                        }
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(roles, id: \.id) { role in
+                                    if let roleTitle = role.data?.sort_title ?? role.caption, roleTitle != "" {
+                                        let iconUrl = role.data?.sort_icon ?? ""
+                                        BadgeView(title: roleTitle, iconURL: iconUrl, background: Color.green.opacity(0.2))
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                .padding()
+                // Specialties
+                if let specialties = hero.data?.hero?.data?.speciality, !specialties.isEmpty {
+                    HStack(spacing: 8) {
+                        Text(specialties.count > 1 ? "Specialties:" : "Specialty:")
+                            .font(.headline)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(specialties, id: \.self) { specialty in
+                                    Text(specialty)
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.2))
+                                        .cornerRadius(12)
+                                }
+                            }
+                        }
+                    }
+                }
             }
+            .padding()
         }
         .background(Color(.systemBackground))
         .cornerRadius(12)
