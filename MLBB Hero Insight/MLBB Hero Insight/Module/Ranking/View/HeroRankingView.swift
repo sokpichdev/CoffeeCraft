@@ -10,6 +10,7 @@ struct HeroRankingView: View {
     @StateObject private var viewModel = HeroRankingViewModel()
     @State private var searchText = ""
     @State private var showFilterSheet = false
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
     
     var filteredHeroes: [HeroRankingRecord] {
         if searchText.isEmpty {

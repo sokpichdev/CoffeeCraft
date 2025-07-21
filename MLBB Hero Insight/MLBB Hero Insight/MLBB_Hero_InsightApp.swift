@@ -10,9 +10,10 @@ import SVGKitSwift
 
 @main
 struct MLBB_Hero_InsightApp: App {
+    @StateObject private var tabBarManager = TabBarVisibilityManager()
     var body: some Scene {
         WindowGroup {
-            MainApp()
+            MainApp().environmentObject(tabBarManager)
         }
     }
 }

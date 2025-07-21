@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var searchText = ""
     @State var isNavigateToDetail: Bool = false
     @State var selectedHeroID: String = "0"
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
     var filteredHeroes: [Hero] {
         if searchText.isEmpty {
@@ -71,7 +72,7 @@ struct HomeView: View {
             .navigationTitle("MLBB Heroes")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
             .navigationDestination(isPresented: $isNavigateToDetail, destination: {
-                HeroDetailView(heroID: selectedHeroID)
+                HeroDetailView(heroID: selectedHeroID).environmentObject(tabBarManager)
             })
         }
         .task {

@@ -9,43 +9,56 @@ import SwiftUI
 struct HeroDetailView: View {
     @StateObject var viewModel = DetailViewModel()
     let heroID: String
-    
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
+
     var body: some View {
-        ScrollView {
-            if viewModel.isLoading {
-                ProgressView("Loading...")
+        VStack {
+            ScrollView {
+                if viewModel.isLoading {
+                    ProgressView("Loading...")
+                        .padding()
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                } else if let hero = viewModel.detail.first {
+                    VStack(spacing: 20) {
+                        // Hero Header
+                        heroHeader(hero: hero)
+                        
+                        // Recommended Lanes
+                        lanesSection(hero: hero)
+                        
+                        // Skills
+                        skillsSection(hero: hero)
+                        
+                        // Hero Relationships
+                        relationshipsSection(hero: hero)
+                        
+                        // Story
+                        storySection(hero: hero)
+                    }
                     .padding()
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding()
-            } else if let hero = viewModel.detail.first {
-                VStack(spacing: 20) {
-                    // Hero Header
-                    heroHeader(hero: hero)
-                    
-                    // Recommended Lanes
-                    lanesSection(hero: hero)
-                    
-                    // Skills
-                    skillsSection(hero: hero)
-                    
-                    // Hero Relationships
-                    relationshipsSection(hero: hero)
-                    
-                    // Story
-                    storySection(hero: hero)
+                } else if viewModel.isFetched {
+                    Text("No data found.")
                 }
-                .padding()
-            } else if viewModel.isFetched {
-                Text("No data found.")
+            }
+            .task {
+                await viewModel.loadDetail(id: heroID)
+            }
+            .navigationTitle("Hero Detail")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.05)) {
+                tabBarManager.isVisible = false
             }
         }
-        .task {
-            await viewModel.loadDetail(id: heroID)
+        .onDisappear() {
+            withAnimation(.easeInOut(duration: 0.05)) {
+                tabBarManager.isVisible = true
+            }
         }
-        .navigationTitle("Hero Detail")
-        .navigationBarTitleDisplayMode(.inline)
     }
     
     // MARK: - View Components
