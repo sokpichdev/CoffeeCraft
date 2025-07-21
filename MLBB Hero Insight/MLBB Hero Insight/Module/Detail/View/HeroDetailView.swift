@@ -64,7 +64,7 @@ struct HeroDetailView: View {
     // MARK: - View Components
     
     private func heroHeader(hero: HeroDetailRecord) -> some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
             // Hero Image
             AsyncImage(url: URL(string: hero.data?.head_big ?? "")) { phase in
                 switch phase {
@@ -72,8 +72,7 @@ struct HeroDetailView: View {
                     image
                         .resizable()
                         .scaledToFit()
-                        .frame(height: UIScreen.main.bounds.width)
-                        .cornerRadius(12)
+                        .frame(height: UIScreen.main.bounds.width - 32)
                 case .failure:
                     Image(systemName: "photo")
                         .resizable()
@@ -91,17 +90,27 @@ struct HeroDetailView: View {
             // Specialties
             if let specialties = hero.data?.hero?.data?.speciality, !specialties.isEmpty {
                 HStack(spacing: 8) {
-                    ForEach(specialties, id: \.self) { specialty in
-                        Text(specialty)
-                            .font(.caption)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(12)
+                    Text(specialties.count > 1 ? "Specialties:" : "Specialty:")
+                        .font(.headline)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(specialties, id: \.self) { specialty in
+                                Text(specialty)
+                                    .font(.caption)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 4)
+                                    .background(Color.blue.opacity(0.2))
+                                    .cornerRadius(12)
+                            }
+                        }
                     }
                 }
+                .padding()
             }
         }
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
     
     private func lanesSection(hero: HeroDetailRecord) -> some View {
