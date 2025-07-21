@@ -24,11 +24,8 @@ struct HeroDetailView: View {
                     // Hero Header
                     heroHeader(hero: hero)
                     
-                    // Stats and Attributes
-                    statsSection(hero: hero)
-                    
                     // Recommended Lanes
-//                    lanesSection(hero: hero)
+                    lanesSection(hero: hero)
                     
                     // Skills
                     skillsSection(hero: hero)
@@ -105,28 +102,20 @@ struct HeroDetailView: View {
         }
     }
     
-    private func statsSection(hero: HeroDetailRecord) -> some View {
+    private func lanesSection(hero: HeroDetailRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Attributes")
+            Text("Recommended Lanes")
                 .font(.headline)
-                .padding(.bottom, 4)
             
-            if let abilities = hero.data?.hero?.data?.abilityshow {
-                HStack {
-                    StatView(title: "Durability", value: abilities[safe: 0] ?? "0", color: .red)
-                    StatView(title: "Offense", value: abilities[safe: 1] ?? "0", color: .orange)
-                    StatView(title: "Control", value: abilities[safe: 2] ?? "0", color: .blue)
-                    StatView(title: "Difficulty", value: abilities[safe: 3] ?? "0", color: .purple)
-                }
-            }
-            
-            if let difficulty = hero.data?.hero?.data?.difficulty {
-                HStack {
-                    Text("Difficulty:")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    DifficultyStars(rating: Int(difficulty) ?? 0, maxRating: 10)
-                    Spacer()
+            if let lanes = hero.data?.hero?.data?.roadsort {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(lanes.indices, id: \.self) { index in
+                            if let lane = lanes[index] {
+                                laneView(for: lane)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -135,45 +124,50 @@ struct HeroDetailView: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
-    
-//    private func lanesSection(hero: HeroDetailRecord) -> some View {
-//        VStack(alignment: .leading, spacing: 12) {
-//            Text("Recommended Lanes")
-//                .font(.headline)
-//            
-//            if let lanes = hero.data?.hero?.data?.roadsort?.compactMap({ $0 }) {
-//                ScrollView(.horizontal, showsIndicators: false) {
-//                    HStack(spacing: 12) {
-//                        ForEach(lanes, id: \.id) { lane in
-//                            VStack(spacing: 8) {
-//                                if let iconURL = lane.data.road_sort_icon {
-//                                    AsyncImage(url: URL(string: iconURL)) { image in
-//                                        image
-//                                            .resizable()
-//                                            .scaledToFit()
-//                                    } placeholder: {
-//                                        ProgressView()
-//                                    }
-//                                    .frame(width: 40, height: 40)
-//                                }
-//                                
-//                                Text(lane.data?.road_sort_title ?? lane.caption ?? "")
-//                                    .font(.caption)
-//                            }
-//                            .padding()
-//                            .frame(width: 100)
-//                            .background(Color(.secondarySystemBackground))
-//                            .cornerRadius(10)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        .padding()
-//        .background(Color(.systemBackground))
-//        .cornerRadius(12)
-//        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-//    }
+
+    @ViewBuilder
+    private func laneView(for lane: RoadSortItem) -> some View {
+        switch lane {
+        case .roadSort(let roadSort):
+            VStack(spacing: 8) {
+                if let iconURL = roadSort.data?.road_sort_icon, let url = URL(string: iconURL) {
+                    if url.pathExtension.lowercased() == "svg" {
+                        SVGImageView(url: url)
+                            .frame(width: 40, height: 40)
+                    } else {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                            default:
+                                EmptyView()
+                            }
+                        }
+                        .frame(width: 40, height: 40)
+                    }
+                }
+                
+                Text(roadSort.data?.road_sort_title ?? roadSort.caption ?? "Unknown Lane")
+                    .font(.caption)
+            }
+            .padding()
+            .frame(width: 100)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(10)
+            
+        case .string(let laneString):
+            if !laneString.isEmpty {
+                Text(laneString)
+                    .font(.caption)
+                    .padding()
+                    .frame(width: 100)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(10)
+            }
+        }
+    }
     
     private func skillsSection(hero: HeroDetailRecord) -> some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -280,20 +274,6 @@ struct StatView: View {
     }
 }
 
-struct DifficultyStars: View {
-    let rating: Int
-    let maxRating: Int
-    
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(1...maxRating, id: \.self) { star in
-                Image(systemName: star <= rating ? "star.fill" : "star")
-                    .foregroundColor(.yellow)
-                    .font(.caption)
-            }
-        }
-    }
-}
 struct SkillCard: View {
     let skill: HeroSkill
     
