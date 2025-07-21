@@ -9,8 +9,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var viewModel: HomeViewModel
     @State private var searchText = ""
-    @State var isNavigateToDetail: Bool = false
-    @State var selectedHeroID: String = "0"
+    @State private var selectedHeroID: String?  // Make optional
     @EnvironmentObject var tabBarManager: TabBarVisibilityManager
 
     var filteredHeroes: [Hero] {
@@ -42,10 +41,7 @@ struct HomeView: View {
                     ScrollView {
                         LazyVStack(spacing: 0, pinnedViews: []) {
                             ForEach(filteredHeroes) { hero in
-                                Button(action: {
-                                    isNavigateToDetail = true
-                                    selectedHeroID = hero.id
-                                }, label: {
+                                NavigationLink(value: hero.id) {
                                     HStack(spacing: 16) {
                                         Circle()
                                             .fill(Color.indigo.opacity(0.2))
@@ -57,7 +53,7 @@ struct HomeView: View {
                                         Spacer()
                                     }
                                     .padding(.vertical, 4)
-                                })
+                                }
                                 .buttonStyle(.plain)
                             }
                         }
@@ -71,9 +67,10 @@ struct HomeView: View {
             }
             .navigationTitle("MLBB Heroes")
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
-            .navigationDestination(isPresented: $isNavigateToDetail, destination: {
-                HeroDetailView(heroID: selectedHeroID).environmentObject(tabBarManager)
-            })
+            .navigationDestination(for: String.self) { heroID in
+                HeroDetailView(heroID: heroID)
+                    .environmentObject(tabBarManager)
+            }
         }
         .task {
             if !viewModel.isFetched {

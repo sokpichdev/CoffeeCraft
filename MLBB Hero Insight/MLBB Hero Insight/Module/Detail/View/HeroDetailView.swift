@@ -46,7 +46,7 @@ struct HeroDetailView: View {
             .task {
                 await viewModel.loadDetail(id: heroID)
             }
-            .navigationTitle("Hero Detail")
+            .navigationTitle(viewModel.detail.first?.data?.hero?.data?.name ?? "")
             .navigationBarTitleDisplayMode(.inline)
         }
         .onAppear {
@@ -72,7 +72,7 @@ struct HeroDetailView: View {
                     image
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 200)
+                        .frame(height: UIScreen.main.bounds.width)
                         .cornerRadius(12)
                 case .failure:
                     Image(systemName: "photo")
