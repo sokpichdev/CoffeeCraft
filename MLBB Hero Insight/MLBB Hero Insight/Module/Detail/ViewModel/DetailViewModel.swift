@@ -10,6 +10,7 @@ import SwiftUI
 @MainActor
 class DetailViewModel: ObservableObject {
     @Published var detail: [HeroDetailRecord] = []
+    @Published var allHeroes: [Hero] = [] // For relationship hero references
     @Published var isLoading: Bool = false
     @Published var isFetched: Bool = false
     @Published var errorMessage: String?
