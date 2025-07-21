@@ -31,7 +31,7 @@ struct HeroDetailView: View {
                     skillsSection(hero: hero)
                     
                     // Hero Relationships
-//                    relationshipsSection(hero: hero)
+                    relationshipsSection(hero: hero)
                     
                     // Story
                     storySection(hero: hero)
@@ -53,7 +53,7 @@ struct HeroDetailView: View {
     private func heroHeader(hero: HeroDetailRecord) -> some View {
         VStack(spacing: 16) {
             // Hero Image
-            AsyncImage(url: URL(string: hero.data?.hero?.data?.squareheadbig ?? "")) { phase in
+            AsyncImage(url: URL(string: hero.data?.head_big ?? "")) { phase in
                 switch phase {
                 case .success(let image):
                     image
@@ -191,49 +191,46 @@ struct HeroDetailView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
     
-//    private func relationshipsSection(hero: HeroDetailRecord) -> some View {
-//        VStack(alignment: .leading, spacing: 16) {
-//            Text("Hero Relationships")
-//                .font(.title2)
-//                .fontWeight(.bold)
-//            
-//            if let relation = hero.data?.relation {
-//                if let assists = relation.assist {
-//                    RelationshipCard(
-//                        title: "Works Well With",
-//                        description: assists.desc,
-//                        heroIDs: assists.target_hero_id ?? [],
-//                        allHeroes: viewModel.allHeroes,
-//                        color: .green
-//                    )
-//                }
-//                
-//                if let strongs = relation.strong {
-//                    RelationshipCard(
-//                        title: "Strong Against",
-//                        description: strongs.desc,
-//                        heroIDs: strongs.target_hero_id ?? [],
-//                        allHeroes: viewModel.allHeroes,
-//                        color: .blue
-//                    )
-//                }
-//                
-//                if let weaks = relation.weak {
-//                    RelationshipCard(
-//                        title: "Weak Against",
-//                        description: weaks.desc,
-//                        heroIDs: weaks.target_hero_id ?? [],
-//                        allHeroes: viewModel.allHeroes,
-//                        color: .red
-//                    )
-//                }
-//            }
-//        }
-//        .padding()
-//        .background(Color(.systemBackground))
-//        .cornerRadius(12)
-//        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-//    }
+    private func relationshipsSection(hero: HeroDetailRecord) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Hero Relationships")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            if let relation = hero.data?.relation {
+                if let assists = relation.assist {
+                    RelationshipCard(
+                        title: "Works Well With",
+                        description: assists.desc,
+                        targetHeroes: assists.target_hero ?? [],
+                        color: .green
+                    )
+                }
+                
+                if let strongs = relation.strong {
+                    RelationshipCard(
+                        title: "Strong Against",
+                        description: strongs.desc,
+                        targetHeroes: strongs.target_hero ?? [],
+                        color: .blue
+                    )
+                }
+                
+                if let weaks = relation.weak {
+                    RelationshipCard(
+                        title: "Weak Against",
+                        description: weaks.desc,
+                        targetHeroes: weaks.target_hero ?? [],
+                        color: .red
+                    )
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
     
     private func storySection(hero: HeroDetailRecord) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -334,64 +331,78 @@ struct SkillCard: View {
         .cornerRadius(10)
     }
 }
-//struct RelationshipCard: View {
-//    let title: String
-//    let description: String?
-//    let heroIDs: [Int]
-//    let allHeroes: [Hero]
-//    let color: Color
-//    
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 12) {
-//            HStack {
-//                Circle()
-//                    .fill(color)
-//                    .frame(width: 10, height: 10)
-//                
-//                Text(title)
-//                    .font(.headline)
-//                    .foregroundColor(color)
-//                
-//                Spacer()
-//            }
-//            
-//            if let description = description {
-//                Text(description)
-//                    .font(.subheadline)
-//                    .foregroundColor(.secondary)
-//            }
-//            
-//            ScrollView(.horizontal, showsIndicators: false) {
-//                HStack(spacing: 12) {
-//                    ForEach(heroIDs, id: \.self) { id in
-//                        if let hero = allHeroes.first(where: { $0.id == String(id) }) {
-//                            VStack(spacing: 8) {
-//                                AsyncImage(url: URL(string: hero.head ?? "")) { image in
-//                                    image
-//                                        .resizable()
-//                                        .scaledToFit()
-//                                } placeholder: {
-//                                    ProgressView()
-//                                }
-//                                .frame(width: 50, height: 50)
-//                                .clipShape(Circle())
-//                                
-//                                Text(hero.name ?? "")
-//                                    .font(.caption)
-//                                    .lineLimit(1)
-//                            }
-//                            .frame(width: 80)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        .padding()
-//        .background(color.opacity(0.1))
-//        .cornerRadius(10)
-//    }
-//}
-
+struct RelationshipCard: View {
+    let title: String
+    let description: String?
+    let targetHeroes: [HeroImageWrapper?]?  // Optional array of optional items
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Circle()
+                    .fill(color)
+                    .frame(width: 10, height: 10)
+                
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(color)
+                
+                Spacer()
+            }
+            
+            if let description = description {
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            if let heroes = targetHeroes?.compactMap({ $0 }), !heroes.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(heroes) { hero in
+                            if let headUrl = hero.data?.head {
+                                AsyncImage(url: URL(string: headUrl)) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 60, height: 60)
+                                            .clipShape(Circle())
+                                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                        
+                                    case .failure:
+                                        Image(systemName: "person.crop.circle.badge.exclamationmark")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 60, height: 60)
+                                            .foregroundColor(.gray)
+                                        
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(width: 60, height: 60)
+                                        
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            } else {
+                Text("No heroes available")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(color.opacity(0.1))
+        .cornerRadius(10)
+    }
+}
 // MARK: - Helper Extensions
 
 extension Collection {
