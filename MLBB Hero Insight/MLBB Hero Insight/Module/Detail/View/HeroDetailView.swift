@@ -88,17 +88,6 @@ struct HeroDetailView: View {
                 }
             }
             
-            // Hero Name and ID
-            VStack(spacing: 4) {
-                Text(hero.data?.hero?.data?.name ?? "Unknown Hero")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
-                Text("#\(hero.data?.hero_id ?? 0)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
             // Specialties
             if let specialties = hero.data?.hero?.data?.speciality, !specialties.isEmpty {
                 HStack(spacing: 8) {
@@ -125,10 +114,25 @@ struct HeroDetailView: View {
                     HStack(spacing: 12) {
                         ForEach(lanes.indices, id: \.self) { index in
                             if let lane = lanes[index] {
-                                laneView(for: lane)
+                                switch lane {
+                                case .roadSort(let roadSort):
+                                    BadgeView(
+                                        title: roadSort.data?.road_sort_title ?? roadSort.caption,
+                                        iconURL: roadSort.data?.road_sort_icon,
+                                        background: .blue.opacity(0.1))
+                                    
+                                case .string(let laneString):
+                                    if !laneString.isEmpty {
+                                        BadgeView(
+                                            title: laneString,
+                                            iconURL: nil,
+                                            background: .gray.opacity(0.1))
+                                    }
+                                }
                             }
                         }
                     }
+                    .padding(.vertical, 4)
                 }
             }
         }
