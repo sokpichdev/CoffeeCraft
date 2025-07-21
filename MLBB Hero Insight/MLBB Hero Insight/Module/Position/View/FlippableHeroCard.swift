@@ -135,9 +135,16 @@ struct FlippableHeroCard: View {
                             .foregroundColor(.secondary)
                         
                         WrapHStack(items: roles, idKey: \.id) { role in
-                            badgeView(title: role.data.sort_title ?? role.caption,
-                                      iconURL: role.data.sort_icon,
-                                      background: .green.opacity(0.1))
+                            switch role {
+                            case .sortID(let data):
+                                badgeView(title: data.data?.sort_title ?? data.caption,
+                                         iconURL: data.data?.sort_icon,
+                                         background: .green.opacity(0.1))
+                            case .string(let str):
+                                badgeView(title: str,
+                                         iconURL: nil,
+                                         background: .green.opacity(0.1))
+                            }
                         }
                     }
                 }

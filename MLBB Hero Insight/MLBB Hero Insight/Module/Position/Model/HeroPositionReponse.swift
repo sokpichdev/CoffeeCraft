@@ -121,14 +121,64 @@ struct RoadSortData: Codable {
 }
 
 // ✅ Sort ID Info
-struct HeroSortID: Codable {
+enum HeroSortID: Codable {
+    case sortID(HeroSortIDData)
+    case string(String)
+    
+    // Add computed properties to access the underlying data
+        var id: Int? {
+            switch self {
+            case .sortID(let data): return data.id
+            case .string: return nil
+            }
+        }
+        
+        var caption: String? {
+            switch self {
+            case .sortID(let data): return data.caption
+            case .string(let str): return str
+            }
+        }
+        
+        var data: HeroSortIDDetail? {
+            switch self {
+            case .sortID(let data): return data.data
+            case .string: return nil
+            }
+        }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let sortID = try? container.decode(HeroSortIDData.self) {
+            self = .sortID(sortID)
+        } else if let string = try? container.decode(String.self) {
+            self = .string(string)
+        } else {
+            throw DecodingError.typeMismatch(HeroSortID.self,
+                                           DecodingError.Context(codingPath: decoder.codingPath,
+                                           debugDescription: "Expected HeroSortIDData or String"))
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .sortID(let sortID):
+            try container.encode(sortID)
+        case .string(let string):
+            try container.encode(string)
+        }
+    }
+}
+
+struct HeroSortIDData: Codable {
     let _id: String?
     let caption: String?
     let configId: Int?
     let createdAt: Int?
     let createdUser: String?
-    let data: SortIDData
-    let dynamic: String?
+    let data: HeroSortIDDetail?
+    let dynamic: String? // Update this type if needed
     let id: Int?
     let linkId: [Int]?
     let sort: Int?
@@ -136,6 +186,12 @@ struct HeroSortID: Codable {
     let updatedUser: String?
 }
 
+struct HeroSortIDDetail: Codable {
+    let _object: Int?
+    let sort_icon: String?
+    let sort_id: String?
+    let sort_title: String?
+}
 struct SortIDData: Codable {
     let _object: Int?
     let sort_icon: String?
