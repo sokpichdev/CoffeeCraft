@@ -11,7 +11,8 @@ struct HeroPositionView: View {
     @EnvironmentObject var homeVM: HomeViewModel
     @State private var searchText = ""
     @State private var showFilterSheet = false
-    
+    @EnvironmentObject var tabBarManager: TabBarVisibilityManager
+
     var filteredHeros: [HeroPositionRecord] {
         if searchText.isEmpty {
             return heroPosVM.positions ?? []

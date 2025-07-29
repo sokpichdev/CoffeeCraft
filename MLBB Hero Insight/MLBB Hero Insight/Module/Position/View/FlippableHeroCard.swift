@@ -121,7 +121,7 @@ struct FlippableHeroCard: View {
                             .foregroundColor(.secondary)
                         
                         WrapHStack(items: lanes, idKey: \.id) { lane in
-                            badgeView(title: lane.data?.road_sort_title ?? lane.caption,
+                            BadgeView(title: lane.data?.road_sort_title ?? lane.caption,
                                       iconURL: lane.data?.road_sort_icon,
                                       background: .brown.opacity(0.1))
                         }
@@ -135,9 +135,16 @@ struct FlippableHeroCard: View {
                             .foregroundColor(.secondary)
                         
                         WrapHStack(items: roles, idKey: \.id) { role in
-                            badgeView(title: role.data.sort_title ?? role.caption,
-                                      iconURL: role.data.sort_icon,
-                                      background: .green.opacity(0.1))
+                            switch role {
+                            case .sortID(let data):
+                                BadgeView(title: data.data?.sort_title ?? data.caption,
+                                         iconURL: data.data?.sort_icon,
+                                         background: .green.opacity(0.1))
+                            case .string(let str):
+                                BadgeView(title: str,
+                                         iconURL: nil,
+                                         background: .green.opacity(0.1))
+                            }
                         }
                     }
                 }
@@ -224,37 +231,6 @@ struct FlippableHeroCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
         )
-    }
-    
-    // MARK: - Helpers
-    private func badgeView(title: String?, iconURL: String?, background: Color) -> some View {
-        HStack(spacing: 4) {
-            if let iconURL = iconURL, let url = URL(string: iconURL) {
-                if url.pathExtension.lowercased() == "svg" {
-                    SVGImageView(url: url)
-                        .frame(width: 28, height: 28)
-                } else {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                        default:
-                            EmptyView()
-                        }
-                    }
-                    .frame(width: 20, height: 20)
-                }
-            }
-            
-            Text(title ?? "")
-                .font(.caption2)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(background)
-        .cornerRadius(6)
     }
     
     private func relationSection(title: String, ids: [Int], dotColor: Color) -> some View {

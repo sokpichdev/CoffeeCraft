@@ -13,7 +13,7 @@ struct testApp: App {
     var body: some Scene {
         WindowGroup {
 //            PlayerBankerView()
-            MainShimmer()
+            ContentView()
         }
     }
 }

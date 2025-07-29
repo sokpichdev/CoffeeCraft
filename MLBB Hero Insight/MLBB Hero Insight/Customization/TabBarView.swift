@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+final class TabBarVisibilityManager: ObservableObject {
+    @Published var isVisible: Bool = true
+}
+
 struct TabBarView: View {
     @Binding var selectedTab: Tab
     let bgColor: Color = .init(white: 0.9)
