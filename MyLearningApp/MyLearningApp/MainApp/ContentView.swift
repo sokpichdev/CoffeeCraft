@@ -36,7 +36,10 @@ struct ContentView: View {
                         CustomModuleButton(name: "📦 Drag & Drop", color: .green) {
                             selectButton(.dragdrop)
                         }
-//                        
+                        CustomModuleButton(name: "Dual Scrolls", color: .blue) {
+                            selectButton(.dualScroll)
+                        }
+//
 //                        CustomModuleButton(name: "🔍 Code Detector", color: .purple) {
 //                            selectButton(.codeDetector)
 //                        }
@@ -108,6 +111,8 @@ struct ContentView: View {
             TimeZoneView()
         case .viewFile:
             ViewingFile()
+        case .dualScroll:
+            DualScrollView()
         case .none:
             EmptyView()
         }
@@ -132,5 +137,6 @@ enum Buttontype {
     case map
     case timeZone
     case viewFile
+    case dualScroll
     case none
 }
