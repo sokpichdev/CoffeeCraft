@@ -94,7 +94,7 @@ struct DualScrollView: View {
             // LEFT SECTION MENU
             ScrollViewReader { proxy in
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
                         ForEach(sections) { section in
                             Button(action: {
                                 isProgrammaticScroll = true
@@ -102,19 +102,30 @@ struct DualScrollView: View {
                                     selectedSectionID = section.id
                                 }
                             }) {
-                                Text(section.name)
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundColor(selectedSectionID == section.id ? .white : .primary)
-                                    .padding(.vertical, 10)
-                                    .frame(maxWidth: .infinity)
-                                    .background(selectedSectionID == section.id ? Color.accentColor : Color.clear)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                ZStack(alignment: .trailing) {
+                                    HStack {
+                                        Text(section.name)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundColor(selectedSectionID == section.id ? .blue : .primary)
+                                            .padding(.vertical, 10)
+                                            .padding(.leading, 8)
+                                        Spacer()
+                                    }
+                                    
+                                    // Persistent accent line on right edge
+                                    Rectangle()
+                                        .fill(selectedSectionID == section.id ? Color.accentColor : Color.clear)
+                                        .frame(width: 4)
+                                        .cornerRadius(2)
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .padding()
+                    .padding(.leading, 5)
+                    .padding(.vertical, 10)
                 }
-                .frame(width: 110)
+                .frame(width: 120)
                 .background(Color(.systemGray6))
             }
             
