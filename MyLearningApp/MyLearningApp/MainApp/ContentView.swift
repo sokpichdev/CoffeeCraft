@@ -48,21 +48,21 @@ struct ContentView: View {
 //                            selectButton(.videoStreaming)
 //                        }
 //                        
-//                        Menu {
-//                            Button("Fixed Scrolling View") { selectDropdownOption(1) }
-//                            Button("Gesture Scrolling View - Volume Slider") { selectDropdownOption(2) }
-//                        } label: {
-//                            CustomModuleButton(name: "Scrolling Options", color: .blue) { }
-//                        }
+                        Menu {
+                            Button("Fixed Scrolling View") { selectDropdownOption(1) }
+                            Button("Gesture Scrolling View - Volume Slider") { selectDropdownOption(2) }
+                        } label: {
+                            CustomModuleButton(name: "Scrolling Options", color: .blue) { }
+                        }
 //                        CustomModuleButton(name: "Download", color: .green) {
 //                            selectButton(.download)
 //                        }
-//                        CustomModuleButton(name: "Map", color: .purple) {
-//                            selectButton(.map)
-//                        }
-//                        CustomModuleButton(name: "Time Zone", color: .orange) {
-//                            selectButton(.timeZone)
-//                        }
+                        CustomModuleButton(name: "Map", color: .purple) {
+                            selectButton(.map)
+                        }
+                        CustomModuleButton(name: "Time Zone", color: .orange) {
+                            selectButton(.timeZone)
+                        }
                     }
                     .padding(.horizontal, 16)
                 }
