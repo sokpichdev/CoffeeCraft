@@ -5,6 +5,7 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct CoffeeDetailView: View {
     @EnvironmentObject var cartManager: CartManager
@@ -50,18 +51,12 @@ struct CoffeeDetailView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-
-                    // Product Image
-                    AsyncImage(url: URL(string: product.imageURL)) { image in
-                        image.resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 300)
-                            .cornerRadius(20)
-                            .shadow(radius: 5)
-                    } placeholder: {
-                        ProgressView()
-                            .frame(height: 300)
-                    }
+                    WebImage(url: URL(string: product.imageURL))
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 300)
+                        .cornerRadius(20)
+                        .shadow(radius: 5)
 
                     // Name & Description
                     VStack(alignment: .leading, spacing: 6) {
