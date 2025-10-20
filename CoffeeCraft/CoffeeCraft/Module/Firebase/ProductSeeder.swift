@@ -19,7 +19,7 @@ struct ProductSeeder {
                 "description": "A classic Italian coffee with steamed milk foam.",
                 "price": 3.5,
                 "category": "Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1511920170033-f8396924c348",
+                "imageURL": "https://i.postimg.cc/VNK61H8p/capp.jpg",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -31,7 +31,7 @@ struct ProductSeeder {
                 "description": "Smooth espresso with steamed milk and a light layer of foam.",
                 "price": 4.0,
                 "category": "Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+                "imageURL": "https://i.postimg.cc/WpX7CsCJ/Caffe-Latte-at-Pulse-Cafe.jpg",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy", "Almond"],
@@ -43,7 +43,7 @@ struct ProductSeeder {
                 "description": "Espresso with rich chocolate and steamed milk.",
                 "price": 4.2,
                 "category": "Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+                "imageURL": "https://i.postimg.cc/7LJPz1Jc/Mocha-1fc71f7.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Soy", "Oat"],
@@ -55,7 +55,7 @@ struct ProductSeeder {
                 "description": "Strong and bold espresso shot.",
                 "price": 2.5,
                 "category": "Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1525493376214-ff165c3c63e4",
+                "imageURL": "https://i.postimg.cc/W1FcYNpw/espresso-d93cf1fb-0d4d-4da2-877f-c8226560ea4a.webp",
                 "customizations": [
                     "Size": ["Single", "Double"],
                     "Extras": ["Sugar", "Cinnamon"]
@@ -68,7 +68,7 @@ struct ProductSeeder {
                 "description": "Spiced tea with steamed milk.",
                 "price": 3.8,
                 "category": "Tea",
-                "imageURL": "https://images.unsplash.com/photo-1600792128701-0e68b7c95a4f",
+                "imageURL": "https://i.postimg.cc/yxNBj0ry/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -80,7 +80,7 @@ struct ProductSeeder {
                 "description": "Refreshing hot green tea.",
                 "price": 2.2,
                 "category": "Tea",
-                "imageURL": "https://images.unsplash.com/photo-1562440499-64aa7e0f91e6",
+                "imageURL": "https://i.postimg.cc/Z5Wn4zHf/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Sweetness": ["None", "Low", "Medium", "High"]
@@ -91,7 +91,7 @@ struct ProductSeeder {
                 "description": "Simple hot black tea.",
                 "price": 2.0,
                 "category": "Tea",
-                "imageURL": "https://images.unsplash.com/photo-1579370318442-0d79f19c76f1",
+                "imageURL": "https://i.postimg.cc/Y07LCD09/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Sweetness": ["None", "Low", "Medium", "High"]
@@ -104,7 +104,7 @@ struct ProductSeeder {
                 "description": "Creamy green tea latte with a hint of sweetness.",
                 "price": 4.2,
                 "category": "Matcha",
-                "imageURL": "https://images.unsplash.com/photo-1562003385-48a2b8d2dc08",
+                "imageURL": "https://i.postimg.cc/44c14j81/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -118,7 +118,7 @@ struct ProductSeeder {
                 "description": "Rich and creamy hot chocolate drink.",
                 "price": 3.5,
                 "category": "Hot Chocolate",
-                "imageURL": "https://images.unsplash.com/photo-1541167760496-1628856ab772",
+                "imageURL": "https://i.postimg.cc/4xg2TXsS/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Extras": ["Whipped Cream", "Marshmallows", "Chocolate Drizzle"]
@@ -131,7 +131,7 @@ struct ProductSeeder {
                 "description": "Strong espresso poured over cold water and ice cubes.",
                 "price": 2.8,
                 "category": "Iced Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1527168027773-0cc890c0f29f",
+                "imageURL": "https://i.postimg.cc/442WnzZ5/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Extras": ["Lemon", "Sugar Syrup"]
@@ -142,7 +142,7 @@ struct ProductSeeder {
                 "description": "Chilled espresso with milk over ice.",
                 "price": 3.9,
                 "category": "Iced Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+                "imageURL": "https://i.postimg.cc/PrF0GgNK/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy", "Almond"],
@@ -154,7 +154,7 @@ struct ProductSeeder {
                 "description": "Chilled chocolate espresso drink.",
                 "price": 4.5,
                 "category": "Iced Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+                "imageURL": "https://i.postimg.cc/PJHTwB1z/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -166,7 +166,7 @@ struct ProductSeeder {
                 "description": "Iced coffee with caramel syrup.",
                 "price": 4.0,
                 "category": "Iced Coffee",
-                "imageURL": "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+                "imageURL": "https://i.postimg.cc/Mp9H8K1n/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -180,7 +180,7 @@ struct ProductSeeder {
                 "description": "Espresso with steamed milk and caramel drizzle.",
                 "price": 4.5,
                 "category": "Flavored Latte",
-                "imageURL": "https://images.unsplash.com/photo-1589302168068-964664d93dc0",
+                "imageURL": "https://i.postimg.cc/G903q40J/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -192,7 +192,7 @@ struct ProductSeeder {
                 "description": "Classic latte with vanilla syrup.",
                 "price": 4.2,
                 "category": "Flavored Latte",
-                "imageURL": "https://images.unsplash.com/photo-1511920170033-f8396924c348",
+                "imageURL": "https://i.postimg.cc/wjmLqNT8/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -204,7 +204,7 @@ struct ProductSeeder {
                 "description": "Latte with hazelnut syrup.",
                 "price": 4.3,
                 "category": "Flavored Latte",
-                "imageURL": "https://images.unsplash.com/photo-1511920170033-f8396924c348",
+                "imageURL": "https://i.postimg.cc/02H02xYK/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -216,7 +216,7 @@ struct ProductSeeder {
                 "description": "Sweet latte with a touch of honey.",
                 "price": 4.0,
                 "category": "Flavored Latte",
-                "imageURL": "https://images.unsplash.com/photo-1541167760496-1628856ab772",
+                "imageURL": "https://i.postimg.cc/7hwm7VhT/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"]
@@ -227,7 +227,7 @@ struct ProductSeeder {
                 "description": "Warm milk with turmeric and spices.",
                 "price": 4.3,
                 "category": "Flavored Latte",
-                "imageURL": "https://images.unsplash.com/photo-1562440499-64aa7e0f91e6",
+                "imageURL": "https://i.postimg.cc/1XQYBSCf/image.png",
                 "customizations": [
                     "Size": ["Small", "Medium", "Large"],
                     "Milk": ["Whole", "Oat", "Soy"],
@@ -241,7 +241,7 @@ struct ProductSeeder {
                 "description": "Espresso poured over vanilla ice cream.",
                 "price": 5.0,
                 "category": "Dessert",
-                "imageURL": "https://images.unsplash.com/photo-1524182576067-08b2b7f38c56",
+                "imageURL": "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
                 "customizations": [
                     "Ice Cream": ["Vanilla", "Chocolate"],
                     "Espresso Shots": ["Single", "Double"]
