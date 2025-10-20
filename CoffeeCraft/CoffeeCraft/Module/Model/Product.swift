@@ -13,6 +13,7 @@ struct Product: Identifiable, Hashable, Codable {
     let price: Double
     let imageURL: String
     let customizations: [String: [String]]?
+    let priceModifiers: [String: [String: Double]]? // ["Size": ["Small": 0, "Medium": 0.5, "Large": 1.0]]
 
     // ✅ Conform to Hashable
     func hash(into hasher: inout Hasher) {

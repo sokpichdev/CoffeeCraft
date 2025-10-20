@@ -28,7 +28,8 @@ class ProductViewModel: ObservableObject {
                     description: data["description"] as? String ?? "",
                     price: data["price"] as? Double ?? 0.0,
                     imageURL: data["imageURL"] as? String ?? "",
-                    customizations: data["customizations"] as? [String: [String]] ?? [:]
+                    customizations: data["customizations"] as? [String: [String]] ?? [:],
+                    priceModifiers: data["priceModifiers"] as? [String: [String: Double]] ?? [:]
                 )
             }
             print("✅ Fetched products:", self.products)
