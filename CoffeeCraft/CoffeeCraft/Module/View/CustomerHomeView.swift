@@ -8,6 +8,7 @@ import SwiftUI
 
 struct CustomerHomeView: View {
     @StateObject private var productVM = ProductViewModel()
+    @StateObject private var cartManager = CartManager()
 
     var body: some View {
         NavigationStack {
@@ -25,45 +26,23 @@ struct CustomerHomeView: View {
                     ScrollView {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 16)], spacing: 16) {
                             ForEach(productVM.products) { product in
-                                ProductCardView(product: product)
+                                NavigationLink(value: product) {
+                                    ProductCardView(product: product)
+                                }
                             }
-                            
                         }
                         .padding()
                     }
                 }
             }
             .navigationTitle("Coffee Menu")
+            .navigationDestination(for: Product.self) { product in
+                CoffeeDetailView(product: product)
+                    .environmentObject(cartManager)
+            }
         }
         .task {
             await productVM.fetchProducts()
         }
-    }
-}
-
-struct ProductCardView: View {
-    let product: Product
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: URL(string: product.imageURL)) { image in
-                image.resizable().scaledToFill()
-            } placeholder: {
-                Color.gray.opacity(0.2)
-            }
-            .frame(height: 140)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-
-            Text(product.name)
-                .font(.headline)
-
-            Text("$\(product.price, specifier: "%.2f")")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(radius: 2)
     }
 }

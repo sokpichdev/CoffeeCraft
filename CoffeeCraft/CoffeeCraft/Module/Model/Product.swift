@@ -6,11 +6,20 @@
 //
 import Foundation
 
-struct Product: Identifiable, Codable {
-    var id: String
-    var name: String
-    var description: String
-    var price: Double
-    var imageURL: String
-    var customizations: [String: [String]]? // e.g. ["Size": ["Small", "Medium", "Large"]]
+struct Product: Identifiable, Hashable, Codable {
+    let id: String
+    let name: String
+    let description: String
+    let price: Double
+    let imageURL: String
+    let customizations: [String: [String]]?
+
+    // ✅ Conform to Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id) // Use unique id for hashing
+    }
+
+    static func == (lhs: Product, rhs: Product) -> Bool {
+        lhs.id == rhs.id
+    }
 }

@@ -11,7 +11,6 @@ import Firebase
 @main
 struct CoffeeCraftApp: App {
     @StateObject var authVM = AuthViewModel()
-
     init() {
         FirebaseApp.configure()
     }
