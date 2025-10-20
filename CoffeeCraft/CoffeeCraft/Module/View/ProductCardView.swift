@@ -40,3 +40,30 @@ struct ProductCardView: View {
         .shadow(radius: 2)
     }
 }
+
+// MARK: - Menu Item Row
+struct MenuItemRow: View {
+    let item: MenuItem
+
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(item.name)
+                    .font(.system(size: 16, weight: .semibold))
+                Text(String(format: "$%.2f", item.price))
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            WebImage(url: URL(string: item.image))
+                .resizable()
+                .scaledToFill()
+                .frame(width: 80, height: 80)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .padding()
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .shadow(color: .gray.opacity(0.1), radius: 3, x: 0, y: 1)
+    }
+}
