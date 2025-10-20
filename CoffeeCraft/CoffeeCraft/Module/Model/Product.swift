@@ -1,3 +1,9 @@
+//
+//  Product.swift
+//  CoffeeCraft
+//
+//  Created by Sok Pich on 10/20/25.
+//
 import Foundation
 
 struct Product: Identifiable, Codable {
