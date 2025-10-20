@@ -13,94 +13,102 @@ struct CustomerHomeView: View {
     @State private var isProgrammaticScroll = false
 
     var body: some View {
-        HStack(spacing: 0) {
-            // LEFT CATEGORY MENU
-            ScrollViewReader { proxy in
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(productVM.sections) { section in
-                            Button(action: {
-                                isProgrammaticScroll = true
-                                withAnimation(.easeInOut) { selectedSectionID = section.id }
-                            }) {
-                                ZStack(alignment: .trailing) {
-                                    HStack {
-                                        Text(section.name)
-                                            .font(.system(size: 15, weight: .medium))
-                                            .foregroundColor(selectedSectionID == section.id ? .blue : .primary)
-                                            .padding(.vertical, 10)
-                                            .padding(.leading, 8)
-                                        Spacer()
+        NavigationStack {
+            HStack(spacing: 0) {
+                // MARK: Left Category Menu
+                ScrollViewReader { proxy in
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(productVM.sections) { section in
+                                Button(action: {
+                                    isProgrammaticScroll = true
+                                    withAnimation(.easeInOut) { selectedSectionID = section.id }
+                                }) {
+                                    ZStack(alignment: .trailing) {
+                                        HStack {
+                                            Text(section.name)
+                                                .font(.system(size: 15, weight: .medium))
+                                                .foregroundColor(selectedSectionID == section.id ? .blue : .primary)
+                                                .padding(.vertical, 10)
+                                                .padding(.leading, 8)
+                                            Spacer()
+                                        }
+
+                                        Rectangle()
+                                            .fill(selectedSectionID == section.id ? Color.accentColor : Color.clear)
+                                            .frame(width: 4)
+                                            .cornerRadius(2)
                                     }
-
-                                    Rectangle()
-                                        .fill(selectedSectionID == section.id ? Color.accentColor : Color.clear)
-                                        .frame(width: 4)
-                                        .cornerRadius(2)
                                 }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.leading, 5)
+                        .padding(.vertical, 10)
                     }
-                    .padding(.leading, 5)
-                    .padding(.vertical, 10)
+                    .frame(width: 120)
+                    .background(Color(.systemGray6))
                 }
-                .frame(width: 120)
-                .background(Color(.systemGray6))
-            }
 
-            Divider()
+                Divider()
 
-            // RIGHT SIDE ITEMS
-            ScrollViewReader { contentProxy in
-                ScrollView(.vertical, showsIndicators: true) {
-                    LazyVStack(alignment: .leading, spacing: 24) {
-                        ForEach(productVM.sections) { section in
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text(section.name)
-                                    .font(.title3.bold())
+                // MARK: Right Product List
+                ScrollViewReader { contentProxy in
+                    ScrollView(.vertical, showsIndicators: true) {
+                        LazyVStack(alignment: .leading, spacing: 24) {
+                            ForEach(productVM.sections) { section in
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text(section.name)
+                                        .font(.title3.bold())
+                                        .padding(.horizontal)
+                                        .padding(.top, 8)
+
+                                    VStack(spacing: 10) {
+                                        ForEach(section.items) { product in
+                                            NavigationLink(value: product) {
+                                                MenuItemRow(item: product)
+                                                    .id("\(section.id)_\(product.name)")
+                                            }
+                                        }
+                                    }
                                     .padding(.horizontal)
-                                    .padding(.top, 8)
-
-                                VStack(spacing: 10) {
-                                    ForEach(section.items) { item in
-                                        MenuItemRow(item: item)
-                                            .id("\(section.id)_\(item.name)")
+                                }
+                                .background(
+                                    GeometryReader { geo in
+                                        Color.clear.preference(
+                                            key: SectionOffsetKey.self,
+                                            value: [section.id: geo.frame(in: .named("scroll")).minY]
+                                        )
                                     }
-                                }
-                                .padding(.horizontal)
+                                )
+                                .id(section.id)
                             }
-                            .background(
-                                GeometryReader { geo in
-                                    Color.clear.preference(
-                                        key: SectionOffsetKey.self,
-                                        value: [section.id: geo.frame(in: .named("scroll")).minY]
-                                    )
-                                }
-                            )
-                            .id(section.id)
                         }
+                        .padding(.bottom, 50)
                     }
-                    .padding(.bottom, 50)
-                }
-                .coordinateSpace(name: "scroll")
-                .onPreferenceChange(SectionOffsetKey.self) { values in
-                    if !isProgrammaticScroll { updateVisibleSection(values: values) }
-                }
-                .onChange(of: selectedSectionID) { newValue in
-                    if let id = newValue, isProgrammaticScroll {
-                        withAnimation(.easeInOut) { contentProxy.scrollTo(id, anchor: .top) }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { isProgrammaticScroll = false }
+                    .coordinateSpace(name: "scroll")
+                    .onPreferenceChange(SectionOffsetKey.self) { values in
+                        if !isProgrammaticScroll { updateVisibleSection(values: values) }
+                    }
+                    .onChange(of: selectedSectionID) { newValue in
+                        if let id = newValue, isProgrammaticScroll {
+                            withAnimation(.easeInOut) { contentProxy.scrollTo(id, anchor: .top) }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { isProgrammaticScroll = false }
+                        }
                     }
                 }
             }
-        }
-        .onChange(of: visibleSectionID) { newValue in
-            selectedSectionID = newValue
-        }
-        .task {
-            await productVM.fetchProducts()
-            selectedSectionID = productVM.sections.first?.id
+            .onChange(of: visibleSectionID) { newValue in
+                selectedSectionID = newValue
+            }
+            .navigationDestination(for: Product.self) { product in
+                CoffeeDetailView(product: product)
+            }
+            .task {
+//                await ProductSeeder.seedSampleProducts()
+                await productVM.fetchProducts()
+                selectedSectionID = productVM.sections.first?.id
+            }
         }
     }
 
@@ -111,8 +119,6 @@ struct CustomerHomeView: View {
         }
     }
 }
-
-
 
 // MARK: - Preference Key
 struct SectionOffsetKey: PreferenceKey {

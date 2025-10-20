@@ -7,6 +7,7 @@
 import Foundation
 
 struct Product: Identifiable, Hashable, Codable {
+    var uID = UUID()
     let id: String
     let name: String
     let description: String
@@ -23,9 +24,9 @@ struct Product: Identifiable, Hashable, Codable {
 }
 
 struct SectionData: Identifiable {
-    var id: String
+    var id: String { name }
     var name: String
-    var items: [MenuItem]
+    var items: [Product]
 }
 
 struct MenuItem: Identifiable {

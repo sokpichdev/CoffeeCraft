@@ -45,11 +45,7 @@ class ProductViewModel: ObservableObject {
     func computeSections() {
         sections = Dictionary(grouping: products, by: { $0.category })
             .map { category, products in
-                SectionData(
-                    id: category,
-                    name: category,
-                    items: products.map { MenuItem(name: $0.name, price: $0.price, image: $0.imageURL) }
-                )
+                SectionData(name: category, items: products)
             }
             .sorted { $0.name < $1.name }
     }
