@@ -19,105 +19,91 @@ struct CoffeeDetailView: View {
     var sugarLevels = ["No Sugar", "Less", "Normal", "Extra"]
     var iceLevels = ["No Ice", "Less", "Regular", "Extra"]
 
+    // MARK: - Subtotal calculation matching CartItem.totalPrice
+    private var subtotal: Double {
+        var price = product.price
+
+        // Size adjustments
+        switch selectedSize {
+        case "Small": price += 0
+        case "Medium": price += 0.5
+        case "Large": price += 1.0
+        default: break
+        }
+
+        // Milk adjustments
+        switch selectedMilk {
+        case "Whole": price += 0
+        case "Oat": price += 0.5
+        case "Soy": price += 0.5
+        case "Almond": price += 0.5
+        default: break
+        }
+
+        // Extras adjustments
+        price += Double(selectedExtras.count) * 0.5
+
+        return price
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                AsyncImage(url: URL(string: product.imageURL)) { image in
-                    image.resizable()
-                        .scaledToFit()
-                        .frame(maxHeight: 250)
-                        .cornerRadius(15)
-                } placeholder: {
-                    ProgressView()
-                }
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
 
-                Text(product.name)
-                    .font(.title)
-                    .fontWeight(.bold)
-                Text(String(format: "$%.2f", product.price))
-                    .font(.title2)
-                    .foregroundColor(.secondary)
-                Text(product.description)
-                    .font(.body)
-
-                Divider()
-
-                // Size
-                if let sizes = product.customizations?["Size"] {
-                    VStack(alignment: .leading) {
-                        Text("Size").font(.headline)
-                        Picker("Size", selection: $selectedSize) {
-                            ForEach(sizes, id: \.self) { size in
-                                Text(size)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
+                    // Product Image
+                    AsyncImage(url: URL(string: product.imageURL)) { image in
+                        image.resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 300)
+                            .cornerRadius(20)
+                            .shadow(radius: 5)
+                    } placeholder: {
+                        ProgressView()
+                            .frame(height: 300)
                     }
-                }
 
-                // Milk
-                if let milks = product.customizations?["Milk"] {
-                    VStack(alignment: .leading) {
-                        Text("Milk").font(.headline)
-                        Picker("Milk", selection: $selectedMilk) {
-                            ForEach(milks, id: \.self) { milk in
-                                Text(milk)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
+                    // Name & Description
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(product.name)
+                            .font(.title)
+                            .fontWeight(.bold)
+                        Text(product.description)
+                            .font(.body)
+                            .foregroundColor(.secondary)
                     }
-                }
 
-                // Sugar
-                VStack(alignment: .leading) {
-                    Text("Sugar").font(.headline)
-                    Picker("Sugar", selection: $selectedSugar) {
-                        ForEach(sugarLevels, id: \.self) { sugar in
-                            Text(sugar)
+                    // Customizations
+                    VStack(alignment: .leading, spacing: 16) {
+                        if let sizes = product.customizations?["Size"] {
+                            CustomSelectionChips(title: "Size", options: sizes, selected: $selectedSize)
+                        }
+                        if let milks = product.customizations?["Milk"] {
+                            CustomSelectionChips(title: "Milk", options: milks, selected: $selectedMilk)
+                        }
+                        CustomSelectionChips(title: "Sugar", options: sugarLevels, selected: $selectedSugar)
+                        CustomSelectionChips(title: "Ice", options: iceLevels, selected: $selectedIce)
+                        if let extras = product.customizations?["Extras"] {
+                            MultiSelectionChips(title: "Extras", options: extras, selected: $selectedExtras)
                         }
                     }
-                    .pickerStyle(SegmentedPickerStyle())
+
+                    Spacer(minLength: 120) // Space for sticky footer
+                }
+                .padding()
+            }
+
+            // MARK: Sticky Footer: Subtotal + Add to Cart
+            VStack(spacing: 12) {
+                HStack {
+                    Text("Subtotal:")
+                        .font(.headline)
+                    Spacer()
+                    Text(String(format: "$%.2f", subtotal))
+                        .font(.title2)
+                        .bold()
                 }
 
-                // Ice
-                VStack(alignment: .leading) {
-                    Text("Ice").font(.headline)
-                    Picker("Ice", selection: $selectedIce) {
-                        ForEach(iceLevels, id: \.self) { ice in
-                            Text(ice)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-
-                // Extras
-                if let extras = product.customizations?["Extras"] {
-                    VStack(alignment: .leading) {
-                        Text("Extras").font(.headline)
-                        ForEach(extras, id: \.self) { extra in
-                            HStack {
-                                Text(extra)
-                                Spacer()
-                                if selectedExtras.contains(extra) {
-                                    Image(systemName: "checkmark").foregroundColor(.green)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                if selectedExtras.contains(extra) {
-                                    selectedExtras.removeAll { $0 == extra }
-                                } else {
-                                    selectedExtras.append(extra)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                }
-
-                Divider()
-
-                // Add to Cart Button
                 Button(action: {
                     cartManager.addToCart(
                         product: product,
@@ -135,19 +121,83 @@ struct CoffeeDetailView: View {
                         .padding()
                         .background(Color.brown)
                         .cornerRadius(12)
+                        .shadow(radius: 3)
                 }
             }
             .padding()
-            .onAppear {
-                if let sizes = product.customizations?["Size"], selectedSize.isEmpty {
-                    selectedSize = sizes.first ?? ""
-                }
-                if let milks = product.customizations?["Milk"], selectedMilk.isEmpty {
-                    selectedMilk = milks.first ?? ""
-                }
+            .background(.ultraThinMaterial)
+            .cornerRadius(20, corners: [.topLeft, .topRight])
+            .shadow(radius: 5)
+        }
+        .onAppear {
+            // Default selections
+            if let sizes = product.customizations?["Size"], selectedSize.isEmpty {
+                selectedSize = sizes.first ?? ""
+            }
+            if let milks = product.customizations?["Milk"], selectedMilk.isEmpty {
+                selectedMilk = milks.first ?? ""
             }
         }
         .navigationTitle("Customize")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+
+// MARK: - Single Selection Chips
+struct CustomSelectionChips: View {
+    var title: String
+    var options: [String]
+    @Binding var selected: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.headline)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(options, id: \.self) { option in
+                        Text(option)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(selected == option ? Color.brown : Color.gray.opacity(0.2))
+                            .foregroundColor(selected == option ? .white : .primary)
+                            .cornerRadius(12)
+                            .onTapGesture { selected = option }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Multi Selection Chips
+struct MultiSelectionChips: View {
+    var title: String
+    var options: [String]
+    @Binding var selected: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.headline)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(options, id: \.self) { option in
+                        Text(option)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(selected.contains(option) ? Color.brown : Color.gray.opacity(0.2))
+                            .foregroundColor(selected.contains(option) ? .white : .primary)
+                            .cornerRadius(12)
+                            .onTapGesture {
+                                if selected.contains(option) {
+                                    selected.removeAll { $0 == option }
+                                } else {
+                                    selected.append(option)
+                                }
+                            }
+                    }
+                }
+            }
+        }
     }
 }
