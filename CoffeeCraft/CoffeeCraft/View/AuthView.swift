@@ -13,47 +13,159 @@ struct AuthView: View {
     @State private var name = ""
     @State private var role: UserRole = .customer
     @State private var isLogin = true
+    @State private var isLoading = false
+    @FocusState private var focusedField: Field?
+
+    enum Field {
+        case name, email, password
+    }
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text(isLogin ? "Login" : "Sign Up")
-                .font(.largeTitle).bold()
+        ZStack {
+            // Background gradient
+            LinearGradient(colors: [.brown.opacity(0.8), .black],
+                           startPoint: .topLeading,
+                           endPoint: .bottomTrailing)
+                .ignoresSafeArea()
 
-            if !isLogin {
-                TextField("Name", text: $name)
-            }
+            VStack(spacing: 24) {
+                Spacer()
 
-            TextField("Email", text: $email)
-                .textInputAutocapitalization(.never)
-                .keyboardType(.emailAddress)
-            SecureField("Password", text: $password)
+                // Title
+                Text(isLogin ? "Welcome Back ☕️" : "Create Account 🌿")
+                    .font(.system(.largeTitle, design: .rounded)).bold()
+                    .foregroundStyle(.white)
+                    .transition(.opacity.combined(with: .slide))
+                    .padding(.bottom, 8)
 
-            if !isLogin {
-                Picker("Role", selection: $role) {
-                    Text("Customer").tag(UserRole.customer)
-                    Text("Manager").tag(UserRole.manager)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-            }
+                // Form container
+                VStack(spacing: 16) {
+                    if !isLogin {
+                        CustomTextField(title: "Full Name", text: $name, icon: "person.fill")
+                            .focused($focusedField, equals: .name)
+                            .submitLabel(.next)
+                    }
 
-            Button(isLogin ? "Login" : "Sign Up") {
-                Task {
-                    do {
-                        if isLogin {
-                            try await authVM.login(email: email, password: password)
-                        } else {
-                            try await authVM.signUp(name: name, email: email, password: password, role: role)
+                    CustomTextField(title: "Email Address", text: $email, icon: "envelope.fill", keyboardType: .emailAddress)
+                        .focused($focusedField, equals: .email)
+                        .submitLabel(.next)
+
+                    CustomSecureField(title: "Password", text: $password, icon: "lock.fill")
+                        .focused($focusedField, equals: .password)
+                        .submitLabel(.done)
+
+                    if !isLogin {
+                        Picker("Role", selection: $role) {
+                            Text("Customer").tag(UserRole.customer)
+                            Text("Manager").tag(UserRole.manager)
                         }
-                    } catch {
-                        print("Error: \(error.localizedDescription)")
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding(.top, 6)
                     }
                 }
-            }
+                .padding(24)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 8)
+                .padding(.horizontal)
 
-            Button(isLogin ? "Create account" : "Already have an account? Login") {
-                isLogin.toggle()
+                // Auth button
+                Button {
+                    Task {
+                        isLoading = true
+                        do {
+                            if isLogin {
+                                try await authVM.login(email: email, password: password)
+                            } else {
+                                try await authVM.signUp(name: name, email: email, password: password, role: role)
+                            }
+                        } catch {
+                            print("Error: \(error.localizedDescription)")
+                        }
+                        isLoading = false
+                    }
+                } label: {
+                    HStack {
+                        if isLoading {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Text(isLogin ? "Login" : "Sign Up")
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.brown.gradient)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
+                }
+                .padding(.horizontal)
+
+                // Switch between login/signup
+                Button {
+                    withAnimation(.spring()) {
+                        isLogin.toggle()
+                        clearFields()
+                    }
+                } label: {
+                    Text(isLogin ? "Don’t have an account? Sign Up" : "Already have an account? Login")
+                        .font(.callout)
+                        .foregroundStyle(.white.opacity(0.8))
+                        .padding(.top, 8)
+                }
+
+                Spacer()
             }
+            .padding()
+        }
+    }
+
+    private func clearFields() {
+        email = ""
+        password = ""
+        name = ""
+    }
+}
+
+struct CustomTextField: View {
+    var title: String
+    @Binding var text: String
+    var icon: String = ""
+    var keyboardType: UIKeyboardType = .default
+
+    var body: some View {
+        HStack {
+            if !icon.isEmpty {
+                Image(systemName: icon)
+                    .foregroundColor(.brown)
+            }
+            TextField(title, text: $text)
+                .keyboardType(keyboardType)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
         }
         .padding()
+        .background(.white.opacity(0.9))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+struct CustomSecureField: View {
+    var title: String
+    @Binding var text: String
+    var icon: String = ""
+
+    var body: some View {
+        HStack {
+            if !icon.isEmpty {
+                Image(systemName: icon)
+                    .foregroundColor(.brown)
+            }
+            SecureField(title, text: $text)
+        }
+        .padding()
+        .background(.white.opacity(0.9))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
