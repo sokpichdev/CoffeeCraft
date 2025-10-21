@@ -11,7 +11,7 @@ struct CoffeeDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     let product: Product
     var cartItem: CartItem? = nil // optional cart item for editing
-
+    var onUpdate: (() -> Void)? = nil
     @State private var selectedSize: String
     @State private var selectedMilk: String
     @State private var selectedSugar: String
@@ -23,9 +23,10 @@ struct CoffeeDetailView: View {
     var iceLevels = ["No Ice", "Less", "Regular", "Extra"]
 
     // MARK: - Init to set initial selections from cartItem or defaults
-    init(product: Product, cartItem: CartItem? = nil) {
+    init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil) {
         self.product = product
         self.cartItem = cartItem
+        self.onUpdate = onUpdate
         _selectedSize = State(initialValue: cartItem?.size ?? (product.customizations?["Size"]?.first ?? ""))
         _selectedMilk = State(initialValue: cartItem?.milk ?? (product.customizations?["Milk"]?.first ?? ""))
         _selectedSugar = State(initialValue: cartItem?.sugar ?? "Normal")
@@ -115,6 +116,7 @@ struct CoffeeDetailView: View {
                             ice: selectedIce,
                             extras: selectedExtras
                         )
+                        onUpdate?()
                     } else {
                         // Add new item
                         cartManager.addToCart(

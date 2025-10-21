@@ -71,8 +71,14 @@ struct CartView: View {
                 .background(.ultraThinMaterial)
             }
             .sheet(item: $editingItem) { item in
-                CoffeeDetailView(product: item.product, cartItem: item)
-                                    .environmentObject(cartManager)
+                CoffeeDetailView(
+                    product: item.product,
+                    cartItem: item,
+                    onUpdate: {
+                        editingItem = nil
+                    }
+                )
+                .environmentObject(cartManager)
             }
             .navigationTitle("My Cart")
         }
