@@ -9,6 +9,7 @@ import SDWebImageSwiftUI
 
 struct CoffeeDetailView: View {
     @EnvironmentObject var cartManager: CartManager
+    @Environment(\.dismiss) private var dismiss
     let product: Product
     var cartItem: CartItem? = nil // optional cart item for editing
     var onUpdate: (() -> Void)? = nil
@@ -56,7 +57,7 @@ struct CoffeeDetailView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     WebImage(url: URL(string: product.imageURL))
@@ -89,12 +90,12 @@ struct CoffeeDetailView: View {
                         }
                     }
 
-                    Spacer(minLength: 120)
+                    Spacer(minLength: 180) // 👈 Add spacing so content doesn’t hide behind footer
                 }
                 .padding()
             }
 
-            // MARK: Sticky Footer
+            // MARK: - Sticky Footer
             VStack(spacing: 12) {
                 HStack {
                     Text("Subtotal:")
@@ -107,7 +108,6 @@ struct CoffeeDetailView: View {
 
                 Button(action: {
                     if let cartItem = cartItem {
-                        // Update existing cart item
                         cartManager.updateCartItem(
                             item: cartItem,
                             size: selectedSize,
@@ -118,7 +118,6 @@ struct CoffeeDetailView: View {
                         )
                         onUpdate?()
                     } else {
-                        // Add new item
                         cartManager.addToCart(
                             product: product,
                             size: selectedSize,
@@ -145,14 +144,23 @@ struct CoffeeDetailView: View {
             }
             .padding()
             .padding(.bottom, 8)
+            .frame(maxWidth: .infinity)
             .background(.ultraThinMaterial)
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
-        .frame(maxHeight: .infinity)
-        .ignoresSafeArea()
-        .navigationTitle("Customize")
-        .navigationBarTitleDisplayMode(.inline)
+        .ignoresSafeArea(edges: .bottom)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
+                }
+            }
+        }
+        .navigationBarTitle(product.name, displayMode: .inline)
     }
 }
 

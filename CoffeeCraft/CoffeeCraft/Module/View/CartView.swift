@@ -10,7 +10,8 @@ import SDWebImageSwiftUI
 struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
     @State private var editingItem: CartItem? = nil
-    
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -113,7 +114,21 @@ struct CartView: View {
                 )
                 .environmentObject(cartManager)
             }
-            .navigationTitle("My Cart")
+            .navigationBarTitle("My Cart", displayMode: .inline) // set the title
+            .navigationBarBackButtonHidden(false) // show the back button
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        // Pop the view
+                        // If using NavigationStack:
+                        // presentationMode.wrappedValue.dismiss()
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.brown)
+                    }
+                }
+            }
         }
     }
 }

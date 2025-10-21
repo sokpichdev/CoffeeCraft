@@ -124,7 +124,7 @@ struct CustomerHomeView: View {
                 await productVM.fetchProducts()
                 selectedSectionID = productVM.sections.first?.id
             }
-            .sheet(isPresented: $showCartSheet) {
+            .fullScreenCover(isPresented: $showCartSheet) {
                 CartView()
                     .environmentObject(cartManager)
                     .presentationDetents([.large]) // draggable up
