@@ -8,94 +8,109 @@ import SwiftUI
 
 struct CustomerHomeView: View {
     @StateObject private var productVM = ProductViewModel()
+    @StateObject var cartManager = CartManager()
     @State private var selectedSectionID: String? = nil
     @State private var visibleSectionID: String? = nil
     @State private var isProgrammaticScroll = false
 
+    @State private var showCartSheet = false
+
     var body: some View {
         NavigationStack {
-            HStack(spacing: 0) {
-                // MARK: Left Category Menu
-                ScrollViewReader { proxy in
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(productVM.sections) { section in
-                                Button(action: {
-                                    isProgrammaticScroll = true
-                                    withAnimation(.easeInOut) { selectedSectionID = section.id }
-                                }) {
-                                    ZStack(alignment: .trailing) {
-                                        HStack {
-                                            Text(section.name)
-                                                .font(.system(size: 15, weight: .medium))
-                                                .foregroundColor(selectedSectionID == section.id ? .blue : .primary)
-                                                .padding(.vertical, 10)
-                                                .padding(.leading, 8)
-                                            Spacer()
+            ZStack(alignment: .bottom) {
+                // MARK: - Main Split View (Left Category + Right Product List)
+                HStack(spacing: 0) {
+                    // MARK: Left Category Menu
+                    ScrollViewReader { proxy in
+                        ScrollView(.vertical, showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(productVM.sections) { section in
+                                    Button(action: {
+                                        isProgrammaticScroll = true
+                                        withAnimation(.easeInOut) { selectedSectionID = section.id }
+                                    }) {
+                                        ZStack(alignment: .trailing) {
+                                            HStack {
+                                                Text(section.name)
+                                                    .font(.system(size: 15, weight: .medium))
+                                                    .foregroundColor(selectedSectionID == section.id ? .blue : .primary)
+                                                    .padding(.vertical, 10)
+                                                    .padding(.leading, 8)
+                                                Spacer()
+                                            }
+
+                                            Rectangle()
+                                                .fill(selectedSectionID == section.id ? Color.accentColor : Color.clear)
+                                                .frame(width: 4)
+                                                .cornerRadius(2)
                                         }
-
-                                        Rectangle()
-                                            .fill(selectedSectionID == section.id ? Color.accentColor : Color.clear)
-                                            .frame(width: 4)
-                                            .cornerRadius(2)
                                     }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            .padding(.leading, 5)
+                            .padding(.vertical, 10)
                         }
-                        .padding(.leading, 5)
-                        .padding(.vertical, 10)
+                        .frame(width: 120)
+                        .background(Color(.systemGray6))
                     }
-                    .frame(width: 120)
-                    .background(Color(.systemGray6))
-                }
 
-                Divider()
+                    Divider()
 
-                // MARK: Right Product List
-                ScrollViewReader { contentProxy in
-                    ScrollView(.vertical, showsIndicators: true) {
-                        LazyVStack(alignment: .leading, spacing: 24) {
-                            ForEach(productVM.sections) { section in
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text(section.name)
-                                        .font(.title3.bold())
-                                        .padding(.horizontal)
-                                        .padding(.top, 8)
+                    // MARK: Right Product List
+                    ScrollViewReader { contentProxy in
+                        ScrollView(.vertical, showsIndicators: true) {
+                            LazyVStack(alignment: .leading, spacing: 24) {
+                                ForEach(productVM.sections) { section in
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text(section.name)
+                                            .font(.title3.bold())
+                                            .padding(.horizontal)
+                                            .padding(.top, 8)
 
-                                    VStack(spacing: 10) {
-                                        ForEach(section.items) { product in
-                                            NavigationLink(value: product) {
-                                                MenuItemRow(item: product)
-                                                    .id("\(section.id)_\(product.name)")
+                                        VStack(spacing: 10) {
+                                            ForEach(section.items) { product in
+                                                NavigationLink(value: product) {
+                                                    MenuItemRow(item: product)
+                                                        .id("\(section.id)_\(product.name)")
+                                                }
                                             }
                                         }
+                                        .padding(.horizontal)
                                     }
-                                    .padding(.horizontal)
+                                    .background(
+                                        GeometryReader { geo in
+                                            Color.clear.preference(
+                                                key: SectionOffsetKey.self,
+                                                value: [section.id: geo.frame(in: .named("scroll")).minY]
+                                            )
+                                        }
+                                    )
+                                    .id(section.id)
                                 }
-                                .background(
-                                    GeometryReader { geo in
-                                        Color.clear.preference(
-                                            key: SectionOffsetKey.self,
-                                            value: [section.id: geo.frame(in: .named("scroll")).minY]
-                                        )
-                                    }
-                                )
-                                .id(section.id)
+                            }
+                            .padding(.bottom, 100) // leave space for cart bar
+                        }
+                        .coordinateSpace(name: "scroll")
+                        .onPreferenceChange(SectionOffsetKey.self) { values in
+                            if !isProgrammaticScroll { updateVisibleSection(values: values) }
+                        }
+                        .onChange(of: selectedSectionID) { newValue in
+                            if let id = newValue, isProgrammaticScroll {
+                                withAnimation(.easeInOut) { contentProxy.scrollTo(id, anchor: .top) }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { isProgrammaticScroll = false }
                             }
                         }
-                        .padding(.bottom, 50)
                     }
-                    .coordinateSpace(name: "scroll")
-                    .onPreferenceChange(SectionOffsetKey.self) { values in
-                        if !isProgrammaticScroll { updateVisibleSection(values: values) }
+                }
+
+                // MARK: - Sticky "View Cart" Button
+                if !cartManager.items.isEmpty {
+                    ViewCartButton(cartManager: cartManager) {
+                        showCartSheet = true
                     }
-                    .onChange(of: selectedSectionID) { newValue in
-                        if let id = newValue, isProgrammaticScroll {
-                            withAnimation(.easeInOut) { contentProxy.scrollTo(id, anchor: .top) }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { isProgrammaticScroll = false }
-                        }
-                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.spring(), value: cartManager.items.count)
                 }
             }
             .onChange(of: visibleSectionID) { newValue in
@@ -103,11 +118,16 @@ struct CustomerHomeView: View {
             }
             .navigationDestination(for: Product.self) { product in
                 CoffeeDetailView(product: product)
+                    .environmentObject(cartManager)
             }
             .task {
-//                await ProductSeeder.seedSampleProducts()
                 await productVM.fetchProducts()
                 selectedSectionID = productVM.sections.first?.id
+            }
+            .sheet(isPresented: $showCartSheet) {
+                CartView()
+                    .environmentObject(cartManager)
+                    .presentationDetents([.medium, .large]) // draggable up
             }
         }
     }
