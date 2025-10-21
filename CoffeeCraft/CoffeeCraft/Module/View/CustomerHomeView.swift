@@ -127,7 +127,7 @@ struct CustomerHomeView: View {
             .sheet(isPresented: $showCartSheet) {
                 CartView()
                     .environmentObject(cartManager)
-                    .presentationDetents([.medium, .large]) // draggable up
+                    .presentationDetents([.large]) // draggable up
             }
         }
     }
