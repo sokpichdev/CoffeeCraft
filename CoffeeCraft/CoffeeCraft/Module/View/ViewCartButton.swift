@@ -18,15 +18,15 @@ struct ViewCartButton: View {
             Spacer(minLength: 0)
             Button(action: onTap) {
                 HStack {
-                    VStack(alignment: .leading) {
-                        Text("View Cart (\(totalDrinks) drink\(totalDrinks > 1 ? "s" : ""))")
-                            .font(.headline)
-                        Text(formattedTotal)
-                            .font(.subheadline)
-                    }
-                    Spacer()
                     Image(systemName: "cart.fill")
                         .font(.title3)
+                    
+                    Text("View Cart (\(totalDrinks) drink\(totalDrinks > 1 ? "s" : ""))")
+                        .font(.headline)
+                    Spacer()
+                    
+                    Text(formattedTotal)
+                        .font(.subheadline)
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
