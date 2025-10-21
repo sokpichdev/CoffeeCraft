@@ -10,22 +10,33 @@ import SDWebImageSwiftUI
 struct CoffeeDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     let product: Product
+    var cartItem: CartItem? = nil // optional cart item for editing
 
-    @State private var selectedSize: String = ""
-    @State private var selectedMilk: String = ""
-    @State private var selectedSugar: String = "Normal"
-    @State private var selectedIce: String = "Regular"
-    @State private var selectedExtras: [String] = []
+    @State private var selectedSize: String
+    @State private var selectedMilk: String
+    @State private var selectedSugar: String
+    @State private var selectedIce: String
+    @State private var selectedExtras: [String]
     @State private var showAddedAlert = false
 
     var sugarLevels = ["No Sugar", "Less", "Normal", "Extra"]
     var iceLevels = ["No Ice", "Less", "Regular", "Extra"]
 
-    // MARK: - Subtotal calculation matching CartItem.totalPrice
+    // MARK: - Init to set initial selections from cartItem or defaults
+    init(product: Product, cartItem: CartItem? = nil) {
+        self.product = product
+        self.cartItem = cartItem
+        _selectedSize = State(initialValue: cartItem?.size ?? (product.customizations?["Size"]?.first ?? ""))
+        _selectedMilk = State(initialValue: cartItem?.milk ?? (product.customizations?["Milk"]?.first ?? ""))
+        _selectedSugar = State(initialValue: cartItem?.sugar ?? "Normal")
+        _selectedIce = State(initialValue: cartItem?.ice ?? "Regular")
+        _selectedExtras = State(initialValue: cartItem?.extras ?? [])
+    }
+
+    // MARK: - Subtotal calculation
     private var subtotal: Double {
         var price = product.price
 
-        // Size adjustments
         switch selectedSize {
         case "Small": price += 0
         case "Medium": price += 0.5
@@ -33,18 +44,13 @@ struct CoffeeDetailView: View {
         default: break
         }
 
-        // Milk adjustments
         switch selectedMilk {
         case "Whole": price += 0
-        case "Oat": price += 0.5
-        case "Soy": price += 0.5
-        case "Almond": price += 0.5
+        case "Oat", "Soy", "Almond": price += 0.5
         default: break
         }
 
-        // Extras adjustments
         price += Double(selectedExtras.count) * 0.5
-
         return price
     }
 
@@ -59,7 +65,6 @@ struct CoffeeDetailView: View {
                         .cornerRadius(20)
                         .shadow(radius: 5)
 
-                    // Name & Description
                     VStack(alignment: .leading, spacing: 6) {
                         Text(product.name)
                             .font(.title)
@@ -69,7 +74,6 @@ struct CoffeeDetailView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    // Customizations
                     VStack(alignment: .leading, spacing: 16) {
                         if let sizes = product.customizations?["Size"] {
                             CustomSelectionChips(title: "Size", options: sizes, selected: $selectedSize)
@@ -84,11 +88,12 @@ struct CoffeeDetailView: View {
                         }
                     }
 
-                    Spacer(minLength: 120) // Space for sticky footer
+                    Spacer(minLength: 120)
                 }
                 .padding()
             }
-            // MARK: Sticky Footer: Subtotal + Add to Cart
+
+            // MARK: Sticky Footer
             VStack(spacing: 12) {
                 HStack {
                     Text("Subtotal:")
@@ -100,17 +105,30 @@ struct CoffeeDetailView: View {
                 }
 
                 Button(action: {
-                    cartManager.addToCart(
-                        product: product,
-                        size: selectedSize,
-                        milk: selectedMilk,
-                        sugar: selectedSugar,
-                        ice: selectedIce,
-                        extras: selectedExtras
-                    )
+                    if let cartItem = cartItem {
+                        // Update existing cart item
+                        cartManager.updateCartItem(
+                            item: cartItem,
+                            size: selectedSize,
+                            milk: selectedMilk,
+                            sugar: selectedSugar,
+                            ice: selectedIce,
+                            extras: selectedExtras
+                        )
+                    } else {
+                        // Add new item
+                        cartManager.addToCart(
+                            product: product,
+                            size: selectedSize,
+                            milk: selectedMilk,
+                            sugar: selectedSugar,
+                            ice: selectedIce,
+                            extras: selectedExtras
+                        )
+                    }
                     showAddedAlert = true
                 }) {
-                    Text("Add to Cart")
+                    Text(cartItem == nil ? "Add to Cart" : "Update Cart")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -119,8 +137,8 @@ struct CoffeeDetailView: View {
                         .cornerRadius(12)
                         .shadow(radius: 3)
                 }
-                .alert("Added to Cart ☕️", isPresented: $showAddedAlert) {
-                    Button("OK", role: .cancel) { }
+                .alert("Added to Cart ☕️", isPresented: cartItem == nil ? $showAddedAlert : .constant(false)) {
+                    Button("OK", role: .cancel) {}
                 }
             }
             .padding()
@@ -129,22 +147,12 @@ struct CoffeeDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
-        .onAppear {
-            // Default selections
-            if let sizes = product.customizations?["Size"], selectedSize.isEmpty {
-                selectedSize = sizes.first ?? ""
-            }
-            if let milks = product.customizations?["Milk"], selectedMilk.isEmpty {
-                selectedMilk = milks.first ?? ""
-            }
-        }
-        .frame(maxHeight: .infinity) // make VStack fill the screen
-        .ignoresSafeArea() // ensures it touches bottom
+        .frame(maxHeight: .infinity)
+        .ignoresSafeArea()
         .navigationTitle("Customize")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
-
 
 // MARK: - Single Selection Chips
 struct CustomSelectionChips: View {

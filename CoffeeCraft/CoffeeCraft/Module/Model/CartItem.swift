@@ -74,4 +74,17 @@ class CartManager: ObservableObject {
     func clearCart() {
         items.removeAll()
     }
+    
+    func updateCartItem(item: CartItem, size: String, milk: String, sugar: String, ice: String, extras: [String]) {
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            items[index] = CartItem(
+                product: item.product,
+                size: size,
+                milk: milk,
+                sugar: sugar,
+                ice: ice,
+                extras: extras
+            )
+        }
+    }
 }
