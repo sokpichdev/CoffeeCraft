@@ -11,6 +11,7 @@ import Firebase
 @main
 struct CoffeeCraftApp: App {
     @StateObject var authVM = AuthViewModel()
+    @StateObject var cartManager = CartManager()
     init() {
         FirebaseApp.configure()
     }
@@ -19,6 +20,7 @@ struct CoffeeCraftApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(authVM)
+                .environmentObject(cartManager)
         }
     }
 }

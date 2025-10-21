@@ -16,6 +16,7 @@ struct CoffeeDetailView: View {
     @State private var selectedSugar: String = "Normal"
     @State private var selectedIce: String = "Regular"
     @State private var selectedExtras: [String] = []
+    @State private var showAddedAlert = false
 
     var sugarLevels = ["No Sugar", "Less", "Normal", "Extra"]
     var iceLevels = ["No Ice", "Less", "Regular", "Extra"]
@@ -87,7 +88,6 @@ struct CoffeeDetailView: View {
                 }
                 .padding()
             }
-
             // MARK: Sticky Footer: Subtotal + Add to Cart
             VStack(spacing: 12) {
                 HStack {
@@ -108,6 +108,7 @@ struct CoffeeDetailView: View {
                         ice: selectedIce,
                         extras: selectedExtras
                     )
+                    showAddedAlert = true
                 }) {
                     Text("Add to Cart")
                         .font(.headline)
@@ -118,8 +119,12 @@ struct CoffeeDetailView: View {
                         .cornerRadius(12)
                         .shadow(radius: 3)
                 }
+                .alert("Added to Cart ☕️", isPresented: $showAddedAlert) {
+                    Button("OK", role: .cancel) { }
+                }
             }
             .padding()
+            .padding(.bottom, 8)
             .background(.ultraThinMaterial)
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
@@ -133,6 +138,8 @@ struct CoffeeDetailView: View {
                 selectedMilk = milks.first ?? ""
             }
         }
+        .frame(maxHeight: .infinity) // make VStack fill the screen
+        .ignoresSafeArea() // ensures it touches bottom
         .navigationTitle("Customize")
         .navigationBarTitleDisplayMode(.inline)
     }
