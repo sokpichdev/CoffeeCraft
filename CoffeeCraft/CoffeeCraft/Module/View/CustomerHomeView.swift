@@ -33,14 +33,14 @@ struct CustomerHomeView: View {
                                             HStack {
                                                 Text(section.name)
                                                     .font(.system(size: 15, weight: .medium))
-                                                    .foregroundColor(selectedSectionID == section.id ? .blue : .primary)
+                                                    .foregroundColor(selectedSectionID == section.id ? .brown : .primary)
                                                     .padding(.vertical, 10)
                                                     .padding(.leading, 8)
                                                 Spacer()
                                             }
 
                                             Rectangle()
-                                                .fill(selectedSectionID == section.id ? Color.accentColor : Color.clear)
+                                                .fill(selectedSectionID == section.id ? Color.brown : Color.clear)
                                                 .frame(width: 4)
                                                 .cornerRadius(2)
                                         }

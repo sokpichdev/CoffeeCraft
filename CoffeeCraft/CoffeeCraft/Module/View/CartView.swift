@@ -14,7 +14,7 @@ struct CartView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack(alignment: .bottom) {
                 ScrollView {
                     VStack(spacing: 12) {
                         ForEach(cartManager.items) { item in
@@ -63,11 +63,12 @@ struct CartView: View {
                     .padding(.bottom, 8)
                 }
                 .padding(.horizontal)
-                .padding(.top, 8)
+                .padding(.vertical, 8)
                 .background(.ultraThinMaterial)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
                 .shadow(radius: 5)
             }
+            .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
                 CoffeeDetailView(
                     product: item.product,
