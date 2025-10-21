@@ -21,43 +21,7 @@ struct CartView: View {
                             Button {
                                 editingItem = item
                             } label: {
-                                HStack(alignment: .top, spacing: 12) {
-                                    // Optional product image
-                                    if let url = URL(string: item.product.imageURL) {
-                                        WebImage(url: url)
-                                            .resizable()
-                                            .indicator(.activity)
-                                            .frame(width: 60, height: 60)
-                                            .cornerRadius(10)
-                                    }
-                                    
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(item.product.name)
-                                            .font(.headline)
-                                        Text("\(item.size), \(item.milk)")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                        
-                                        if !item.extras.isEmpty {
-                                            Text("Extras: \(item.extras.joined(separator: ", "))")
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
-                                        }
-                                        
-                                        Text(String(format: "$%.2f", item.totalPrice))
-                                            .font(.subheadline)
-                                            .bold()
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                }
-                                .padding()
-                                .background(.ultraThinMaterial)
-                                .cornerRadius(14)
-                                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                CardItemView(item: item)
                             }
                             .buttonStyle(PlainButtonStyle())
                             .contextMenu {
@@ -130,5 +94,42 @@ struct CartView: View {
                 }
             }
         }
+    }
+}
+
+struct CardItemView: View {
+    let item: CartItem
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            if let url = URL(string: item.product.imageURL) {
+                WebImage(url: url)
+                    .resizable()
+                    .indicator(.activity)
+                    .frame(width: 60, height: 60)
+                    .cornerRadius(10)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.product.name)
+                    .font(.headline)
+                Text("\(item.size), \(item.milk)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                if !item.extras.isEmpty {
+                    Text("Extras: \(item.extras.joined(separator: ", "))")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+            }
+            Spacer()
+            Text(String(format: "$%.2f", item.totalPrice))
+                .font(.subheadline)
+                .bold()
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
