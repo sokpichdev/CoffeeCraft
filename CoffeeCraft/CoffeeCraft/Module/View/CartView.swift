@@ -10,7 +10,13 @@ import SDWebImageSwiftUI
 struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
     @State private var editingItem: CartItem? = nil
+    @State private var showCheckoutConfirm = false
+    @State private var isPlacingOrder = false
+    @State private var showSuccess = false
+    @State private var showError = false
     @Environment(\.dismiss) private var dismiss
+
+    private let orderService = OrderService()
 
     var body: some View {
         NavigationStack {
@@ -44,26 +50,25 @@ struct CartView: View {
                             .font(.headline)
                         Spacer()
                         Text(String(format: "$%.2f", cartManager.total))
-                            .font(.title2)
-                            .bold()
+                            .font(.title2.bold())
                     }
                     
                     Button {
-                        print("Checkout tapped")
+                        showCheckoutConfirm = true
                     } label: {
                         Text("Checkout")
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.brown)
+                            .background(cartManager.items.isEmpty ? Color.gray : Color.brown)
                             .cornerRadius(14)
                             .shadow(radius: 3)
                     }
                     .padding(.bottom, 8)
+                    .disabled(cartManager.items.isEmpty)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
+                .padding()
                 .background(.ultraThinMaterial)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
                 .shadow(radius: 5)
@@ -73,26 +78,56 @@ struct CartView: View {
                 CoffeeDetailView(
                     product: item.product,
                     cartItem: item,
-                    onUpdate: {
-                        editingItem = nil
-                    }
+                    onUpdate: { editingItem = nil }
                 )
                 .environmentObject(cartManager)
             }
-            .navigationBarTitle("My Cart", displayMode: .inline) // set the title
-            .navigationBarBackButtonHidden(false) // show the back button
+            .navigationTitle("My Cart")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        // Pop the view
-                        // If using NavigationStack:
-                        // presentationMode.wrappedValue.dismiss()
-                        dismiss()
-                    }) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.brown)
                     }
                 }
+            }
+            // MARK: - Checkout Confirmation
+            .alert("Confirm Order", isPresented: $showCheckoutConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Yes") { placeOrder() }
+            } message: {
+                Text("Are you sure you want to place this order? ☕")
+            }
+            // MARK: - Order Result Alerts
+            .alert("Order Placed!", isPresented: $showSuccess) {
+                Button("OK") {
+                    cartManager.clearCart()
+                    dismiss()
+                }
+            } message: {
+                Text("Your coffee order has been sent to the barista ☕")
+            }
+            .alert("Something went wrong", isPresented: $showError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please try again later.")
+            }
+        }
+    }
+
+    // MARK: - Place Order
+    private func placeOrder() {
+        Task {
+            isPlacingOrder = true
+            do {
+                try await orderService.placeOrder(cartItems: cartManager.items, total: cartManager.total)
+                isPlacingOrder = false
+                showSuccess = true
+            } catch {
+                isPlacingOrder = false
+                showError = true
+                print("Error placing order: \(error.localizedDescription)")
             }
         }
     }
