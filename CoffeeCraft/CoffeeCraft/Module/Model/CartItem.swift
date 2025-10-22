@@ -5,10 +5,10 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
-
+import FirebaseFirestore
 // MARK: - Cart Item
-struct CartItem: Identifiable {
-    let id = UUID()
+struct CartItem: Identifiable, Codable {
+    let id: UUID
     let product: Product
     let size: String
     let milk: String
@@ -44,47 +44,3 @@ struct CartItem: Identifiable {
     }
 }
 
-// MARK: - Cart Manager
-class CartManager: ObservableObject {
-    @Published var items: [CartItem] = []
-
-    func addToCart(product: Product,
-                   size: String,
-                   milk: String,
-                   sugar: String,
-                   ice: String,
-                   extras: [String]) {
-        let item = CartItem(product: product,
-                            size: size,
-                            milk: milk,
-                            sugar: sugar,
-                            ice: ice,
-                            extras: extras)
-        items.append(item)
-    }
-
-    func removeFromCart(item: CartItem) {
-        items.removeAll { $0.id == item.id }
-    }
-
-    var total: Double {
-        items.reduce(0) { $0 + $1.totalPrice }
-    }
-
-    func clearCart() {
-        items.removeAll()
-    }
-    
-    func updateCartItem(item: CartItem, size: String, milk: String, sugar: String, ice: String, extras: [String]) {
-        if let index = items.firstIndex(where: { $0.id == item.id }) {
-            items[index] = CartItem(
-                product: item.product,
-                size: size,
-                milk: milk,
-                sugar: sugar,
-                ice: ice,
-                extras: extras
-            )
-        }
-    }
-}

@@ -5,10 +5,11 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
+import FirebaseAuth
 
 struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @StateObject var cartManager = CartManager()
+    @StateObject var cartManager = CartManager(userId: Auth.auth().currentUser?.uid ?? "guest")
     @State private var selectedTab: Tab = .home
     
     var body: some View {
