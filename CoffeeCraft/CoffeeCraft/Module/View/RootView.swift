@@ -8,7 +8,8 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
-
+    @State private var selectedTab: Tab = .home
+    
     var body: some View {
         Group {
             if authVM.isLoading {
@@ -16,12 +17,18 @@ struct RootView: View {
             } else if authVM.currentUser == nil {
                 AuthView()
             } else {
-                switch authVM.currentUser!.role {
-                case .customer:
-                    CustomerHomeView()
-                case .manager:
-                    ManagerDashboardView()
+                VStack(spacing: 0) {
+                    // MARK: - Main Content
+                    // Show the selected tab's root view
+                    switch authVM.currentUser!.role {
+                    case .customer:
+                        CustomerHomeView()
+                    case .manager:
+                        ManagerDashboardView()
+                    }
+                    TabBarView(selectedTab: $selectedTab)
                 }
+                .ignoresSafeArea(edges: .bottom)
             }
         }
     }

@@ -17,8 +17,10 @@ struct CoffeeCraftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(authVM)
+            NavigationStack {
+                RootView()
+                    .environmentObject(authVM)
+            }
         }
     }
 }
