@@ -104,9 +104,9 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         lhs.rawValue < rhs.rawValue
     }
 
-    case home       // Coffee listing
+    case home       // Home / Featured
+    case menu       // Coffee menu
     case orders     // Past orders
-    case cart       // Shopping cart
     case profile    // User profile
 
     var id: Int { rawValue }
@@ -114,13 +114,13 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
     var icon: String {
         switch self {
         case .home:
-            return "cup.and.saucer.fill"        // Coffee list
+            return "house.fill"
+        case .menu:
+            return "list.bullet.rectangle.portrait.fill"
         case .orders:
-            return "clock.fill"                  // Order history
-        case .cart:
-            return "cart.fill"                   // Cart
+            return "clock.fill"
         case .profile:
-            return "person.crop.circle.fill"     // Profile
+            return "person.crop.circle.fill"
         }
     }
 
@@ -128,12 +128,12 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         switch self {
         case .home:
             return "Home"
+        case .menu:
+            return "Menu"
         case .orders:
             return "Orders"
-        case .cart:
-            return "Cart"
         case .profile:
-            return "Profile"
+            return "Account"
         }
     }
 
@@ -141,9 +141,9 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         switch self {
         case .home:
             return .brown
-        case .orders:
+        case .menu:
             return .orange
-        case .cart:
+        case .orders:
             return .green
         case .profile:
             return .blue

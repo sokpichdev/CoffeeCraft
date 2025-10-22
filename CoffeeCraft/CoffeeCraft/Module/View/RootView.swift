@@ -8,6 +8,7 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    @StateObject var cartManager = CartManager()
     @State private var selectedTab: Tab = .home
     
     var body: some View {
@@ -22,7 +23,17 @@ struct RootView: View {
                     // Show the selected tab's root view
                     switch authVM.currentUser!.role {
                     case .customer:
-                        CustomerHomeView()
+                        switch selectedTab {
+                        case .home:
+                            ComingSoonView()
+                        case .menu:
+                            CustomerHomeView()
+                                .environmentObject(cartManager)
+                        case .orders:
+                            ComingSoonView()
+                        case .profile:
+                            ComingSoonView()
+                        }
                     case .manager:
                         ManagerDashboardView()
                     }

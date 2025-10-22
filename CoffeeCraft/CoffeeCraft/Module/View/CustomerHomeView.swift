@@ -8,7 +8,7 @@ import SwiftUI
 
 struct CustomerHomeView: View {
     @StateObject private var productVM = ProductViewModel()
-    @StateObject var cartManager = CartManager()
+    @EnvironmentObject var cartManager: CartManager
     @State private var selectedSectionID: String? = nil
     @State private var visibleSectionID: String? = nil
     @State private var isProgrammaticScroll = false
