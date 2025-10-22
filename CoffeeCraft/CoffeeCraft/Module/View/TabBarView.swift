@@ -8,19 +8,18 @@ import SwiftUI
 
 struct TabBarView: View {
     @Binding var selectedTab: Tab
-    let bgColor: Color = .init(white: 0.9)
 
     var body: some View {
         TabsLayoutView(selectedTab: $selectedTab)
             .padding(EdgeInsets(top: 16, leading: 16, bottom: 40, trailing: 16))
             .background(
-                Color.white
-                        .mask(
-                            RoundedCorner(radius: 30, corners: [.topLeft, .topRight])
-                        )
+                Color(UIColor.systemBackground)
+                    .mask(
+                        RoundedCorner(radius: 30, corners: [.topLeft, .topRight])
+                    )
             )
             .frame(height: 70)
-            .shadow(radius: 30)
+            .shadow(color: Color.primary.opacity(0.2), radius: 10, x: 0, y: -5)
     }
 }
 
@@ -75,7 +74,7 @@ fileprivate struct TabsLayoutView: View {
                     HStack(spacing: 10) {
                         Image(systemName: tab.icon)
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
-                            .foregroundColor(isSelected ? tab.color : .black.opacity(0.6))
+                            .foregroundColor(isSelected ? tab.color : .primary.opacity(0.6))
                             .rotationEffect(.degrees(rotationAngle))
                             .scaleEffect(isSelected ? 1 : 0.9)
                             .animation(.easeInOut, value: rotationAngle)
