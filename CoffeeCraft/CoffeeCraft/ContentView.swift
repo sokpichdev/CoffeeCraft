@@ -19,7 +19,9 @@ struct ContentView: View {
     }
 }
 struct ComingSoonView: View {
-    var featureName: String = "This feature" // optional, can customize per view
+    var featureName: String = "This feature"
+    @State private var rotate = false
+    @State private var scale: CGFloat = 1.0
     
     var body: some View {
         VStack(spacing: 20) {
@@ -28,6 +30,18 @@ struct ComingSoonView: View {
                 .scaledToFit()
                 .frame(width: 100, height: 100)
                 .foregroundColor(.gray)
+                .rotationEffect(.degrees(rotate ? 360 : 0))
+                .scaleEffect(scale)
+                .animation(
+                    .easeInOut(duration: 3.5)
+                        .repeatForever(autoreverses: true),
+                    value: rotate
+                )
+                .animation(
+                    .easeInOut(duration: 2.25)
+                        .repeatForever(autoreverses: true),
+                    value: scale
+                )
             
             Text("\(featureName) is coming soon!")
                 .font(.title2)
@@ -42,5 +56,10 @@ struct ComingSoonView: View {
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+        .onAppear {
+            rotate.toggle()
+            scale = 0.85
+        }
     }
 }
+
