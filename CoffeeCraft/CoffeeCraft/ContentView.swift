@@ -19,6 +19,7 @@ struct ContentView: View {
     }
 }
 struct ComingSoonView: View {
+    @EnvironmentObject var authVM: AuthViewModel
     var featureName: String = "This feature"
     @State private var rotate = false
     @State private var scale: CGFloat = 1.0
@@ -52,6 +53,13 @@ struct ComingSoonView: View {
             Text("Stay tuned for updates ☕️")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+            Button(action: {
+                authVM.logout()
+            }, label: {
+                Text("Logout")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            })
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)

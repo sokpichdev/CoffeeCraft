@@ -27,13 +27,15 @@ struct RootView: View {
                         switch selectedTab {
                         case .home:
                             ComingSoonView()
+                                .environmentObject(authVM)
                         case .menu:
                             CustomerHomeView()
                                 .environmentObject(cartManager)
                         case .orders:
-                            ComingSoonView()
+                            OrdersView()
                         case .profile:
                             ComingSoonView()
+                                .environmentObject(authVM)
                         }
                     case .manager:
                         ManagerDashboardView()
