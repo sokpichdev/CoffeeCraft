@@ -51,6 +51,7 @@ struct OrdersView: View {
 
 struct OrderCardView: View {
     let order: Order
+    var adminActions: (() -> AnyView)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -112,6 +113,12 @@ struct OrderCardView: View {
                     .fontWeight(.bold)
             }
             .padding(.top, 4)
+
+            // Admin actions (if provided)
+            if let adminActions = adminActions {
+                Divider()
+                adminActions()
+            }
         }
         .padding()
         .background(Color.white)
@@ -122,8 +129,9 @@ struct OrderCardView: View {
     func statusColor(_ status: String) -> Color {
         switch status {
         case "Pending": return .orange
-        case "In Progress": return .blue
-        case "Done": return .green
+        case "In Progress", "InProgress": return .blue
+        case "Ready": return .green
+        case "Done", "Completed": return .gray
         default: return .gray
         }
     }

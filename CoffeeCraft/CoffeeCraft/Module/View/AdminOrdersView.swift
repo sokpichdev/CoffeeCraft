@@ -10,65 +10,66 @@ struct AdminOrdersView: View {
     @StateObject var vm = AdminOrdersViewModel()
 
     var body: some View {
-            List {
-                ForEach(vm.orders) { order in
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("Order: \(order.id?.prefix(6) ?? "")")
-                                .font(.headline)
-                            Spacer()
-                            Text(order.status.capitalized)
-                                .foregroundColor(color(for: order.status))
-                                .fontWeight(.semibold)
+        ZStack {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+
+            if filteredOrders.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.brown.opacity(0.8))
+                    Text("No Active Orders")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("All orders have been completed. New ones will appear here.")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(filteredOrders) { order in
+                            OrderCardView(order: order) {
+                                AnyView(
+                                    HStack(spacing: 8) {
+                                        Button("Start") {
+                                            vm.updateOrderStatus(order: order, status: "InProgress")
+                                        }
+                                        .disabled(order.status != "Pending")
+
+                                        Button("Ready") {
+                                            vm.updateOrderStatus(order: order, status: "Ready")
+                                        }
+                                        .disabled(order.status != "InProgress")
+
+                                        Button("Complete") {
+                                            vm.updateOrderStatus(order: order, status: "Completed")
+                                        }
+                                        .disabled(order.status != "Ready")
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .tint(.brown)
+                                )
+                            }
+                            .padding(.horizontal)
                         }
-
-                        ForEach(order.items) { item in
-                            HStack {
-                                Text("\(item.name) \(item.size ?? "")")
-                                Spacer()
-                                Text("$\(item.price, specifier: "%.2f")")
-                            }
-                            .font(.subheadline)
-                        }
-
-                        Text("Total: $\(order.totalPrice, specifier: "%.2f")")
-                            .fontWeight(.semibold)
-
-                        HStack {
-                            Button("Start") {
-                                vm.updateOrderStatus(order: order, status: "InProgress")
-                            }
-                            .disabled(order.status != "Pending")
-
-                            Button("Ready") {
-                                vm.updateOrderStatus(order: order, status: "Ready")
-                            }
-                            .disabled(order.status != "InProgress")
-
-                            Button("Complete") {
-                                vm.updateOrderStatus(order: order, status: "Completed")
-                            }
-                            .disabled(order.status != "Ready")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.brown)
                     }
-                    .padding(8)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(radius: 2)
+                    .padding(.vertical)
                 }
             }
-            .navigationTitle("Orders")
+        }
+        .navigationTitle("Active Orders")
+        .task {
+            vm.fetchOrders()
+        }
     }
 
-    func color(for status: String) -> Color {
-        switch status {
-        case "Pending": return .orange
-        case "InProgress": return .blue
-        case "Ready": return .green
-        case "Completed": return .gray
-        default: return .black
-        }
+    private var filteredOrders: [Order] {
+        vm.orders
+            .filter { $0.status != "Completed" }
+            .sorted(by: { $0.timestamp > $1.timestamp })
     }
 }
