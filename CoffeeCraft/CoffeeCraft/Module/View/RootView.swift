@@ -38,7 +38,16 @@ struct RootView: View {
                                 .environmentObject(authVM)
                         }
                     case .manager:
-                        ManagerDashboardView()
+                        switch selectedTab {
+                        case .home:
+                            ComingSoonView().environmentObject(authVM)
+                        case .menu:
+                            ComingSoonView().environmentObject(authVM)
+                        case .orders:
+                            AdminOrdersView()
+                        case .profile:
+                            ComingSoonView().environmentObject(authVM)
+                        }
                     }
                     TabBarView(selectedTab: $selectedTab)
                 }
