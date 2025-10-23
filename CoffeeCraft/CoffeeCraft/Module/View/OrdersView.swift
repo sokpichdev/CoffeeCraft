@@ -12,41 +12,39 @@ struct OrdersView: View {
     @StateObject private var orderVM = OrderViewModel()
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                // Full background color
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
-
-                if orderVM.orders.isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "cup.and.saucer.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.brown.opacity(0.7))
-                        Text("No Orders Yet")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        Text("Your recent coffee orders will appear here.")
-                            .foregroundColor(.gray)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(orderVM.orders) { order in
-                                OrderCardView(order: order)
-                                    .padding(.horizontal)
-                            }
+        ZStack {
+            // Full background color
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+            
+            if orderVM.orders.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.brown.opacity(0.7))
+                    Text("No Orders Yet")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("Your recent coffee orders will appear here.")
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(orderVM.orders) { order in
+                            OrderCardView(order: order)
+                                .padding(.horizontal)
                         }
-                        .padding(.top, 12)
-                        .frame(maxWidth: .infinity)
                     }
+                    .padding(.vertical)
+                    .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("My Orders")
-            .task {
-                await orderVM.fetchUserOrders()
-            }
+        }
+        .navigationTitle("My Orders")
+        .task {
+            await orderVM.fetchUserOrders()
         }
     }
 }
