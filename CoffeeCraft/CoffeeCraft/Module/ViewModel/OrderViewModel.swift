@@ -14,24 +14,37 @@ class OrderViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let db = Firestore.firestore()
+    private var listener: ListenerRegistration?
 
-    func fetchUserOrders() async {
+    deinit {
+        listener?.remove()
+    }
+
+    func listenToUserOrders() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
 
-        do {
-            let snapshot = try await db.collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .order(by: "timestamp", descending: true)
-                .getDocuments()
+        listener?.remove() // avoid multiple listeners
 
-            self.orders = snapshot.documents.compactMap { doc -> Order? in
-                try? doc.data(as: Order.self)
+        listener = db.collection("orders")
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "timestamp", descending: true)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+
+                if let error = error {
+                    self.errorMessage = error.localizedDescription
+                    print("❌ Listen error:", error)
+                    return
+                }
+
+                guard let documents = snapshot?.documents else {
+                    self.orders = []
+                    return
+                }
+
+                self.orders = documents.compactMap { doc -> Order? in
+                    try? doc.data(as: Order.self)
+                }
             }
-
-        } catch {
-            self.errorMessage = error.localizedDescription
-            print("❌ Fetch error:", error)
-        }
     }
 }
-

@@ -43,9 +43,10 @@ struct OrdersView: View {
             }
         }
         .navigationTitle("My Orders")
-        .task {
-            await orderVM.fetchUserOrders()
+        .onAppear {
+            orderVM.listenToUserOrders()
         }
+
     }
 }
 
