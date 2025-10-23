@@ -1,8 +1,15 @@
+//
+//  AdminOrdersView.swift
+//  CoffeeCraft
+//
+//  Created by Sok Pich on 10/23/25.
+//
+import SwiftUI
+
 struct AdminOrdersView: View {
     @StateObject var vm = AdminOrdersViewModel()
 
     var body: some View {
-        NavigationStack {
             List {
                 ForEach(vm.orders) { order in
                     VStack(alignment: .leading, spacing: 10) {
@@ -29,19 +36,19 @@ struct AdminOrdersView: View {
 
                         HStack {
                             Button("Start") {
-                                vm.updateOrderStatus(order: order, status: "inProgress")
+                                vm.updateOrderStatus(order: order, status: "InProgress")
                             }
-                            .disabled(order.status != "pending")
+                            .disabled(order.status != "Pending")
 
                             Button("Ready") {
-                                vm.updateOrderStatus(order: order, status: "ready")
+                                vm.updateOrderStatus(order: order, status: "Ready")
                             }
-                            .disabled(order.status != "inProgress")
+                            .disabled(order.status != "InProgress")
 
                             Button("Complete") {
-                                vm.updateOrderStatus(order: order, status: "completed")
+                                vm.updateOrderStatus(order: order, status: "Completed")
                             }
-                            .disabled(order.status != "ready")
+                            .disabled(order.status != "Ready")
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.brown)
@@ -53,15 +60,14 @@ struct AdminOrdersView: View {
                 }
             }
             .navigationTitle("Orders")
-        }
     }
 
     func color(for status: String) -> Color {
         switch status {
-        case "pending": return .orange
-        case "inProgress": return .blue
-        case "ready": return .green
-        case "completed": return .gray
+        case "Pending": return .orange
+        case "InProgress": return .blue
+        case "Ready": return .green
+        case "Completed": return .gray
         default: return .black
         }
     }

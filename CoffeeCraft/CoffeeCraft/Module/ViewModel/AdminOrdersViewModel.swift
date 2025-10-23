@@ -1,6 +1,11 @@
+//
+//  AdminOrdersViewModel.swift
+//  CoffeeCraft
+//
+//  Created by Sok Pich on 10/23/25.
+//
 import SwiftUI
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 class AdminOrdersViewModel: ObservableObject {
     @Published var orders: [Order] = []
