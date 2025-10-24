@@ -30,7 +30,7 @@ struct OrdersView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 16) {
                         ForEach(orderVM.orders) { order in
                             OrderCardView(order: order)

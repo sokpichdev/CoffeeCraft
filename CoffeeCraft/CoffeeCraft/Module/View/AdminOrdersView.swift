@@ -29,7 +29,7 @@ struct AdminOrdersView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 16) {
                         ForEach(filteredOrders) { order in
                             OrderCardView(order: order) {

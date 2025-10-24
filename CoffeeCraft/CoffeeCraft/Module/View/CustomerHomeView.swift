@@ -58,7 +58,7 @@ struct CustomerHomeView: View {
                 
                 // MARK: Right Product List
                 ScrollViewReader { contentProxy in
-                    ScrollView(.vertical, showsIndicators: true) {
+                    ScrollView(.vertical, showsIndicators: false) {
                         LazyVStack(alignment: .leading, spacing: 24) {
                             ForEach(productVM.sections) { section in
                                 VStack(alignment: .leading, spacing: 12) {

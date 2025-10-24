@@ -58,7 +58,7 @@ struct CoffeeDetailView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     WebImage(url: URL(string: product.imageURL))
                         .resizable()
