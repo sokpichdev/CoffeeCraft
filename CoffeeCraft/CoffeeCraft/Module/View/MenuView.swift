@@ -1,12 +1,12 @@
 //
-//  CustomerHomeView.swift
+//  MenuView.swift
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
 
-struct CustomerHomeView: View {
+struct MenuView: View {
     @StateObject private var productVM = ProductViewModel()
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedSectionID: String? = nil

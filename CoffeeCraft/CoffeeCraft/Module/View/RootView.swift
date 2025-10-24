@@ -29,7 +29,7 @@ struct RootView: View {
                             ComingSoonView()
                                 .environmentObject(authVM)
                         case .menu:
-                            CustomerHomeView()
+                            MenuView()
                                 .environmentObject(cartManager)
                         case .orders:
                             OrdersView()
