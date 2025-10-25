@@ -42,7 +42,7 @@ struct RootView: View {
                         case .home:
                             ComingSoonView().environmentObject(authVM)
                         case .menu:
-                            ComingSoonView().environmentObject(authVM)
+                            MenuView(isManager: true).environmentObject(cartManager)
                         case .orders:
                             AdminOrdersView()
                         case .profile:
