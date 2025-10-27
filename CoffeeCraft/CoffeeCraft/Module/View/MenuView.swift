@@ -63,7 +63,7 @@ struct MenuView: View {
                                 productName: "",
                                 productDescription: "",
                                 productPrice: 0.0,
-                                productCategory: "",
+                                productCategory: selectedSectionID ?? "",
                                 productImageURL: "",
                                 productAvailable: true,
                                isEditing: false)
@@ -148,6 +148,7 @@ struct MenuView: View {
 
                                 if isManager {
                                     Button(action: {
+                                        selectedSectionID = section.id
                                         selectedProductToEdit = Product.empty(in: section.id)
                                     }) {
                                         Label("Add new item", systemImage: "plus.circle.fill")
