@@ -9,19 +9,30 @@ import SwiftUI
 struct EditProductView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var productVM: ProductViewModel
-    @Binding var product: Product
-
-    var isEditing: Bool {
-        productVM.products.contains(product)
-    }
+    var productID: String
+    
+    var productName: String
+    var productDescription: String
+    var productPrice: Double
+    var productCategory: String
+    var productImageURL: String
+    var productAvailable: Bool
+    
+    @State private var tempName: String = ""
+    @State private var tempDescription: String = ""
+    @State private var tempPrice: Double = 0.0
+    @State private var tempCategory: String = ""
+    @State private var tempImageURL: String = ""
+    @State private var tempAvailable: Bool = true
+    
+    var isEditing: Bool = false
 
     var body: some View {
-        NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     // MARK: - Image Preview
                     VStack {
-                        if let url = URL(string: product.imageURL), !product.imageURL.isEmpty {
+                        if let url = URL(string: productImageURL), !productImageURL.isEmpty {
                             AsyncImage(url: url) { image in
                                 image
                                     .resizable()
@@ -49,10 +60,7 @@ struct EditProductView: View {
                                 }
                             }
                         }
-
-                        TextField("Image URL", text: $product.imageURL)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
+                        CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo.on.rectangle.angled")
                     }
 
                     // MARK: - Product Info
@@ -60,13 +68,10 @@ struct EditProductView: View {
                         Label("Basic Info", systemImage: "info.circle")
                             .font(.headline)
                             .foregroundColor(.brown)
-
-                        Group {
-                            CustomProductTextField(title: "Name", text: $product.name, icon: "cup.and.saucer.fill")
-                            CustomProductTextField(title: "Description", text: $product.description, icon: "text.justify")
-                            CustomNumberField(title: "Price ($)", value: $product.price, icon: "dollarsign.circle.fill")
-                            CustomProductTextField(title: "Category", text: $product.category, icon: "folder.fill")
-                        }
+                        CustomProductTextField(title: "Name", text: $tempName, icon: "cup.and.saucer.fill")
+                        CustomProductTextField(title: "Description", text: $tempDescription, icon: "text.justify")
+                        CustomNumberField(title: "Price ($)", value: $tempPrice, icon: "dollarsign.circle.fill")
+                        CustomProductTextField(title: "Category", text: $tempCategory, icon: "folder.fill")
                     }
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
@@ -76,7 +81,7 @@ struct EditProductView: View {
                         Label("Status", systemImage: "checkmark.circle")
                             .font(.headline)
                             .foregroundColor(.brown)
-                        Toggle("Available for order", isOn: $product.available)
+                        Toggle("Available for order", isOn: $tempAvailable)
                             .toggleStyle(SwitchToggleStyle(tint: .brown))
                     }
                     .padding()
@@ -85,7 +90,12 @@ struct EditProductView: View {
                     // MARK: - Save Button
                     Button(action: {
                         Task {
-                            await productVM.saveProduct(product)
+                            await productVM.saveProduct(Product(id: productID,
+                                                                name: productName,
+                                                                description: productDescription,
+                                                                price: productPrice,
+                                                                imageURL: productImageURL,
+                                                                category: productCategory))
                             dismiss()
                         }
                     }) {
@@ -112,6 +122,13 @@ struct EditProductView: View {
                     Button("Cancel", role: .cancel) { dismiss() }
                 }
             }
-        }
+            .onAppear {
+                tempName = productName
+                tempDescription = productDescription
+                tempPrice = productPrice
+                tempCategory = productCategory
+                tempImageURL = productImageURL
+                tempAvailable = productAvailable
+            }
     }
 }

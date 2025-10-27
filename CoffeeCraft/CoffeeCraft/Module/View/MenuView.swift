@@ -49,10 +49,24 @@ struct MenuView: View {
         }
         .navigationDestination(item: $selectedProductToEdit) { product in
             if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
-                EditProductView(productVM: productVM, product: $productVM.products[index])
+                EditProductView(productVM: productVM,
+                                productID: productVM.products[index].id,
+                                productName: productVM.products[index].name,
+                                productDescription: productVM.products[index].description,
+                                productPrice: productVM.products[index].price,
+                                productCategory: productVM.products[index].category,
+                                productImageURL: productVM.products[index].imageURL,
+                                productAvailable: productVM.products[index].available)
             } else {
-                // For newly added product (not in array yet)
-                EditProductView(productVM: productVM, product: .constant(product))
+                EditProductView(productVM: productVM,
+                                productID: "",
+                                productName: "",
+                                productDescription: "",
+                                productPrice: 0.0,
+                                productCategory: "",
+                                productImageURL: "",
+                                productAvailable: true,
+                               isEditing: false)
             }
         }
 
@@ -201,6 +215,7 @@ struct CustomProductTextField: View {
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(10)
         }
+        .padding(.horizontal)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
@@ -220,6 +235,7 @@ struct CustomNumberField: View {
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(10)
         }
+        .padding(.horizontal)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
