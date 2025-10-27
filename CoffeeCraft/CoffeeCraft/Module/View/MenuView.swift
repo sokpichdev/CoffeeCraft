@@ -29,7 +29,7 @@ struct MenuView: View {
                 productList
             }
 
-            if !cartManager.items.isEmpty && !isManager {
+            if !cartManager.items.isEmpty {
                 ViewCartButton(cartManager: cartManager) {
                     showCartSheet = true
                 }
