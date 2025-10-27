@@ -1,3 +1,11 @@
+//
+//  EditProductView.swift
+//  CoffeeCraft
+//
+//  Created by Sok Pich on 10/27/25.
+//
+import SwiftUI
+
 struct EditProductView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var productVM: ProductViewModel

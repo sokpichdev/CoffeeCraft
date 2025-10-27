@@ -17,8 +17,7 @@ struct MenuView: View {
     @State private var isProgrammaticScroll = false
 
     @State private var showCartSheet = false
-    @State private var showEditSheet = false
-    @State private var productToEdit: Product?
+    @State private var selectedProductToEdit: Product?
 
     var isManager: Bool = false
 
@@ -48,20 +47,18 @@ struct MenuView: View {
             CoffeeDetailView(product: product)
                 .environmentObject(cartManager)
         }
+        .navigationDestination(item: $selectedProductToEdit) { product in
+            if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
+                EditProductView(productVM: productVM, product: $productVM.products[index])
+            } else {
+                // For newly added product (not in array yet)
+                EditProductView(productVM: productVM, product: .constant(product))
+            }
+        }
+
         .fullScreenCover(isPresented: $showCartSheet) {
             CartView()
                 .environmentObject(cartManager)
-        }
-        .sheet(isPresented: $showEditSheet) {
-            if let productToEdit = productToEdit {
-                // Find the product in ViewModel array to bind
-                if let index = productVM.products.firstIndex(of: productToEdit) {
-                    EditProductView(productVM: productVM, product: $productVM.products[index])
-                } else {
-                    // For new product not in array yet
-                    EditProductView(productVM: productVM, product: .constant(productToEdit))
-                }
-            }
         }
     }
 
@@ -119,8 +116,7 @@ struct MenuView: View {
                                             .id("\(section.id)_\(product.id)")
                                             .contextMenu(isManager ? ContextMenu(menuItems: {
                                                 Button("Edit", systemImage: "pencil") {
-                                                    productToEdit = product
-                                                    showEditSheet = true
+                                                    selectedProductToEdit = product
                                                 }
                                                 Button("Remove", role: .destructive) {
                                                     Task {
@@ -133,35 +129,12 @@ struct MenuView: View {
                                                     }
                                                 }
                                             }) : nil)
-                                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                                if isManager {
-                                                    Button("Edit") {
-                                                        productToEdit = product
-                                                        showEditSheet = true
-                                                    }.tint(.blue)
-
-                                                    Button("Unavailable") {
-                                                        Task {
-                                                            await productVM.markUnavailable(product)
-                                                        }
-                                                    }.tint(.orange)
-
-                                                    Button(role: .destructive) {
-                                                        Task {
-                                                            await productVM.deleteProduct(product)
-                                                        }
-                                                    } label: {
-                                                        Label("Delete", systemImage: "trash")
-                                                    }
-                                                }
-                                            }
                                     }
                                 }
 
                                 if isManager {
                                     Button(action: {
-                                        productToEdit = Product.empty(in: section.id)
-                                        showEditSheet = true
+                                        selectedProductToEdit = Product.empty(in: section.id)
                                     }) {
                                         Label("Add new item", systemImage: "plus.circle.fill")
                                             .font(.subheadline)
@@ -214,35 +187,40 @@ struct SectionOffsetKey: PreferenceKey {
     }
 }
 
-struct EditProductView: View {
-    @Environment(\.dismiss) var dismiss
-    @ObservedObject var productVM: ProductViewModel
-    @Binding var product: Product   // <-- Binding to source of truth
+// MARK: - Custom Components
+struct CustomProductTextField: View {
+    var title: String
+    @Binding var text: String
+    var icon: String
 
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Name", text: $product.name)
-                TextField("Description", text: $product.description)
-                TextField("Price", value: $product.price, format: .number)
-                TextField("Image URL", text: $product.imageURL)
-                Toggle("Available", isOn: $product.available)
-            }
-            .navigationTitle(productVM.products.contains(product) ? "Edit Product" : "Add Product")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        Task {
-                            await productVM.saveProduct(product)
-                            dismiss()
-                        }
-                    }
-                }
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", role: .cancel) { dismiss() }
-                }
-            }
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(.brown)
+            TextField(title, text: $text)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(10)
         }
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
 
+struct CustomNumberField: View {
+    var title: String
+    @Binding var value: Double
+    var icon: String
+
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(.brown)
+            TextField(title, value: $value, format: .number)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding(10)
+        }
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
