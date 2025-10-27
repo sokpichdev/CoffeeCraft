@@ -81,29 +81,42 @@ class ProductViewModel: ObservableObject {
 
     // MARK: - CRUD Operations
     func saveProduct(_ product: Product) async {
+        // Determine if we are creating a new document (id is empty) or updating an existing one.
+        let isNewProduct = product.id.isEmpty
+        var productToSave = product // Use a mutable copy for the ID update
+
         let data: [String: Any] = [
-            "name": product.name,
-            "description": product.description,
-            "price": product.price,
-            "imageURL": product.imageURL,
-            "category": product.category,
-            "available": product.available,
-            "customizations": product.customizations ?? [:],
-            "priceModifiers": product.priceModifiers ?? [:]
+            "name": productToSave.name,
+            "description": productToSave.description,
+            "price": productToSave.price,
+            "imageURL": productToSave.imageURL,
+            "category": productToSave.category,
+            "available": productToSave.available,
+            "customizations": productToSave.customizations ?? [:],
+            "priceModifiers": productToSave.priceModifiers ?? [:]
         ]
 
         do {
-            try await db.collection("products").document(product.id).setData(data)
+            if isNewProduct {
+                // 1. CREATE: Use .addDocument to let Firestore generate the unique ID.
+                let newDocumentRef = try await db.collection("products").addDocument(data: data)
+                
+                // 2. IMPORTANT: Update the local product's ID with the new Firestore ID.
+                productToSave.id = newDocumentRef.documentID
+            } else {
+                // 3. UPDATE: Use .document(product.id).setData for existing products.
+                try await db.collection("products").document(productToSave.id).setData(data)
+            }
             
             // Update local array immediately for UI
-            if let index = products.firstIndex(of: product) {
-                products[index] = product
+            if let index = products.firstIndex(where: { $0.id == productToSave.id }) {
+                products[index] = productToSave
             } else {
-                products.append(product)
+                products.append(productToSave)
             }
             computeSections()
         } catch {
-            print("❌ Save error:", error.localizedDescription)
+            print("❌ Save error: \(error.localizedDescription)")
         }
     }
 
