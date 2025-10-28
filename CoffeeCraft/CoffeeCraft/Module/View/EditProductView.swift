@@ -26,7 +26,7 @@ struct EditProductView: View {
     @State private var tempImageURL: String = ""
     @State private var tempAvailable: Bool = true
     
-    var isEditing: Bool = false
+    var isEditing: Bool = true
 
     var categoryNames: [String] {
         productVM.sections.map { $0.name }
@@ -36,34 +36,31 @@ struct EditProductView: View {
             VStack(spacing: 32) {
                 // MARK: - Image Preview
                 VStack(spacing: 16) {
-                    Group {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.gray.opacity(0.2))
+                        VStack(spacing: 8) {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .font(.system(size: 50))
+                                .foregroundColor(.gray)
+                            Text("No Image")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
                         if let url = URL(string: tempImageURL), !tempImageURL.isEmpty {
                             WebImage(url: url)
                                 .resizable()
                                 .scaledToFill()
-                        } else {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(Color.gray.opacity(0.1))
-                                VStack(spacing: 8) {
-                                    Image(systemName: "photo.on.rectangle.angled")
-                                        .font(.system(size: 50))
-                                        .foregroundColor(.gray)
-                                    Text("No Image")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
-                            }
                         }
                     }
                     .frame(height: 200)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
-
-                    CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo")
-                }.padding(.horizontal)
+                    
+                    CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo").padding()
+                        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
+                }
+                .padding(.horizontal)
 
                 // MARK: - Product Info
                 VStack(alignment: .leading, spacing: 16) {
@@ -124,10 +121,12 @@ struct EditProductView: View {
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 3)
                 }
-                .padding(.horizontal)
                 .padding(.bottom, 20)
+                .padding(.horizontal)
             }
             .padding(.top, 20)
+            .frame(maxWidth: .infinity)
+//            .padding(.horizontal)
         }
         .navigationTitle(isEditing ? "Edit Product" : "Add Product")
         .scrollDismissesKeyboard(.immediately)
