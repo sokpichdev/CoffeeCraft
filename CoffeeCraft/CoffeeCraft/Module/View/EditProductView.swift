@@ -28,6 +28,9 @@ struct EditProductView: View {
     
     var isEditing: Bool = false
 
+    var categoryNames: [String] {
+        productVM.sections.map { $0.name }
+    }
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 32) {
@@ -73,7 +76,7 @@ struct EditProductView: View {
                         CustomProductTextField(title: "Name", text: $tempName, icon: "cup.and.saucer.fill")
                         CustomProductTextField(title: "Description", text: $tempDescription, icon: "text.justify")
                         CustomNumberField(title: "Price ($)", value: $tempPrice, icon: "dollarsign.circle.fill")
-                        CustomProductTextField(title: "Category", text: $tempCategory, icon: "folder.fill")
+                        CustomPickerView(title: "Category", values: categoryNames, selectedValue: $tempCategory, icon: "folder.fill")
                     }
                 }
                 .padding()

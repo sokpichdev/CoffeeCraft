@@ -241,3 +241,32 @@ struct CustomNumberField: View {
         .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
+
+struct CustomPickerView: View {
+    var title: String
+    var values: [String]
+    @Binding var selectedValue: String
+    var icon: String
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .foregroundColor(.brown)
+                .frame(width: 20)
+            
+            Picker(title, selection: $selectedValue) {
+                ForEach(values, id: \.self) { value in
+                    Text(value).tag(value)
+                }
+                if selectedValue.isEmpty || !values.contains(selectedValue) {
+                    Text("Select \(title)...").tag("")
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(.primary)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
