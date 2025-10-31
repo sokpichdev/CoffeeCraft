@@ -193,18 +193,20 @@ struct CategorySelectionButton: View {
 }
 
 struct CategorySelectionSheet: View {
-    let categories: [String]
+    @State var categories: [String]
     @Binding var selectedCategory: String
     @Environment(\.dismiss) var dismiss
     
     @State private var searchText: String = ""
     @State private var tempSelectedCategory: String = ""
+    @State private var tempCategories: [String] = []
     
     var filteredCategories: [String] {
+        let all = categories + tempCategories
         if searchText.isEmpty {
-            return categories
+            return all
         } else {
-            return categories.filter { $0.localizedCaseInsensitiveContains(searchText) }
+            return all.filter { $0.localizedCaseInsensitiveContains(searchText) }
         }
     }
     
@@ -224,9 +226,7 @@ struct CategorySelectionSheet: View {
                                 .padding(.leading, 8)
                             
                             if !searchText.isEmpty {
-                                Button(action: {
-                                    searchText = ""
-                                }) {
+                                Button(action: { searchText = "" }) {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.gray)
                                         .padding(.trailing, 8)
@@ -262,9 +262,31 @@ struct CategorySelectionSheet: View {
                         }
                         
                         if filteredCategories.isEmpty && !searchText.isEmpty {
-                            Text("No categories found for \"\(searchText)\"")
-                                .foregroundColor(.gray)
-                                .padding(.top, 40)
+                            VStack(spacing: 12) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 30))
+                                    .foregroundColor(.brown.opacity(0.6))
+                                
+                                Text("No category found for “\(searchText)”")
+                                    .foregroundColor(.gray)
+                                    .font(.subheadline)
+                                
+                                Button("Add as New Category") {
+                                    withAnimation {
+                                        tempCategories.append(searchText)
+                                        tempSelectedCategory = searchText
+                                        searchText = ""
+                                    }
+                                }
+                                .font(.subheadline.bold())
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 8)
+                                .background(Color.brown)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                            }
+                            .padding(.vertical, 40)
+                            .transition(.opacity)
                         }
                     }
                 }
