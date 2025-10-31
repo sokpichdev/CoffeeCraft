@@ -27,6 +27,7 @@ struct EditProductView: View {
     @State private var tempAvailable: Bool = true
     
     var isEditing: Bool = true
+    @State private var showCategorySheet: Bool = false
 
     var categoryNames: [String] {
         productVM.sections.map { $0.name }
@@ -73,7 +74,9 @@ struct EditProductView: View {
                         CustomProductTextField(title: "Name", text: $tempName, icon: "cup.and.saucer.fill")
                         CustomProductTextField(title: "Description", text: $tempDescription, icon: "text.justify")
                         CustomNumberField(title: "Price ($)", value: $tempPrice, icon: "dollarsign.circle.fill")
-                        CustomPickerView(title: "Category", values: categoryNames, selectedValue: $tempCategory, icon: "folder.fill")
+                        CategorySelectionButton(title: "Category", category: tempCategory, icon: "folder.fill") {
+                            showCategorySheet = true
+                        }
                     }
                 }
                 .padding()
@@ -126,7 +129,6 @@ struct EditProductView: View {
             }
             .padding(.top, 20)
             .frame(maxWidth: .infinity)
-//            .padding(.horizontal)
         }
         .navigationTitle(isEditing ? "Edit Product" : "Add Product")
         .scrollDismissesKeyboard(.immediately)
@@ -147,6 +149,140 @@ struct EditProductView: View {
             tempCategory = productCategory
             tempImageURL = productImageURL
             tempAvailable = productAvailable
+        }
+        .sheet(isPresented: $showCategorySheet) {
+            CategorySelectionSheet(
+                categories: categoryNames,
+                selectedCategory: $tempCategory
+            )
+            .presentationDetents([.medium, .large])
+        }
+    }
+}
+struct CategorySelectionButton: View {
+    let title: String
+    let category: String
+    let icon: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
+                    .foregroundColor(.brown)
+                    .frame(width: 20)
+
+                Text(category.isEmpty ? "Select \(title)..." : category)
+                    .foregroundColor(category.isEmpty ? .gray : .primary)
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+                    .font(.caption)
+            }
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain) // Use .plain to prevent the default button coloring
+        .tint(.brown)
+        .padding(.horizontal)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+    }
+}
+
+struct CategorySelectionSheet: View {
+    let categories: [String]
+    @Binding var selectedCategory: String
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var searchText: String = ""
+    @State private var tempSelectedCategory: String = ""
+    
+    var filteredCategories: [String] {
+        if searchText.isEmpty {
+            return categories
+        } else {
+            return categories.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                TextField("Search Categories", text: $searchText)
+                    .padding(8)
+                    .padding(.horizontal, 25)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+                    .overlay(
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                                .padding(.leading, 8)
+                            
+                            if !searchText.isEmpty {
+                                Button(action: {
+                                    searchText = ""
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                        .padding(.trailing, 8)
+                                }
+                            }
+                        }
+                    )
+                    .padding([.top, .horizontal])
+                ScrollView(showsIndicators: true) {
+                    LazyVStack(spacing: 0) {
+                        ForEach(filteredCategories, id: \.self) { category in
+                            Button(action: {
+                                tempSelectedCategory = category
+                            }) {
+                                HStack {
+                                    Text(category)
+                                        .foregroundColor(category == tempSelectedCategory ? .brown : .primary) // Highlight selected text
+                                        .fontWeight(category == tempSelectedCategory ? .semibold : .regular)
+                                    
+                                    Spacer()
+                                    
+                                    if category == tempSelectedCategory {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.brown)
+                                    }
+                                }
+                                .padding()
+                                .padding(.horizontal)
+                                .background(category == tempSelectedCategory ? Color.brown.opacity(0.1) : Color.clear)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        
+                        if filteredCategories.isEmpty && !searchText.isEmpty {
+                            Text("No categories found for \"\(searchText)\"")
+                                .foregroundColor(.gray)
+                                .padding(.top, 40)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Select Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        selectedCategory = tempSelectedCategory
+                        dismiss()
+                    }
+                    .foregroundColor(.brown)
+                }
+            }
+            .onAppear {
+                tempSelectedCategory = selectedCategory
+            }
         }
     }
 }
