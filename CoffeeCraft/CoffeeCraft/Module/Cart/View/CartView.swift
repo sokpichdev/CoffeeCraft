@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
@@ -75,7 +74,7 @@ struct CartView: View {
             }
             .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
-                CoffeeDetailView(
+                ProductDetailView(
                     product: item.product,
                     cartItem: item,
                     onUpdate: { editingItem = nil }

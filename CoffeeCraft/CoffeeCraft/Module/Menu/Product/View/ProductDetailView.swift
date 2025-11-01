@@ -1,5 +1,5 @@
 //
-//  CoffeeDetailView.swift
+//  ProductDetailView.swift
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 10/20/25.
@@ -7,7 +7,7 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-struct CoffeeDetailView: View {
+struct ProductDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     @Environment(\.dismiss) private var dismiss
     let product: Product
@@ -78,15 +78,15 @@ struct CoffeeDetailView: View {
 
                     VStack(alignment: .leading, spacing: 16) {
                         if let sizes = product.customizations?["Size"] {
-                            CustomSelectionChips(title: "Size", options: sizes, selected: $selectedSize)
+                            CustomSingleSelectionview(title: "Size", options: sizes, selected: $selectedSize)
                         }
                         if let milks = product.customizations?["Milk"] {
-                            CustomSelectionChips(title: "Milk", options: milks, selected: $selectedMilk)
+                            CustomSingleSelectionview(title: "Milk", options: milks, selected: $selectedMilk)
                         }
-                        CustomSelectionChips(title: "Sugar", options: sugarLevels, selected: $selectedSugar)
-                        CustomSelectionChips(title: "Ice", options: iceLevels, selected: $selectedIce)
+                        CustomSingleSelectionview(title: "Sugar", options: sugarLevels, selected: $selectedSugar)
+                        CustomSingleSelectionview(title: "Ice", options: iceLevels, selected: $selectedIce)
                         if let extras = product.customizations?["Extras"] {
-                            MultiSelectionChips(title: "Extras", options: extras, selected: $selectedExtras)
+                            CustomMultipleSelectionView(title: "Extras", options: extras, selected: $selectedExtras)
                         }
                     }
 
@@ -161,63 +161,5 @@ struct CoffeeDetailView: View {
             }
         }
         .navigationBarTitle(product.name, displayMode: .inline)
-    }
-}
-
-// MARK: - Single Selection Chips
-struct CustomSelectionChips: View {
-    var title: String
-    var options: [String]
-    @Binding var selected: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.headline)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(options, id: \.self) { option in
-                        Text(option)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(selected == option ? Color.brown : Color.gray.opacity(0.2))
-                            .foregroundColor(selected == option ? .white : .primary)
-                            .cornerRadius(12)
-                            .onTapGesture { selected = option }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Multi Selection Chips
-struct MultiSelectionChips: View {
-    var title: String
-    var options: [String]
-    @Binding var selected: [String]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.headline)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(options, id: \.self) { option in
-                        Text(option)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(selected.contains(option) ? Color.brown : Color.gray.opacity(0.2))
-                            .foregroundColor(selected.contains(option) ? .white : .primary)
-                            .cornerRadius(12)
-                            .onTapGesture {
-                                if selected.contains(option) {
-                                    selected.removeAll { $0 == option }
-                                } else {
-                                    selected.append(option)
-                                }
-                            }
-                    }
-                }
-            }
-        }
     }
 }

@@ -44,7 +44,7 @@ struct MenuView: View {
             selectedSectionID = newValue
         }
         .navigationDestination(for: Product.self) { product in
-            CoffeeDetailView(product: product)
+            ProductDetailView(product: product)
                 .environmentObject(cartManager)
         }
         .navigationDestination(item: $selectedProductToEdit) { product in
@@ -191,82 +191,5 @@ struct MenuView: View {
         if let topSection = sorted.first?.key {
             visibleSectionID = topSection
         }
-    }
-}
-
-// MARK: - Preference Key
-struct SectionOffsetKey: PreferenceKey {
-    static var defaultValue: [String: CGFloat] = [:]
-    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
-        value.merge(nextValue(), uniquingKeysWith: { $1 })
-    }
-}
-
-// MARK: - Custom Components
-struct CustomProductTextField: View {
-    var title: String
-    @Binding var text: String
-    var icon: String
-
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.brown)
-            TextField(title, text: $text)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(10)
-        }
-        .padding(.horizontal)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-    }
-}
-
-struct CustomNumberField: View {
-    var title: String
-    @Binding var value: Double
-    var icon: String
-
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.brown)
-            TextField(title, value: $value, format: .number)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(PlainTextFieldStyle())
-                .padding(10)
-        }
-        .padding(.horizontal)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-    }
-}
-
-struct CustomPickerView: View {
-    var title: String
-    var values: [String]
-    @Binding var selectedValue: String
-    var icon: String
-    var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .foregroundColor(.brown)
-                .frame(width: 20)
-            
-            Picker(title, selection: $selectedValue) {
-                ForEach(values, id: \.self) { value in
-                    Text(value).tag(value)
-                }
-                if selectedValue.isEmpty || !values.contains(selectedValue) {
-                    Text("Select \(title)...").tag("")
-                }
-            }
-            .pickerStyle(.menu)
-            .tint(.primary)
-            Spacer()
-        }
-        .padding(.horizontal)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
