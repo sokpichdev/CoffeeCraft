@@ -52,6 +52,10 @@ struct EditProductView: View {
                             WebImage(url: url)
                                 .resizable()
                                 .scaledToFill()
+                                .frame(maxHeight: 300)
+                                .frame(width: UIScreen.main.bounds.width - 32)
+                                .cornerRadius(20)
+                                .shadow(radius: 5)
                         }
                     }
                     .frame(height: 200)

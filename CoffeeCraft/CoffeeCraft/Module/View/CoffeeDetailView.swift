@@ -62,7 +62,7 @@ struct CoffeeDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     WebImage(url: URL(string: product.imageURL))
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
                         .frame(maxHeight: 300)
                         .cornerRadius(20)
                         .shadow(radius: 5)
