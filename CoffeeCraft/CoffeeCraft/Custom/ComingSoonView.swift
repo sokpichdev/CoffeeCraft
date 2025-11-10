@@ -14,6 +14,11 @@ struct ComingSoonView: View {
     
     var body: some View {
         VStack(spacing: 20) {
+//            CustomAttributedStringText(
+//                TextSegment(text: "Hello", color: .blue, font: .title.bold(), underline: true),
+//                TextSegment(text: "world!", strikethrough: true, italic: true, newLine: true),
+//                TextSegment(text: "Check this link", color: .red, link: URL(string: "https://postimages.org/")!)
+
             Image(systemName: "hourglass")
                 .resizable()
                 .scaledToFit()
