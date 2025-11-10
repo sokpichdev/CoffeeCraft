@@ -141,11 +141,11 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         case .home:
             return .brown
         case .menu:
-            return .orange
+            return .brown
         case .orders:
-            return .green
+            return .brown
         case .profile:
-            return .blue
+            return .brown
         }
     }
 }
