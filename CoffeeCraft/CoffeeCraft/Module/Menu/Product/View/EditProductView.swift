@@ -30,9 +30,11 @@ struct EditProductView: View {
     @State private var showCategorySheet: Bool = false
     @State private var isURLValid: Bool = false
 
-    var categoryNames: [String] {
+    var categoryNames: [String] { // get-only property
         productVM.sections.map { $0.name }
     }
+    @State private var mutableCategoryNames: [String] = [] // mutable copy
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 32) {
@@ -180,13 +182,22 @@ struct EditProductView: View {
             tempCategory = productCategory
             tempImageURL = productImageURL
             tempAvailable = productAvailable
+            
+            if mutableCategoryNames.isEmpty {
+                mutableCategoryNames = categoryNames
+            }
         }
         .onChange(of: tempImageURL) {
             isURLValid = (URL(string: tempImageURL) != nil) && !tempImageURL.isEmpty
         }
+        .onChange(of: tempCategory) {
+            if !mutableCategoryNames.contains(tempCategory) {
+                mutableCategoryNames.append(tempCategory)
+            }
+        }
         .sheet(isPresented: $showCategorySheet) {
             CategorySelectionSheet(
-                categories: categoryNames,
+                categories: mutableCategoryNames,
                 selectedCategory: $tempCategory
             )
             .presentationDetents([.medium, .large])
