@@ -28,6 +28,7 @@ struct EditProductView: View {
     
     var isEditing: Bool = true
     @State private var showCategorySheet: Bool = false
+    @State private var isURLValid: Bool = false
 
     var categoryNames: [String] {
         productVM.sections.map { $0.name }
@@ -50,6 +51,20 @@ struct EditProductView: View {
                         }
                         if let url = URL(string: tempImageURL), !tempImageURL.isEmpty {
                             WebImage(url: url)
+                                .onSuccess { _, _, _ in
+                                    DispatchQueue.main.async {
+                                        if !isURLValid {
+                                            isURLValid = true
+                                        }
+                                    }
+                                }
+                                .onFailure { _ in
+                                    DispatchQueue.main.async {
+                                        if isURLValid {
+                                            isURLValid = false
+                                        }
+                                    }
+                                }
                                 .resizable()
                                 .scaledToFill()
                                 .frame(maxHeight: 300)
@@ -61,9 +76,21 @@ struct EditProductView: View {
                     .frame(height: 200)
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
-                    
-                    CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo").padding()
-                        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo")
+                        if !isURLValid {
+                            CustomAttributedStringText(TextSegment(text: "No Image URL?", color: .red, font: .caption),
+                                                       TextSegment(text: "Click Here to get!",
+                                                                   color: .brown,
+                                                                   font: .caption,
+                                                                   link: URL(string: "https://postimages.org/")!,
+                                                                  underline: true))
+                            .padding(.leading)
+                        }
+                    }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
                 }
                 .padding(.horizontal)
 
@@ -153,6 +180,9 @@ struct EditProductView: View {
             tempCategory = productCategory
             tempImageURL = productImageURL
             tempAvailable = productAvailable
+        }
+        .onChange(of: tempImageURL) {
+            isURLValid = (URL(string: tempImageURL) != nil) && !tempImageURL.isEmpty
         }
         .sheet(isPresented: $showCategorySheet) {
             CategorySelectionSheet(
