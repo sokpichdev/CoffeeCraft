@@ -103,6 +103,7 @@ struct CategorySelectionSheet: View {
                             .transition(.opacity)
                         }
                     }
+                    .padding(.top)
                 }
             }
             .navigationTitle("Select Category")
