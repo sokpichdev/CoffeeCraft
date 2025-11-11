@@ -89,21 +89,52 @@ struct OrderCardView: View {
                             Text(item.name)
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                            if let size = item.size, let milk = item.milk {
-                                Text("\(size) • \(milk)")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
+                            Spacer()
+                            Text("$\(item.price, specifier: "%.2f")")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+
+                        // Selections
+                        if let selections = item.selections, !selections.isEmpty {
+                            VStack(alignment: .leading, spacing: 2) {
+                                ForEach(selections.keys.sorted(), id: \.self) { key in
+                                    if let value = selections[key] {
+                                        HStack(spacing: 8) {
+                                            Text("\(key):")
+                                            Text(value)
+                                        }
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    }
+                                }
                             }
                         }
-                        Spacer()
-                        Text("$\(item.price, specifier: "%.2f")")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
+
+                        // Extras
+                        if let extras = item.extras, !extras.isEmpty {
+                            HStack(spacing: 8) {
+                                Text("Extras:")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                ForEach(extras, id: \.self) { extra in
+                                    HStack(spacing: 0) {
+                                        Text(extra)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                        if extra != extras.last {
+                                            Text(",")
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Divider()
                     }
                 }
             }
-
-            Divider()
 
             // Footer
             HStack {
