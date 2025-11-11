@@ -20,16 +20,13 @@ struct ProductDetailView: View {
     @State private var selectedExtras: [String]
     @State private var showAddedAlert = false
 
-    var sugarLevels = ["No Sugar", "Less", "Normal", "Extra"]
-    var iceLevels = ["No Ice", "Less", "Regular", "Extra"]
-
     // MARK: - Init to set initial selections from cartItem or defaults
     init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil) {
         self.product = product
         self.cartItem = cartItem
         self.onUpdate = onUpdate
-        _selectedSize = State(initialValue: cartItem?.size ?? (product.customizations?["Size"]?.first ?? ""))
-        _selectedMilk = State(initialValue: cartItem?.milk ?? (product.customizations?["Milk"]?.first ?? ""))
+        _selectedSize = State(initialValue: cartItem?.size ?? "Size")
+        _selectedMilk = State(initialValue: cartItem?.milk ?? "Milk")
         _selectedSugar = State(initialValue: cartItem?.sugar ?? "Normal")
         _selectedIce = State(initialValue: cartItem?.ice ?? "Regular")
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
@@ -37,23 +34,26 @@ struct ProductDetailView: View {
 
     // MARK: - Subtotal calculation
     private var subtotal: Double {
-        var price = product.price
+        var total = product.price
 
-        switch selectedSize {
-        case "Small": price += 0
-        case "Medium": price += 0.5
-        case "Large": price += 1.0
-        default: break
+        // Size
+        if let sizePrice = product.customizations?["Size"]?[selectedSize] {
+            total += sizePrice
         }
 
-        switch selectedMilk {
-        case "Whole": price += 0
-        case "Oat", "Soy", "Almond": price += 0.5
-        default: break
+        // Milk
+        if let milkPrice = product.customizations?["Milk"]?[selectedMilk] {
+            total += milkPrice
         }
 
-        price += Double(selectedExtras.count) * 0.5
-        return price
+        // Extras (multiple)
+        if let extrasDict = product.customizations?["Extras"] {
+            for extra in selectedExtras {
+                total += extrasDict[extra] ?? 0
+            }
+        }
+
+        return total
     }
 
     var body: some View {
@@ -83,8 +83,12 @@ struct ProductDetailView: View {
                         if let milks = product.customizations?["Milk"] {
                             CustomSingleSelectionview(title: "Milk", options: milks, selected: $selectedMilk)
                         }
-                        CustomSingleSelectionview(title: "Sugar", options: sugarLevels, selected: $selectedSugar)
-                        CustomSingleSelectionview(title: "Ice", options: iceLevels, selected: $selectedIce)
+                        if let sugarLevels = product.customizations?["Sugar"] {
+                            CustomSingleSelectionview(title: "Sugar", options: sugarLevels, selected: $selectedSugar)
+                        }
+                        if let iceLevels = product.customizations?["Ice"] {
+                            CustomSingleSelectionview(title: "Ice", options: iceLevels, selected: $selectedIce)
+                        }
                         if let extras = product.customizations?["Extras"] {
                             CustomMultipleSelectionView(title: "Extras", options: extras, selected: $selectedExtras)
                         }

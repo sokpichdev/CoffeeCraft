@@ -65,8 +65,8 @@ class ProductViewModel: ObservableObject {
             imageURL: data["imageURL"] as? String ?? "",
             category: data["category"] as? String ?? "Others",
             available: data["available"] as? Bool ?? true,
-            customizations: data["customizations"] as? [String: [String]] ?? [:],
-            priceModifiers: data["priceModifiers"] as? [String: [String: Double]] ?? [:]
+            customizations: data["customizations"] as? [String: [String: Double]] ?? [:],
+//            priceModifiers: data["priceModifiers"] as? [String: [String: Double]] ?? [:]
         )
     }
 
@@ -92,8 +92,7 @@ class ProductViewModel: ObservableObject {
             "imageURL": productToSave.imageURL,
             "category": productToSave.category,
             "available": productToSave.available,
-            "customizations": productToSave.customizations ?? [:],
-            "priceModifiers": productToSave.priceModifiers ?? [:]
+            "customizations": productToSave.customizations ?? [:]
         ]
 
         do {

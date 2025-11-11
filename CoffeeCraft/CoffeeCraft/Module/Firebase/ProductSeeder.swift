@@ -13,7 +13,7 @@ struct ProductSeeder {
         let productsRef = db.collection("products")
 
         let sampleProducts: [[String: Any]] = [
-            // Coffee
+            // ☕️ Coffee
             [
                 "name": "Cappuccino",
                 "description": "A classic Italian coffee with steamed milk foam.",
@@ -21,9 +21,9 @@ struct ProductSeeder {
                 "category": "Coffee",
                 "imageURL": "https://i.postimg.cc/VNK61H8p/capp.jpg",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Caramel", "Vanilla", "Chocolate"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Caramel": 0.5, "Vanilla": 0.5, "Chocolate": 0.5]
                 ]
             ],
             [
@@ -33,9 +33,9 @@ struct ProductSeeder {
                 "category": "Coffee",
                 "imageURL": "https://i.postimg.cc/WpX7CsCJ/Caffe-Latte-at-Pulse-Cafe.jpg",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy", "Almond"],
-                    "Extras": ["Caramel", "Vanilla", "Hazelnut"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5, "Almond": 0.5],
+                    "Extras": ["Caramel": 0.5, "Vanilla": 0.5, "Hazelnut": 0.5]
                 ]
             ],
             [
@@ -45,9 +45,9 @@ struct ProductSeeder {
                 "category": "Coffee",
                 "imageURL": "https://i.postimg.cc/7LJPz1Jc/Mocha-1fc71f7.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Soy", "Oat"],
-                    "Extras": ["Whipped Cream", "Chocolate Drizzle"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Soy": 0.5, "Oat": 0.5],
+                    "Extras": ["Whipped Cream": 0.5, "Chocolate Drizzle": 0.5]
                 ]
             ],
             [
@@ -57,12 +57,12 @@ struct ProductSeeder {
                 "category": "Coffee",
                 "imageURL": "https://i.postimg.cc/W1FcYNpw/espresso-d93cf1fb-0d4d-4da2-877f-c8226560ea4a.webp",
                 "customizations": [
-                    "Size": ["Single", "Double"],
-                    "Extras": ["Sugar", "Cinnamon"]
+                    "Size": ["Single": 0.0, "Double": 0.5],
+                    "Extras": ["Sugar": 0.0, "Cinnamon": 0.2]
                 ]
             ],
 
-            // Tea
+            // 🍵 Tea
             [
                 "name": "Chai Latte",
                 "description": "Spiced tea with steamed milk.",
@@ -70,9 +70,9 @@ struct ProductSeeder {
                 "category": "Tea",
                 "imageURL": "https://i.postimg.cc/yxNBj0ry/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Sweetness": ["Low", "Medium", "High"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Sweetness": ["Low": 0.0, "Medium": 0.0, "High": 0.0]
                 ]
             ],
             [
@@ -82,8 +82,8 @@ struct ProductSeeder {
                 "category": "Tea",
                 "imageURL": "https://i.postimg.cc/Z5Wn4zHf/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Sweetness": ["None", "Low", "Medium", "High"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Sweetness": ["None": 0.0, "Low": 0.0, "Medium": 0.0, "High": 0.0]
                 ]
             ],
             [
@@ -93,12 +93,12 @@ struct ProductSeeder {
                 "category": "Tea",
                 "imageURL": "https://i.postimg.cc/Y07LCD09/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Sweetness": ["None", "Low", "Medium", "High"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Sweetness": ["None": 0.0, "Low": 0.0, "Medium": 0.0, "High": 0.0]
                 ]
             ],
 
-            // Matcha Series
+            // 🍵 Matcha
             [
                 "name": "Matcha Latte",
                 "description": "Creamy green tea latte with a hint of sweetness.",
@@ -106,13 +106,13 @@ struct ProductSeeder {
                 "category": "Matcha",
                 "imageURL": "https://i.postimg.cc/44c14j81/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Honey", "Vanilla"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Honey": 0.3, "Vanilla": 0.3]
                 ]
             ],
 
-            // Hot Chocolate
+            // 🍫 Hot Chocolate
             [
                 "name": "Hot Chocolate",
                 "description": "Rich and creamy hot chocolate drink.",
@@ -120,12 +120,12 @@ struct ProductSeeder {
                 "category": "Hot Chocolate",
                 "imageURL": "https://i.postimg.cc/4xg2TXsS/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Extras": ["Whipped Cream", "Marshmallows", "Chocolate Drizzle"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Extras": ["Whipped Cream": 0.5, "Marshmallows": 0.5, "Chocolate Drizzle": 0.5]
                 ]
             ],
 
-            // Iced Coffee
+            // 🧊 Iced Coffee
             [
                 "name": "Iced Americano",
                 "description": "Strong espresso poured over cold water and ice cubes.",
@@ -133,8 +133,8 @@ struct ProductSeeder {
                 "category": "Iced Coffee",
                 "imageURL": "https://i.postimg.cc/442WnzZ5/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Extras": ["Lemon", "Sugar Syrup"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Extras": ["Lemon": 0.2, "Sugar Syrup": 0.3]
                 ]
             ],
             [
@@ -144,9 +144,9 @@ struct ProductSeeder {
                 "category": "Iced Coffee",
                 "imageURL": "https://i.postimg.cc/PrF0GgNK/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy", "Almond"],
-                    "Extras": ["Caramel", "Vanilla"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5, "Almond": 0.5],
+                    "Extras": ["Caramel": 0.5, "Vanilla": 0.5]
                 ]
             ],
             [
@@ -156,9 +156,9 @@ struct ProductSeeder {
                 "category": "Iced Coffee",
                 "imageURL": "https://i.postimg.cc/PJHTwB1z/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Whipped Cream", "Chocolate Drizzle"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Whipped Cream": 0.5, "Chocolate Drizzle": 0.5]
                 ]
             ],
             [
@@ -168,13 +168,13 @@ struct ProductSeeder {
                 "category": "Iced Coffee",
                 "imageURL": "https://i.postimg.cc/Mp9H8K1n/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Caramel", "Vanilla"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Caramel": 0.5, "Vanilla": 0.5]
                 ]
             ],
 
-            // Other flavored lattes
+            // ☕️ Flavored Latte
             [
                 "name": "Caramel Macchiato",
                 "description": "Espresso with steamed milk and caramel drizzle.",
@@ -182,9 +182,9 @@ struct ProductSeeder {
                 "category": "Flavored Latte",
                 "imageURL": "https://i.postimg.cc/G903q40J/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Vanilla", "Caramel"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Vanilla": 0.5, "Caramel": 0.5]
                 ]
             ],
             [
@@ -194,9 +194,9 @@ struct ProductSeeder {
                 "category": "Flavored Latte",
                 "imageURL": "https://i.postimg.cc/wjmLqNT8/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Vanilla", "Caramel"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Vanilla": 0.5, "Caramel": 0.5]
                 ]
             ],
             [
@@ -206,9 +206,9 @@ struct ProductSeeder {
                 "category": "Flavored Latte",
                 "imageURL": "https://i.postimg.cc/02H02xYK/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Extras": ["Hazelnut", "Caramel"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Extras": ["Hazelnut": 0.5, "Caramel": 0.5]
                 ]
             ],
             [
@@ -218,8 +218,8 @@ struct ProductSeeder {
                 "category": "Flavored Latte",
                 "imageURL": "https://i.postimg.cc/7hwm7VhT/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5]
                 ]
             ],
             [
@@ -229,13 +229,13 @@ struct ProductSeeder {
                 "category": "Flavored Latte",
                 "imageURL": "https://i.postimg.cc/1XQYBSCf/image.png",
                 "customizations": [
-                    "Size": ["Small", "Medium", "Large"],
-                    "Milk": ["Whole", "Oat", "Soy"],
-                    "Sweetness": ["Low", "Medium", "High"]
+                    "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
+                    "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
+                    "Sweetness": ["Low": 0.0, "Medium": 0.0, "High": 0.0]
                 ]
             ],
 
-            // Dessert / Affogato
+            // 🍨 Dessert
             [
                 "name": "Affogato",
                 "description": "Espresso poured over vanilla ice cream.",
@@ -243,8 +243,8 @@ struct ProductSeeder {
                 "category": "Dessert",
                 "imageURL": "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
                 "customizations": [
-                    "Ice Cream": ["Vanilla", "Chocolate"],
-                    "Espresso Shots": ["Single", "Double"]
+                    "Ice Cream": ["Vanilla": 0.0, "Chocolate": 0.5],
+                    "Espresso Shots": ["Single": 0.0, "Double": 0.5]
                 ]
             ]
         ]

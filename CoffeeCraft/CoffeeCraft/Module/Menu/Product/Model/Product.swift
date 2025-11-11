@@ -15,8 +15,7 @@ struct Product: Identifiable, Hashable, Codable, Equatable {
     var imageURL: String
     var category: String
     var available: Bool = true
-    var customizations: [String: [String]]?
-    var priceModifiers: [String: [String: Double]]? // ["Size": ["Small": 0, "Medium": 0.5, "Large": 1.0]]
+    var customizations: [String: [String: Double]]?
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -33,7 +32,6 @@ struct Product: Identifiable, Hashable, Codable, Equatable {
             category: category,
             available: true,
             customizations: [:],
-            priceModifiers: [:]
         )
     }
 }
