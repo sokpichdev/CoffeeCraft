@@ -13,10 +13,10 @@ struct ProductDetailView: View {
     let product: Product
     var cartItem: CartItem? = nil // optional cart item for editing
     var onUpdate: (() -> Void)? = nil
-    @State private var selectedSize: String
-    @State private var selectedMilk: String
-    @State private var selectedSugar: String
-    @State private var selectedIce: String
+//    @State private var selectedSize: String
+//    @State private var selectedMilk: String
+//    @State private var selectedSugar: String
+//    @State private var selectedIce: String
     @State private var selectedExtras: [String]
     @State private var showAddedAlert = false
 
@@ -24,11 +24,6 @@ struct ProductDetailView: View {
     init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil) {
         self.product = product
         self.cartItem = cartItem
-        self.onUpdate = onUpdate
-        _selectedSize = State(initialValue: cartItem?.size ?? "Size")
-        _selectedMilk = State(initialValue: cartItem?.milk ?? "Milk")
-        _selectedSugar = State(initialValue: cartItem?.sugar ?? "Normal")
-        _selectedIce = State(initialValue: cartItem?.ice ?? "Regular")
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
     }
 
@@ -134,20 +129,14 @@ struct ProductDetailView: View {
                     if let cartItem = cartItem {
                         cartManager.updateCartItem(
                             item: cartItem,
-                            size: selectedSize,
-                            milk: selectedMilk,
-                            sugar: selectedSugar,
-                            ice: selectedIce,
+                            selections: selections,
                             extras: selectedExtras
                         )
                         onUpdate?()
                     } else {
                         cartManager.addToCart(
                             product: product,
-                            size: selectedSize,
-                            milk: selectedMilk,
-                            sugar: selectedSugar,
-                            ice: selectedIce,
+                            selections: selections,
                             extras: selectedExtras
                         )
                     }

@@ -22,15 +22,20 @@ class OrderService {
             "totalPrice": total,
             "status": "Pending",
             "items": cartItems.map { item in
-                return [
+                var itemDict: [String: Any] = [
                     "name": item.product.name,
-                    "size": item.size,
-                    "milk": item.milk,
-                    "sugar": item.sugar,
-                    "ice": item.ice,
-                    "extras": item.extras,
                     "price": item.totalPrice
                 ]
+                
+                if !item.selections.isEmpty {
+                    itemDict["selections"] = item.selections
+                }
+                
+                if !item.extras.isEmpty {
+                    itemDict["extras"] = item.extras
+                }
+                
+                return itemDict
             }
         ]
         

@@ -22,10 +22,17 @@ struct CardItemView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.product.name)
                     .font(.headline)
-                Text("\(item.size), \(item.milk)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
+
+                if !item.selections.isEmpty {
+                    ForEach(item.selections.keys.sorted(), id: \.self) { key in
+                        if let value = item.selections[key], !value.isEmpty {
+                            Text("\(key): \(value)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
                 if !item.extras.isEmpty {
                     Text("Extras: \(item.extras.joined(separator: ", "))")
                         .font(.caption2)

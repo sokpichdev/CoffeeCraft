@@ -18,17 +18,11 @@ class CartManager: ObservableObject {
         loadCartFromFirestore()
     }
     func addToCart(product: Product,
-                   size: String,
-                   milk: String,
-                   sugar: String,
-                   ice: String,
+                   selections: [String: String],
                    extras: [String]) {
         let item = CartItem(id: UUID(),
                             product: product,
-                            size: size,
-                            milk: milk,
-                            sugar: sugar,
-                            ice: ice,
+                            selections: selections,
                             extras: extras)
         items.append(item)
         saveCartToFirestore()
@@ -43,18 +37,13 @@ class CartManager: ObservableObject {
         items.removeAll()
         saveCartToFirestore()
     }
-
-    func updateCartItem(item: CartItem, size: String, milk: String, sugar: String, ice: String, extras: [String]) {
+    func updateCartItem(item: CartItem, selections: [String: String], extras: [String]) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index] = CartItem(
                 id: item.id,
                 product: item.product,
-                size: size,
-                milk: milk,
-                sugar: sugar,
-                ice: ice,
-                extras: extras
-            )
+                selections: selections,
+                extras: extras)
             saveCartToFirestore()
         }
     }
