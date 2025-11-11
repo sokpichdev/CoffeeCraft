@@ -32,7 +32,7 @@ struct CustomSingleSelectionview: View {
                                 .onTapGesture { selected = option }
 
                             if price > 0 {
-                                Text("$\(price + sizePrice, specifier: "%.2f")")
+                                Text("$\(price, specifier: "%.2f")")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             } else {
