@@ -78,7 +78,7 @@ struct ProductDetailView: View {
 
                     VStack(alignment: .leading, spacing: 16) {
                         if let sizes = product.customizations?["Size"] {
-                            CustomSingleSelectionview(title: "Size", options: sizes, selected: $selectedSize)
+                            CustomSingleSelectionview(title: "Size", sizePrice: product.price, options: sizes, selected: $selectedSize)
                         }
                         if let milks = product.customizations?["Milk"] {
                             CustomSingleSelectionview(title: "Milk", options: milks, selected: $selectedMilk)

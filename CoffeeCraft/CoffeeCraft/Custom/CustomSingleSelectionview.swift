@@ -8,6 +8,7 @@ import SwiftUI
 
 struct CustomSingleSelectionview: View {
     let title: String
+    var sizePrice: Double = 0.0
     let options: [String: Double]
     @Binding var selected: String
 
@@ -30,8 +31,8 @@ struct CustomSingleSelectionview: View {
                                 .cornerRadius(12)
                                 .onTapGesture { selected = option }
 
-                            if price > 0 {
-                                Text("$\(price, specifier: "%.2f")")
+                            if price > 0 || sizePrice > 0 {
+                                Text("$\(price + sizePrice, specifier: "%.2f")")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             } else {
@@ -43,5 +44,12 @@ struct CustomSingleSelectionview: View {
             }
         }
         .padding(.vertical, 4)
+        .onAppear {
+                    if title == "Size" || title == "Milk" {
+                        if let zeroPriceOption = options.first(where: { $1 == 0.0 })?.key {
+                            selected = zeroPriceOption
+                        }
+                    }
+                }
     }
 }
