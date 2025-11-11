@@ -32,24 +32,36 @@ struct ProductDetailView: View {
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
     }
 
+    @State private var selections: [String: String] = [:]
+
+    private func bindingFor(_ category: String) -> Binding<String> {
+        return Binding<String>(
+            get: { selections[category] ?? "" },
+            set: { selections[category] = $0 }
+        )
+    }
+
     // MARK: - Subtotal calculation
     private var subtotal: Double {
         var total = product.price
 
-        // Size
-        if let sizePrice = product.customizations?["Size"]?[selectedSize] {
-            total += sizePrice
-        }
+        if let customizations = product.customizations {
+            for (category, options) in customizations {
+                if category.lowercased() == "extras" {
+                    continue // skip
+                }
+                // single-selection
+                if let selectedOption = selections[category],
+                   let price = options[selectedOption] {
+                    total += price
+                }
+            }
 
-        // Milk
-        if let milkPrice = product.customizations?["Milk"]?[selectedMilk] {
-            total += milkPrice
-        }
-
-        // Extras (multiple)
-        if let extrasDict = product.customizations?["Extras"] {
-            for extra in selectedExtras {
-                total += extrasDict[extra] ?? 0
+            // multiple-selection extras
+            if let extrasDict = customizations["Extras"] {
+                for extra in selectedExtras {
+                    total += extrasDict[extra] ?? 0
+                }
             }
         }
 
@@ -77,24 +89,32 @@ struct ProductDetailView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 16) {
-                        if let sizes = product.customizations?["Size"] {
-                            CustomSingleSelectionview(title: "Size", sizePrice: product.price, options: sizes, selected: $selectedSize)
-                        }
-                        if let milks = product.customizations?["Milk"] {
-                            CustomSingleSelectionview(title: "Milk", options: milks, selected: $selectedMilk)
-                        }
-                        if let sugarLevels = product.customizations?["Sugar"] {
-                            CustomSingleSelectionview(title: "Sugar", options: sugarLevels, selected: $selectedSugar)
-                        }
-                        if let iceLevels = product.customizations?["Ice"] {
-                            CustomSingleSelectionview(title: "Ice", options: iceLevels, selected: $selectedIce)
-                        }
-                        if let extras = product.customizations?["Extras"] {
-                            CustomMultipleSelectionView(title: "Extras", options: extras, selected: $selectedExtras)
+                        if let customizations = product.customizations, !customizations.isEmpty {
+                            ForEach(Array(customizations.keys), id: \.self) { category in
+                                let options = customizations[category] ?? [:]
+
+                                if category == "Extras" {
+                                    CustomMultipleSelectionView(
+                                        title: category,
+                                        options: options,
+                                        selected: $selectedExtras
+                                    )
+                                } else {
+                                    CustomSingleSelectionview(
+                                        title: category,
+                                        sizePrice: product.price,
+                                        options: options,
+                                        selected: bindingFor(category) // dynamic bindings for selections
+                                    )
+                                }
+                            }
+                        } else {
+                            Text("No customization available.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
                     }
-
-                    Spacer(minLength: 180) // 👈 Add spacing so content doesn’t hide behind footer
+                    Spacer(minLength: 180)
                 }
                 .padding()
             }

@@ -19,7 +19,7 @@ struct CustomSingleSelectionview: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(options.keys.sorted(), id: \.self) { option in
+                    ForEach(Array(options.keys), id: \.self) { option in
                         let price = options[option] ?? 0.0
 
                         VStack(spacing: 4) {
@@ -31,7 +31,7 @@ struct CustomSingleSelectionview: View {
                                 .cornerRadius(12)
                                 .onTapGesture { selected = option }
 
-                            if price > 0 || sizePrice > 0 {
+                            if price > 0 {
                                 Text("$\(price + sizePrice, specifier: "%.2f")")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
@@ -45,11 +45,9 @@ struct CustomSingleSelectionview: View {
         }
         .padding(.vertical, 4)
         .onAppear {
-                    if title == "Size" || title == "Milk" {
-                        if let zeroPriceOption = options.first(where: { $1 == 0.0 })?.key {
-                            selected = zeroPriceOption
-                        }
-                    }
-                }
+            if let zeroPriceOption = options.first(where: { $1 == 0.0 })?.key {
+                selected = zeroPriceOption
+            }
+        }
     }
 }
