@@ -84,8 +84,8 @@ struct OrderCardView: View {
             // Items
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(order.items) { item in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
                             Text(item.name)
                                 .font(.subheadline)
                                 .fontWeight(.medium)

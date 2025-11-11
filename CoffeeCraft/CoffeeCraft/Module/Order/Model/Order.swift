@@ -19,12 +19,9 @@ struct Order: Identifiable, Codable {
 
 // simpler model just for decoding item info
 struct CartItemData: Identifiable, Codable {
-    var id: String { name + (size ?? "") }
+    var id: String { "\(name)-\(Date().timeIntervalSince1970)" }
     var name: String
-    var size: String?
-    var milk: String?
-    var sugar: String?
-    var ice: String?
+    var selections: [String: String]?
     var extras: [String]?
     var price: Double
 }
