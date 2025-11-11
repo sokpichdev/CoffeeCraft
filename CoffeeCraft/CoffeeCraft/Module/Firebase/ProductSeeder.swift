@@ -72,7 +72,7 @@ struct ProductSeeder {
                 "customizations": [
                     "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
                     "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
-                    "Sweetness": ["Low": 0.0, "Medium": 0.0, "High": 0.0]
+                    "Sugar Level": ["0%": 0.0, "25%": 0.0, "50%": 0.0, "70%": 0.0, "100%": 0.0, "120%": 0.0]
                 ]
             ],
             [
@@ -83,7 +83,7 @@ struct ProductSeeder {
                 "imageURL": "https://i.postimg.cc/Z5Wn4zHf/image.png",
                 "customizations": [
                     "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
-                    "Sweetness": ["None": 0.0, "Low": 0.0, "Medium": 0.0, "High": 0.0]
+                    "Sugar Level": ["0%": 0.0, "25%": 0.0, "50%": 0.0, "70%": 0.0, "100%": 0.0, "120%": 0.0]
                 ]
             ],
             [
@@ -94,7 +94,7 @@ struct ProductSeeder {
                 "imageURL": "https://i.postimg.cc/Y07LCD09/image.png",
                 "customizations": [
                     "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
-                    "Sweetness": ["None": 0.0, "Low": 0.0, "Medium": 0.0, "High": 0.0]
+                    "Sugar Level": ["0%": 0.0, "25%": 0.0, "50%": 0.0, "70%": 0.0, "100%": 0.0, "120%": 0.0]
                 ]
             ],
 
@@ -231,7 +231,7 @@ struct ProductSeeder {
                 "customizations": [
                     "Size": ["Small": 0.0, "Medium": 0.5, "Large": 1.0],
                     "Milk": ["Whole": 0.0, "Oat": 0.5, "Soy": 0.5],
-                    "Sweetness": ["Low": 0.0, "Medium": 0.0, "High": 0.0]
+                    "Sugar Level": ["0%": 0.0, "25%": 0.0, "50%": 0.0, "70%": 0.0, "100%": 0.0, "120%": 0.0]
                 ]
             ],
 
