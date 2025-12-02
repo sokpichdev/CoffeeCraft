@@ -13,7 +13,7 @@ struct CustomMultipleSelectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.headline)
+            Text(title).font(.customHeadline)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
                     ForEach(options.keys.sorted(), id: \.self) { option in
@@ -34,7 +34,7 @@ struct CustomMultipleSelectionView: View {
                                 }
                             if price > 0 {
                                 Text("$\(price, specifier: "%.2f")")
-                                    .font(.caption)
+                                    .font(.customCaption)
                                     .foregroundColor(.secondary)
                             } else {
                                 Spacer()

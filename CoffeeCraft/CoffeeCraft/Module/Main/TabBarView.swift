@@ -73,7 +73,7 @@ fileprivate struct TabsLayoutView: View {
                     }
                     HStack(spacing: 10) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .font(.customTitle3.weight(.semibold))
                             .foregroundColor(isSelected ? tab.color : .primary.opacity(0.6))
                             .rotationEffect(.degrees(rotationAngle))
                             .scaleEffect(isSelected ? 1 : 0.9)
@@ -85,7 +85,7 @@ fileprivate struct TabsLayoutView: View {
                             .animation(.default, value: selectedOffset)
                         if isSelected {
                             Text(tab.title)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .font(.customTitle3.weight(.semibold))
                                 .foregroundColor(tab.color)
                                 .padding(.trailing, 20)
                         }

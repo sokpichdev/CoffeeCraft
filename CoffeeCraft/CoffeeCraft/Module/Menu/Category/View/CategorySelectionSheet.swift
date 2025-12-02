@@ -78,12 +78,12 @@ struct CategorySelectionSheet: View {
                         if filteredCategories.isEmpty && !searchText.isEmpty {
                             VStack(spacing: 12) {
                                 Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 30))
+                                    .font(.customTitle)
                                     .foregroundColor(.brown.opacity(0.6))
                                 
                                 Text("No category found for “\(searchText)”")
                                     .foregroundColor(.gray)
-                                    .font(.subheadline)
+                                    .font(.customSubheadline)
                                 
                                 Button("Add as New Category") {
                                     withAnimation {
@@ -92,7 +92,7 @@ struct CategorySelectionSheet: View {
                                         searchText = ""
                                     }
                                 }
-                                .font(.subheadline.bold())
+                                .font(.customSubheadline.bold())
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 8)
                                 .background(Color.brown)

@@ -48,7 +48,7 @@ struct EditProductView: View {
                                 .font(.system(size: 50))
                                 .foregroundColor(.gray)
                             Text("No Image")
-                                .font(.caption)
+                                .font(.customCaption)
                                 .foregroundColor(.gray)
                         }
                         if let url = URL(string: tempImageURL), !tempImageURL.isEmpty {
@@ -119,7 +119,7 @@ struct EditProductView: View {
                 // MARK: - Availability Toggle
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Status", systemImage: "checkmark.circle")
-                        .font(.headline)
+                        .font(.customHeadline)
                         .foregroundColor(.brown)
                         .padding(.bottom, 4)
                     

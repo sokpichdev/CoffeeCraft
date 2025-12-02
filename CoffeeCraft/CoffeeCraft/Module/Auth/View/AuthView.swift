@@ -110,7 +110,7 @@ struct AuthView: View {
                     }
                 } label: {
                     Text(isLogin ? "Don’t have an account? Sign Up" : "Already have an account? Login")
-                        .font(.callout)
+                        .font(.customCallout)
                         .foregroundStyle(.white.opacity(0.8))
                         .padding(.top, 8)
                 }

@@ -46,17 +46,17 @@ struct CartView: View {
                 VStack(spacing: 12) {
                     HStack {
                         Text("Total")
-                            .font(.headline)
+                            .font(.customHeadline)
                         Spacer()
                         Text(String(format: "$%.2f", cartManager.total))
-                            .font(.title2.bold())
+                            .font(.customTitle2.bold())
                     }
                     
                     Button {
                         showCheckoutConfirm = true
                     } label: {
                         Text("Checkout")
-                            .font(.headline)
+                            .font(.customHeadline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()

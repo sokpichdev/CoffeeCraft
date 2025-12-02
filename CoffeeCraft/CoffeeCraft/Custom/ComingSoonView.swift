@@ -38,19 +38,18 @@ struct ComingSoonView: View {
                 )
             
             Text("\(featureName) is coming soon!")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.customFont(size: 22, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .foregroundColor(.gray)
             
             Text("Stay tuned for updates ☕️")
-                .font(.subheadline)
+                .font(.customSubheadline)
                 .foregroundColor(.secondary)
             Button(action: {
                 authVM.logout()
             }, label: {
                 Text("Logout")
-                    .font(.subheadline)
+                    .font(.customSubheadline)
                     .foregroundColor(.secondary)
             })
         }

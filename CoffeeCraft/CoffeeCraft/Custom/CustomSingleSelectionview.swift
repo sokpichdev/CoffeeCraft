@@ -15,7 +15,7 @@ struct CustomSingleSelectionview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.headline)
+                .font(.customHeadline)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
@@ -33,7 +33,7 @@ struct CustomSingleSelectionview: View {
 
                             if price > 0 {
                                 Text("$\(price, specifier: "%.2f")")
-                                    .font(.caption)
+                                    .font(.customCaption)
                                     .foregroundColor(.secondary)
                             } else {
                                 Spacer()

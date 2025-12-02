@@ -169,7 +169,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                 
                 if labelFloating {
                     Text(placeholder)
-                        .font(.system(size: 14))
+                        .font(.customBody)
                         .foregroundColor(isError ? .red : .gray)
                         .padding(.horizontal, 6)
                         .background(Color(.systemBackground))
@@ -186,14 +186,14 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                         
                         if !labelFloating {
                             Text(placeholder)
-                                .font(.customFont(size: 14, weight: .regular))
+                                .font(.customBody)
                                 .foregroundColor(.gray)
 //                                .matchedGeometryEffect(id: "placeholder", in: animation)
                                 .scaleEffect(1.0)
                         }
                         if fieldtype == .password && !eyeToggle {
                             SecureField("", text: $text)
-                                .font(.customFont(size: 14, weight: .regular))
+                                .font(.customBody)
                                 .focused($focused)
                                 .animation(.easeInOut(duration: 0.22), value: labelFloating)
                                 .keyboardType(keyboardType)
@@ -201,7 +201,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                         } else {
                             TextField("", text: $text)
                                 .focused($focused)
-                                .font(.customFont(size: 14, weight: .regular))
+                                .font(.customBody)
                                 .animation(.easeInOut(duration: 0.22), value: labelFloating)
                                 .keyboardType(keyboardType)
                                 .disabled(isDisable)
@@ -228,7 +228,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
             
             if isError {
                 Text(errorText)
-                    .font(.caption)
+                    .font(.customCaption)
                     .foregroundColor(.red)
             }
         }
