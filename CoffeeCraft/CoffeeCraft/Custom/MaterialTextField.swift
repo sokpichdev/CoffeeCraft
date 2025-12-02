@@ -8,6 +8,12 @@ import SwiftUI
 import UIKit
 import Combine
 
+enum TextFieldType {
+    case email
+    case password
+    case normal
+}
+
 struct MaterialTextField<Leading: View, Trailing: View>: View {
     @Binding var text: String
     var countryCode: String = ""
@@ -210,7 +216,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                         Button {
                             eyeToggle.toggle()
                         } label: {
-                            Image(eyeToggle ? .eyeOpen : .eyeClose)
+                            Image(systemName: eyeToggle ? "eye" : "eye.slash")
                                 .foregroundColor(.gray)
                         }
                         .padding(.trailing, 8)
