@@ -16,55 +16,60 @@ struct ForgotPasswordView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Text("Enter the email address associated with your account to receive a password reset link.")
-                    .font(.customCallout)
-                    .multilineTextAlignment(.center)
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 20) {
+                    Text("Enter the email address associated with your account to receive a password reset link.")
+                        .font(.customCallout)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    MaterialTextField(
+                        text: $email,
+                        placeholder: "Email Address",
+                        keyboardType: .emailAddress,
+                        fieldtype: .email
+                    )
+                    .textContentType(.emailAddress)
                     .padding(.horizontal)
-                
-                MaterialTextField(
-                    text: $email,
-                    placeholder: "Email Address",
-                    keyboardType: .emailAddress,
-                    fieldtype: .email
-                )
-                .textContentType(.emailAddress)
-                .padding(.horizontal)
 
-                Button {
-                    Task {
-                        isLoading = true
-                        do {
-                            try await authVM.sendPasswordReset(email: email)
-                            alertMessage = "Password reset link sent to \(email)."
-                            showAlert = true
-                        } catch {
-                            alertMessage = "Error: \(error.localizedDescription)"
-                            showAlert = true
+                    Button {
+                        Task {
+                            isLoading = true
+                            do {
+                                try await authVM.sendPasswordReset(email: email)
+                                alertMessage = "Password reset link sent to \(email)."
+                                showAlert = true
+                            } catch {
+                                alertMessage = "Error: \(error.localizedDescription)"
+                                showAlert = true
+                            }
+                            isLoading = false
                         }
-                        isLoading = false
-                    }
-                } label: {
-                    HStack {
-                        if isLoading {
-                            ProgressView().tint(.white)
-                        } else {
-                            Text("Send Reset Link").fontWeight(.semibold)
+                    } label: {
+                        HStack {
+                            if isLoading {
+                                ProgressView().tint(.white)
+                            } else {
+                                Text("Send Reset Link").fontWeight(.semibold)
+                            }
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.brown.gradient)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.brown.gradient)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
+                    .padding(.horizontal)
+                    .disabled(isLoading || email.isEmpty)
                 }
-                .padding(.horizontal)
-                .disabled(isLoading || email.isEmpty)
-
-                Spacer()
+                .padding(.top, 40)
             }
-            .padding(.top, 40)
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            )
             .navigationTitle("Reset Password")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

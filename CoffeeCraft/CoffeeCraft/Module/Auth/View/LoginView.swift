@@ -21,8 +21,6 @@ struct LoginView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            
-            // Email Field
             MaterialTextField(
                 text: $email,
                 placeholder: "Email Address",
@@ -33,7 +31,6 @@ struct LoginView: View {
             .submitLabel(.next)
             .textContentType(.emailAddress)
 
-            // Password Field
             MaterialTextField(
                 text: $password,
                 placeholder: "Password",
@@ -43,7 +40,6 @@ struct LoginView: View {
             .submitLabel(.done)
             .textContentType(.password)
             
-            // Forgot Password Button
             HStack {
                 Spacer()
                 Button("Forgot Password?") {
@@ -54,7 +50,6 @@ struct LoginView: View {
             }
             .padding(.top, 4)
             
-            // Login Button
             Button {
                 Task {
                     isLoading = true

@@ -21,16 +21,13 @@ struct RegisterView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            
-            // Name Field
             MaterialTextField(
                 text: $name,
                 placeholder: "Full Name")
             .focused($focusedField, equals: .name)
             .submitLabel(.next)
             .textContentType(.name)
-
-            // Email Field
+            
             MaterialTextField(
                 text: $email,
                 placeholder: "Email Address",
@@ -41,7 +38,6 @@ struct RegisterView: View {
             .submitLabel(.next)
             .textContentType(.emailAddress)
 
-            // Password Field
             MaterialTextField(
                 text: $password,
                 placeholder: "Password",
@@ -51,7 +47,6 @@ struct RegisterView: View {
             .submitLabel(.done)
             .textContentType(.newPassword)
 
-            // Role Picker
             Picker("Role", selection: $role) {
                 Text("Customer").tag(UserRole.customer)
                 Text("Manager").tag(UserRole.manager)
@@ -59,7 +54,6 @@ struct RegisterView: View {
             .pickerStyle(SegmentedPickerStyle())
             .padding(.top, 6)
 
-            // Sign Up Button
             Button {
                 Task {
                     isLoading = true
