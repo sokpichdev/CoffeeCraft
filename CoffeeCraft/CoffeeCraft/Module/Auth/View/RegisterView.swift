@@ -24,9 +24,6 @@ struct RegisterView: View {
             MaterialTextField(
                 text: $name,
                 placeholder: "Full Name")
-            .focused($focusedField, equals: .name)
-            .submitLabel(.next)
-            .textContentType(.name)
             
             MaterialTextField(
                 text: $email,
@@ -34,18 +31,12 @@ struct RegisterView: View {
                 keyboardType: .emailAddress,
                 fieldtype: .email
             )
-            .focused($focusedField, equals: .email)
-            .submitLabel(.next)
-            .textContentType(.emailAddress)
 
             MaterialTextField(
                 text: $password,
                 placeholder: "Password",
                 fieldtype: .password
             )
-            .focused($focusedField, equals: .password)
-            .submitLabel(.done)
-            .textContentType(.newPassword)
 
             Picker("Role", selection: $role) {
                 Text("Customer").tag(UserRole.customer)

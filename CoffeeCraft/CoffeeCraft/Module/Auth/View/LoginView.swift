@@ -27,18 +27,12 @@ struct LoginView: View {
                 keyboardType: .emailAddress,
                 fieldtype: .email
             )
-            .focused($focusedField, equals: .email)
-            .submitLabel(.next)
-            .textContentType(.emailAddress)
 
             MaterialTextField(
                 text: $password,
                 placeholder: "Password",
                 fieldtype: .password
             )
-            .focused($focusedField, equals: .password)
-            .submitLabel(.done)
-            .textContentType(.password)
             
             HStack {
                 Spacer()
@@ -46,7 +40,7 @@ struct LoginView: View {
                     showForgotPassword = true
                 }
                 .font(.customCallout)
-                .foregroundStyle(Color.brown.opacity(0.8))
+                .foregroundStyle(Color.white)
             }
             .padding(.top, 4)
             
