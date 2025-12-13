@@ -16,7 +16,6 @@ enum TextFieldType {
 
 struct MaterialTextField<Leading: View, Trailing: View>: View {
     @Binding var text: String
-    var countryCode: String = ""
     var placeholder: String
     var charLimit: Int = 254
     var keyboardType: UIKeyboardType = .default
@@ -37,7 +36,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     // MARK: - Has Leading & Trailing
     init(
         text: Binding<String>,
-        countryCode: String = "",
         placeholder: String,
         charLimit: Int = 254,
         keyboardType: UIKeyboardType = .default,
@@ -51,7 +49,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         onTextChanged: ((String) -> Void)? = nil
     ) {
         self._text = text
-        self.countryCode = countryCode
         self.placeholder = placeholder
         self.charLimit = charLimit
         self.keyboardType = keyboardType
@@ -68,7 +65,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     // MARK: - Has Leading, No Trailing
     init(
         text: Binding<String>,
-        countryCode: String = "",
         placeholder: String,
         isDisable: Bool = false,
         isError: Bool = false,
@@ -81,7 +77,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         onTextChanged: ((String) -> Void)? = nil
     ) where Trailing == EmptyView {
         self._text = text
-        self.countryCode = countryCode
         self.placeholder = placeholder
         self.charLimit = charLimit
         self.keyboardType = keyboardType
@@ -98,7 +93,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     // MARK: - No Leading, Has Trailing
     init(
         text: Binding<String>,
-        countryCode: String = "",
         placeholder: String,
         charLimit: Int = 254,
         keyboardType: UIKeyboardType = .default,
@@ -111,7 +105,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         onTextChanged: ((String) -> Void)? = nil
     ) where Leading == EmptyView {
         self._text = text
-        self.countryCode = countryCode
         self.placeholder = placeholder
         self.charLimit = charLimit
         self.keyboardType = keyboardType
@@ -128,7 +121,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     // MARK: - No Leading, No Trailing
     init(
         text: Binding<String>,
-        countryCode: String = "",
         placeholder: String,
         charLimit: Int = 254,
         keyboardType: UIKeyboardType = .default,
@@ -138,7 +130,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         errorText: String = ""
     ) where Leading == EmptyView, Trailing == EmptyView {
         self._text = text
-        self.countryCode = countryCode
         self.placeholder = placeholder
         self.charLimit = charLimit
         self.keyboardType = keyboardType

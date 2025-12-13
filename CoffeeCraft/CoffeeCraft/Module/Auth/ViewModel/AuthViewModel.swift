@@ -62,7 +62,10 @@ class AuthViewModel: ObservableObject {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
         fetchUserData(uid: result.user.uid)
     }
-
+    func sendPasswordReset(email: String) async throws {
+        try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+    
     func logout() {
         try? Auth.auth().signOut()
         currentUser = nil
