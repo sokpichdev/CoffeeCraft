@@ -155,15 +155,15 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         VStack(alignment: .leading, spacing: 4) {
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.white.opacity(0.8))
                     .stroke(borderColor, lineWidth: 1)
-                    .background(Color(.systemBackground))
                 
                 if labelFloating {
                     Text(placeholder)
                         .font(.customBody)
                         .foregroundColor(isError ? .red : .gray)
                         .padding(.horizontal, 6)
-                        .background(Color(.systemBackground))
+                        .background(Color.white.opacity(0.8))
                         .offset(x: 12, y: -28)
                         .scaleEffect(1.0)
 //                        .matchedGeometryEffect(id: "placeholder", in: animation)
@@ -182,22 +182,20 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
 //                                .matchedGeometryEffect(id: "placeholder", in: animation)
                                 .scaleEffect(1.0)
                         }
-                        if fieldtype == .password && !eyeToggle {
-                            SecureField("", text: $text)
-                                .font(.customBody)
-                                .focused($focused)
-                                .animation(.easeInOut(duration: 0.22), value: labelFloating)
-                                .keyboardType(keyboardType)
-                                .textContentType(.oneTimeCode)
-                        } else {
-                            TextField("", text: $text)
-                                .focused($focused)
-                                .font(.customBody)
-                                .animation(.easeInOut(duration: 0.22), value: labelFloating)
-                                .keyboardType(keyboardType)
-                                .disabled(isDisable)
-                                .autocapitalization(isAutoCapitalize)
+                        Group {
+                            if fieldtype == .password && !eyeToggle {
+                                SecureField("", text: $text)
+                            } else {
+                                TextField("", text: $text)
+                            }
                         }
+                        .font(.customBody)
+                        .focused($focused)
+                        .animation(.easeInOut(duration: 0.22), value: labelFloating)
+                        .keyboardType(keyboardType)
+                        .disabled(isDisable)
+                        .autocapitalization(isAutoCapitalize)
+                        .foregroundStyle(.black)
                     }
                     .padding(.leading, 12)
                     
