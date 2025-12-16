@@ -8,25 +8,11 @@
 import SwiftUI
 import Firebase
 
-enum FirebaseEnvironment {
-    case dev, sit, uat, prod
-}
-
 @main
 struct CoffeeCraftApp: App {
     @StateObject var authVM = AuthViewModel()
-    // Set which environment you want to run
-    var currentEnv: FirebaseEnvironment {
-        #if Dev
-        return .dev
-        #elseif SIT
-        return .sit
-        #elseif UAT
-        return .uat
-        #else
-        return .prod
-        #endif
-    }
+    
+    let currentEnv = Constants.currentEnv
 
     init() {
         configureFirebase(for: currentEnv)
@@ -42,7 +28,7 @@ struct CoffeeCraftApp: App {
     }
 
     func configureFirebase(for env: FirebaseEnvironment) {
-        var plistName: String
+        let plistName: String
 
         switch env {
         case .dev:  plistName = "GoogleService-Info-Dev"
