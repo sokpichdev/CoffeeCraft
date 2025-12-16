@@ -40,44 +40,7 @@ struct EditProductView: View {
             VStack(spacing: 32) {
                 // MARK: - Image Preview
                 VStack(spacing: 16) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.gray.opacity(0.2))
-                        VStack(spacing: 8) {
-                            Image(systemName: "photo.on.rectangle.angled")
-                                .font(.system(size: 50))
-                                .foregroundColor(.gray)
-                            Text("No Image")
-                                .font(.customCaption)
-                                .foregroundColor(.gray)
-                        }
-                        if let url = URL(string: tempImageURL), !tempImageURL.isEmpty {
-                            WebImage(url: url)
-                                .onSuccess { _, _, _ in
-                                    DispatchQueue.main.async {
-                                        if !isURLValid {
-                                            isURLValid = true
-                                        }
-                                    }
-                                }
-                                .onFailure { _ in
-                                    DispatchQueue.main.async {
-                                        if isURLValid {
-                                            isURLValid = false
-                                        }
-                                    }
-                                }
-                                .resizable()
-                                .scaledToFill()
-                                .frame(maxHeight: 300)
-                                .frame(width: UIScreen.main.bounds.width - 32)
-                                .cornerRadius(20)
-                                .shadow(radius: 5)
-                        }
-                    }
-                    .frame(height: 200)
-                    .cornerRadius(16)
-                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
+                    AsyncImageCard(imageURL: tempImageURL, height: 200, width: UIScreen.main.bounds.width - 32)
 
                     VStack(alignment: .leading, spacing: 0) {
                         CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo")
