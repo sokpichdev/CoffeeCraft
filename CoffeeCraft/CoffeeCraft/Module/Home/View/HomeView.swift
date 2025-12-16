@@ -35,27 +35,16 @@ struct HomeView: View {
                 }
                 
                 Text("Good Morning, Sok! ☀️")
-                    .font(.title2.bold())
+                    .font(.customTitle2.bold())
                     .padding(.horizontal)
                 
                 HStack(spacing: 20) {
-                    PickUpButton() {}
+                    PickUpButton(onClick: { })
                     PickUpButton(title: "Delivery") {}
                 }
                 .padding(.horizontal)
-                
-                HStack {
-                    Text("Announcements")
-                        .font(.headline)
-                    Spacer()
-                    Button(action: {
-                    }) {
-                        Text("See All")
-                            .foregroundColor(.blue)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .padding(.horizontal)
+                .zIndex(1)
+                announcementLabel
                 
                 VStack(spacing: 20) {
                     ForEach(announcements.prefix(3), id: \.id) { ann in
@@ -69,6 +58,23 @@ struct HomeView: View {
         }
         .edgesIgnoringSafeArea(.top)
     }
+    
+    var announcementLabel: some View {
+        HStack {
+            Text("Announcements")
+                .font(.customHeadline)
+            Spacer()
+            Button(action: {
+                print("See All button clicked!")
+            }) {
+                Text("See All")
+                    .foregroundColor(.blue)
+                    .padding(8)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(.horizontal)
+    }
 }
 
 struct PickUpButton: View {
@@ -76,15 +82,19 @@ struct PickUpButton: View {
     var onClick: (() -> Void)?
     
     var body: some View {
-        Button(action: { onClick?() }) {
+        Button(action: {
+            onClick?()
+        }, label: {
             Text(title)
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity)
                 .frame(height: 80)
                 .background(Color.brown)
-                .foregroundColor(.white)
                 .cornerRadius(15)
-        }
+        })
+        .foregroundColor(.white)
+        .contentShape(Rectangle())
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
