@@ -26,8 +26,7 @@ struct RootView: View {
                     case .customer:
                         switch selectedTab {
                         case .home:
-                            ComingSoonView()
-                                .environmentObject(authVM)
+                            HomeView()
                         case .menu:
                             MenuView()
                                 .environmentObject(cartManager)
@@ -40,7 +39,7 @@ struct RootView: View {
                     case .manager:
                         switch selectedTab {
                         case .home:
-                            ComingSoonView().environmentObject(authVM)
+                            HomeView()
                         case .menu:
                             MenuView(isManager: true).environmentObject(cartManager)
                         case .orders:
