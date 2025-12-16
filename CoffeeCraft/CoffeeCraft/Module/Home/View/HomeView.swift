@@ -5,20 +5,34 @@
 //  Created by Sok Pich on 12/16/25.
 //
 import SwiftUI
+import SDWebImage
 
+// MARK: - HomeView
 struct HomeView: View {
-    private let banners = ["https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
-                           "https://i.postimg.cc/7hwm7VhT/image.png",
-                           "https://i.postimg.cc/Z5Wn4zHf/image.png",
-                           "https://i.postimg.cc/G903q40J/image.png"]
+    // 1. Data
+    private let originalBanners = [
+        "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
+        "https://i.postimg.cc/7hwm7VhT/image.png",
+        "https://i.postimg.cc/Z5Wn4zHf/image.png",
+        "https://i.postimg.cc/G903q40J/image.png"
+    ] // N = 4 (Real items)
+
+    // 2. Looping Data (Buffer: [D, A, B, C, D, A] -> 6 items)
     private var loopedBanners: [String] {
-        banners + banners + banners + banners
+        guard let first = originalBanners.first, let last = originalBanners.last else { return originalBanners }
+        var temp = [String]()
+        temp.append(last)               // Index 0: Duplicate of last
+        temp.append(contentsOf: originalBanners) // Index 1 to N: Real items
+        temp.append(first)              // Index N+1: Duplicate of first
+        return temp
     }
+
+    // 3. State bound to the TabView (0 to N+1)
+    @State private var currentIndex: Int = 0 // Tracks the real 0-3 index
+    // Timer state for auto-scrolling
+    @State private var autoScrollTimer: Timer?
     
-    @State private var selectedBanner: Int = 0
-    @State private var bannerTimer: Timer?
-    @State private var resumeWorkItem: DispatchWorkItem?
-    @State private var isUserDragging = false
+    // Other data
     let announcements = [
         Announcement(id: 1, title: "New Coffee Blend!", description: "Try our new seasonal coffee.", imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg"),
         Announcement(id: 2, title: "Weekend Special", description: "Discount for all drinks this weekend.", imageName: ""),
@@ -28,7 +42,29 @@ struct HomeView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
-                bannerCarousel
+                VStack(spacing: 8) {
+                    GenericInfiniteCarousel(
+                        items: originalBanners,
+                        height: 180,
+                        viewWidth: UIScreen.main.bounds.width,
+                        currentIndex: $currentIndex
+                    ) { urlString in
+                        AsyncImageCard(imageURL: urlString, height: 180, width: UIScreen.main.bounds.width, corner: 0)
+                    }
+                    .frame(height: 180)
+                    
+                    HStack(spacing: 6) {
+                        ForEach(0..<originalBanners.count, id: \.self) { index in
+                            Capsule()
+                                .fill(index == currentIndex ? Color.brown : .gray.opacity(0.4))
+                                .frame(width: index == currentIndex ? 16 : 6, height: 6)
+                                .animation(.easeInOut, value: currentIndex)
+                        }
+                    }
+                }
+                
+                Spacer().frame(height: 10)
+                
                 Text("Good Morning, Sok! ☀️")
                     .font(.customTitle2.bold())
                     .padding(.horizontal)
@@ -52,17 +88,8 @@ struct HomeView: View {
             }
         }
         .edgesIgnoringSafeArea(.top)
-        .onAppear {
-            selectedBanner = banners.count
-            startBannerTimer()
-        }
-        .onDisappear {
-            bannerTimer?.invalidate()
-            bannerTimer = nil
-            resumeWorkItem?.cancel()
-        }
     }
-    
+        
     var announcementLabel: some View {
         HStack {
             Text("Announcements")
@@ -107,95 +134,4 @@ struct Announcement: Identifiable {
     let title: String?
     let description: String?
     let imageName: String?
-}
-
-extension HomeView {
-    private var bannerCarousel: some View {
-        VStack(spacing: 8) {
-
-            TabView(selection: $selectedBanner) {
-                ForEach(loopedBanners.indices, id: \.self) { index in
-                    AsyncImageCard(
-                        imageURL: loopedBanners[index],
-                        height: 180,
-                        width: UIScreen.main.bounds.width,
-                        corner: 0
-                    )
-                    .tag(index)
-                    .allowsHitTesting(false)
-                }
-            }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .frame(height: 180)
-            .gesture(
-                DragGesture()
-                    .onChanged { _ in
-                        pauseAutoScroll()
-                    }
-                    .onEnded { _ in
-                        resumeAutoScrollAfterDelay()
-                    }
-            )
-            .onChange(of: selectedBanner, perform: handleInfiniteLoop)
-
-            // Custom page indicator
-            pageIndicator
-        }
-    }
-
-    private func handleInfiniteLoop(_ index: Int) {
-        let count = banners.count
-
-        // reached end → reset to middle silently
-        if index == count * 2 {
-            DispatchQueue.main.async {
-                selectedBanner = count
-            }
-        }
-    }
-
-    private func startBannerTimer() {
-        bannerTimer?.invalidate()
-
-        bannerTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
-            guard !isUserDragging else { return }
-            withAnimation(.easeInOut(duration: 0.8)) {
-                selectedBanner += 1
-            }
-        }
-    }
-    private func pauseAutoScroll() {
-        isUserDragging = true
-        bannerTimer?.invalidate()
-        bannerTimer = nil
-    }
-    private func resumeAutoScrollAfterDelay() {
-        resumeWorkItem?.cancel()
-
-        let workItem = DispatchWorkItem {
-            isUserDragging = false
-            startBannerTimer()
-        }
-
-        resumeWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10, execute: workItem)
-    }
-    private var realIndex: Int {
-        selectedBanner % banners.count
-    }
-    private var pageIndicator: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<banners.count, id: \.self) { index in
-                Capsule()
-                    .fill(index == realIndex ? Color.brown : Color.gray.opacity(0.4))
-                    .frame(
-                        width: index == realIndex ? 16 : 6,
-                        height: 6
-                    )
-                    .animation(.easeInOut(duration: 0.25), value: realIndex)
-            }
-        }
-        .padding(.top, 6)
-    }
-
 }
