@@ -16,6 +16,12 @@ struct HomeView: View {
         "https://i.postimg.cc/Z5Wn4zHf/image.png",
         "https://i.postimg.cc/G903q40J/image.png"
     ] // N = 4 (Real items)
+    private let originalBanners1 = [
+        "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
+        "https://i.postimg.cc/7hwm7VhT/image.png",
+        "https://i.postimg.cc/Z5Wn4zHf/image.png",
+        "https://i.postimg.cc/G903q40J/image.png"
+    ]
 
     // 2. Looping Data (Buffer: [D, A, B, C, D, A] -> 6 items)
     private var loopedBanners: [String] {
@@ -29,6 +35,7 @@ struct HomeView: View {
 
     // 3. State bound to the TabView (0 to N+1)
     @State private var currentIndex: Int = 0 // Tracks the real 0-3 index
+    @State private var currentIndex1: Int = 0
     // Timer state for auto-scrolling
     @State private var autoScrollTimer: Timer?
     
@@ -52,10 +59,17 @@ struct HomeView: View {
                         AsyncImageCard(imageURL: urlString, height: 180, width: UIScreen.main.bounds.width, corner: 0)
                     }
                     .frame(height: 180)
-                    
                     PageIndicator(
                             count: originalBanners.count,
                             currentIndex: currentIndex
+                        )
+                    
+                    TrueInfiniteCarousel(items: originalBanners1, height: 180, currentIndex: $currentIndex1) { urlString in
+                        AsyncImageCard(imageURL: urlString, height: 180, width: UIScreen.main.bounds.width, corner: 0)
+                    }
+                    PageIndicator(
+                            count: originalBanners1.count,
+                            currentIndex: currentIndex1
                         )
                 }
                 
