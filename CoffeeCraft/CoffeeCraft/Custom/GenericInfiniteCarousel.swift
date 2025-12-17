@@ -116,14 +116,13 @@ struct GenericInfiniteCarousel<Content: View, T: Hashable>: UIViewRepresentable 
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
             return CGSize(width: collectionView.bounds.width, height: parent.height)
         }
-
-        // MARK: Infinite Logic
+        
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-            adjustIfNeeded(scrollView)
-        }
+            let pageWidth = scrollView.bounds.width
+            let page = Int(round(scrollView.contentOffset.x / pageWidth))
+            let itemCount = parent.items.count
 
-        func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-            adjustIfNeeded(scrollView)
+            parent.currentIndex = page % itemCount
         }
 
         private func adjustIfNeeded(_ scrollView: UIScrollView) {
@@ -154,21 +153,36 @@ struct GenericInfiniteCarousel<Content: View, T: Hashable>: UIViewRepresentable 
         // MARK: Auto Scroll
 
         func startAutoScroll() {
-            // Invalidate existing timer if any
-
             timer?.invalidate()
+            
             timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
-                guard let self = self, let cv = self.collectionView else { return }
-                
-                // Calculate the next page index
-                let currentPage = Int(round(cv.contentOffset.x / cv.bounds.width))
+                guard let self = self,
+                      let cv = self.collectionView else { return }
+
+                let pageWidth = cv.bounds.width
+                let itemCount = self.parent.items.count
+
+                var currentPage = Int(round(cv.contentOffset.x / pageWidth))
+
+                // 🔑 PRE-RESET (NO FLASH)
+                if currentPage >= itemCount * 2 {
+                    currentPage -= itemCount
+                    cv.setContentOffset(
+                        CGPoint(x: CGFloat(currentPage) * pageWidth, y: 0),
+                        animated: false
+                    )
+                }
+
                 let nextPage = currentPage + 1
 
+                // Animate safely
                 cv.setContentOffset(
-                    CGPoint(x: CGFloat(nextPage) * cv.bounds.width, y: 0),
+                    CGPoint(x: CGFloat(nextPage) * pageWidth, y: 0),
                     animated: true
                 )
-                // AdjustIfNeeded will be called when animation finishes
+
+                // Update real index
+                self.parent.currentIndex = nextPage % itemCount
             }
         }
     }
