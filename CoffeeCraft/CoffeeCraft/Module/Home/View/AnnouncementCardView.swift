@@ -13,7 +13,7 @@ struct AnnouncementCardView: View {
     var body: some View {
         Button(action: { onClick?() }) {
             VStack(alignment: .leading, spacing: 10) {
-                AsyncImageCard(imageURL: announcement.imageName ?? "", height: 180, width: UIScreen.main.bounds.width - 32, corner: 0)
+                AsyncImageCard(imageURL: announcement.imageName ?? "", height: 200, width: UIScreen.main.bounds.width - 32, corner: 0)
                 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(announcement.title ?? "")

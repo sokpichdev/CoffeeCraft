@@ -9,6 +9,7 @@ import SDWebImage
 
 // MARK: - HomeView
 struct HomeView: View {
+    @Binding var selectedTab: Tab
     private let originalBanners = [
         "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
         "https://i.postimg.cc/7hwm7VhT/image.png",
@@ -28,8 +29,8 @@ struct HomeView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 VStack(spacing: 8) {
-                    InfiniteCarousel(items: originalBanners, height: 180, width: UIScreen.main.bounds.width, currentIndex: $currentIndex) { urlString in
-                        AsyncImageCard(imageURL: urlString, height: 180, width: UIScreen.main.bounds.width, corner: 0)
+                    InfiniteCarousel(items: originalBanners, height: 200, width: UIScreen.main.bounds.width, currentIndex: $currentIndex) { urlString in
+                        AsyncImageCard(imageURL: urlString, height: 200, width: UIScreen.main.bounds.width, corner: 0)
                     }
                     PageIndicator(
                             count: originalBanners.count,
@@ -44,7 +45,9 @@ struct HomeView: View {
                     .padding(.horizontal)
                 
                 HStack(spacing: 20) {
-                    PickUpButton(onClick: { })
+                    PickUpButton(onClick: {
+                        selectedTab = .menu
+                    })
                     PickUpButton(title: "Delivery") {}
                 }
                 .padding(.horizontal)
