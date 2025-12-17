@@ -9,37 +9,15 @@ import SDWebImage
 
 // MARK: - HomeView
 struct HomeView: View {
-    // 1. Data
     private let originalBanners = [
-        "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
-        "https://i.postimg.cc/7hwm7VhT/image.png",
-        "https://i.postimg.cc/Z5Wn4zHf/image.png",
-        "https://i.postimg.cc/G903q40J/image.png"
-    ] // N = 4 (Real items)
-    private let originalBanners1 = [
         "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
         "https://i.postimg.cc/7hwm7VhT/image.png",
         "https://i.postimg.cc/Z5Wn4zHf/image.png",
         "https://i.postimg.cc/G903q40J/image.png"
     ]
 
-    // 2. Looping Data (Buffer: [D, A, B, C, D, A] -> 6 items)
-    private var loopedBanners: [String] {
-        guard let first = originalBanners.first, let last = originalBanners.last else { return originalBanners }
-        var temp = [String]()
-        temp.append(last)               // Index 0: Duplicate of last
-        temp.append(contentsOf: originalBanners) // Index 1 to N: Real items
-        temp.append(first)              // Index N+1: Duplicate of first
-        return temp
-    }
-
-    // 3. State bound to the TabView (0 to N+1)
-    @State private var currentIndex: Int = 0 // Tracks the real 0-3 index
-    @State private var currentIndex1: Int = 0
-    // Timer state for auto-scrolling
-    @State private var autoScrollTimer: Timer?
+    @State private var currentIndex: Int = 0
     
-    // Other data
     let announcements = [
         Announcement(id: 1, title: "New Coffee Blend!", description: "Try our new seasonal coffee.", imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg"),
         Announcement(id: 2, title: "Weekend Special", description: "Discount for all drinks this weekend.", imageName: ""),
@@ -50,26 +28,12 @@ struct HomeView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 VStack(spacing: 8) {
-                    GenericInfiniteCarousel(
-                        items: originalBanners,
-                        height: 180,
-                        viewWidth: UIScreen.main.bounds.width,
-                        currentIndex: $currentIndex
-                    ) { urlString in
+                    InfiniteCarousel(items: originalBanners, height: 180, width: UIScreen.main.bounds.width, currentIndex: $currentIndex) { urlString in
                         AsyncImageCard(imageURL: urlString, height: 180, width: UIScreen.main.bounds.width, corner: 0)
                     }
-                    .frame(height: 180)
                     PageIndicator(
                             count: originalBanners.count,
                             currentIndex: currentIndex
-                        )
-                    
-                    TrueInfiniteCarousel(items: originalBanners1, height: 180, currentIndex: $currentIndex1) { urlString in
-                        AsyncImageCard(imageURL: urlString, height: 180, width: UIScreen.main.bounds.width, corner: 0)
-                    }
-                    PageIndicator(
-                            count: originalBanners1.count,
-                            currentIndex: currentIndex1
                         )
                 }
                 
