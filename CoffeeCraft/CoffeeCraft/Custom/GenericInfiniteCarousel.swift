@@ -76,6 +76,8 @@ struct GenericInfiniteCarousel<Content: View, T: Hashable>: UIViewRepresentable 
 
         let parent: GenericInfiniteCarousel<Content, T>
         var timer: Timer?
+        var resumeTimer: Timer?
+        var isUserDragging = false
 
         weak var collectionView: UICollectionView?
         
@@ -117,7 +119,17 @@ struct GenericInfiniteCarousel<Content: View, T: Hashable>: UIViewRepresentable 
             return CGSize(width: collectionView.bounds.width, height: parent.height)
         }
         
+        func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+            isUserDragging = true
+            stopAutoScroll()
+        }
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            scheduleResume()
+        }
+
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+            scheduleResume()
+            
             let pageWidth = scrollView.bounds.width
             let page = Int(round(scrollView.contentOffset.x / pageWidth))
             let itemCount = parent.items.count
@@ -152,12 +164,18 @@ struct GenericInfiniteCarousel<Content: View, T: Hashable>: UIViewRepresentable 
         }
         // MARK: Auto Scroll
 
-        func startAutoScroll() {
+        func stopAutoScroll() {
             timer?.invalidate()
-            
+            timer = nil
+        }
+
+        func startAutoScroll() {
+            stopAutoScroll()
+
             timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
                 guard let self = self,
-                      let cv = self.collectionView else { return }
+                      let cv = self.collectionView,
+                      !self.isUserDragging else { return }
 
                 let pageWidth = cv.bounds.width
                 let itemCount = self.parent.items.count
@@ -185,6 +203,16 @@ struct GenericInfiniteCarousel<Content: View, T: Hashable>: UIViewRepresentable 
                 self.parent.currentIndex = nextPage % itemCount
             }
         }
+
+        func scheduleResume() {
+            resumeTimer?.invalidate()
+
+            resumeTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
+                self?.isUserDragging = false
+                self?.startAutoScroll()
+            }
+        }
+
     }
 }
 
