@@ -53,14 +53,10 @@ struct HomeView: View {
                     }
                     .frame(height: 180)
                     
-                    HStack(spacing: 6) {
-                        ForEach(0..<originalBanners.count, id: \.self) { index in
-                            Capsule()
-                                .fill(index == currentIndex ? Color.brown : .gray.opacity(0.4))
-                                .frame(width: index == currentIndex ? 16 : 6, height: 6)
-                                .animation(.easeInOut, value: currentIndex)
-                        }
-                    }
+                    PageIndicator(
+                            count: originalBanners.count,
+                            currentIndex: currentIndex
+                        )
                 }
                 
                 Spacer().frame(height: 10)
@@ -134,4 +130,23 @@ struct Announcement: Identifiable {
     let title: String?
     let description: String?
     let imageName: String?
+}
+
+struct PageIndicator: View {
+    let count: Int
+    let currentIndex: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<count, id: \.self) { index in
+                Capsule()
+                    .fill(index == currentIndex ? Color.brown : Color.gray.opacity(0.3))
+                    .frame(
+                        width: index == currentIndex ? 18 : 8,
+                        height: 8
+                    )
+                    .animation(.easeInOut(duration: 0.25), value: currentIndex)
+            }
+        }
+    }
 }
