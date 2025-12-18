@@ -18,52 +18,72 @@ struct HomeView: View {
     ]
 
     @State private var currentIndex: Int = 0
-    
     let announcements = [
         Announcement(id: 1, title: "New Coffee Blend!", description: "Try our new seasonal coffee.", imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg"),
         Announcement(id: 2, title: "Weekend Special", description: "Discount for all drinks this weekend.", imageName: ""),
         Announcement(id: 3, title: "Free Cookie", description: "Get a free cookie with any coffee.", imageName: "")
     ]
-    
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
-                VStack(spacing: 8) {
-                    InfiniteCarousel(items: originalBanners, height: 200, width: UIScreen.main.bounds.width, currentIndex: $currentIndex) { urlString in
-                        AsyncImageCard(imageURL: urlString, height: 200, width: UIScreen.main.bounds.width, corner: 0)
-                    }
-                    PageIndicator(
-                            count: originalBanners.count,
-                            currentIndex: currentIndex
+                
+                // MARK: - Stretchy Header Banner
+                GeometryReader { geo in
+                    let minY = geo.frame(in: .global).minY
+                    let baseHeight: CGFloat = 240
+                    
+                    /// calculate a height that grows BOTH ways
+                    /// the +max(0, minY) makes it grow down
+                    /// The extra +minY logic ensures it stays pinned to the top
+                    let dynamicHeight = baseHeight + (minY > 0 ? minY : 0)
+                    
+                    InfiniteCarousel(
+                        items: originalBanners,
+                        height: dynamicHeight,
+                        width: UIScreen.main.bounds.width,
+                        currentIndex: $currentIndex
+                    ) { urlString in
+                        AsyncImageCard(
+                            imageURL: urlString,
+                            height: dynamicHeight,
+                            width: UIScreen.main.bounds.width,
+                            corner: 0
                         )
+                    }
+                    /// It keeps the top of the image at the top of the screen
+                    .offset(y: minY > 0 ? -minY : 0)
                 }
+                .frame(height: 240)
                 
-                Spacer().frame(height: 10)
-                
-                Text("Good Morning, Sok! ☀️")
-                    .font(.customTitle2.bold())
+                VStack(spacing: 12) {
+                    PageIndicator(count: originalBanners.count, currentIndex: currentIndex)
+                        .padding(.top, 5)
+
+                    Text("Good Morning, Sok! ☀️")
+                        .font(.title2.bold())
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+
+                    HStack(spacing: 20) {
+                        PickUpButton(onClick: { selectedTab = .menu })
+                        PickUpButton(title: "Delivery") {}
+                    }
                     .padding(.horizontal)
-                
-                HStack(spacing: 20) {
-                    PickUpButton(onClick: {
-                        selectedTab = .menu
-                    })
-                    PickUpButton(title: "Delivery") {}
-                }
-                .padding(.horizontal)
-                .zIndex(1)
-                announcementLabel
-                
-                VStack(spacing: 20) {
-                    ForEach(announcements.prefix(3)) { ann in
-                        NavigationLink {
-                            AnnouncementDetailView(announcement: ann)
-                        } label: {
-                            AnnouncementCardView(announcement: ann)
+
+                    announcementLabel
+                    
+                    VStack(spacing: 20) {
+                        ForEach(announcements.prefix(3)) { ann in
+                            NavigationLink {
+                                AnnouncementDetailView(announcement: ann)
+                            } label: {
+                                AnnouncementCardView(announcement: ann)
+                            }
                         }
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
                 
                 Spacer(minLength: 30)
             }

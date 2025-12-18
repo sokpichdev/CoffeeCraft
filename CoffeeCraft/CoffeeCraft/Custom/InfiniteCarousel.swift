@@ -50,7 +50,7 @@ struct InfiniteCarousel<Content: View, T: Hashable>: View {
         .onAppear {
             // Dynamically start in the middle set
             scrollPosition = items.count * centerOffset
-            startAutoScroll()
+            scheduleAutoScrollRestart()
         }
         .onChange(of: scrollPosition) { _, newValue in
             guard let newValue, items.count > 0 else { return }
