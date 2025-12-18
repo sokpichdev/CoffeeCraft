@@ -55,8 +55,12 @@ struct HomeView: View {
                 announcementLabel
                 
                 VStack(spacing: 20) {
-                    ForEach(announcements.prefix(3), id: \.id) { ann in
-                        AnnouncementCardView(announcement: ann) {}
+                    ForEach(announcements.prefix(3)) { ann in
+                        NavigationLink {
+                            AnnouncementDetailView(announcement: ann)
+                        } label: {
+                            AnnouncementCardView(announcement: ann)
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -65,21 +69,24 @@ struct HomeView: View {
             }
         }
         .edgesIgnoringSafeArea(.top)
+
     }
         
     var announcementLabel: some View {
         HStack {
             Text("Announcements")
                 .font(.customHeadline)
+            
             Spacer()
-            Button(action: {
-                print("See All button clicked!")
-            }) {
+            
+            NavigationLink {
+                AnnouncementsListView()
+            } label: {
                 Text("See All")
                     .foregroundColor(.blue)
                     .padding(8)
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
         .padding(.horizontal)
     }
