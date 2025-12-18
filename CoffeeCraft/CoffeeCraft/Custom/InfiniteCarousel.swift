@@ -62,7 +62,7 @@ struct InfiniteCarousel<Content: View, T: Hashable>: View {
         
         timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
             if !isUserScrolling {
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation {
                     if let current = scrollPosition {
                         scrollPosition = current + 1
                     }
