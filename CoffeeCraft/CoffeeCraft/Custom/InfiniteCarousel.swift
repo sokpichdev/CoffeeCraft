@@ -15,14 +15,28 @@ struct InfiniteCarousel<Content: View, T: Hashable>: View {
     
     @State private var scrollPosition: Int?
     @State private var timer: Timer?
-    @State private var isUserScrolling = false
+    @State private var restartWorkItem: DispatchWorkItem?
+    @State private var isUserDragging = false
+
+    // MARK: - Dynamic Configuration
+    // If <= 5 items, use 5 sets (25 items max). If > 5 items, 3 sets is plenty of buffer.
+    private var multiplier: Int {
+        items.count <= 5 ? 5 : 3
+    }
     
+    private var repeatedItems: [T] {
+        Array(repeating: items, count: multiplier).flatMap { $0 }
+    }
+    
+    private var centerOffset: Int {
+        multiplier / 2 // Returns 2 for multiplier 5, or 1 for multiplier 3
+    }
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 0) { // Using LazyHStack for true infinite scroll
-                ForEach(0..<Int.max, id: \.self) { index in
-                    let actualIndex = index % items.count
-                    content(items[actualIndex])
+            HStack(spacing: 0) {
+                ForEach(repeatedItems.indices, id: \.self) { index in
+                    content(repeatedItems[index])
                         .frame(width: width, height: height)
                         .id(index)
                 }
@@ -32,47 +46,95 @@ struct InfiniteCarousel<Content: View, T: Hashable>: View {
         .scrollPosition(id: $scrollPosition)
         .scrollTargetBehavior(.paging)
         .frame(height: height)
-        .onChange(of: scrollPosition) { oldValue, newValue in
-            guard let newValue = newValue else { return }
-            currentIndex = newValue % items.count
-            isUserScrolling = false
-        }
+        .background(Color.black)
         .onAppear {
-            // Start at a large middle point for infinite scrolling
-            scrollPosition = 1000 * items.count + currentIndex
+            // Dynamically start in the middle set
+            scrollPosition = items.count * centerOffset
             startAutoScroll()
+        }
+        .onChange(of: scrollPosition) { _, newValue in
+            guard let newValue, items.count > 0 else { return }
+            currentIndex = newValue % items.count
+            recenterIfNeeded(newValue)
         }
         .onDisappear {
             stopAutoScroll()
+            cancelRestart()
         }
         .gesture(
             DragGesture()
                 .onChanged { _ in
-                    isUserScrolling = true
+                    isUserDragging = true
                     stopAutoScroll()
+                    cancelRestart()
                 }
                 .onEnded { _ in
-                    startAutoScroll()
+                    isUserDragging = false
+                    scheduleAutoScrollRestart()
                 }
         )
     }
+
+    // MARK: - Auto Scroll
     
     private func startAutoScroll() {
         stopAutoScroll()
-        
         timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
-            if !isUserScrolling {
-                withAnimation {
-                    if let current = scrollPosition {
-                        scrollPosition = current + 1
-                    }
+            guard !isUserDragging, let current = scrollPosition else { return }
+            // Ensure the UI update happens on the main thread
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    scrollPosition = current + 1
                 }
             }
         }
     }
-    
+
     private func stopAutoScroll() {
         timer?.invalidate()
         timer = nil
     }
+
+    // MARK: - Delayed Restart
+
+    private func scheduleAutoScrollRestart() {
+        cancelRestart()
+
+        let workItem = DispatchWorkItem {
+            startAutoScroll()
+        }
+
+        restartWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: workItem)
+    }
+
+    private func cancelRestart() {
+        restartWorkItem?.cancel()
+        restartWorkItem = nil
+    }
+
+    // MARK: - Infinite Loop Logic
+    
+    private func recenterIfNeeded(_ index: Int) {
+            let count = items.count
+            
+            // Define the "Safe Zone" (The middle set)
+            let middleStart = count * centerOffset
+            let middleEnd = middleStart + count
+
+            // If user exits the middle set, we snap them back
+            if index < middleStart || index >= middleEnd {
+                let delay = isUserDragging ? 0.0 : 0.31
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    let remainder = index % count
+                    let centeredIndex = middleStart + remainder
+                    
+                    // Silent snap to the corresponding item in the middle set
+                    if scrollPosition != centeredIndex {
+                        scrollPosition = centeredIndex
+                    }
+                }
+            }
+        }
 }
