@@ -31,11 +31,7 @@ struct HomeView: View {
                 // MARK: - Stretchy Header Banner
                 GeometryReader { geo in
                     let minY = geo.frame(in: .global).minY
-                    let baseHeight: CGFloat = 240
-                    
-                    /// calculate a height that grows BOTH ways
-                    /// the +max(0, minY) makes it grow down
-                    /// The extra +minY logic ensures it stays pinned to the top
+                    let baseHeight: CGFloat = 250
                     let dynamicHeight = baseHeight + (minY > 0 ? minY : 0)
                     
                     InfiniteCarousel(
@@ -51,14 +47,16 @@ struct HomeView: View {
                             corner: 0
                         )
                     }
-                    /// It keeps the top of the image at the top of the screen
+                    .overlay(
+                        PageIndicator(count: originalBanners.count, currentIndex: currentIndex)
+                            .padding(.bottom, 15), // Gap from the bottom of the image
+                        alignment: .bottom
+                    )
                     .offset(y: minY > 0 ? -minY : 0)
                 }
-                .frame(height: 240)
+                .frame(height: 250)
                 
                 VStack(spacing: 12) {
-                    PageIndicator(count: originalBanners.count, currentIndex: currentIndex)
-                        .padding(.top, 5)
 
                     Text("Good Morning, Sok! ☀️")
                         .font(.title2.bold())
@@ -148,7 +146,8 @@ struct PageIndicator: View {
         HStack(spacing: 8) {
             ForEach(0..<count, id: \.self) { index in
                 Capsule()
-                    .fill(index == currentIndex ? Color.brown : Color.gray.opacity(0.3))
+                    .fill(index == currentIndex ? Color.brown : Color.white.opacity(0.8))
+                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                     .frame(
                         width: index == currentIndex ? 18 : 8,
                         height: 8
