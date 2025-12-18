@@ -6,15 +6,13 @@
 //
 import SwiftUI
 
-import SwiftUI
-
 struct OrdersView: View {
     @StateObject private var orderVM = OrderViewModel()
 
     var body: some View {
         ZStack {
-            // Full background color
-            Color(.systemGroupedBackground)
+            // Adaptive background
+            Color(uiColor: .secondarySystemBackground)
                 .ignoresSafeArea()
             
             if orderVM.orders.isEmpty {
@@ -27,6 +25,8 @@ struct OrdersView: View {
                         .fontWeight(.semibold)
                     Text("Your recent coffee orders will appear here.")
                         .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -153,9 +153,11 @@ struct OrderCardView: View {
             }
         }
         .padding()
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 3)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(uiColor: .tertiarySystemBackground))
+        )
+        .shadow(color: Color.primary.opacity(0.05), radius: 6, x: 0, y: 3)
     }
 
     func statusColor(_ status: String) -> Color {

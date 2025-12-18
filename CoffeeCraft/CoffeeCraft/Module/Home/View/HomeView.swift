@@ -87,7 +87,9 @@ struct HomeView: View {
             }
         }
         .edgesIgnoringSafeArea(.top)
-
+//        .task {
+//            await ProductSeeder.seedSampleProducts()
+//        }
     }
         
     var announcementLabel: some View {
