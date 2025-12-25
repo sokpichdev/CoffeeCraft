@@ -22,10 +22,10 @@ struct AnnouncementDetailView: View {
                 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(announcement.title ?? "")
-                        .font(.customTitle2.bold())
+                        .font(.title2.bold())
                     
                     Text(announcement.description ?? "")
-                        .font(.customBody)
+                        .font(.body)
                         .foregroundColor(.gray)
                 }
                 .padding(.horizontal)

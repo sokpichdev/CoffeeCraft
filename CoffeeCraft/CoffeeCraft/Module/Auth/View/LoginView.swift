@@ -39,7 +39,7 @@ struct LoginView: View {
                 Button("Forgot Password?") {
                     showForgotPassword = true
                 }
-                .font(.customCallout)
+                .font(.callout)
                 .foregroundStyle(Color.white)
             }
             .padding(.top, 4)

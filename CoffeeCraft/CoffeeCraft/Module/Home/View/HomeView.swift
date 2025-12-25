@@ -95,7 +95,7 @@ struct HomeView: View {
     var announcementLabel: some View {
         HStack {
             Text("Announcements")
-                .font(.customHeadline)
+                .font(.headline)
             
             Spacer()
             
@@ -103,7 +103,6 @@ struct HomeView: View {
                 AnnouncementsListView()
             } label: {
                 Text("See All")
-                    .foregroundColor(.blue)
                     .padding(8)
             }
             .buttonStyle(.plain)

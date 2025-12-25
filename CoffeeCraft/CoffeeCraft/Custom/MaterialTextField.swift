@@ -160,7 +160,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                 
                 if labelFloating {
                     Text(placeholder)
-                        .font(.customBody)
+                        .font(.body)
                         .foregroundColor(isError ? .red : .gray)
                         .padding(.horizontal, 6)
                         .background(Color.white.opacity(0.8))
@@ -177,7 +177,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                         
                         if !labelFloating {
                             Text(placeholder)
-                                .font(.customBody)
+                                .font(.body)
                                 .foregroundColor(.gray)
 //                                .matchedGeometryEffect(id: "placeholder", in: animation)
                                 .scaleEffect(1.0)
@@ -189,7 +189,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                                 TextField("", text: $text)
                             }
                         }
-                        .font(.customBody)
+                        .font(.body)
                         .focused($focused)
                         .animation(.easeInOut(duration: 0.22), value: labelFloating)
                         .keyboardType(keyboardType)
@@ -217,7 +217,7 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
             
             if isError {
                 Text(errorText)
-                    .font(.customCaption)
+                    .font(.caption)
                     .foregroundColor(.red)
             }
         }
