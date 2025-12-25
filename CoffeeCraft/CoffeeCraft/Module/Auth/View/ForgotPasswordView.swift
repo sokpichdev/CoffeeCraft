@@ -19,7 +19,7 @@ struct ForgotPasswordView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 20) {
                     Text("Enter the email address associated with your account to receive a password reset link.")
-                        .font(.customCallout)
+                        .font(.callout)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     

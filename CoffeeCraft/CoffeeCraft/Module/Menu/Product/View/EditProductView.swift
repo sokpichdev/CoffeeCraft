@@ -82,7 +82,7 @@ struct EditProductView: View {
                 // MARK: - Availability Toggle
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Status", systemImage: "checkmark.circle")
-                        .font(.customHeadline)
+                        .font(.headline)
                         .foregroundColor(.brown)
                         .padding(.bottom, 4)
                     

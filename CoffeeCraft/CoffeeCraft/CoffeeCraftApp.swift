@@ -28,6 +28,13 @@ struct CoffeeCraftApp: App {
     }
 
     func configureFirebase(for env: FirebaseEnvironment) {
+        for family in UIFont.familyNames {
+            print("Family: \(family)")
+            for name in UIFont.fontNames(forFamilyName: family) {
+                print("  Font Name: \(name)")
+            }
+        }
+
         let plistName: String
 
         switch env {

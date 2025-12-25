@@ -15,10 +15,11 @@ struct AnnouncementCardView: View {
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(announcement.title ?? "")
-                    .font(.customHeadline)
+                    .font(.headline)
+                    .foregroundColor(.primary)
                 
                 Text(announcement.description ?? "")
-                    .font(.customSubheadline)
+                    .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)

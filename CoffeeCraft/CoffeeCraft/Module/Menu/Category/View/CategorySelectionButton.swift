@@ -26,7 +26,7 @@ struct CategorySelectionButton: View {
                 
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)
-                    .font(.customCaption)
+                    .font(.caption)
             }
             .padding(.vertical, 10)
             .contentShape(Rectangle())

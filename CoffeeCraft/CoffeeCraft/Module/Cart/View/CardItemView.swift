@@ -21,13 +21,13 @@ struct CardItemView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.product.name)
-                    .font(.customHeadline)
+                    .font(.headline)
 
                 if !item.selections.isEmpty {
                     ForEach(item.selections.keys.sorted(), id: \.self) { key in
                         if let value = item.selections[key], !value.isEmpty {
                             Text("\(key): \(value)")
-                                .font(.customSubheadline)
+                                .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -35,13 +35,13 @@ struct CardItemView: View {
 
                 if !item.extras.isEmpty {
                     Text("Extras: \(item.extras.joined(separator: ", "))")
-                        .font(.customCaption2)
+                        .font(.caption2)
                         .foregroundColor(.gray)
                 }
             }
             Spacer()
             Text(String(format: "$%.2f", item.totalPrice))
-                .font(.customSubheadline)
+                .font(.subheadline)
                 .bold()
         }
         .padding()
