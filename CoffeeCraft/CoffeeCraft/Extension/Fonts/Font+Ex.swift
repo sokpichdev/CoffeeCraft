@@ -8,6 +8,12 @@
 import SwiftUI
 import UIKit
 
+enum AppFontConfig {
+    
+    /// Change this ONE line to switch the entire app font
+    static var primary: AppFont = .nunito
+}
+
 // MARK: - App Font Weight
 
 enum AppFontWeight {
@@ -71,7 +77,7 @@ enum AppFont {
 extension Font {
     
     static func app(
-        _ font: AppFont = .nunito,
+        _ font: AppFont = AppFontConfig.primary,
         weight: AppFontWeight = .regular,
         size: CGFloat,
         relativeTo textStyle: Font.TextStyle = .body
@@ -100,7 +106,6 @@ extension Font {
 
     // MARK: - Large Titles
     static let largeTitle = Font.app(
-        .nunito,
         weight: .bold,
         size: 34,
         relativeTo: .largeTitle
@@ -108,21 +113,18 @@ extension Font {
 
     // MARK: - Titles
     static let title = Font.app(
-        .nunito,
         weight: .bold,
         size: 28,
         relativeTo: .title
     )
 
     static let title2 = Font.app(
-        .nunito,
         weight: .semibold,
         size: 22,
         relativeTo: .title2
     )
 
     static let title3 = Font.app(
-        .nunito,
         weight: .semibold,
         size: 20,
         relativeTo: .title3
@@ -130,7 +132,6 @@ extension Font {
 
     // MARK: - Headline
     static let headline = Font.app(
-        .nunito,
         weight: .semibold,
         size: 17,
         relativeTo: .headline
@@ -138,21 +139,18 @@ extension Font {
 
     // MARK: - Body
     static let body = Font.app(
-        .nunito,
         weight: .regular,
         size: 17,
         relativeTo: .body
     )
 
     static let callout = Font.app(
-        .nunito,
         weight: .regular,
         size: 16,
         relativeTo: .callout
     )
 
     static let subheadline = Font.app(
-        .nunito,
         weight: .regular,
         size: 15,
         relativeTo: .subheadline
@@ -160,7 +158,6 @@ extension Font {
 
     // MARK: - Footnote
     static let footnote = Font.app(
-        .nunito,
         weight: .regular,
         size: 13,
         relativeTo: .footnote
@@ -168,14 +165,12 @@ extension Font {
 
     // MARK: - Captions
     static let caption = Font.app(
-        .nunito,
         weight: .medium,
         size: 12,
         relativeTo: .caption
     )
 
     static let caption2 = Font.app(
-        .nunito,
         weight: .regular,
         size: 11,
         relativeTo: .caption2
