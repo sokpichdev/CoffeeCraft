@@ -14,7 +14,7 @@ enum TextFieldType {
     case normal
 }
 
-struct MaterialTextField<Leading: View, Trailing: View>: View {
+struct MaterialTextField: View {
     @Binding var text: String
     var placeholder: String
     var charLimit: Int = 254
@@ -24,8 +24,8 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     var isError: Bool = false
     var errorText: String = ""
     var isAutoCapitalize: UITextAutocapitalizationType = .sentences
-    var leading: Leading?
-    var trailing: Trailing?
+    var leading: AnyView?
+    var trailing: AnyView?
     var onTextChanged: ((String) -> Void)?
     
     @FocusState private var focused: Bool
@@ -33,8 +33,8 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     @State var textField = UITextField()
     @State private var keepFloating = false
     
-    // MARK: - Has Leading & Trailing
-    init(
+    // MARK: - Single Universal Init
+    init<Leading: View, Trailing: View>(
         text: Binding<String>,
         placeholder: String,
         charLimit: Int = 254,
@@ -44,8 +44,8 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         isError: Bool = false,
         errorText: String = "",
         isAutoCapitalize: UITextAutocapitalizationType = .sentences,
-        @ViewBuilder leading: () -> Leading,
-        @ViewBuilder trailing: () -> Trailing,
+        @ViewBuilder leading: () -> Leading = { EmptyView() },
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() },
         onTextChanged: ((String) -> Void)? = nil
     ) {
         self._text = text
@@ -57,88 +57,14 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
         self.isError = isError
         self.errorText = errorText
         self.isAutoCapitalize = isAutoCapitalize
-        self.leading = leading()
-        self.trailing = trailing()
+        
+        let leadingView = leading()
+        self.leading = leadingView is EmptyView ? nil : AnyView(leadingView)
+        
+        let trailingView = trailing()
+        self.trailing = trailingView is EmptyView ? nil : AnyView(trailingView)
+        
         self.onTextChanged = onTextChanged
-    }
-    
-    // MARK: - Has Leading, No Trailing
-    init(
-        text: Binding<String>,
-        placeholder: String,
-        isDisable: Bool = false,
-        isError: Bool = false,
-        errorText: String = "",
-        charLimit: Int = 254,
-        keyboardType: UIKeyboardType = .default,
-        isAutoCapitalize: UITextAutocapitalizationType = .sentences,
-        fieldtype: TextFieldType = .normal,
-        @ViewBuilder leading: () -> Leading,
-        onTextChanged: ((String) -> Void)? = nil
-    ) where Trailing == EmptyView {
-        self._text = text
-        self.placeholder = placeholder
-        self.charLimit = charLimit
-        self.keyboardType = keyboardType
-        self.fieldtype = fieldtype
-        self.isDisable = isDisable
-        self.isError = isError
-        self.errorText = errorText
-        self.isAutoCapitalize = isAutoCapitalize
-        self.leading = leading()
-        self.trailing = nil
-        self.onTextChanged = onTextChanged
-    }
-    
-    // MARK: - No Leading, Has Trailing
-    init(
-        text: Binding<String>,
-        placeholder: String,
-        charLimit: Int = 254,
-        keyboardType: UIKeyboardType = .default,
-        fieldtype: TextFieldType = .normal,
-        isDisable: Bool = false,
-        isError: Bool = false,
-        errorText: String = "",
-        isAutoCapitalize: UITextAutocapitalizationType = .sentences,
-        @ViewBuilder trailing: () -> Trailing,
-        onTextChanged: ((String) -> Void)? = nil
-    ) where Leading == EmptyView {
-        self._text = text
-        self.placeholder = placeholder
-        self.charLimit = charLimit
-        self.keyboardType = keyboardType
-        self.fieldtype = fieldtype
-        self.isDisable = isDisable
-        self.isError = isError
-        self.errorText = errorText
-        self.isAutoCapitalize = isAutoCapitalize
-        self.leading = nil
-        self.trailing = trailing()
-        self.onTextChanged = onTextChanged
-    }
-    
-    // MARK: - No Leading, No Trailing
-    init(
-        text: Binding<String>,
-        placeholder: String,
-        charLimit: Int = 254,
-        keyboardType: UIKeyboardType = .default,
-        fieldtype: TextFieldType = .normal,
-        isDisable: Bool = false,
-        isError: Bool = false,
-        errorText: String = ""
-    ) where Leading == EmptyView, Trailing == EmptyView {
-        self._text = text
-        self.placeholder = placeholder
-        self.charLimit = charLimit
-        self.keyboardType = keyboardType
-        self.fieldtype = fieldtype
-        self.isDisable = isDisable
-        self.isError = isError
-        self.errorText = errorText
-        self.leading = nil
-        self.trailing = nil
     }
     
     var labelFloating: Bool {
@@ -147,7 +73,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
     
     var borderColor: Color {
         if isError { return .red }
-//        if focused { return .blue }
         return .gray.opacity(0.5)
     }
     
@@ -166,7 +91,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                         .background(Color.white.opacity(0.8))
                         .offset(x: 12, y: -28)
                         .scaleEffect(1.0)
-//                        .matchedGeometryEffect(id: "placeholder", in: animation)
                 }
                 
                 HStack(spacing: 0) {
@@ -179,7 +103,6 @@ struct MaterialTextField<Leading: View, Trailing: View>: View {
                             Text(placeholder)
                                 .font(.body)
                                 .foregroundColor(.gray)
-//                                .matchedGeometryEffect(id: "placeholder", in: animation)
                                 .scaleEffect(1.0)
                         }
                         Group {
