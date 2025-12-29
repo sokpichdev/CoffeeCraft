@@ -55,7 +55,7 @@ struct CustomTextField1<TrailingView: View>: View {
                     textField: $textField,
                     isFocus: $isFocus,
                     showValidate: isValidate, trailingView: trailingView)
-                .onChange(of: text) { value in
+                .onChange(of: text) { value, _ in
                     onTextChange?(value)
 //                    isValidate = false
 //                    showValidate = false
@@ -140,7 +140,7 @@ struct CustomTextField1<TrailingView: View>: View {
                     .foregroundColor(Color.textFieldError)
             }
         }
-        .onChange(of: isValidate) {_ in
+        .onChange(of: isValidate) {
             if isValidate {
                 showValidate = true
                 textField.isValidate = true
@@ -149,7 +149,7 @@ struct CustomTextField1<TrailingView: View>: View {
                 textField.isValidate = false
             }
         }
-        .onChange(of: isFocus) { _ in
+        .onChange(of: isFocus) {
             if !isFocus {
                 if isValidate {
                     showValidate = true

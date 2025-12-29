@@ -40,7 +40,7 @@ struct MenuView: View {
         .onAppear {
             productVM.listenProducts()
         }
-        .onChange(of: visibleSectionID) { newValue in
+        .onChange(of: visibleSectionID) { newValue, _ in
             selectedSectionID = newValue
         }
         .navigationDestination(for: Product.self) { product in
@@ -177,7 +177,7 @@ struct MenuView: View {
             .onPreferenceChange(SectionOffsetKey.self) { values in
                 if !isProgrammaticScroll { updateVisibleSection(values: values) }
             }
-            .onChange(of: selectedSectionID) { newValue in
+            .onChange(of: selectedSectionID) { newValue, _ in
                 if let id = newValue, isProgrammaticScroll {
                     withAnimation { contentProxy.scrollTo(id, anchor: .top) }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { isProgrammaticScroll = false }
