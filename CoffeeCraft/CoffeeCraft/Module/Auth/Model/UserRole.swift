@@ -17,3 +17,8 @@ struct User: Identifiable, Codable {
     var email: String
     var role: UserRole
 }
+
+struct FieldValidation {
+    var isValid: Bool = true
+    var message: String = ""
+}

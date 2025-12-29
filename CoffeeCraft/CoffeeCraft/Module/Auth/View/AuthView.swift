@@ -8,10 +8,6 @@ import SwiftUI
 
 struct AuthView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var email = ""
-    @State private var password = ""
-    @State private var name = ""
-    @State private var role: UserRole = .customer
     
     @State private var isLogin = true
 
@@ -31,10 +27,10 @@ struct AuthView: View {
                     
                     Group {
                         if isLogin {
-                            LoginView(email: $email, password: $password)
+                            LoginView()
                                 .transition(.move(edge: .leading).combined(with: .opacity))
                         } else {
-                            RegisterView(name: $name, email: $email, password: $password, role: $role)
+                            RegisterView()
                                 .transition(.move(edge: .trailing).combined(with: .opacity))
                         }
                     }
@@ -43,7 +39,7 @@ struct AuthView: View {
                     Button {
                         withAnimation(.spring()) {
                             isLogin.toggle()
-                            clearFields()
+                            authVM.resetForm()
                         }
                     } label: {
                         Text(isLogin ? "Don’t have an account? Sign Up" : "Already have an account? Login")
@@ -61,13 +57,5 @@ struct AuthView: View {
             }
             
         }
-        
-    }
-
-    private func clearFields() {
-        email = ""
-        password = ""
-        name = ""
-        role = .customer
     }
 }
