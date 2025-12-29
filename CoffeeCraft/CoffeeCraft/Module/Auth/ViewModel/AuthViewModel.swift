@@ -11,10 +11,24 @@ import FirebaseFirestore
 
 @MainActor
 class AuthViewModel: ObservableObject {
+    // MARK: - Form Fields
+    @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var name: String = ""
+    @Published var role: UserRole = .customer
+    
+    // MARK: - Validation State
+    @Published var emailValidation = FieldValidation()
+    @Published var passwordValidation = FieldValidation()
+    @Published var nameValidation = FieldValidation()
+    
+    // MARK: - UI State
+    @Published var isLoading = false
+    @Published var errorMessage: String?
     @Published var currentUser: User?
-    @Published var isLoading = true
+    
     private let db = Firestore.firestore()
-
+    
     init() {
         checkUser()
     }
@@ -71,3 +85,62 @@ class AuthViewModel: ObservableObject {
         currentUser = nil
     }
 }
+
+extension AuthViewModel {
+
+    func validateEmail() {
+        if email.isEmpty {
+            emailValidation = .init(isValid: false, message: "Email is required")
+        } else if !email.contains("@") {
+            emailValidation = .init(isValid: false, message: "Invalid email format")
+        } else {
+            emailValidation = .init()
+        }
+    }
+
+    func validatePassword() {
+        if password.count < 6 {
+            passwordValidation = .init(
+                isValid: false,
+                message: "Password must be at least 6 characters"
+            )
+        } else {
+            passwordValidation = .init()
+        }
+    }
+
+    func validateName() {
+        if name.isEmpty {
+            nameValidation = .init(isValid: false, message: "Name is required")
+        } else {
+            nameValidation = .init()
+        }
+    }
+
+    func validateLoginForm() -> Bool {
+        validateEmail()
+        validatePassword()
+        return emailValidation.isValid && passwordValidation.isValid
+    }
+
+    func validateRegisterForm() -> Bool {
+        validateName()
+        validateEmail()
+        validatePassword()
+        return nameValidation.isValid &&
+               emailValidation.isValid &&
+               passwordValidation.isValid
+    }
+    
+    func resetForm() {
+        email = ""
+        password = ""
+        name = ""
+        role = .customer
+        emailValidation = .init()
+        passwordValidation = .init()
+        nameValidation = .init()
+    }
+
+}
+

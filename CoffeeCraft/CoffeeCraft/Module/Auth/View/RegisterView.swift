@@ -8,20 +8,10 @@ import SwiftUI
 
 struct RegisterView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @Binding var name: String
-    @Binding var email: String
-    @Binding var password: String
-    @Binding var role: UserRole
-    @State private var isLoading = false
-    @FocusState private var focusedField: Field?
-
-    enum Field {
-        case name, email, password
-    }
 
     var body: some View {
         VStack(spacing: 16) {
-            CustomTextField1(text: $name,
+            CustomTextField1(text: $authVM.name,
                              placeHolder: "User Name",
                              charLimit: 15,
                              fieldType: .normal,
@@ -29,12 +19,12 @@ struct RegisterView: View {
                              leadingIcon: .username,
                              trailingView: EmptyView(),
                              isValidate: .constant(true),
-                             validateText: "Error Text",
+                             validateText: authVM.errorMessage ?? "",
                              isAutoCapitalize: .none,
                              onTextChange: { _ in
-                // check user name
+                authVM.validateName()
             })
-            CustomTextField1(text: $email,
+            CustomTextField1(text: $authVM.email,
                              placeHolder: "Email Address",
                              keyboardType: .emailAddress,
                              fieldType: .email,
@@ -42,12 +32,12 @@ struct RegisterView: View {
                              leadingIcon: .username,
                              trailingView: EmptyView(),
                              isValidate: .constant(true), // change later
-                             validateText: "Error Text",
+                             validateText: authVM.errorMessage ?? "",
                              isAutoCapitalize: .none,
                              onTextChange: { _ in
-                // func to check
+                authVM.validateEmail()
             })
-            CustomTextField1(text: $password,
+            CustomTextField1(text: $authVM.password,
                              placeHolder: "Password",
                              charLimit: 15,
                              keyboardType: .alphabet,
@@ -56,13 +46,13 @@ struct RegisterView: View {
                              leadingIcon: .lock,
                              trailingView: EmptyView(),
                              isValidate: .constant(true),
-                             validateText: "Error Text",
+                             validateText: authVM.errorMessage ?? "",
                              isAutoCapitalize: .none,
                              onTextChange: { _ in
-                // validate password
+                authVM.validatePassword()
             })
 
-            Picker("Role", selection: $role) {
+            Picker("Role", selection: $authVM.role) {
                 Text("Customer").tag(UserRole.customer)
                 Text("Manager").tag(UserRole.manager)
             }
@@ -70,18 +60,20 @@ struct RegisterView: View {
             .padding(.top, 6)
 
             Button {
-                Task {
-                    isLoading = true
-                    do {
-                        try await authVM.signUp(name: name, email: email, password: password, role: role)
-                    } catch {
-                        print("Sign Up Error: \(error.localizedDescription)")
+                if authVM.validateRegisterForm() {
+                    Task {
+                        authVM.isLoading = true
+                        do {
+                            try await authVM.signUp(name: authVM.name, email: authVM.email, password: authVM.password, role: authVM.role)
+                        } catch {
+                            print("Sign Up Error: \(error.localizedDescription)")
+                        }
+                        authVM.isLoading = false
                     }
-                    isLoading = false
                 }
             } label: {
                 HStack {
-                    if isLoading {
+                    if authVM.isLoading {
                         ProgressView().tint(.white)
                     } else {
                         Text("Sign Up").fontWeight(.semibold)
@@ -94,7 +86,7 @@ struct RegisterView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14))
                 .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
             }
-            .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty)
+            .disabled(authVM.isLoading || authVM.name.isEmpty || authVM.email.isEmpty || authVM.password.isEmpty)
         }
         .padding(24)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
