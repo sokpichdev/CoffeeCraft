@@ -22,14 +22,19 @@ struct ForgotPasswordView: View {
                         .font(.callout)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                    
-                    MaterialTextField(
-                        text: $email,
-                        placeholder: "Email Address",
-                        keyboardType: .emailAddress,
-                        fieldtype: .email
-                    )
-                    .textContentType(.emailAddress)
+                    CustomTextField1(text: $email,
+                                     placeHolder: "Email Address",
+                                     keyboardType: .emailAddress,
+                                     fieldType: .email,
+                                     isAutoCorrect: false, isStarMark: true,
+                                     leadingIcon: .username,
+                                     trailingView: EmptyView(),
+                                     isValidate: .constant(true), // change later
+                                     validateText: "Error Text",
+                                     isAutoCapitalize: .none,
+                                     onTextChange: { _ in
+        //                 // func to check
+                    })
                     .padding(.horizontal)
 
                     Button {

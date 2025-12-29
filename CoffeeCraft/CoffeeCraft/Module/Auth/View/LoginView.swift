@@ -8,6 +8,8 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    // alias for compatibility with older code that used `viewModel`
+    private var viewModel: AuthViewModel { authVM }
     @Binding var email: String
     @Binding var password: String
     @State private var isLoading = false
@@ -21,18 +23,33 @@ struct LoginView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            MaterialTextField(
-                text: $email,
-                placeholder: "Email Address",
-                keyboardType: .emailAddress,
-                fieldtype: .email
-            )
-
-            MaterialTextField(
-                text: $password,
-                placeholder: "Password",
-                fieldtype: .password
-            )
+            CustomTextField1(text: $email,
+                             placeHolder: "Email Address",
+                             keyboardType: .emailAddress,
+                             fieldType: .email,
+                             isAutoCorrect: false, isStarMark: true,
+                             leadingIcon: .username,
+                             trailingView: EmptyView(),
+                             isValidate: .constant(true), // change later
+                             validateText: "Error Text",
+                             isAutoCapitalize: .none,
+                             onTextChange: { _ in
+//                 // func to check
+            })
+            CustomTextField1(text: $password,
+                             placeHolder: "Password",
+                             charLimit: 15,
+                             keyboardType: .alphabet,
+                             fieldType: .password,
+                             isAutoCorrect: false, isStarMark: true,
+                             leadingIcon: .lock,
+                             trailingView: EmptyView(),
+                             isValidate: .constant(true),
+                             validateText: "Error Text",
+                             isAutoCapitalize: .none,
+                             onTextChange: { _ in
+                // validate password
+            })
             
             HStack {
                 Spacer()

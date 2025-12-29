@@ -21,22 +21,46 @@ struct RegisterView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            MaterialTextField(
-                text: $name,
-                placeholder: "Full Name")
-            
-            MaterialTextField(
-                text: $email,
-                placeholder: "Email Address",
-                keyboardType: .emailAddress,
-                fieldtype: .email
-            )
-
-            MaterialTextField(
-                text: $password,
-                placeholder: "Password",
-                fieldtype: .password
-            )
+            CustomTextField1(text: $name,
+                             placeHolder: "User Name",
+                             charLimit: 15,
+                             fieldType: .normal,
+                             isAutoCorrect: false, isStarMark: true,
+                             leadingIcon: .username,
+                             trailingView: EmptyView(),
+                             isValidate: .constant(true),
+                             validateText: "Error Text",
+                             isAutoCapitalize: .none,
+                             onTextChange: { _ in
+                // check user name
+            })
+            CustomTextField1(text: $email,
+                             placeHolder: "Email Address",
+                             keyboardType: .emailAddress,
+                             fieldType: .email,
+                             isAutoCorrect: false, isStarMark: true,
+                             leadingIcon: .username,
+                             trailingView: EmptyView(),
+                             isValidate: .constant(true), // change later
+                             validateText: "Error Text",
+                             isAutoCapitalize: .none,
+                             onTextChange: { _ in
+                // func to check
+            })
+            CustomTextField1(text: $password,
+                             placeHolder: "Password",
+                             charLimit: 15,
+                             keyboardType: .alphabet,
+                             fieldType: .password,
+                             isAutoCorrect: false, isStarMark: true,
+                             leadingIcon: .lock,
+                             trailingView: EmptyView(),
+                             isValidate: .constant(true),
+                             validateText: "Error Text",
+                             isAutoCapitalize: .none,
+                             onTextChange: { _ in
+                // validate password
+            })
 
             Picker("Role", selection: $role) {
                 Text("Customer").tag(UserRole.customer)
