@@ -1,4 +1,4 @@
-# <#Title#>
+# CoffeeCraft — Feature Planning
 
 ## 1. Auth
 - Register  
