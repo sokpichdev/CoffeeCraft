@@ -24,8 +24,7 @@ struct InboxView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Inbox")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitle("Inbox", displayMode: .inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
