@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct AccountView: View {
+    @State var isNavigateToInbox: Bool = false
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -82,11 +83,16 @@ struct AccountView: View {
                 .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
+        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
+           InboxView()
+        })
     }
     // MARK: Personal
     var personalSection: some View {
         sectionContainer(title: "Personal", icon: "person.text.rectangle") {
-            RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: 3)
+            RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: 3) {
+                isNavigateToInbox = true
+            }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
@@ -191,9 +197,11 @@ struct RowInSectionView: View {
     let systemImage: String
     var badgeCount: Int? = nil
     
+    var onClicked: (() -> Void)?
+    
     var body: some View {
         Button {
-            // coming soon
+            onClicked?()
         } label: {
             HStack(spacing: 14) {
                 ZStack {
@@ -235,12 +243,15 @@ struct RowInSectionView: View {
                         )
                 }
                 
-                Image(systemName: "chevron.right")
-                    .font(.headline)
-                    .foregroundColor(Color.brown)
+                if onClicked != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
+                }
             }
             .padding(.vertical, 12)
         }
+        .disabled(onClicked == nil)
         .foregroundStyle(.primary)
     }
 }
