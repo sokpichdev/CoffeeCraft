@@ -13,7 +13,7 @@ struct InboxView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach($inboxVM.displayedAnnouncements) { $announcement in
+                ForEach(inboxVM.filteredAnnouncements) { announcement in
                     NavigationLink {
                         AnnouncementDetailView(announcement: announcement)
                             .onAppear {
@@ -39,24 +39,49 @@ struct InboxView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationBarTitle("Inbox", displayMode: .inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
                         .font(.headline)
-                        .foregroundColor(Color.brown)
+                        .foregroundColor(.brown)
                 }
             }
-            
+
+            // Center Title (Filter + Inbox)
+            ToolbarItem(placement: .principal) {
+                Menu {
+                    Picker("Filter", selection: $inboxVM.selectedFilter) {
+                        ForEach(InboxFilter.allCases) { filter in
+                            Text(filter.rawValue).tag(filter)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        HStack(spacing: 2) {
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                            Text(inboxVM.selectedFilter.rawValue)
+                                .font(.headline)
+                        }
+                        .foregroundColor(.brown)
+                        
+                        Text("Inbox")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+
+            // Read All Button
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     inboxVM.markAllAsRead()
                 } label: {
-                    Text("Mark All Read")
+                    Text("Read All")
                         .font(.headline)
-                        .foregroundColor(Color.brown)
+                        .foregroundColor(.brown)
                 }
             }
         }

@@ -9,10 +9,22 @@ import SwiftUI
 class InboxViewModel: ObservableObject {
     @Published var displayedAnnouncements: [Announcement] = []
     @Published var isLoading = false
+    @Published var selectedFilter: InboxFilter = .all
     
     private let itemsPerPage = 5
     private var currentPage = 0
     private var hasMoreData = true
+    
+    var filteredAnnouncements: [Announcement] {
+        switch selectedFilter {
+        case .all:
+            return displayedAnnouncements
+        case .unread:
+            return displayedAnnouncements.filter { !$0.isRead }
+        case .read:
+            return displayedAnnouncements.filter { $0.isRead }
+        }
+    }
     
     func loadInitial() {
         guard displayedAnnouncements.isEmpty else { return }
