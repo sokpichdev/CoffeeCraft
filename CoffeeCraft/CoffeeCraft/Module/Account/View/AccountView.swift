@@ -30,6 +30,8 @@ struct AccountView: View {
                         SettingsView()
                     } label: {
                         Image(systemName: "gearshape")
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
                     }
                 }
             }
@@ -40,26 +42,25 @@ struct AccountView: View {
 extension AccountView {
     
     var profileSection: some View {
-        HStack(spacing: 16) {
+        VStack(spacing: 12) {
             Image(systemName: "person.crop.circle.fill")
                 .resizable()
                 .frame(width: 64, height: 64)
                 .foregroundStyle(.gray)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Sok Pich")
-                    .font(.headline)
-                
-                NavigationLink("View Profile >") {
-                    ProfileView()
-                }
-                .font(.subheadline)
-                .foregroundStyle(.blue)
+
+            Text("Sok Pich")
+                .font(.headline)
+
+            NavigationLink {
+                ProfileView()
+            } label: {
+                Text("View Profile")
+                    .font(.subheadline)
+                    .foregroundStyle(.blue)
             }
-            
-            Spacer()
         }
         .padding()
+        .frame(maxWidth: .infinity)
         .background(.ultraThinMaterial)
         .cornerRadius(16)
     }
