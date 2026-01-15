@@ -98,12 +98,37 @@ extension AuthViewModel {
         }
     }
 
+    func validateStrictPassword() { // strict validation
+        if password.isEmpty {
+            passwordValidation = .init(isValid: false, message: "Password is required")
+        } else if password.count < 8 {
+            passwordValidation = .init(isValid: false, message: "Password must be at least 8 characters")
+        } else if password.count > 20 {
+            passwordValidation = .init(isValid: false, message: "Password must be less than 20 characters")
+        } else if !password.containsUppercase() {
+            passwordValidation = .init(isValid: false, message: "Password must contain at least one uppercase letter")
+        } else if !password.containsLowercase() {
+            passwordValidation = .init(isValid: false, message: "Password must contain at least one lowercase letter")
+        } else if !password.containsNumber() {
+            passwordValidation = .init(isValid: false, message: "Password must contain at least one number")
+        } else if !password.containsSpecialCharacter() {
+            passwordValidation = .init(isValid: false, message: "Password must contain at least one special character (!@#$%^&*)")
+        } else if password.contains(" ") {
+            passwordValidation = .init(isValid: false, message: "Password cannot contain spaces")
+        } else {
+            passwordValidation = .init()
+        }
+    }
+    
     func validatePassword() {
-        if password.count < 6 {
-            passwordValidation = .init(
-                isValid: false,
-                message: "Password must be at least 6 characters"
-            )
+        if password.isEmpty {
+            passwordValidation = .init(isValid: false, message: "Password is required")
+        } else if password.contains(" ") {
+            passwordValidation = .init(isValid: false, message: "Password cannot contain spaces")
+        } else if password.count < 8 {
+            passwordValidation = .init(isValid: false, message: "Password must be at least 8 characters")
+        } else if !password.containsLetterAndNumber() {
+            passwordValidation = .init(isValid: false, message: "Password must contain both letters and numbers")
         } else {
             passwordValidation = .init()
         }

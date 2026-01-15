@@ -45,8 +45,8 @@ struct RegisterView: View {
                              isAutoCorrect: false, isStarMark: true,
                              leadingIcon: .lock,
                              trailingView: EmptyView(),
-                             isValidate: .constant(true),
-                             validateText: authVM.errorMessage ?? "",
+                             isValidate: $authVM.passwordValidation.isValid,
+                             validateText: authVM.passwordValidation.message,
                              isAutoCapitalize: .none,
                              onTextChange: { _ in
                 authVM.validatePassword()

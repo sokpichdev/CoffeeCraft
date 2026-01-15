@@ -30,3 +30,30 @@ extension String {
         return emailPredicate.evaluate(with: self)
     }
 }
+
+extension String {
+    // MARK: Strick password validation
+    func containsUppercase() -> Bool {
+        return self.rangeOfCharacter(from: .uppercaseLetters) != nil
+    }
+    
+    func containsLowercase() -> Bool {
+        return self.rangeOfCharacter(from: .lowercaseLetters) != nil
+    }
+    
+    func containsNumber() -> Bool {
+        return self.rangeOfCharacter(from: .decimalDigits) != nil
+    }
+    
+    func containsSpecialCharacter() -> Bool {
+        let specialCharacters = CharacterSet(charactersIn: "!@#$%^&*()_+-=[]{}|;:,.<>?")
+        return self.rangeOfCharacter(from: specialCharacters) != nil
+    }
+    
+    // MARK: Simple password validation
+    func containsLetterAndNumber() -> Bool {
+        let hasLetter = self.rangeOfCharacter(from: .letters) != nil
+        let hasNumber = self.rangeOfCharacter(from: .decimalDigits) != nil
+        return hasLetter && hasNumber
+    }
+}
