@@ -9,6 +9,7 @@ import SwiftUI
 struct AnnouncementDetailView: View {
     let announcement: Announcement
     
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -31,7 +32,16 @@ struct AnnouncementDetailView: View {
                 .padding(.horizontal)
             }
         }
-        .navigationTitle("Announcement")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitle("Announcement", displayMode: .inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
+                }
+            }
+        }
     }
 }
