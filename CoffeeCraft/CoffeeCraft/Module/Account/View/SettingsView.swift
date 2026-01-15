@@ -61,37 +61,33 @@ struct SettingsView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color(red: 0.9, green: 0.3, blue: 0.2), Color(red: 0.8, green: 0.25, blue: 0.15)],
+                                    colors: [Color.red, Color.red.opacity(0.85)],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
-                            .shadow(color: Color(red: 0.8, green: 0.25, blue: 0.15).opacity(0.4), radius: 8, y: 4)
+                            .shadow(color: Color.red.opacity(0.4), radius: 8, y: 4)
                     )
                 }
                 .padding(.top, 8)
                 
                 Text("Version 1.0.0")
                     .font(.caption)
-                    .foregroundStyle(Color(red: 0.5, green: 0.4, blue: 0.3))
+                    .foregroundStyle(.secondary)
                     .padding(.top, 12)
             }
             .padding()
         }
-        .background(Color(red: 0.98, green: 0.96, blue: 0.94))
+        .background(Color(.systemGroupedBackground))
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: { dismiss() }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                        Text("Back")
-                            .font(.system(size: 16, weight: .medium))
-                    }
-                    .foregroundStyle(Color(red: 0.4, green: 0.26, blue: 0.13))
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
                 }
             }
         }
@@ -105,12 +101,12 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(red: 0.55, green: 0.35, blue: 0.18))
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color(red: 0.3, green: 0.2, blue: 0.1))
+                    .foregroundStyle(.primary)
             }
             .padding(.leading, 4)
             
@@ -121,7 +117,7 @@ struct SettingsView: View {
             .padding(.horizontal, 20)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(.white)
+                    .fill(Color(.secondarySystemGroupedBackground))
                     .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
             )
         }
@@ -134,12 +130,12 @@ struct SettingsView: View {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Color(red: 0.96, green: 0.94, blue: 0.92))
+                        .fill(Color(.tertiarySystemGroupedBackground))
                         .frame(width: 38, height: 38)
                     
                     Image(systemName: icon)
                         .font(.system(size: 16))
-                        .foregroundStyle(Color(red: 0.4, green: 0.26, blue: 0.13))
+                        .foregroundStyle(Color.brown)
                 }
                 
                 Text(title)
@@ -149,11 +145,11 @@ struct SettingsView: View {
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.6, green: 0.5, blue: 0.4))
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
             }
             .padding(.vertical, 14)
         }
-        .foregroundStyle(Color(red: 0.2, green: 0.13, blue: 0.07))
+        .foregroundStyle(.primary)
     }
 }

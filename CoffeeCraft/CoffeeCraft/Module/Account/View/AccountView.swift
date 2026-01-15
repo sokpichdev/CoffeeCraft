@@ -19,7 +19,7 @@ struct AccountView: View {
                 }
                 .padding()
             }
-            .background(Color(red: 0.98, green: 0.96, blue: 0.94))
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -28,14 +28,8 @@ struct AccountView: View {
                         SettingsView()
                     } label: {
                         Image(systemName: "gearshape.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color(red: 0.4, green: 0.26, blue: 0.13), Color(red: 0.55, green: 0.35, blue: 0.18)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
                     }
                 }
             }
@@ -50,7 +44,7 @@ extension AccountView {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color(red: 0.4, green: 0.26, blue: 0.13), Color(red: 0.55, green: 0.35, blue: 0.18)],
+                            colors: [Color.brown, Color.brown.opacity(0.75), Color.brown.opacity(0.5)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -69,7 +63,7 @@ extension AccountView {
                 Text("Sok Pich")
                     .font(.title2)
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color(red: 0.2, green: 0.13, blue: 0.07))
+                    .foregroundStyle(.primary)
 
                 NavigationLink {
                     ProfileView()
@@ -79,9 +73,9 @@ extension AccountView {
                             .font(.subheadline)
                             .fontWeight(.medium)
                         Image(systemName: "arrow.right.circle.fill")
-                            .font(.subheadline)
+                            .font(.headline)
                     }
-                    .foregroundStyle(Color(red: 0.55, green: 0.35, blue: 0.18))
+                    .foregroundStyle(Color.brown)
                 }
             }
         }
@@ -90,7 +84,7 @@ extension AccountView {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(.white)
+                .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
     }
@@ -136,7 +130,7 @@ extension AccountView {
             Text("Stay connected with us")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundStyle(Color(red: 0.3, green: 0.2, blue: 0.1))
+                .foregroundStyle(.secondary)
             
             HStack(spacing: 20) {
                 socialIcon("paperplane.fill")
@@ -156,12 +150,12 @@ extension AccountView {
         } label: {
             ZStack {
                 Circle()
-                    .fill(Color(red: 0.96, green: 0.94, blue: 0.92))
+                    .fill(Color(.tertiarySystemGroupedBackground))
                     .frame(width: 44, height: 44)
                 
                 Image(systemName: systemName)
-                    .font(.system(size: 18))
-                    .foregroundStyle(Color(red: 0.4, green: 0.26, blue: 0.13))
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
             }
         }
     }
@@ -176,12 +170,12 @@ extension AccountView {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(red: 0.55, green: 0.35, blue: 0.18))
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color(red: 0.3, green: 0.2, blue: 0.1))
+                    .foregroundStyle(.primary)
             }
             .padding(.leading, 4)
             
@@ -192,7 +186,7 @@ extension AccountView {
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(.white)
+                    .fill(Color(.secondarySystemGroupedBackground))
                     .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
             )
         }
@@ -211,12 +205,12 @@ struct AccountRow: View {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Color(red: 0.96, green: 0.94, blue: 0.92))
+                        .fill(Color(.tertiarySystemGroupedBackground))
                         .frame(width: 36, height: 36)
                     
                     Image(systemName: systemImage)
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color(red: 0.4, green: 0.26, blue: 0.13))
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
                 }
                 
                 Text(title)
@@ -234,16 +228,16 @@ struct AccountRow: View {
                         .padding(.vertical, 3)
                         .background(
                             Capsule()
-                                .fill(Color(red: 0.8, green: 0.3, blue: 0.2))
+                                .fill(Color.red)
                         )
                 }
                 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.6, green: 0.5, blue: 0.4))
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
             }
             .padding(.vertical, 12)
         }
-        .foregroundStyle(Color(red: 0.2, green: 0.13, blue: 0.07))
+        .foregroundStyle(.primary)
     }
 }
