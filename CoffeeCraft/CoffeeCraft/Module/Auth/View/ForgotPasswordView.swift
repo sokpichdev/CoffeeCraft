@@ -9,7 +9,6 @@ import SwiftUI
 struct ForgotPasswordView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) var dismiss
-    @State private var email: String = ""
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -39,8 +38,8 @@ struct ForgotPasswordView: View {
                         Task {
                             isLoading = true
                             do {
-                                try await authVM.sendPasswordReset(email: email)
-                                alertMessage = "Password reset link sent to \(email)."
+                                try await authVM.sendPasswordReset(email: authVM.email)
+                                alertMessage = "Password reset link sent to \(authVM.email)."
                                 showAlert = true
                             } catch {
                                 alertMessage = "Error: \(error.localizedDescription)"
@@ -64,7 +63,7 @@ struct ForgotPasswordView: View {
                         .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
                     }
                     .padding(.horizontal)
-                    .disabled(isLoading || email.isEmpty)
+                    .disabled(isLoading || authVM.email.isEmpty)
                 }
                 .padding(.top, 40)
             }
