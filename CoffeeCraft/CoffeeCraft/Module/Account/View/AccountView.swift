@@ -8,36 +8,31 @@ import SwiftUI
 
 struct AccountView: View {
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    profileSection
-                    personalSection
-                    shortcutsSection
-                    contactsSection
-                    footerSection
-                }
-                .padding()
+        ScrollView {
+            VStack(spacing: 20) {
+                profileSection
+                personalSection
+                shortcutsSection
+                contactsSection
+                footerSection
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Account")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
-                    }
+            .padding()
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationBarTitle("Account", displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    SettingsView()
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
                 }
             }
         }
     }
-}
-
-extension AccountView {
+    // MARK: Profile
     var profileSection: some View {
         VStack(spacing: 16) {
             ZStack {
@@ -57,7 +52,7 @@ extension AccountView {
                     .frame(width: 40, height: 40)
                     .foregroundStyle(.white)
             }
-            .shadow(color: Color(red: 0.4, green: 0.26, blue: 0.13).opacity(0.3), radius: 8, y: 4)
+            .shadow(color: Color.brown.opacity(0.3), radius: 8, y: 4)
 
             VStack(spacing: 6) {
                 Text("Sok Pich")
@@ -88,43 +83,42 @@ extension AccountView {
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
     }
-}
-
-extension AccountView {
+    // MARK: Personal
     var personalSection: some View {
         sectionContainer(title: "Personal", icon: "person.text.rectangle") {
             AccountRow(title: "Inbox", systemImage: "tray.fill", badgeCount: 3)
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Personalization", systemImage: "slider.horizontal.3")
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Favorites", systemImage: "heart.fill")
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Addresses", systemImage: "location.fill")
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Vouchers", systemImage: "ticket.fill", badgeCount: 2)
         }
     }
     
+    // MARK: ShortCuts
     var shortcutsSection: some View {
         sectionContainer(title: "Shortcuts", icon: "bolt.fill") {
             AccountRow(title: "Stores", systemImage: "building.2.fill")
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Announcements", systemImage: "megaphone.fill")
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Rewards", systemImage: "gift.fill")
         }
     }
     
+    // MARK: contacts
     var contactsSection: some View {
         sectionContainer(title: "Contacts", icon: "bubble.left.and.bubble.right.fill") {
             AccountRow(title: "Customer Service", systemImage: "headset")
-            Divider().padding(.leading, 44)
+            DeviderInSectionView(padding: 44)
             AccountRow(title: "Feedback", systemImage: "bubble.left.fill")
         }
     }
-}
 
-extension AccountView {
+    // MARK: Footer
     var footerSection: some View {
         VStack(spacing: 16) {
             Text("Stay connected with us")
@@ -159,9 +153,7 @@ extension AccountView {
             }
         }
     }
-}
 
-extension AccountView {
     func sectionContainer<Content: View>(
         title: String,
         icon: String,
@@ -239,5 +231,12 @@ struct AccountRow: View {
             .padding(.vertical, 12)
         }
         .foregroundStyle(.primary)
+    }
+}
+
+struct DeviderInSectionView: View {
+    var padding: CGFloat = 50
+    var body: some View {
+        Divider().padding(.leading, padding)
     }
 }

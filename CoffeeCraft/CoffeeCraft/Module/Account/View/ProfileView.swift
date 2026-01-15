@@ -16,15 +16,15 @@ struct ProfileView: View {
                 
                 VStack(spacing: 0) {
                     infoRow("Name", "Sok Pich", icon: "person.fill")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     infoRow("Phone", "+855 77 742 462", icon: "phone.fill")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     infoRow("Email", "pichsok016@example.com", icon: "envelope.fill")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     infoRow("Gender", "Male", icon: "figure.stand")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     infoRow("Date of Birth", "17 Sep 2001", icon: "calendar")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     infoRow("City / Province", "Phnom Penh", icon: "mappin.circle.fill")
                 }
                 .padding(.vertical, 12)
