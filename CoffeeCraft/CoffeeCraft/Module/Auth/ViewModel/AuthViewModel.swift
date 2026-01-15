@@ -108,12 +108,23 @@ extension AuthViewModel {
             passwordValidation = .init()
         }
     }
-
-    func validateName() {
-        if name.isEmpty {
-            nameValidation = .init(isValid: false, message: "Name is required")
+    
+    func checkUsername() {
+        if name.count == 0 {
+            nameValidation.isValid = false
+            nameValidation.message = "Name cannot be empty"
+        } else if name.count < 6 || name.count > 15 {
+            nameValidation.isValid = false
+            nameValidation.message = "Name must be between 6 - 15 letters"
+        } else if name.isContainsLettersAndNumbers() {
+            nameValidation.isValid = false
+            nameValidation.message = "Name cannot contain numbers"
+        } else if !name.checkSpaceAndSpecialChars() {
+            nameValidation.isValid = false
+            nameValidation.message = "Name cannot contain special characters"
         } else {
-            nameValidation = .init()
+            nameValidation.isValid = true
+            nameValidation.message = ""
         }
     }
 
@@ -124,7 +135,7 @@ extension AuthViewModel {
     }
 
     func validateRegisterForm() -> Bool {
-        validateName()
+        checkUsername()
         validateEmail()
         validatePassword()
         return nameValidation.isValid &&
