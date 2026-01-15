@@ -163,8 +163,10 @@ extension AuthViewModel {
                passwordValidation.isValid
     }
     
-    func resetForm() {
-        email = ""
+    func resetForm(isResetEmail: Bool = false) {
+        if isResetEmail {
+            email = ""
+        }
         password = ""
         name = ""
         role = .customer
