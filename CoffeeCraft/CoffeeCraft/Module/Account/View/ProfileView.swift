@@ -15,17 +15,17 @@ struct ProfileView: View {
                 profileHeader
                 
                 VStack(spacing: 0) {
-                    infoRow("Name", "Sok Pich", icon: "person.fill")
+                    RowInSectionView(label: "Name", title: "Sok Pich", systemImage: "person.fill")
                     DeviderInSectionView()
-                    infoRow("Phone", "+855 77 742 462", icon: "phone.fill")
+                    RowInSectionView(label: "Phone", title: "+855 77 742 462", systemImage: "phone.fill")
                     DeviderInSectionView()
-                    infoRow("Email", "pichsok016@example.com", icon: "envelope.fill")
+                    RowInSectionView(label: "Email", title: "pichsok016@example.com", systemImage: "envelope.fill")
                     DeviderInSectionView()
-                    infoRow("Gender", "Male", icon: "figure.stand")
+                    RowInSectionView(label: "Gender", title: "Male", systemImage: "figure.stand")
                     DeviderInSectionView()
-                    infoRow("Date of Birth", "17 Sep 2001", icon: "calendar")
+                    RowInSectionView(label: "Date of Birth", title: "17 Sep 2001", systemImage: "calendar")
                     DeviderInSectionView()
-                    infoRow("City / Province", "Phnom Penh", icon: "mappin.circle.fill")
+                    RowInSectionView(label: "City / Province", title: "Phnom Penh", systemImage: "mappin.circle.fill")
                 }
                 .padding(.vertical, 12)
                 .padding(.horizontal, 20)
@@ -99,34 +99,5 @@ struct ProfileView: View {
         }
         .padding(.top, 12)
         .padding(.bottom, 8)
-    }
-    
-    func infoRow(_ title: String, _ value: String, icon: String) -> some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color(.tertiarySystemGroupedBackground))
-                    .frame(width: 38, height: 38)
-                
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundColor(Color.brown)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.secondary)
-                
-                Text(value)
-                    .font(.system(size: 15))
-                    .fontWeight(.medium)
-                    .foregroundStyle(.primary)
-            }
-            
-            Spacer()
-        }
-        .padding(.vertical, 14)
     }
 }

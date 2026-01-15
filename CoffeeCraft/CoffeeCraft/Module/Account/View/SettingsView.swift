@@ -13,33 +13,33 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 20) {
                 settingsSection(title: "Account", icon: "person.crop.circle.fill") {
-                    settingRow("Account Settings", icon: "gearshape.fill")
+                    RowInSectionView(title: "Account Settings", systemImage: "gearshape.fill")
                     DeviderInSectionView()
-                    settingRow("Face ID & PIN", icon: "faceid")
+                    RowInSectionView(title: "Face ID & PIN", systemImage: "faceid")
                 }
                 
                 settingsSection(title: "Connections", icon: "link.circle.fill") {
-                    settingRow("Connected Accounts", icon: "network")
+                    RowInSectionView(title: "Connected Accounts", systemImage: "network")
                 }
                 
                 settingsSection(title: "Preferences", icon: "paintbrush.fill") {
-                    settingRow("Appearance", icon: "sparkles")
+                    RowInSectionView(title: "Appearance", systemImage: "sparkles")
                     DeviderInSectionView()
-                    settingRow("Languages", icon: "globe")
+                    RowInSectionView(title: "Languages", systemImage: "globe")
                 }
                 
                 settingsSection(title: "Support", icon: "questionmark.circle.fill") {
-                    settingRow("FAQs", icon: "doc.text.fill")
+                    RowInSectionView(title: "FAQs", systemImage: "doc.text.fill")
                     DeviderInSectionView()
-                    settingRow("Terms & Conditions", icon: "doc.plaintext")
+                    RowInSectionView(title: "Terms & Conditions", systemImage: "doc.plaintext")
                     DeviderInSectionView()
-                    settingRow("About Us", icon: "info.circle.fill")
+                    RowInSectionView(title: "About Us", systemImage: "info.circle.fill")
                 }
                 
                 settingsSection(title: "Share the Love", icon: "heart.circle.fill") {
-                    settingRow("Share the App", icon: "square.and.arrow.up.fill")
+                    RowInSectionView(title: "Share the App", systemImage: "square.and.arrow.up.fill")
                     DeviderInSectionView()
-                    settingRow("Write a Review", icon: "star.fill")
+                    RowInSectionView(title: "Write a Review", systemImage: "star.fill")
                 }
                 
                 Button {
@@ -121,35 +121,5 @@ struct SettingsView: View {
                     .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
             )
         }
-    }
-    
-    func settingRow(_ title: String, icon: String) -> some View {
-        Button {
-            // coming soon
-        } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(Color(.tertiarySystemGroupedBackground))
-                        .frame(width: 38, height: 38)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color.brown)
-                }
-                
-                Text(title)
-                    .font(.system(size: 15))
-                    .fontWeight(.medium)
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.headline)
-                    .foregroundColor(Color.brown)
-            }
-            .padding(.vertical, 14)
-        }
-        .foregroundStyle(.primary)
     }
 }
