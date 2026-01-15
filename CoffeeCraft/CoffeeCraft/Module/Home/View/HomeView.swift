@@ -19,9 +19,9 @@ struct HomeView: View {
 
     @State private var currentIndex: Int = 0
     let announcements = [
-        Announcement(id: 1, title: "New Coffee Blend!", description: "Try our new seasonal coffee.", imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg"),
-        Announcement(id: 2, title: "Weekend Special", description: "Discount for all drinks this weekend.", imageName: ""),
-        Announcement(id: 3, title: "Free Cookie", description: "Get a free cookie with any coffee.", imageName: "")
+        Announcement(id: 1, title: "New Coffee Blend!", description: "Try our new seasonal coffee.", imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg", createdDate: ""),
+        Announcement(id: 2, title: "Weekend Special", description: "Discount for all drinks this weekend.", imageName: "", createdDate: ""),
+        Announcement(id: 3, title: "Free Cookie", description: "Get a free cookie with any coffee.", imageName: "", createdDate: "")
     ]
 
     var body: some View {
@@ -137,6 +137,7 @@ struct Announcement: Identifiable {
     let title: String?
     let description: String?
     let imageName: String?
+    let createdDate: String?
 }
 
 struct PageIndicator: View {
