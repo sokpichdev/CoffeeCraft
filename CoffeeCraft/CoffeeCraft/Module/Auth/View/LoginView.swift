@@ -35,7 +35,7 @@ struct LoginView: View {
                 isStarMark: true,
                 leadingIcon: .lock,
                 trailingView: EmptyView(),
-                isValidate: .constant(authVM.passwordValidation.isValid),
+                isValidate: $authVM.passwordValidation.isValid,
                 validateText: authVM.passwordValidation.message,
                 isAutoCapitalize: .none,
                 onTextChange: { _ in authVM.validatePassword() }
