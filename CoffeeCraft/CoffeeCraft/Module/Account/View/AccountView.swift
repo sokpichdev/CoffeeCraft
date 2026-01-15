@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct AccountView: View {
+    @StateObject var inboxVM = InboxViewModel()
     @State var isNavigateToInbox: Bool = false
     var body: some View {
         ScrollView {
@@ -54,13 +55,13 @@ struct AccountView: View {
                     .foregroundStyle(.white)
             }
             .shadow(color: Color.brown.opacity(0.3), radius: 8, y: 4)
-
+            
             VStack(spacing: 6) {
                 Text("Sok Pich")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)
-
+                
                 NavigationLink {
                     ProfileView()
                 } label: {
@@ -84,13 +85,14 @@ struct AccountView: View {
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
         .navigationDestination(isPresented: $isNavigateToInbox, destination: {
-           InboxView()
+            InboxView().environmentObject(inboxVM)
         })
     }
     // MARK: Personal
     var personalSection: some View {
         sectionContainer(title: "Personal", icon: "person.text.rectangle") {
-            RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: 3) {
+            RowInSectionView(title: "Inbox", systemImage: "tray.fill",
+                             badgeCount: inboxVM.displayedAnnouncements.filter { !$0.isRead }.count) {
                 isNavigateToInbox = true
             }
             DeviderInSectionView(padding: 44)
@@ -230,7 +232,7 @@ struct RowInSectionView: View {
                 
                 Spacer()
                 
-                if let count = badgeCount {
+                if let count = badgeCount, count > 0 {
                     Text("\(count)")
                         .font(.caption)
                         .fontWeight(.semibold)
