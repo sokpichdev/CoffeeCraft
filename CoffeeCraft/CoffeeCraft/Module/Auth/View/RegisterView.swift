@@ -18,11 +18,11 @@ struct RegisterView: View {
                              isAutoCorrect: false, isStarMark: true,
                              leadingIcon: .username,
                              trailingView: EmptyView(),
-                             isValidate: .constant(true),
-                             validateText: authVM.errorMessage ?? "",
+                             isValidate: $authVM.nameValidation.isValid,
+                             validateText: authVM.nameValidation.message,
                              isAutoCapitalize: .none,
                              onTextChange: { _ in
-                authVM.validateName()
+                authVM.checkUsername()
             })
             CustomTextField1(text: $authVM.email,
                              placeHolder: "Email Address",

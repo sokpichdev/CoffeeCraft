@@ -57,9 +57,6 @@ struct CustomTextField1<TrailingView: View>: View {
                     showValidate: isValidate, trailingView: trailingView)
                 .onChange(of: text) { value, _ in
                     onTextChange?(value)
-//                    isValidate = false
-//                    showValidate = false
-//                    textField.isValidate = false
                 }
                 .onReceive(Just(text)) { newString in
                     guard charLimit > 0, newString.count > charLimit else { return }
@@ -134,14 +131,14 @@ struct CustomTextField1<TrailingView: View>: View {
             .onTapGesture {
                 self.textField.becomeFirstResponder()
             }
-            if showValidate && !isFormDeposit {
+            if showValidate {
                 Text(validateText)
                     .font(.system(size: 12))
                     .foregroundColor(Color.textFieldError)
             }
         }
         .onChange(of: isValidate) {
-            if isValidate {
+            if !isValidate {  // Show error when NOT valid
                 showValidate = true
                 textField.isValidate = true
             } else {
@@ -151,7 +148,7 @@ struct CustomTextField1<TrailingView: View>: View {
         }
         .onChange(of: isFocus) {
             if !isFocus {
-                if isValidate {
+                if !isValidate { // how error when NOT valid
                     showValidate = true
                     textField.isValidate = true
                 } else {
