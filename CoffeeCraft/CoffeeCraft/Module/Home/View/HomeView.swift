@@ -138,6 +138,7 @@ struct Announcement: Identifiable {
     let description: String?
     let imageName: String?
     let createdDate: String?
+    var isRead: Bool = false
 }
 
 struct PageIndicator: View {

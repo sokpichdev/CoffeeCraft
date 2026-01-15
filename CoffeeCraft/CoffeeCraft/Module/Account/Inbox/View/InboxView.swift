@@ -8,20 +8,22 @@ import SwiftUI
 
 struct InboxView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = InboxViewModel()
+    @EnvironmentObject var inboxVM: InboxViewModel
     
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(viewModel.displayedAnnouncements) { announcement in
+                ForEach($inboxVM.displayedAnnouncements) { $announcement in
                     NavigationLink {
                         AnnouncementDetailView(announcement: announcement)
+                            .onAppear {
+                                inboxVM.markAsRead(id: announcement.id)
+                            }
                     } label: {
                         InboxItemView(announcement: announcement)
                             .onAppear {
-                                // Load more when reaching the last item
-                                if announcement.id == viewModel.displayedAnnouncements.last?.id {
-                                    viewModel.loadMore()
+                                if announcement.id == inboxVM.displayedAnnouncements.last?.id {
+                                    inboxVM.loadMore()
                                 }
                             }
                     }
@@ -29,7 +31,7 @@ struct InboxView: View {
                 }
                 
                 // Loading indicator
-                if viewModel.isLoading {
+                if inboxVM.isLoading {
                     ProgressView()
                         .padding()
                 }
@@ -50,7 +52,7 @@ struct InboxView: View {
             
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    // Mark all as read action
+                    inboxVM.markAllAsRead()
                 } label: {
                     Text("Mark All Read")
                         .font(.headline)
@@ -59,7 +61,7 @@ struct InboxView: View {
             }
         }
         .onAppear {
-            viewModel.loadInitial()
+            inboxVM.loadInitial()
         }
     }
 }
@@ -107,9 +109,12 @@ struct InboxItemView: View {
                     Spacer()
                     
                     // Unread indicator
-                    Circle()
-                        .fill(Color(red: 0.55, green: 0.35, blue: 0.18))
-                        .frame(width: 8, height: 8)
+                    if !announcement.isRead {
+                        Circle()
+                            .fill(Color(red: 0.55, green: 0.35, blue: 0.18))
+                            .frame(width: 8, height: 8)
+                    }
+
                 }
                 
                 if let description = announcement.description {
@@ -148,6 +153,7 @@ let announcements: [Announcement] = (1...100).map { id in
         title: "New Year Promotion! ☕",
         description: "Celebrate 2026 with 20% off all beverages. Valid until January 31st. Don't miss out on your favorite coffee!",
         imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
-        createdDate: "2 hours ago"
+        createdDate: "2 hours ago",
+        isRead: false
     )
 }

@@ -47,4 +47,14 @@ class InboxViewModel: ObservableObject {
             self.isLoading = false
         }
     }
+    func markAsRead(id: Int) {
+        guard let index = displayedAnnouncements.firstIndex(where: { $0.id == id }) else { return }
+        displayedAnnouncements[index].isRead = true
+    }
+    func markAllAsRead() {
+        for index in displayedAnnouncements.indices {
+            displayedAnnouncements[index].isRead = true
+        }
+    }
+
 }
