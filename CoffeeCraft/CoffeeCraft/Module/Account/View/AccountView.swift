@@ -86,35 +86,35 @@ struct AccountView: View {
     // MARK: Personal
     var personalSection: some View {
         sectionContainer(title: "Personal", icon: "person.text.rectangle") {
-            AccountRow(title: "Inbox", systemImage: "tray.fill", badgeCount: 3)
+            RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: 3)
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Personalization", systemImage: "slider.horizontal.3")
+            RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Favorites", systemImage: "heart.fill")
+            RowInSectionView(title: "Favorites", systemImage: "heart.fill")
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Addresses", systemImage: "location.fill")
+            RowInSectionView(title: "Addresses", systemImage: "location.fill")
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Vouchers", systemImage: "ticket.fill", badgeCount: 2)
+            RowInSectionView(title: "Vouchers", systemImage: "ticket.fill", badgeCount: 2)
         }
     }
     
     // MARK: ShortCuts
     var shortcutsSection: some View {
         sectionContainer(title: "Shortcuts", icon: "bolt.fill") {
-            AccountRow(title: "Stores", systemImage: "building.2.fill")
+            RowInSectionView(title: "Stores", systemImage: "building.2.fill")
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Announcements", systemImage: "megaphone.fill")
+            RowInSectionView(title: "Announcements", systemImage: "megaphone.fill")
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Rewards", systemImage: "gift.fill")
+            RowInSectionView(title: "Rewards", systemImage: "gift.fill")
         }
     }
     
     // MARK: contacts
     var contactsSection: some View {
         sectionContainer(title: "Contacts", icon: "bubble.left.and.bubble.right.fill") {
-            AccountRow(title: "Customer Service", systemImage: "headset")
+            RowInSectionView(title: "Customer Service", systemImage: "headset")
             DeviderInSectionView(padding: 44)
-            AccountRow(title: "Feedback", systemImage: "bubble.left.fill")
+            RowInSectionView(title: "Feedback", systemImage: "bubble.left.fill")
         }
     }
 
@@ -185,7 +185,8 @@ struct AccountView: View {
     }
 }
 
-struct AccountRow: View {
+struct RowInSectionView: View {
+    var label: String? = nil
     let title: String
     let systemImage: String
     var badgeCount: Int? = nil
@@ -205,9 +206,19 @@ struct AccountRow: View {
                         .foregroundColor(Color.brown)
                 }
                 
-                Text(title)
-                    .font(.system(size: 15))
-                    .fontWeight(.medium)
+                VStack(alignment: .leading, spacing: 4) {
+                    if let label = label {
+                        Text(label)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Text(title)
+                        .font(.system(size: 15))
+                        .fontWeight(.medium)
+                        .foregroundStyle(.primary)
+                }
                 
                 Spacer()
                 
