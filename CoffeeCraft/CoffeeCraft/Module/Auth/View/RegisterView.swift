@@ -31,8 +31,8 @@ struct RegisterView: View {
                              isAutoCorrect: false, isStarMark: true,
                              leadingIcon: .username,
                              trailingView: EmptyView(),
-                             isValidate: .constant(true), // change later
-                             validateText: authVM.errorMessage ?? "",
+                             isValidate: $authVM.emailValidation.isValid,
+                             validateText: authVM.emailValidation.message,
                              isAutoCapitalize: .none,
                              onTextChange: { _ in
                 authVM.validateEmail()

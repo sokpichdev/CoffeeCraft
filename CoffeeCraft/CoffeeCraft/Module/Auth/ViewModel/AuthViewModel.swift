@@ -91,7 +91,7 @@ extension AuthViewModel {
     func validateEmail() {
         if email.isEmpty {
             emailValidation = .init(isValid: false, message: "Email is required")
-        } else if !email.contains("@") {
+        } else if !email.isValidEmail() {
             emailValidation = .init(isValid: false, message: "Invalid email format")
         } else {
             emailValidation = .init()
@@ -111,20 +111,15 @@ extension AuthViewModel {
     
     func checkUsername() {
         if name.count == 0 {
-            nameValidation.isValid = false
-            nameValidation.message = "Name cannot be empty"
+            nameValidation = .init(isValid: false, message: "Name cannot be empty")
         } else if name.count < 6 || name.count > 15 {
-            nameValidation.isValid = false
-            nameValidation.message = "Name must be between 6 - 15 letters"
+            nameValidation = .init(isValid: false, message: "Name must be between 6 - 15 letters")
         } else if name.isContainsLettersAndNumbers() {
-            nameValidation.isValid = false
-            nameValidation.message = "Name cannot contain numbers"
+            nameValidation = .init(isValid: false, message: "Name cannot contain numbers")
         } else if !name.checkSpaceAndSpecialChars() {
-            nameValidation.isValid = false
-            nameValidation.message = "Name cannot contain special characters"
+            nameValidation = .init(isValid: false, message: "Name cannot contain special characters")
         } else {
-            nameValidation.isValid = true
-            nameValidation.message = ""
+            nameValidation = .init()
         }
     }
 

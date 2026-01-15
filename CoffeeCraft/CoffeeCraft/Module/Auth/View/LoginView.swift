@@ -21,7 +21,7 @@ struct LoginView: View {
                 isStarMark: true,
                 leadingIcon: .username,
                 trailingView: EmptyView(),
-                isValidate: .constant(authVM.emailValidation.isValid),
+                isValidate: $authVM.emailValidation.isValid,
                 validateText: authVM.emailValidation.message,
                 isAutoCapitalize: .none,
                 onTextChange: { _ in authVM.validateEmail() }
