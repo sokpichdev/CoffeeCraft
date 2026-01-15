@@ -14,7 +14,7 @@ struct SettingsView: View {
             VStack(spacing: 20) {
                 settingsSection(title: "Account", icon: "person.crop.circle.fill") {
                     settingRow("Account Settings", icon: "gearshape.fill")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     settingRow("Face ID & PIN", icon: "faceid")
                 }
                 
@@ -24,21 +24,21 @@ struct SettingsView: View {
                 
                 settingsSection(title: "Preferences", icon: "paintbrush.fill") {
                     settingRow("Appearance", icon: "sparkles")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     settingRow("Languages", icon: "globe")
                 }
                 
                 settingsSection(title: "Support", icon: "questionmark.circle.fill") {
                     settingRow("FAQs", icon: "doc.text.fill")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     settingRow("Terms & Conditions", icon: "doc.plaintext")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     settingRow("About Us", icon: "info.circle.fill")
                 }
                 
                 settingsSection(title: "Share the Love", icon: "heart.circle.fill") {
                     settingRow("Share the App", icon: "square.and.arrow.up.fill")
-                    Divider().padding(.leading, 50)
+                    DeviderInSectionView()
                     settingRow("Write a Review", icon: "star.fill")
                 }
                 
