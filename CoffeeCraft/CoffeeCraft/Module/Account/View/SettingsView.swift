@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         List {
             Section {
@@ -41,6 +42,16 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
+                }
+            }
+        }
     }
     
     func row(_ title: String) -> some View {

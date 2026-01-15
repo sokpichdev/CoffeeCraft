@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "person.crop.circle.fill")
@@ -25,12 +26,22 @@ struct ProfileView: View {
         }
         .padding()
         .navigationTitle("Profile")
+        .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .foregroundColor(Color.brown)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit") {
                     // coming soon
                 }
+                .font(.headline)
+                .foregroundColor(Color.brown)
             }
         }
     }
