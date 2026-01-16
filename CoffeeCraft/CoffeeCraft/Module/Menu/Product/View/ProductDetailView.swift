@@ -9,25 +9,23 @@ import SDWebImageSwiftUI
 
 struct ProductDetailView: View {
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var favVM: FavoriteViewModel
     @Environment(\.dismiss) private var dismiss
+    
     let product: Product
     var cartItem: CartItem? = nil // optional cart item for editing
     var onUpdate: (() -> Void)? = nil
-//    @State private var selectedSize: String
-//    @State private var selectedMilk: String
-//    @State private var selectedSugar: String
-//    @State private var selectedIce: String
+    
     @State private var selectedExtras: [String]
     @State private var showAddedAlert = false
-
+    @State private var selections: [String: String] = [:]
+    
     // MARK: - Init to set initial selections from cartItem or defaults
     init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil) {
         self.product = product
         self.cartItem = cartItem
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
     }
-
-    @State private var selections: [String: String] = [:]
 
     private func bindingFor(_ category: String) -> Binding<String> {
         return Binding<String>(
@@ -162,6 +160,15 @@ struct ProductDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
+        .onAppear {
+            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+        }
+        .onChange(of: selections) {
+            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+        }
+        .onChange(of: selectedExtras) {
+            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+        }
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -170,6 +177,17 @@ struct ProductDetailView: View {
                     Image(systemName: "chevron.left")
                         .font(.headline)
                         .foregroundColor(Color.brown)
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    Task {
+                        await favVM.toggleFavorite(product: product, selections: selections, selectedExtras: selectedExtras)
+                    }
+                } label: {
+                    Image(systemName: favVM.isFavorite ? "heart.fill" : "heart")
+                        .font(.headline)
+                        .foregroundColor(favVM.isFavorite ? .red : .brown)
                 }
             }
         }

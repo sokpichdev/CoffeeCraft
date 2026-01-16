@@ -10,6 +10,7 @@ import FirebaseAuth
 struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject var cartManager = CartManager(userId: Auth.auth().currentUser?.uid ?? "guest")
+    @StateObject var favVM = FavoriteViewModel()
     @State private var selectedTab: Tab = .home
     
     var body: some View {
@@ -30,6 +31,7 @@ struct RootView: View {
                         case .menu:
                             MenuView()
                                 .environmentObject(cartManager)
+                                .environmentObject(favVM)
                         case .orders:
                             OrdersView()
                         case .profile:
