@@ -21,7 +21,8 @@ struct SearchView: View {
         return products.filter { product in
             product.name.localizedCaseInsensitiveContains(searchText) ||
             product.description.localizedCaseInsensitiveContains(searchText) ||
-            product.category.localizedCaseInsensitiveContains(searchText)
+            product.category.localizedCaseInsensitiveContains(searchText) ||
+            String(product.price).localizedCaseInsensitiveContains(searchText)
         }
     }
     
