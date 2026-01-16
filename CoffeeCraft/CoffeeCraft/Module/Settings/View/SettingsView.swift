@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -43,7 +44,11 @@ struct SettingsView: View {
                 }
                 
                 Button {
-                    // logout action
+                    authVM.logout() { isSuccess in
+                        if isSuccess {
+                            dismiss()
+                        }
+                    }
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: "rectangle.portrait.and.arrow.right.fill")

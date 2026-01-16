@@ -9,6 +9,7 @@ import SwiftUI
 struct AccountView: View {
     @StateObject var inboxVM = InboxViewModel()
     @EnvironmentObject var favVM: FavoriteViewModel
+    @EnvironmentObject var authVM: AuthViewModel
     // navigate
     @State var isNavigateToInbox: Bool = false
     @State var isNavigateToFavorite: Bool = false
@@ -29,6 +30,7 @@ struct AccountView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
                     SettingsView()
+                        .environmentObject(authVM)
                 } label: {
                     Image(systemName: "gearshape.fill")
                         .font(.headline)
