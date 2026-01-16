@@ -80,9 +80,15 @@ class AuthViewModel: ObservableObject {
         try await Auth.auth().sendPasswordReset(withEmail: email)
     }
     
-    func logout() {
-        try? Auth.auth().signOut()
-        currentUser = nil
+    func logout(onResult: @escaping (Bool) -> Void) {
+        do {
+            try Auth.auth().signOut()
+            self.currentUser = nil
+            onResult(true)
+        } catch let error as NSError {
+            print("Error signing out: \(error.localizedDescription)")
+            onResult(false)
+        }
     }
 }
 

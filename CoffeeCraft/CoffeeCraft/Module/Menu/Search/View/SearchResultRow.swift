@@ -30,13 +30,12 @@ struct SearchResultRow: View {
             WebImage(url: URL(string: product.imageURL))
                 .resizable()
                 .indicator(.activity)
-                .scaledToFill()
-                .frame(width: 70, height: 70)
+                .aspectRatio(1, contentMode: .fit)
                 .cornerRadius(10)
             
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(product.name)
-                    .font(.headline)
+                    .font(.subheadline)
                     .foregroundColor(.primary)
                     .lineLimit(1)
                 
@@ -49,23 +48,25 @@ struct SearchResultRow: View {
                     }
                     .foregroundColor(matchBadge.1)
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
+                    .padding(.vertical, 1)
                     .background(matchBadge.1.opacity(0.15))
                     .cornerRadius(6)
                 }
                 
                 Text("$\(product.price, specifier: "%.2f")")
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundColor(.secondary)
+                Spacer(minLength: 0)
             }
             
             Spacer()
             
             Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.headline)
+                .foregroundColor(Color.brown)
         }
         .padding(12)
+        .frame(height: 90)
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)

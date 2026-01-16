@@ -37,18 +37,22 @@ struct RootView: View {
                         case .profile:
                             AccountView()
                                 .environmentObject(favVM)
+                                .environmentObject(authVM)
                         }
                     case .manager:
                         switch selectedTab {
                         case .home:
                             HomeView(selectedTab: $selectedTab)
                         case .menu:
-                            MenuView(isManager: true).environmentObject(cartManager)
+                            MenuView(isManager: true)
+                                .environmentObject(cartManager)
+                                .environmentObject(favVM)
                         case .orders:
                             AdminOrdersView()
                         case .profile:
                             AccountView()
                                 .environmentObject(favVM)
+                                .environmentObject(authVM)
                         }
                     }
                     TabBarView(selectedTab: $selectedTab)
