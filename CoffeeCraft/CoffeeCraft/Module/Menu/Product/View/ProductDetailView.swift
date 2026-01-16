@@ -172,11 +172,21 @@ struct ProductDetailView: View {
         .ignoresSafeArea(edges: .bottom)
         .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
+            if cartItem != nil { // sheet
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
+                    }
+                }
+            } else { // navigation mode
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
+                    }
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {

@@ -18,6 +18,7 @@ struct MenuView: View {
 
     @State private var showCartSheet = false
     @State private var selectedProductToEdit: Product?
+    @State private var showSearchSheet = false
 
     var isManager: Bool = false
 
@@ -42,6 +43,18 @@ struct MenuView: View {
         }
         .onChange(of: visibleSectionID) { newValue, _ in
             selectedSectionID = newValue
+        }
+        .navigationBarTitle("Menu", displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showSearchSheet = true
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.headline)
+                        .foregroundColor(.brown)
+                }
+            }
         }
         .navigationDestination(for: Product.self) { product in
             ProductDetailView(product: product)
@@ -70,10 +83,15 @@ struct MenuView: View {
                                isEditing: false)
             }
         }
-
         .fullScreenCover(isPresented: $showCartSheet) {
             CartView()
                 .environmentObject(cartManager)
+                .environmentObject(favVM)
+        }
+        .sheet(isPresented: $showSearchSheet) {
+            SearchView(products: productVM.products)
+                .environmentObject(cartManager)
+                .environmentObject(favVM)
         }
     }
 

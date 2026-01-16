@@ -12,7 +12,7 @@ struct OrdersView: View {
     var body: some View {
         ZStack {
             // Adaptive background
-            Color(uiColor: .secondarySystemBackground)
+            Color(uiColor: .systemGroupedBackground)
                 .ignoresSafeArea()
             
             if orderVM.orders.isEmpty {
@@ -42,7 +42,7 @@ struct OrdersView: View {
                 }
             }
         }
-        .navigationTitle("My Orders")
+        .navigationBarTitle("My Orders", displayMode: .inline)
         .onAppear {
             orderVM.listenToUserOrders()
         }

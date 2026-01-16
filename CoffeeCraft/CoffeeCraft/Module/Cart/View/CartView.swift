@@ -8,6 +8,7 @@ import SwiftUI
 
 struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var favVM: FavoriteViewModel
     @State private var editingItem: CartItem? = nil
     @State private var showCheckoutConfirm = false
     @State private var isPlacingOrder = false
@@ -74,12 +75,15 @@ struct CartView: View {
             }
             .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
-                ProductDetailView(
-                    product: item.product,
-                    cartItem: item,
-                    onUpdate: { editingItem = nil }
-                )
-                .environmentObject(cartManager)
+                NavigationStack {
+                    ProductDetailView(
+                        product: item.product,
+                        cartItem: item,
+                        onUpdate: { editingItem = nil }
+                    )
+                    .environmentObject(cartManager)
+                    .environmentObject(favVM)
+                }
             }
             .navigationTitle("My Cart")
             .navigationBarTitleDisplayMode(.inline)
