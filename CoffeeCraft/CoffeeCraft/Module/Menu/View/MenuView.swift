@@ -11,7 +11,7 @@ import FirebaseFirestore
 struct MenuView: View {
     @StateObject private var productVM = ProductViewModel()
     @EnvironmentObject var cartManager: CartManager
-
+    @EnvironmentObject var favVM: FavoriteViewModel
     @State private var selectedSectionID: String? = nil
     @State private var visibleSectionID: String? = nil
     @State private var isProgrammaticScroll = false
@@ -46,6 +46,7 @@ struct MenuView: View {
         .navigationDestination(for: Product.self) { product in
             ProductDetailView(product: product)
                 .environmentObject(cartManager)
+                .environmentObject(favVM)
         }
         .navigationDestination(item: $selectedProductToEdit) { product in
             if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
