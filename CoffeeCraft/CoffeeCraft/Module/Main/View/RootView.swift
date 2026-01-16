@@ -36,6 +36,7 @@ struct RootView: View {
                             OrdersView()
                         case .profile:
                             AccountView()
+                                .environmentObject(favVM)
                         }
                     case .manager:
                         switch selectedTab {
@@ -47,6 +48,7 @@ struct RootView: View {
                             AdminOrdersView()
                         case .profile:
                             AccountView()
+                                .environmentObject(favVM)
                         }
                     }
                     TabBarView(selectedTab: $selectedTab)

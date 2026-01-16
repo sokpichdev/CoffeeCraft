@@ -8,7 +8,10 @@ import SwiftUI
 
 struct AccountView: View {
     @StateObject var inboxVM = InboxViewModel()
+    @EnvironmentObject var favVM: FavoriteViewModel
+    // navigate
     @State var isNavigateToInbox: Bool = false
+    @State var isNavigateToFavorite: Bool = false
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -87,6 +90,10 @@ struct AccountView: View {
         .navigationDestination(isPresented: $isNavigateToInbox, destination: {
             InboxView().environmentObject(inboxVM)
         })
+        .navigationDestination(isPresented: $isNavigateToFavorite) {
+            FavoriteView()
+                .environmentObject(favVM)
+        }
     }
     // MARK: Personal
     var personalSection: some View {
@@ -98,7 +105,9 @@ struct AccountView: View {
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Favorites", systemImage: "heart.fill")
+            RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
+                isNavigateToFavorite = true
+            }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Addresses", systemImage: "location.fill")
             DeviderInSectionView(padding: 44)

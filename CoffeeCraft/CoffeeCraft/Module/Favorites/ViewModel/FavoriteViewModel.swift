@@ -12,6 +12,7 @@ import FirebaseAuth
 class FavoriteViewModel: ObservableObject {
 
     @Published var isFavorite: Bool = false
+    @Published var favorites: [FavoriteItem] = []
     
     private let db = Firestore.firestore()
 
@@ -24,13 +25,9 @@ class FavoriteViewModel: ObservableObject {
         return result
     }
 
-    // MARK: - Load favorite
+    // MARK: - Load favorite state for a product
     func loadFavoriteState(product: Product, selections: [String: String], selectedExtras: [String]) async {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("⚠️ Favorite check skipped: user not logged in")
-            return
-        }
-
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         let customizations = currentCustomizationForFavorite(selections: selections, selectedExtras: selectedExtras)
         let hash = buildCustomizationHash(customizations)
 
@@ -45,18 +42,13 @@ class FavoriteViewModel: ObservableObject {
         isFavorite = !(snapshot?.documents.isEmpty ?? true)
     }
     
-    // MARK: - Toggle favorite
+    // MARK: - Toggle favorite for a product
     func toggleFavorite(product: Product, selections: [String: String], selectedExtras: [String]) async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-
         let customizations = currentCustomizationForFavorite(selections: selections, selectedExtras: selectedExtras)
         let hash = buildCustomizationHash(customizations)
 
-        let ref = db
-            .collection("users")
-            .document(userId)
-            .collection("favorites")
-
+        let ref = db.collection("users").document(userId).collection("favorites")
         let snapshot = try? await ref
             .whereField("productId", isEqualTo: product.id)
             .whereField("customizationHash", isEqualTo: hash)
@@ -76,6 +68,42 @@ class FavoriteViewModel: ObservableObject {
                 "createdAt": Date()
             ])
             isFavorite = true
+        }
+    }
+
+    // MARK: - Load all favorites for current user
+    func loadAllFavorites() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+
+        do {
+            let snapshot = try await db
+                .collection("users")
+                .document(userId)
+                .collection("favorites")
+                .order(by: "createdAt", descending: true)
+                .getDocuments()
+
+            favorites = snapshot.documents.compactMap { doc in
+                guard
+                    let productName = doc["productName"] as? String,
+                    let imageURL = doc["imageURL"] as? String,
+                    let basePrice = doc["basePrice"] as? Double,
+                    let customizations = doc["customizations"] as? [String: String],
+                    let customizationHash = doc["customizationHash"] as? String
+                else { return nil }
+
+                return FavoriteItem(
+                    id: doc.documentID,
+                    productId: doc["productId"] as? String ?? "",
+                    productName: productName,
+                    imageURL: imageURL,
+                    basePrice: basePrice,
+                    customizations: customizations,
+                    customizationHash: customizationHash
+                )
+            }
+        } catch {
+            print("Failed to load favorites:", error)
         }
     }
 
