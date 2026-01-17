@@ -31,23 +31,18 @@ struct CustomizationCategoryCard: View {
                     
                     Spacer()
                     
-                    Text("\(category.options.count)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(Color.brown))
-                    
-                    Button(action: onDelete) {
-                        Image(systemName: "trash.fill")
-                            .foregroundColor(.red)
+                    HStack(spacing: 16) {
+                        Button(action: onDelete) {
+                            Image(systemName: "trash.fill")
+                                .foregroundColor(.red)
+                                .font(.headline)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
                 }
                 .padding()
             }
