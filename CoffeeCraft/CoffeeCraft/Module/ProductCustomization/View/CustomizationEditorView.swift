@@ -2,7 +2,7 @@
 //  CustomizationEditorView.swift
 //  CoffeeCraft
 //
-//  View for editing product customizations
+//  Created by Sok Pich on 1/17/26.
 //
 
 import SwiftUI
@@ -18,89 +18,129 @@ struct CustomizationEditorView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                // Existing customizations for this product
-                ForEach($customizations) { $category in
-                    Section {
-                        ForEach($category.options) { $option in
-                            HStack {
-                                TextField("Option name", text: $option.name)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                
-                                Spacer()
-                                
-                                Text("$")
-                                    .foregroundColor(.secondary)
-                                
-                                TextField("0.00", value: $option.price, format: .number.precision(.fractionLength(2)))
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .keyboardType(.decimalPad)
-                                    .frame(width: 80)
-                                    .multilineTextAlignment(.trailing)
-                            }
-                        }
-                        .onDelete { indices in
-                            category.options.remove(atOffsets: indices)
+            ZStack {
+                // Background gradient
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Header info card
+                        if customizations.isEmpty {
+                            EmptyCustomizationsCard()
+                                .padding(.horizontal)
+                                .padding(.top)
                         }
                         
-                        Button(action: {
-                            category.options.append(CustomizationOption(name: "", price: 0.0))
-                        }) {
-                            Label("Add Option", systemImage: "plus.circle.fill")
-                                .foregroundColor(.brown)
+                        // Existing customizations
+                        ForEach($customizations) { $category in
+                            CustomizationCategoryCard(
+                                category: $category,
+                                onDelete: {
+                                    withAnimation {
+                                        if let index = customizations.firstIndex(where: { $0.id == category.id }) {
+                                            customizations.remove(at: index)
+                                        }
+                                    }
+                                }
+                            )
+                            .padding(.horizontal)
                         }
-                    } header: {
-                        HStack {
-                            TextField("Category name", text: $category.name)
-                                .font(.headline)
-                            
-                            Spacer()
+                        
+                        // Add buttons
+                        VStack(spacing: 12) {
+                            Button(action: {
+                                showAddFromLibrary = true
+                            }) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "book.fill")
+                                        .font(.title3)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Add from Library")
+                                            .font(.headline)
+                                        Text("Choose pre-defined options")
+                                            .font(.caption)
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.brown, Color.brown.opacity(0.8)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(16)
+                                .shadow(color: .brown.opacity(0.3), radius: 8, x: 0, y: 4)
+                            }
                             
                             Button(action: {
-                                if let index = customizations.firstIndex(where: { $0.id == category.id }) {
-                                    customizations.remove(at: index)
-                                }
+                                showCreateCustom = true
                             }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
+                                HStack(spacing: 12) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.title3)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Create Custom")
+                                            .font(.headline)
+                                        Text("Design your own category")
+                                            .font(.caption)
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.orange, Color.orange.opacity(0.8)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(16)
+                                .shadow(color: .orange.opacity(0.3), radius: 8, x: 0, y: 4)
                             }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom, 20)
                     }
+                    .padding(.top, 10)
                 }
-                
-                // Add buttons section
-                Section {
-                    Button(action: {
-                        showAddFromLibrary = true
-                    }) {
-                        Label("Add from Library", systemImage: "book.fill")
-                            .foregroundColor(.brown)
-                            .fontWeight(.semibold)
-                    }
-                    
-                    Button(action: {
-                        showCreateCustom = true
-                    }) {
-                        Label("Create Custom Category", systemImage: "plus.circle.fill")
-                            .foregroundColor(.orange)
-                            .fontWeight(.semibold)
-                    }
-                }
+                .scrollDismissesKeyboard(.immediately)
             }
             .navigationTitle("Customizations")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "checkmark")
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
                     }
-                    .fontWeight(.semibold)
                 }
             }
             .sheet(isPresented: $showAddFromLibrary) {
@@ -116,132 +156,15 @@ struct CustomizationEditorView: View {
                 }
                 Button("Create") {
                     if !newCategoryName.isEmpty {
-                        customizations.append(CustomizationCategory(name: newCategoryName, options: []))
+                        withAnimation {
+                            customizations.append(CustomizationCategory(name: newCategoryName, options: []))
+                        }
                         newCategoryName = ""
                     }
                 }
             } message: {
                 Text("Enter a name for the customization category (e.g., Size, Milk, Extras)")
             }
-        }
-    }
-}
-
-// Sheet to select from pre-defined customizations
-struct CustomizationLibrarySheet: View {
-    let availableCustomizations: [CustomizationCategory]
-    @Binding var selectedCustomizations: [CustomizationCategory]
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        NavigationView {
-            List {
-                if availableCustomizations.isEmpty {
-                    ContentUnavailableView(
-                        "No Customizations Available",
-                        systemImage: "tray",
-                        description: Text("Run the customization seeder to populate options")
-                    )
-                } else {
-                    ForEach(availableCustomizations) { category in
-                        Button(action: {
-                            addCustomization(category)
-                        }) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(category.name)
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    
-                                    Text("\(category.options.count) options")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                // Show checkmark if already added
-                                if selectedCustomizations.contains(where: { $0.name == category.name }) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.brown)
-                                } else {
-                                    Image(systemName: "plus.circle")
-                                        .foregroundColor(.brown)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Customization Library")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func addCustomization(_ category: CustomizationCategory) {
-        // Check if already exists
-        if let existingIndex = selectedCustomizations.firstIndex(where: { $0.name == category.name }) {
-            // Remove it (toggle)
-            selectedCustomizations.remove(at: existingIndex)
-        } else {
-            // Add it with a new ID
-            var newCategory = category
-            newCategory.id = UUID() // Create new ID for this product's instance
-            selectedCustomizations.append(newCategory)
-        }
-    }
-}
-
-// Compact button to show in the product editor
-struct CustomizationEditorButton: View {
-    @Binding var customizations: [CustomizationCategory]
-    @State private var showEditor = false
-    
-    var body: some View {
-        Button(action: {
-            showEditor = true
-        }) {
-            HStack {
-                Image(systemName: "slider.horizontal.3")
-                    .foregroundColor(.brown)
-                    .frame(width: 30)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Customizations")
-                        .foregroundColor(.primary)
-                        .fontWeight(.medium)
-                    
-                    if customizations.isEmpty {
-                        Text("No customizations")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("\(customizations.count) categories")
-                            .font(.caption)
-                            .foregroundColor(.brown)
-                    }
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
-            }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
-        }
-        .buttonStyle(PlainButtonStyle())
-        .sheet(isPresented: $showEditor) {
-            CustomizationEditorView(customizations: $customizations)
         }
     }
 }

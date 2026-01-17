@@ -63,7 +63,7 @@ struct CategorySelectionSheet: View {
                                     Spacer()
                                     
                                     if category == tempSelectedCategory {
-                                        Image(systemName: "checkmark.circle.fill")
+                                        Image(systemName: "checkmark")
                                             .foregroundColor(.brown)
                                     }
                                 }
