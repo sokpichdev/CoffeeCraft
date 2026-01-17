@@ -67,7 +67,8 @@ struct CustomizationEditorView: View {
                                     Spacer()
                                     
                                     Image(systemName: "chevron.right")
-                                        .font(.caption)
+                                        .font(.headline)
+                                        .foregroundColor(Color.brown)
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity)
@@ -101,7 +102,8 @@ struct CustomizationEditorView: View {
                                     Spacer()
                                     
                                     Image(systemName: "chevron.right")
-                                        .font(.caption)
+                                        .font(.headline)
+                                        .foregroundColor(Color.brown)
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity)

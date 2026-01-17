@@ -49,8 +49,8 @@ struct LibraryCategoryCard: View {
                         }
                     }) {
                         Image(systemName: showDetails ? "chevron.up.circle.fill" : "info.circle.fill")
-                            .font(.title3)
-                            .foregroundColor(.brown.opacity(0.6))
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
