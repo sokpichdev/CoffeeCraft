@@ -252,19 +252,12 @@ struct ProductSeeder {
         for product in sampleProducts {
             do {
                 let productName = product["name"] as! String
-                let customID = generateProductID(from: productName)
+                let customID = productName.generateProductID()
                 try await productsRef.document(customID).setData(product)
                 print("✅ Added product with ID: \(customID)")
             } catch {
                 print("❌ Failed to add product: \(error.localizedDescription)")
             }
         }
-    }
-    
-    static func generateProductID(from name: String) -> String {
-        name.lowercased()
-            .replacingOccurrences(of: " ", with: "_")
-            .components(separatedBy: CharacterSet.alphanumerics.inverted)
-            .joined()
     }
 }

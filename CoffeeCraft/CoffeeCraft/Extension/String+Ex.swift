@@ -57,3 +57,12 @@ extension String {
         return hasLetter && hasNumber
     }
 }
+
+extension String {
+    func generateProductID() -> String {
+        self.lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .joined()
+    }
+}
