@@ -87,7 +87,8 @@ struct MenuView: View {
                                 productPrice: productVM.products[index].price,
                                 productCategory: productVM.products[index].category,
                                 productImageURL: productVM.products[index].imageURL,
-                                productAvailable: productVM.products[index].available)
+                                productAvailable: productVM.products[index].available,
+                                productCustomizations: productVM.products[index].customizations ?? [:])
             } else {
                 EditProductView(productVM: productVM,
                                 productID: "",
@@ -97,6 +98,7 @@ struct MenuView: View {
                                 productCategory: selectedSectionID ?? "",
                                 productImageURL: "",
                                 productAvailable: true,
+                                productCustomizations: [:],
                                 isEditing: false)
             }
         }

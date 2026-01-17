@@ -20,6 +20,12 @@ struct AccountView: View {
                 personalSection
                 shortcutsSection
                 contactsSection
+//                Button("Seed Database") {
+//                    Task {
+//                        await CustomizationSeeder.seedCustomizations()
+//                        print("✅ Database seeded successfully!")
+//                    }
+//                }
                 footerSection
             }
             .padding()
