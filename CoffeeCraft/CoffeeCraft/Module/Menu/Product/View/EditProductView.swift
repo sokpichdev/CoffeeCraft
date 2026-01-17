@@ -82,13 +82,23 @@ struct EditProductView: View {
                 .padding(.horizontal)
 
                 // MARK: - Customizations
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 16) {
                     Label("Product Options", systemImage: "slider.horizontal.3")
                         .font(.headline)
                         .foregroundColor(.brown)
                         .padding(.bottom, 4)
                     
                     CustomizationEditorButton(customizations: $tempCustomizations)
+                    
+                    // Display added customizations
+                    if !tempCustomizations.isEmpty {
+                        VStack(spacing: 12) {
+                            ForEach(tempCustomizations) { category in
+                                CustomizationPreviewCard(category: category)
+                            }
+                        }
+                        .padding(.top, 8)
+                    }
                 }
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
