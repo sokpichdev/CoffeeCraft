@@ -74,6 +74,33 @@ struct MenuView: View {
                 .environmentObject(cartManager)
                 .environmentObject(favVM)
         }
+        .navigationDestination(for: Product.self) { product in
+            ProductDetailView(product: product)
+                .environmentObject(cartManager)
+                .environmentObject(favVM)
+        }
+        .navigationDestination(item: $selectedProductToEdit) { product in
+            if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
+                EditProductView(productVM: productVM,
+                                productID: productVM.products[index].id,
+                                productName: productVM.products[index].name,
+                                productDescription: productVM.products[index].description,
+                                productPrice: productVM.products[index].price,
+                                productCategory: productVM.products[index].category,
+                                productImageURL: productVM.products[index].imageURL,
+                                productAvailable: productVM.products[index].available)
+            } else {
+                EditProductView(productVM: productVM,
+                                productID: "",
+                                productName: "",
+                                productDescription: "",
+                                productPrice: 0.0,
+                                productCategory: selectedSectionID ?? "",
+                                productImageURL: "",
+                                productAvailable: true,
+                                isEditing: false)
+            }
+        }
     }
 
     // MARK: - Sidebar
@@ -149,6 +176,22 @@ struct MenuView: View {
                 ForEach(section.items) { product in
                     NavigationLink(value: product) {
                         MenuItemRow(item: product)
+                            .id("\(section.id)_\(product.id)")
+                            .contextMenu(isManager ? ContextMenu(menuItems: {
+                                Button("Edit", systemImage: "pencil") {
+                                    selectedProductToEdit = product
+                                }
+                                Button("Remove", role: .destructive) {
+                                    Task {
+                                        await productVM.deleteProduct(product)
+                                    }
+                                }
+                                Button("Mark as Unavailable", systemImage: "nosign") {
+                                    Task {
+                                        await productVM.markUnavailable(product)
+                                    }
+                                }
+                            }) : nil)
                     }
                 }
 
