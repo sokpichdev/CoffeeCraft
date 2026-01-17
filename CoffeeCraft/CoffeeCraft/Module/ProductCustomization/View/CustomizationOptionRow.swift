@@ -8,12 +8,21 @@ import SwiftUI
 
 struct CustomizationOptionRow: View {
     @Binding var option: CustomizationOption
+    let onDelete: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "circle.fill")
-                .font(.caption2)
-                .foregroundColor(.brown.opacity(0.4))
+            // Delete button (tap version)
+            Button(action: {
+                withAnimation {
+                    onDelete()
+                }
+            }) {
+                Image(systemName: "minus.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.red)
+            }
+            .buttonStyle(PlainButtonStyle())
             
             TextField("Option name", text: $option.name)
                 .textFieldStyle(PlainTextFieldStyle())

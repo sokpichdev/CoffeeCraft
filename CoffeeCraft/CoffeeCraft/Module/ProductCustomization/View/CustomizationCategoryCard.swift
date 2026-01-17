@@ -59,10 +59,16 @@ struct CustomizationCategoryCard: View {
                 // Options list
                 VStack(spacing: 12) {
                     ForEach($category.options) { $option in
-                        CustomizationOptionRow(option: $option)
-                    }
-                    .onDelete { indices in
-                        category.options.remove(atOffsets: indices)
+                        CustomizationOptionRow(
+                            option: $option,
+                            onDelete: {
+                                withAnimation {
+                                    if let index = category.options.firstIndex(where: { $0.id == option.id }) {
+                                        category.options.remove(at: index)
+                                    }
+                                }
+                            }
+                        )
                     }
                     
                     // Add option button
