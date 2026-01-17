@@ -17,14 +17,9 @@ struct MenuView: View {
 
     // MARK: - Scroll Sync State
     @State private var selectedSectionID: String?
-    @State private var visibleSectionID: String?
     @State private var productScrollProxy: ScrollViewProxy?
-    @State private var scrollSource: ScrollSource = .user
-
-    enum ScrollSource {
-        case user
-        case programmatic
-    }
+    @State private var isScrollingProgrammatically = false
+    @State private var scrollDebounceTask: Task<Void, Never>?
 
     // MARK: - UI State
     @State private var showCartSheet = false
@@ -52,6 +47,10 @@ struct MenuView: View {
         }
         .onAppear {
             productVM.listenProducts()
+            // Set initial section
+            if selectedSectionID == nil, let firstSection = productVM.sections.first {
+                selectedSectionID = firstSection.id
+            }
         }
         .navigationBarTitle("Menu", displayMode: .inline)
         .toolbar {
@@ -105,40 +104,51 @@ struct MenuView: View {
 
     // MARK: - Sidebar
     private var categorySidebar: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(productVM.sections) { section in
-                    Button {
-                        scrollToSection(section.id)
-                    } label: {
-                        HStack {
-                            Text(section.name)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(
-                                    selectedSectionID == section.id ? .brown : .primary
-                                )
-                                .padding(.vertical, 10)
-                                .padding(.leading, 8)
-                            Spacer()
+        ScrollViewReader { sidebarProxy in
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(productVM.sections) { section in
+                        Button {
+                            scrollToSection(section.id)
+                        } label: {
+                            HStack {
+                                Text(section.name)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(
+                                        selectedSectionID == section.id ? .brown : .primary
+                                    )
+                                    .padding(.vertical, 10)
+                                    .padding(.leading, 8)
+                                Spacer()
+                            }
+                            .background(
+                                Rectangle()
+                                    .fill(
+                                        selectedSectionID == section.id
+                                        ? Color.brown.opacity(0.15)
+                                        : Color.clear
+                                    )
+                            )
+                            .cornerRadius(6)
                         }
-                        .background(
-                            Rectangle()
-                                .fill(
-                                    selectedSectionID == section.id
-                                    ? Color.brown.opacity(0.15)
-                                    : Color.clear
-                                )
-                        )
-                        .cornerRadius(6)
+                        .buttonStyle(.plain)
+                        .id("sidebar_\(section.id)")
                     }
-                    .buttonStyle(.plain)
+                }
+                .padding(.leading, 5)
+                .padding(.vertical, 10)
+            }
+            .frame(width: 120)
+            .background(Color(.systemGray6))
+            .onChange(of: selectedSectionID) { _, newSection in
+                // Auto-scroll sidebar to keep selected category visible
+                if let newSection = newSection, !isScrollingProgrammatically {
+                    withAnimation {
+                        sidebarProxy.scrollTo("sidebar_\(newSection)", anchor: .center)
+                    }
                 }
             }
-            .padding(.leading, 5)
-            .padding(.vertical, 10)
         }
-        .frame(width: 120)
-        .background(Color(.systemGray6))
     }
 
     // MARK: - Product List
@@ -158,7 +168,8 @@ struct MenuView: View {
             }
             .coordinateSpace(name: "scroll")
             .onPreferenceChange(SectionOffsetKey.self) { values in
-                guard scrollSource == .user else { return }
+                // Only update from user scrolling
+                guard !isScrollingProgrammatically else { return }
                 updateVisibleSection(values: values)
             }
         }
@@ -222,24 +233,51 @@ struct MenuView: View {
     private func scrollToSection(_ id: String) {
         guard let proxy = productScrollProxy else { return }
 
-        scrollSource = .programmatic
+        // Cancel any pending debounce task
+        scrollDebounceTask?.cancel()
+        
+        // Set programmatic scrolling flag
+        isScrollingProgrammatically = true
         selectedSectionID = id
 
-        withAnimation(.easeInOut) {
+        withAnimation(.easeInOut(duration: 0.3)) {
             proxy.scrollTo(id, anchor: .top)
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            scrollSource = .user
+        // Reset flag after animation completes with some buffer
+        scrollDebounceTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            if !Task.isCancelled {
+                isScrollingProgrammatically = false
+            }
         }
     }
 
     private func updateVisibleSection(values: [String: CGFloat]) {
-        let sorted = values.sorted { $0.value < $1.value }
-        guard let top = sorted.first?.key else { return }
-
-        if selectedSectionID != top {
-            selectedSectionID = top
+        // Cancel previous debounce
+        scrollDebounceTask?.cancel()
+        
+        // Debounce the update to avoid jitter
+        scrollDebounceTask = Task {
+            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+            
+            if Task.isCancelled { return }
+            
+            // Find the section closest to the top with a threshold
+            let threshold: CGFloat = 100 // Adjust this value as needed
+            
+            let visibleSections = values.filter { $0.value >= -threshold && $0.value <= threshold }
+            
+            if let closestSection = visibleSections.min(by: { abs($0.value) < abs($1.value) }) {
+                if selectedSectionID != closestSection.key {
+                    selectedSectionID = closestSection.key
+                }
+            } else if let topSection = values.filter({ $0.value <= 0 }).max(by: { $0.value < $1.value }) {
+                // If no section is near top, use the one that just scrolled past
+                if selectedSectionID != topSection.key {
+                    selectedSectionID = topSection.key
+                }
+            }
         }
     }
 }

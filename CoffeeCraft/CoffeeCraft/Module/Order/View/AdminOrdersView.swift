@@ -61,7 +61,7 @@ struct AdminOrdersView: View {
                 }
             }
         }
-        .navigationTitle("Active Orders")
+        .navigationBarTitle("Active Orders", displayMode: .inline)
         .task {
             vm.fetchOrders()
         }
