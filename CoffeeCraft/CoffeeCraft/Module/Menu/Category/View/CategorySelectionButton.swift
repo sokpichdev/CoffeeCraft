@@ -12,6 +12,8 @@ struct CategorySelectionButton: View {
     let icon: String
     let action: () -> Void
     
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 16) {
@@ -25,16 +27,28 @@ struct CategorySelectionButton: View {
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
-                    .font(.caption)
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
             }
             .padding(.vertical, 10)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain) // Use .plain to prevent the default button coloring
+        .buttonStyle(.plain)
         .tint(.brown)
         .padding(.horizontal)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(.systemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color(.systemGray4), lineWidth: 0.5)
+        )
+        .shadow(
+            color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.05),
+            radius: 2,
+            x: 0,
+            y: 1
+        )
     }
 }
