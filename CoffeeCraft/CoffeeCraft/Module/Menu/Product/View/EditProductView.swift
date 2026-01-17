@@ -18,22 +18,24 @@ struct EditProductView: View {
     var productCategory: String
     var productImageURL: String
     var productAvailable: Bool
+    var productCustomizations: [String: [String: Double]]
     
     @State private var tempName: String = ""
     @State private var tempDescription: String = ""
     @State private var tempPrice: Double = 0.0
     @State private var tempCategory: String = ""
     @State private var tempImageURL: String = ""
+    @State private var tempCustomizations: [CustomizationCategory] = []
     @State private var tempAvailable: Bool = true
     
     var isEditing: Bool = true
     @State private var showCategorySheet: Bool = false
     @State private var isURLValid: Bool = false
 
-    var categoryNames: [String] { // get-only property
+    var categoryNames: [String] {
         productVM.sections.map { $0.name }
     }
-    @State private var mutableCategoryNames: [String] = [] // mutable copy
+    @State private var mutableCategoryNames: [String] = []
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -79,6 +81,19 @@ struct EditProductView: View {
                 .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
                 .padding(.horizontal)
 
+                // MARK: - Customizations
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Product Options", systemImage: "slider.horizontal.3")
+                        .font(.headline)
+                        .foregroundColor(.brown)
+                        .padding(.bottom, 4)
+                    
+                    CustomizationEditorButton(customizations: $tempCustomizations)
+                }
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)))
+                .padding(.horizontal)
+
                 // MARK: - Availability Toggle
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Status", systemImage: "checkmark.circle")
@@ -96,6 +111,12 @@ struct EditProductView: View {
                 // MARK: - Save Button
                 Button(action: {
                     Task {
+                        // Convert CustomizationCategory array back to Firebase format
+                        var customizationsDict: [String: [String: Double]] = [:]
+                        for category in tempCustomizations {
+                            customizationsDict[category.name] = category.toFirebaseFormat()
+                        }
+                        
                         await productVM.saveProduct(Product(
                             id: productID,
                             name: tempName,
@@ -103,7 +124,8 @@ struct EditProductView: View {
                             price: tempPrice,
                             imageURL: tempImageURL,
                             category: tempCategory,
-                            available: tempAvailable
+                            available: tempAvailable,
+                            customizations: customizationsDict
                         ))
                         dismiss()
                     }
@@ -145,6 +167,11 @@ struct EditProductView: View {
             tempCategory = productCategory
             tempImageURL = productImageURL
             tempAvailable = productAvailable
+            
+            // Convert Firebase format to CustomizationCategory array
+            tempCustomizations = productCustomizations.map { key, value in
+                CustomizationCategory.fromFirebaseFormat(name: key, data: value)
+            }.sorted { $0.name < $1.name }
             
             if mutableCategoryNames.isEmpty {
                 mutableCategoryNames = categoryNames
