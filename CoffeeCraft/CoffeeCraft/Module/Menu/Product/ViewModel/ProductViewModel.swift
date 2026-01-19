@@ -85,6 +85,11 @@ class ProductViewModel: ObservableObject {
         let isNewProduct = product.id.isEmpty
         var productToSave = product // Use a mutable copy for the ID update
 
+        // If new product, generate my custom ID
+        if isNewProduct {
+            productToSave.id = productToSave.name.generateProductID()
+        }
+
         let data: [String: Any] = [
             "name": productToSave.name,
             "description": productToSave.description,
@@ -96,17 +101,10 @@ class ProductViewModel: ObservableObject {
         ]
 
         do {
-            if isNewProduct {
-                // 1. CREATE: Use .addDocument to let Firestore generate the unique ID.
-                let newDocumentRef = try await db.collection("products").addDocument(data: data)
-                
-                // 2. IMPORTANT: Update the local product's ID with the new Firestore ID.
-                productToSave.id = newDocumentRef.documentID
-            } else {
-                // 3. UPDATE: Use .document(product.id).setData for existing products.
-                try await db.collection("products").document(productToSave.id).setData(data)
-            }
-            
+            try await db.collection("products")
+                .document(productToSave.id)
+                .setData(data)
+
             // Update local array immediately for UI
             if let index = products.firstIndex(where: { $0.id == productToSave.id }) {
                 products[index] = productToSave
