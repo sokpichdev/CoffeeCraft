@@ -56,17 +56,25 @@ class AuthViewModel: ObservableObject {
                 
                 let phoneNumber = data["phoneNumber"] as? String
                 let gender = data["gender"] as? String
-                let dobTimestamp = data["dateOfBirth"] as? Date
                 let city = data["city"] as? String
                 
-                self.currentUser = User(id: uid,
-                                        name: name,
-                                        email: email,
-                                        role: role,
-                                        phoneNumber: phoneNumber,
-                                        gender: gender,
-                                        dateOfBirth: dobTimestamp,
-                                        city: city)
+                // Convert Firestore Timestamp to Swift Date
+                var dateOfBirth: Date? = nil
+                if let dobTimestamp = data["dateOfBirth"] as? Timestamp {
+                    dateOfBirth = dobTimestamp.dateValue()
+                }
+                
+                self.currentUser = User(
+                    id: uid,
+                    name: name,
+                    email: email,
+                    role: role,
+                    phoneNumber: phoneNumber,
+                    gender: gender,
+                    dateOfBirth: dateOfBirth,
+                    city: city
+                )
+                
                 self.isLoading = false
             }
         }
