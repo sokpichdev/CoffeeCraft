@@ -115,25 +115,34 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func updateProfile(user: User) async throws {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+    func updateProfile(user: User) async -> Bool {
+        guard let uid = Auth.auth().currentUser?.uid else { return false }
 
         var data: [String: Any] = [
             "name": user.name,
             "email": user.email
         ]
 
-        // Only update fields if they are not nil
         if let phone = user.phoneNumber { data["phoneNumber"] = phone }
         if let gender = user.gender { data["gender"] = gender }
-        if let dob = user.dateOfBirth { data["dateOfBirth"] = dob }
+        if let dob = user.dateOfBirth {
+            data["dateOfBirth"] = Timestamp(date: dob)
+        }
         if let city = user.city { data["city"] = city }
 
-        try await db.collection("users").document(uid).setData(data, merge: true)
-        // Refresh current user
-        fetchUserData(uid: uid)
-    }
+        do {
+            try await db.collection("users")
+                .document(uid)
+                .setData(data, merge: true)
 
+            // Refresh current user
+            fetchUserData(uid: uid)
+            return true
+        } catch {
+            print("Update profile failed:", error.localizedDescription)
+            return false
+        }
+    }
 }
 
 extension AuthViewModel {
