@@ -30,16 +30,32 @@ struct ProfileView: View {
                 profileHeader
                 
                 VStack(spacing: 0) {
-                    RowInProfileView(label: "Name", title: $name, systemImage: "person.fill", isEditing: $isEditing, editType: .name) {}
+                    RowInProfileView(title: $name,
+                                     isEditing: $isEditing,
+                                     label: "Name",
+                                     systemImage: "person.fill",
+                                     editType: .name) {}
                     DeviderInSectionView()
-                    RowInProfileView(label: "Phone", title: $phone, systemImage: "phone.fill", isEditing: $isEditing, editType: .phone) {}
+                    RowInProfileView(title: $phone,
+                                     isEditing: $isEditing,
+                                     label: "Phone",
+                                     systemImage: "phone.fill",
+                                     editType: .phone) {}
                     DeviderInSectionView()
                     // Email (always read-only)
-                    RowInProfileView(label: "Email", title: .constant(authVM.currentUser?.email ?? "-"), systemImage: "envelope.fill",
-                                     isEditing: $isEditing, editType: .email) {}
+                    RowInProfileView(title: .constant(authVM.currentUser?.email ?? "-"),
+                                     isEditing: $isEditing,
+                                     label: "Email",
+                                     systemImage: "envelope.fill",
+                                     editType: .email) {}
                     DeviderInSectionView()
 
-                    RowInProfileView(label: "Gender", title: $gender, systemImage: "figure.stand", isEditing: $isEditing, editType: .dropDown) {
+                    RowInProfileView(title: $gender,
+                                     isEditing: $isEditing,
+                                     previousTitle: authVM.currentUser?.gender ?? "-",
+                                     label: "Gender",
+                                     systemImage: "figure.stand",
+                                     editType: .dropDown) {
                         Button(action: {
                             showGenderPicker = true
                         }, label: {
@@ -54,9 +70,11 @@ struct ProfileView: View {
                         .buttonStyle(PlainButtonStyle())
                     }
                     DeviderInSectionView()
-                    RowInProfileView(label: "Date of Birth",
-                                     title: .constant("\(authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-")"),
-                                     systemImage: "calendar", isEditing: $isEditing, editType: .date) {
+                    RowInProfileView(title: .constant("\(dob.formatted(date: .long, time: .omitted))"),
+                                     isEditing: $isEditing,
+                                     previousTitle: "\(authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-")",
+                                     label: "Date of Birth",
+                                     systemImage: "calendar", editType: .date) {
                         DatePicker("", selection: $dob, displayedComponents: .date)
                             .labelsHidden()
                             .datePickerStyle(.compact)
@@ -64,7 +82,12 @@ struct ProfileView: View {
                     DeviderInSectionView()
                     
                     // City
-                    RowInProfileView(label: "City / Province", title: $city, systemImage: "mappin.circle.fill", isEditing: $isEditing, editType: .dropDown) {
+                    RowInProfileView(title: $city,
+                                     isEditing: $isEditing,
+                                     previousTitle: authVM.currentUser?.city ?? "-",
+                                     label: "City / Province",
+                                     systemImage: "mappin.circle.fill",
+                                     editType: .dropDown) {
                         Button(action: {
                             showCityPicker = true
                         }, label: {
