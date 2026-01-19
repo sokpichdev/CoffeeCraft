@@ -22,7 +22,10 @@ struct ProfileView: View {
     @State private var isSaving = false
     
     let genderOptions = ["Male", "Female", "Other", "Prefer not to say"]
-    let cityOptions = ["Phnom Penh", "Siem Reap", "Battambang", "Sihanoukville", "Kampong Cham", "Kandal", "Takeo", "Prey Veng", "Kampot", "Pursat"]
+    let cityOptions: [String] = ["Phnom Penh", "Siem Reap", "Battambang", "Preah Sihanouk", "Kampong Cham",
+        "Kandal", "Takeo", "Prey Veng", "Kampot", "Pursat", "Banteay Meanchey",
+        "Kampong Thom", "Kampong Speu", "Koh Kong", "Kratie", "Mondulkiri", "Oddar Meanchey",
+        "Pailin", "Preah Vihear", "Ratanakiri", "Stung Treng", "Svay Rieng", "Tbong Khmum"]
     
     var body: some View {
         ScrollView {
