@@ -28,6 +28,7 @@ struct RootView: View {
                         switch selectedTab {
                         case .home:
                             HomeView(selectedTab: $selectedTab)
+                                .environmentObject(authVM)
                         case .menu:
                             MenuView()
                                 .environmentObject(cartManager)
@@ -43,6 +44,7 @@ struct RootView: View {
                         switch selectedTab {
                         case .home:
                             HomeView(selectedTab: $selectedTab)
+                                .environmentObject(authVM)
                         case .menu:
                             MenuView(isManager: true)
                                 .environmentObject(cartManager)
