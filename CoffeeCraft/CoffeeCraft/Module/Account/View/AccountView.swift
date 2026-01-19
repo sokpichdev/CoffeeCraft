@@ -68,7 +68,7 @@ struct AccountView: View {
             .shadow(color: Color.brown.opacity(0.3), radius: 8, y: 4)
             
             VStack(spacing: 6) {
-                Text("Sok Pich")
+                Text(authVM.currentUser?.name ?? "User")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)

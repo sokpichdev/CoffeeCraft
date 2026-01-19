@@ -11,7 +11,7 @@ struct AdminOrdersView: View {
 
     var body: some View {
         ZStack {
-            Color(uiColor: .secondarySystemBackground)
+            Color(uiColor: .systemGroupedBackground)
                 .ignoresSafeArea()
 
             if filteredOrders.isEmpty {

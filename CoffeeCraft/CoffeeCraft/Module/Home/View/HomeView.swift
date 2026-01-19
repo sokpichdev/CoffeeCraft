@@ -9,6 +9,8 @@ import SDWebImage
 
 // MARK: - HomeView
 struct HomeView: View {
+    @EnvironmentObject var authVM: AuthViewModel
+    
     @Binding var selectedTab: Tab
     private let originalBanners = [
         "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
@@ -58,7 +60,7 @@ struct HomeView: View {
                 
                 VStack(spacing: 12) {
 
-                    Text("Good Morning, Sok! ☀️")
+                    Text("Good Morning, \(authVM.currentUser?.name ?? "User")! ☀️")
                         .font(.title2.bold())
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
