@@ -17,24 +17,67 @@ struct ProfileView: View {
     @State private var dob = Date()
     @State private var city = ""
     
+    @State private var showGenderPicker = false
+    @State private var showCityPicker = false
+    @State private var isSaving = false
+    
+    let genderOptions = ["Male", "Female", "Other", "Prefer not to say"]
+    let cityOptions = ["Phnom Penh", "Siem Reap", "Battambang", "Sihanoukville", "Kampong Cham", "Kandal", "Takeo", "Prey Veng", "Kampot", "Pursat"]
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 28) {
                 profileHeader
                 
                 VStack(spacing: 0) {
-                    RowInSectionView(label: "Name", title: authVM.currentUser?.name ?? "-", systemImage: "person.fill")
+                    RowInProfileView(label: "Name", title: $name, systemImage: "person.fill", isEditing: $isEditing, editType: .name) {}
                     DeviderInSectionView()
-                    RowInSectionView(label: "Phone", title: authVM.currentUser?.phoneNumber ?? "-", systemImage: "phone.fill")
+                    RowInProfileView(label: "Phone", title: $phone, systemImage: "phone.fill", isEditing: $isEditing, editType: .phone) {}
                     DeviderInSectionView()
-                    RowInSectionView(label: "Email", title: authVM.currentUser?.email ?? "-", systemImage: "envelope.fill")
+                    // Email (always read-only)
+                    RowInProfileView(label: "Email", title: .constant(authVM.currentUser?.email ?? "-"), systemImage: "envelope.fill",
+                                     isEditing: $isEditing, editType: .email) {}
                     DeviderInSectionView()
-                    RowInSectionView(label: "Gender", title: authVM.currentUser?.gender ?? "-", systemImage: "figure.stand")
-                    DeviderInSectionView()
-                    RowInSectionView(label: "Date of Birth", title: authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-", systemImage: "calendar")
-                    DeviderInSectionView()
-                    RowInSectionView(label: "City / Province", title: authVM.currentUser?.city ?? "-", systemImage: "mappin.circle.fill")
 
+                    RowInProfileView(label: "Gender", title: $gender, systemImage: "figure.stand", isEditing: $isEditing, editType: .dropDown) {
+                        Button(action: {
+                            showGenderPicker = true
+                        }, label: {
+                            Text(gender.isEmpty ? "Select" : gender)
+                                .font(.headline)
+                                .foregroundStyle(gender.isEmpty ? .secondary : .primary)
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.headline)
+                                .foregroundColor(Color.brown)
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    DeviderInSectionView()
+                    RowInProfileView(label: "Date of Birth",
+                                     title: .constant("\(authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-")"),
+                                     systemImage: "calendar", isEditing: $isEditing, editType: .date) {
+                        DatePicker("", selection: $dob, displayedComponents: .date)
+                            .labelsHidden()
+                            .datePickerStyle(.compact)
+                    }
+                    DeviderInSectionView()
+                    
+                    // City
+                    RowInProfileView(label: "City / Province", title: $city, systemImage: "mappin.circle.fill", isEditing: $isEditing, editType: .dropDown) {
+                        Button(action: {
+                            showCityPicker = true
+                        }, label: {
+                            Text(city.isEmpty ? "Select" : city)
+                                .font(.headline)
+                                .foregroundStyle(city.isEmpty ? .secondary : .primary)
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.headline)
+                                .foregroundColor(Color.brown)
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
                 .padding(.vertical, 12)
                 .padding(.horizontal, 20)
@@ -46,52 +89,72 @@ struct ProfileView: View {
             }
             .padding()
         }
+        .scrollDismissesKeyboard(.immediately)
         .background(Color(.systemGroupedBackground))
         .navigationBarBackButtonHidden(true)
-        .navigationBarTitle("Profile", displayMode: .inline)
+        .navigationBarTitle(isEditing ? "Editing Profile" : "Profile", displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    if isEditing {
+                        cancelEditing()
+                    } else {
+                        dismiss()
+                    }
+                }) {
                     HStack(spacing: 6) {
-                        Image(systemName: "chevron.left")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
+                        if isEditing {
+                            Text("Cancel")
+                                .font(.headline)
+                                .foregroundColor(Color.brown)
+                        } else {
+                            Image(systemName: "chevron.left")
+                                .font(.headline)
+                                .foregroundColor(Color.brown)
+                        }
                     }
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    isEditing = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("Edit")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
+                    if isEditing {
+                        saveProfile()
+                    } else {
+                        startEditing()
                     }
-                    .foregroundStyle(Color.brown)
+                } label: {
+                    if isSaving {
+                        ProgressView()
+                            .tint(.brown)
+                    } else {
+                        HStack(spacing: 6) {
+                            Text(isEditing ? "Save" : "Edit")
+                                .font(.headline)
+                                .foregroundColor(.brown)
+                        }
+                    }
                 }
+                .disabled(isSaving || (isEditing && name.isEmpty))
             }
         }
         .onAppear {
-            if let user = authVM.currentUser {
-                name = user.name
-                phone = user.phoneNumber ?? ""
-                gender = user.gender ?? ""
-                dob = user.dateOfBirth ?? Date()
-                city = user.city ?? ""
-            }
+            loadUserData()
         }
-        .sheet(isPresented: $isEditing) {
-            if let user = authVM.currentUser {
-                EditProfileView(
-                    name: user.name,
-                    phone: user.phoneNumber ?? "",
-                    gender: user.gender ?? "",
-                    dob: user.dateOfBirth ?? Date(),
-                    city: user.city ?? ""
-                )
-                .environmentObject(authVM)
-            }
+        .sheet(isPresented: $showGenderPicker) {
+            PickerSheetView(
+                title: "Select Gender",
+                options: genderOptions,
+                selectedOption: $gender
+            )
+            .presentationDetents([.height(350)])
+        }
+        .sheet(isPresented: $showCityPicker) {
+            PickerSheetView(
+                title: "Select City / Province",
+                options: cityOptions,
+                selectedOption: $city
+            )
+            .presentationDetents([.medium])
         }
     }
     
@@ -117,7 +180,7 @@ struct ProfileView: View {
             }
             
             VStack(spacing: 6) {
-                Text("Sok Pich")
+                Text(authVM.currentUser?.name ?? "User")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
@@ -129,5 +192,60 @@ struct ProfileView: View {
         }
         .padding(.top, 12)
         .padding(.bottom, 8)
+    }
+    
+    func loadUserData() {
+        if let user = authVM.currentUser {
+            name = user.name
+            phone = user.phoneNumber ?? ""
+            gender = user.gender ?? ""
+            dob = user.dateOfBirth ?? Date()
+            city = user.city ?? ""
+        }
+    }
+    
+    func startEditing() {
+        loadUserData()
+        withAnimation(.easeInOut(duration: 0.3)) {
+            isEditing = true
+        }
+    }
+    
+    func cancelEditing() {
+        loadUserData()
+        withAnimation(.easeInOut(duration: 0.3)) {
+            isEditing = false
+        }
+    }
+    
+    func saveProfile() {
+        guard var user = authVM.currentUser else { return }
+
+        isSaving = true
+
+        // Update local user model
+        user.name = name
+        user.phoneNumber = phone
+        user.gender = gender
+        user.dateOfBirth = dob
+        user.city = city
+
+        Task {
+            let success = await authVM.updateProfile(user: user)
+
+            await MainActor.run {
+                isSaving = false
+
+                if success {
+                    print("✅ Successfully Updated profile")
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isEditing = false
+                    }
+                } else {
+                    // TODO: show error alert / toast
+                    print("❌ Failed to update profile")
+                }
+            }
+        }
     }
 }
