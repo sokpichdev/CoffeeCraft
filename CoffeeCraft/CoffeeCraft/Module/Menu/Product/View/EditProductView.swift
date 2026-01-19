@@ -50,13 +50,13 @@ struct EditProductView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         CustomProductTextField(title: "Image URL", text: $tempImageURL, icon: "photo")
                         if !isURLValid {
-                            CustomAttributedStringText(TextSegment(text: "No Image URL?", color: .red, font: .caption),
-                                                       TextSegment(text: "Click Here to get!",
-                                                                   color: .brown,
-                                                                   font: .caption,
-                                                                   link: URL(string: "https://postimages.org/")!,
-                                                                  underline: true))
-                            .padding(.leading)
+//                            CustomAttributedStringText(TextSegment(text: "No Image URL?", color: .red, font: .caption),
+//                                                       TextSegment(text: "Click Here to get!",
+//                                                                   color: .brown,
+//                                                                   font: .caption,
+//                                                                   link: URL(string: "https://postimages.org/")!,
+//                                                                  underline: true))
+//                            .padding(.leading)
                             Button(action: {
                                 if let url = URL(string: "https://postimages.org/") {
                                     webViewURL = url
