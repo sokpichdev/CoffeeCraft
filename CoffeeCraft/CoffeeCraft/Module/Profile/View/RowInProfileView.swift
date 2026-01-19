@@ -7,10 +7,11 @@
 import SwiftUI
 
 struct RowInProfileView<Content: View>: View {
-    var label: String? = nil
     @Binding var title: String
-    let systemImage: String
     @Binding var isEditing: Bool
+    var previousTitle: String = ""
+    var label: String? = nil
+    let systemImage: String
     let editType: EditProductType
     
     @ViewBuilder let content: Content
@@ -54,9 +55,9 @@ struct RowInProfileView<Content: View>: View {
                             .foregroundStyle(.secondary)
 
                     default:
-                        Text(" ")
+                        Text(previousTitle)
                             .font(.headline)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.secondary.opacity(0.5))
                     }
                 } else {
                     Text(title)
