@@ -75,6 +75,7 @@ struct AccountView: View {
                 
                 NavigationLink {
                     ProfileView()
+                        .environmentObject(authVM)
                 } label: {
                     HStack(spacing: 6) {
                         Text("View Profile")

@@ -16,6 +16,12 @@ struct User: Identifiable, Codable {
     var name: String
     var email: String
     var role: UserRole
+    
+    /// optional fields
+    var phoneNumber: String?
+    var gender: String?
+    var dateOfBirth: Date?
+    var city: String?
 }
 
 struct FieldValidation {

@@ -7,7 +7,15 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
+    
+    @State private var isEditing = false
+    @State private var name = ""
+    @State private var phone = ""
+    @State private var gender = ""
+    @State private var dob = Date()
+    @State private var city = ""
     
     var body: some View {
         ScrollView {
@@ -15,17 +23,18 @@ struct ProfileView: View {
                 profileHeader
                 
                 VStack(spacing: 0) {
-                    RowInSectionView(label: "Name", title: "Sok Pich", systemImage: "person.fill")
+                    RowInSectionView(label: "Name", title: authVM.currentUser?.name ?? "-", systemImage: "person.fill")
                     DeviderInSectionView()
-                    RowInSectionView(label: "Phone", title: "+855 77 742 462", systemImage: "phone.fill")
+                    RowInSectionView(label: "Phone", title: authVM.currentUser?.phoneNumber ?? "-", systemImage: "phone.fill")
                     DeviderInSectionView()
-                    RowInSectionView(label: "Email", title: "pichsok016@example.com", systemImage: "envelope.fill")
+                    RowInSectionView(label: "Email", title: authVM.currentUser?.email ?? "-", systemImage: "envelope.fill")
                     DeviderInSectionView()
-                    RowInSectionView(label: "Gender", title: "Male", systemImage: "figure.stand")
+                    RowInSectionView(label: "Gender", title: authVM.currentUser?.gender ?? "-", systemImage: "figure.stand")
                     DeviderInSectionView()
-                    RowInSectionView(label: "Date of Birth", title: "17 Sep 2001", systemImage: "calendar")
+                    RowInSectionView(label: "Date of Birth", title: authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-", systemImage: "calendar")
                     DeviderInSectionView()
-                    RowInSectionView(label: "City / Province", title: "Phnom Penh", systemImage: "mappin.circle.fill")
+                    RowInSectionView(label: "City / Province", title: authVM.currentUser?.city ?? "-", systemImage: "mappin.circle.fill")
+
                 }
                 .padding(.vertical, 12)
                 .padding(.horizontal, 20)
@@ -52,7 +61,7 @@ struct ProfileView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    // coming soon
+                    isEditing = true
                 } label: {
                     HStack(spacing: 6) {
                         Text("Edit")
@@ -61,6 +70,27 @@ struct ProfileView: View {
                     }
                     .foregroundStyle(Color.brown)
                 }
+            }
+        }
+        .onAppear {
+            if let user = authVM.currentUser {
+                name = user.name
+                phone = user.phoneNumber ?? ""
+                gender = user.gender ?? ""
+                dob = user.dateOfBirth ?? Date()
+                city = user.city ?? ""
+            }
+        }
+        .sheet(isPresented: $isEditing) {
+            if let user = authVM.currentUser {
+                EditProfileView(
+                    name: user.name,
+                    phone: user.phoneNumber ?? "",
+                    gender: user.gender ?? "",
+                    dob: user.dateOfBirth ?? Date(),
+                    city: user.city ?? ""
+                )
+                .environmentObject(authVM)
             }
         }
     }

@@ -44,13 +44,29 @@ class AuthViewModel: ObservableObject {
     func fetchUserData(uid: String) {
         db.collection("users").document(uid).getDocument { snapshot, error in
             DispatchQueue.main.async {
-                if let data = snapshot?.data(),
-                   let name = data["name"] as? String,
-                   let email = data["email"] as? String,
-                   let roleString = data["role"] as? String,
-                   let role = UserRole(rawValue: roleString) {
-                    self.currentUser = User(id: uid, name: name, email: email, role: role)
+                guard let data = snapshot?.data() else {
+                    self.isLoading = false
+                    return
                 }
+                
+                let name = data["name"] as? String ?? ""
+                let email = data["email"] as? String ?? ""
+                let roleString = data["role"] as? String ?? "customer"
+                let role = UserRole(rawValue: roleString) ?? .customer
+                
+                let phoneNumber = data["phoneNumber"] as? String
+                let gender = data["gender"] as? String
+                let dobTimestamp = data["dateOfBirth"] as? Date
+                let city = data["city"] as? String
+                
+                self.currentUser = User(id: uid,
+                                        name: name,
+                                        email: email,
+                                        role: role,
+                                        phoneNumber: phoneNumber,
+                                        gender: gender,
+                                        dateOfBirth: dobTimestamp,
+                                        city: city)
                 self.isLoading = false
             }
         }
@@ -90,6 +106,26 @@ class AuthViewModel: ObservableObject {
             onResult(false)
         }
     }
+    
+    func updateProfile(user: User) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        var data: [String: Any] = [
+            "name": user.name,
+            "email": user.email
+        ]
+
+        // Only update fields if they are not nil
+        if let phone = user.phoneNumber { data["phoneNumber"] = phone }
+        if let gender = user.gender { data["gender"] = gender }
+        if let dob = user.dateOfBirth { data["dateOfBirth"] = dob }
+        if let city = user.city { data["city"] = city }
+
+        try await db.collection("users").document(uid).setData(data, merge: true)
+        // Refresh current user
+        fetchUserData(uid: uid)
+    }
+
 }
 
 extension AuthViewModel {
