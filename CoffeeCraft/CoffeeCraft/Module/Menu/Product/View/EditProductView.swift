@@ -30,6 +30,9 @@ struct EditProductView: View {
     
     var isEditing: Bool = true
     @State private var showCategorySheet: Bool = false
+    @State private var showWebView: Bool = false
+    @State private var webViewURL: URL?
+
     @State private var isURLValid: Bool = false
 
     var categoryNames: [String] {
@@ -54,6 +57,21 @@ struct EditProductView: View {
                                                                    link: URL(string: "https://postimages.org/")!,
                                                                   underline: true))
                             .padding(.leading)
+                            Button(action: {
+                                if let url = URL(string: "https://postimages.org/") {
+                                    webViewURL = url
+                                    showWebView = true
+                                }
+                            }, label: {
+                                HStack {
+                                    (
+                                        Text("No Image URL?").foregroundColor(.red).font(.caption) +
+                                        Text(" Click Here to get!").foregroundColor(.brown).font(.caption)
+                                    )
+                                }
+                                .padding(.leading)
+                                .padding(.top, 5)
+                            })
                         }
                     }
                     .padding()
@@ -201,6 +219,22 @@ struct EditProductView: View {
                 selectedCategory: $tempCategory
             )
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showWebView) {
+            NavigationView {
+                if let url = webViewURL {
+                    WebView(url: url)
+                        .navigationTitle("Get Image")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") {
+                                    showWebView = false
+                                }
+                            }
+                        }
+                }
+            }
         }
     }
 }
