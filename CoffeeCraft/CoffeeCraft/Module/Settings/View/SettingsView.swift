@@ -8,28 +8,32 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     
+    @State private var isNavigateToAppearance: Bool = false
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                settingsSection(title: "Account", icon: "person.crop.circle.fill") {
+                SettingsSection(title: "Account", icon: "person.crop.circle.fill") {
                     RowInSectionView(title: "Account Settings", systemImage: "gearshape.fill")
                     DeviderInSectionView()
                     RowInSectionView(title: "Face ID & PIN", systemImage: "faceid")
                 }
                 
-                settingsSection(title: "Connections", icon: "link.circle.fill") {
+                SettingsSection(title: "Connections", icon: "link.circle.fill") {
                     RowInSectionView(title: "Connected Accounts", systemImage: "network")
                 }
                 
-                settingsSection(title: "Preferences", icon: "paintbrush.fill") {
-                    RowInSectionView(title: "Appearance", systemImage: "sparkles")
+                SettingsSection(title: "Preferences", icon: "paintbrush.fill") {
+                    RowInSectionView(title: "Appearance", systemImage: "sparkles") {
+                        isNavigateToAppearance = true
+                    }
                     DeviderInSectionView()
                     RowInSectionView(title: "Languages", systemImage: "globe")
                 }
                 
-                settingsSection(title: "Support", icon: "questionmark.circle.fill") {
+                SettingsSection(title: "Support", icon: "questionmark.circle.fill") {
                     RowInSectionView(title: "FAQs", systemImage: "doc.text.fill")
                     DeviderInSectionView()
                     RowInSectionView(title: "Terms & Conditions", systemImage: "doc.plaintext")
@@ -37,7 +41,7 @@ struct SettingsView: View {
                     RowInSectionView(title: "About Us", systemImage: "info.circle.fill")
                 }
                 
-                settingsSection(title: "Share the Love", icon: "heart.circle.fill") {
+                SettingsSection(title: "Share the Love", icon: "heart.circle.fill") {
                     RowInSectionView(title: "Share the App", systemImage: "square.and.arrow.up.fill")
                     DeviderInSectionView()
                     RowInSectionView(title: "Write a Review", systemImage: "star.fill")
@@ -95,35 +99,8 @@ struct SettingsView: View {
                 }
             }
         }
-    }
-    
-    func settingsSection<Content: View>(
-        title: String,
-        icon: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundColor(Color.brown)
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
-            }
-            .padding(.leading, 4)
-            
-            VStack(spacing: 0) {
-                content()
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 20)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.secondarySystemGroupedBackground))
-                    .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
-            )
+        .navigationDestination(isPresented: $isNavigateToAppearance) {
+            AppearanceSettingsView().environmentObject(themeManager)
         }
     }
 }
