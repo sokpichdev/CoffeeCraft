@@ -19,12 +19,16 @@ struct RowInProfileView<Content: View>: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color(.tertiarySystemGroupedBackground))
+                    .fill(
+                        isEditing && (editType == .phone || editType == .email) ?
+                        Color(.tertiarySystemGroupedBackground).opacity(0.5) : Color(.tertiarySystemGroupedBackground)
+                    )
                     .frame(width: 36, height: 36)
                 
                 Image(systemName: systemImage)
                     .font(.headline)
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(isEditing && (editType == .phone || editType == .email) ?
+                                     Color.secondary : Color(.brown))
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -42,13 +46,7 @@ struct RowInProfileView<Content: View>: View {
                             .font(.headline)
                             .foregroundStyle(.primary)
 
-                    case .phone:
-                        TextField("", text: $title)
-                            .keyboardType(.phonePad)
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-
-                    case .email:
+                    case .email, .phone:
                         // Email is NOT editable, but color changes when editing
                         Text(title)
                             .font(.headline)
