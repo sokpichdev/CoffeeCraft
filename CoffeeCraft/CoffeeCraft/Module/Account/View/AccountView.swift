@@ -10,6 +10,7 @@ struct AccountView: View {
     @StateObject var inboxVM = InboxViewModel()
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var themeManager: ThemeManager
     // navigate
     @State var isNavigateToInbox: Bool = false
     @State var isNavigateToFavorite: Bool = false
@@ -37,6 +38,7 @@ struct AccountView: View {
                 NavigationLink {
                     SettingsView()
                         .environmentObject(authVM)
+                        .environmentObject(themeManager)
                 } label: {
                     Image(systemName: "gearshape.fill")
                         .font(.headline)
@@ -217,6 +219,7 @@ struct RowInSectionView: View {
     let systemImage: String
     var badgeCount: Int? = nil
     
+    var trailingSystemImage: String = "chevron.right"
     var onClicked: (() -> Void)?
     
     var body: some View {
@@ -264,9 +267,11 @@ struct RowInSectionView: View {
                 }
                 
                 if onClicked != nil {
-                    Image(systemName: "chevron.right")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
+                    if trailingSystemImage != "" {
+                        Image(systemName: trailingSystemImage)
+                            .font(.headline)
+                            .foregroundColor(Color.brown)
+                    }
                 }
             }
             .padding(.vertical, 12)

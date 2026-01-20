@@ -11,7 +11,8 @@ import Firebase
 @main
 struct CoffeeCraftApp: App {
     @StateObject var authVM = AuthViewModel()
-    
+    @StateObject private var themeManager = ThemeManager()
+
     let currentEnv = Constants.currentEnv
 
     init() {
@@ -23,6 +24,8 @@ struct CoffeeCraftApp: App {
             NavigationStack {
                 RootView()
                     .environmentObject(authVM)
+                    .preferredColorScheme(themeManager.theme.colorScheme)
+                    .environmentObject(themeManager)
             }
         }
     }
