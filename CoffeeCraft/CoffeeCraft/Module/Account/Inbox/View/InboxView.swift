@@ -91,8 +91,6 @@ struct InboxView: View {
     }
 }
 
-import SDWebImageSwiftUI
-
 struct InboxItemView: View {
     let announcement: Announcement
     
@@ -113,11 +111,8 @@ struct InboxItemView: View {
                     .frame(width: 50, height: 50)
                 
                 if let imageUrl = announcement.imageName {
-                    WebImage(url: URL(string: imageUrl))
-                        .resizable()
-                        .indicator(.activity)
+                    AsyncImageCard(imageURL: imageUrl, height: 50, width: 50)
                         .clipShape(Circle())
-                        .frame(width: 50, height: 50)
                 }
             }
             

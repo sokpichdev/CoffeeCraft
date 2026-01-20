@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 12/16/25.
 //
 import SwiftUI
-import SDWebImage
 
 // MARK: - HomeView
 struct HomeView: View {

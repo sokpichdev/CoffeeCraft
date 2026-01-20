@@ -10,6 +10,7 @@ import SDWebImageSwiftUI
 struct AsyncImageCard: View {
     let imageURL: String?
     let placeholderText: String = "No Image"
+    var isFill: Bool = true
     let height: CGFloat
     let width: CGFloat
     var corner: CGFloat = 15
@@ -41,14 +42,15 @@ struct AsyncImageCard: View {
                         DispatchQueue.main.async { isURLValid = false }
                     }
                     .resizable()
-                    .scaledToFill()
-                    .frame(height: height)
+                    .aspectRatio(contentMode: isFill ? .fill : .fit)
+                    .frame(maxHeight: height)
                     .frame(maxWidth: width)
                     .clipped()
                     .cornerRadius(corner)
             }
         }
         .frame(height: height)
+        .frame(maxWidth: width)
         .cornerRadius(corner)
         .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
     }

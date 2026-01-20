@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct ProductDetailView: View {
     @EnvironmentObject var cartManager: CartManager
@@ -65,11 +64,7 @@ struct ProductDetailView: View {
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
-                    WebImage(url: URL(string: product.imageURL))
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxHeight: 300)
-                        .cornerRadius(20)
+                    AsyncImageCard(imageURL: product.imageURL, height: 300, width: UIScreen.main.bounds.width - 32, corner: 20)
                         .shadow(radius: 5)
 
                     VStack(alignment: .leading, spacing: 6) {

@@ -5,19 +5,12 @@
 //  Created by Sok Pich on 11/1/25.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct CardItemView: View {
     let item: CartItem
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            if let url = URL(string: item.product.imageURL) {
-                WebImage(url: url)
-                    .resizable()
-                    .indicator(.activity)
-                    .frame(width: 60, height: 60)
-                    .cornerRadius(10)
-            }
+            AsyncImageCard(imageURL: item.product.imageURL, height: 60, width: 60, corner: 10)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.product.name)
