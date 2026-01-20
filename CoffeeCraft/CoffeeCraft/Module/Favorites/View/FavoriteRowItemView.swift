@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 1/16/26.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct FavoriteRowItemView: View {
     let item: FavoriteItem
@@ -31,12 +30,7 @@ struct FavoriteRowItemView: View {
             }
             
             Spacer()
-            
-            WebImage(url: URL(string: item.imageURL))
-                .resizable()
-                .scaledToFill()
-                .frame(width: 80, height: 80)
-                .cornerRadius(10)
+            AsyncImageCard(imageURL: item.imageURL, height: 80, width: 80, corner: 10)
                 .shadow(radius: 2)
         }
         .padding(8)

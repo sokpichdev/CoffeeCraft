@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 // MARK: - Menu Item Row
 struct MenuItemRow: View {
@@ -19,11 +18,7 @@ struct MenuItemRow: View {
                     .foregroundColor(.secondary)
             }
             Spacer()
-            WebImage(url: URL(string: item.imageURL))
-                .resizable()
-                .indicator(.activity)
-                .frame(width: 60, height: 60)
-                .cornerRadius(10)
+            AsyncImageCard(imageURL: item.imageURL, height: 60, width: 60, corner: 10)
         }
         .padding(8)
         .background(Color(.systemBackground))

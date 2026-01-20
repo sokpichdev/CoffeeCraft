@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 10/27/25.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct EditProductView: View {
     @Environment(\.dismiss) var dismiss
