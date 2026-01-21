@@ -14,6 +14,7 @@ struct AccountView: View {
     // navigate
     @State var isNavigateToInbox: Bool = false
     @State var isNavigateToFavorite: Bool = false
+    @State var isNavigateToAnnouncements: Bool = false
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -45,6 +46,16 @@ struct AccountView: View {
                         .foregroundColor(Color.brown)
                 }
             }
+        }
+        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
+            InboxView().environmentObject(inboxVM)
+        })
+        .navigationDestination(isPresented: $isNavigateToFavorite) {
+            FavoriteView()
+                .environmentObject(favVM)
+        }
+        .navigationDestination(isPresented: $isNavigateToAnnouncements) {
+            AnnouncementsListView()
         }
     }
     // MARK: Profile
@@ -98,13 +109,6 @@ struct AccountView: View {
                 .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
-        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
-            InboxView().environmentObject(inboxVM)
-        })
-        .navigationDestination(isPresented: $isNavigateToFavorite) {
-            FavoriteView()
-                .environmentObject(favVM)
-        }
     }
     // MARK: Personal
     var personalSection: some View {
@@ -131,7 +135,9 @@ struct AccountView: View {
         sectionContainer(title: "Shortcuts", icon: "bolt.fill") {
             RowInSectionView(title: "Stores", systemImage: "building.2.fill")
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Announcements", systemImage: "megaphone.fill")
+            RowInSectionView(title: "Announcements", systemImage: "megaphone.fill") {
+                isNavigateToAnnouncements = true
+            }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Rewards", systemImage: "gift.fill")
         }
