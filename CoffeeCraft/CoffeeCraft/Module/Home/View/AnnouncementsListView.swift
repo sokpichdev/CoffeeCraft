@@ -73,7 +73,6 @@ struct AnnouncementsListView: View {
             .padding(.horizontal)
             .padding(.top)
         }
-        .navigationTitle("Announcements")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitle("Announcements", displayMode: .inline)
     }
 }
