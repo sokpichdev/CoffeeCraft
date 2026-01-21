@@ -7,8 +7,15 @@
 import SwiftUI
 
 struct FlippableCardView: View {
-    let cardHeight: CGFloat = 220
 
+    let width: CGFloat
+    let aspectRatio: CGFloat = 16 / 9   // width / height
+
+    private var cardHeight: CGFloat {
+        width / aspectRatio
+    }
+
+    // MARK: - State
     @State private var rotationY: Double = 0
     @State private var liveDragRotation: Double = 0
 
@@ -23,7 +30,7 @@ struct FlippableCardView: View {
                 .opacity(isBackFaceVisible ? 1 : 0)
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
         }
-        .frame(height: cardHeight)
+        .frame(width: width, height: cardHeight)
         .rotation3DEffect(
             .degrees(rotationY + liveDragRotation),
             axis: (x: 0, y: 1, z: 0),
@@ -67,25 +74,25 @@ struct FlippableCardView: View {
         !isFrontFaceVisible
     }
 
-    // MARK: - Front Card
+    // MARK: - Front
     private var frontView: some View {
         cardBase {
             Image(systemName: "person.crop.square.fill")
                 .resizable()
                 .scaledToFit()
-                .padding(40)
+                .padding(width * 0.15)
                 .foregroundStyle(.white)
         }
         .background(.blue)
     }
 
-    // MARK: - Back Card
+    // MARK: - Back
     private var backView: some View {
         cardBase {
             Image(systemName: "person.2.square.stack.fill")
                 .resizable()
                 .scaledToFit()
-                .padding(40)
+                .padding(width * 0.15)
                 .foregroundStyle(.white)
         }
         .background(.purple)
@@ -96,8 +103,7 @@ struct FlippableCardView: View {
         @ViewBuilder content: () -> Content
     ) -> some View {
         content()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .frame(height: cardHeight)
+            .frame(width: width, height: cardHeight)
             .cornerRadius(16)
             .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
             .overlay(
