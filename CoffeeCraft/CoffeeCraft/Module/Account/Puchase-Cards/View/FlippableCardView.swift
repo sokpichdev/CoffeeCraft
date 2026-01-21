@@ -18,8 +18,19 @@ struct FlippableCardView: View {
     // MARK: - State
     @State private var rotationY: Double = 0
     @State private var liveDragRotation: Double = 0
+    @State private var tapScale: CGFloat = 1.0
 
     private let flipThreshold: CGFloat = 50
+    
+    private var flipScale: CGFloat {
+        let totalRotation = rotationY + liveDragRotation
+        let normalized = abs(totalRotation.truncatingRemainder(dividingBy: 180))
+        let progress = normalized / 90     // 0 → 1
+        let clamped = min(progress, 1)
+
+        // 1.0 → 0.94 → 1.0
+        return tapScale - (0.15 * clamped)
+    }
 
     var body: some View {
         ZStack {
@@ -30,11 +41,13 @@ struct FlippableCardView: View {
                 .opacity(isBackFaceVisible ? 1 : 0)
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
         }
+        .cornerRadius(10)
+        .scaleEffect(flipScale)
         .frame(width: width, height: cardHeight)
         .rotation3DEffect(
             .degrees(rotationY + liveDragRotation),
             axis: (x: 0, y: 1, z: 0),
-            perspective: 0.5
+            perspective: 0.2
         )
         .contentShape(Rectangle())
         .gesture(
@@ -56,7 +69,24 @@ struct FlippableCardView: View {
                 }
         )
         .onTapGesture {
-            rotationY += 180
+            // Phase 1 — zoom out
+            withAnimation(.easeOut(duration: 0.1)) {
+                tapScale = 0.85
+            }
+
+            // Phase 2 — rotate at minimum scale
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    rotationY += 180
+                }
+            }
+
+            // Phase 3 — zoom back in after midpoint
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    tapScale = 1.0
+                }
+            }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: rotationY)
         .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.5), value: liveDragRotation)
