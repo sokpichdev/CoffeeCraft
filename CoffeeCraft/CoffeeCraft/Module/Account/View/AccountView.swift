@@ -110,15 +110,86 @@ struct AccountView: View {
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
     }
+    
+    // MARK: My Cards
+    var myCardSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "creditcard.fill")
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
+                Text("My Cards")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+            }
+            .padding(.leading, 4)
+            
+            VStack(alignment: .center) {
+                HStack(spacing: 0) {
+                    FlippableCardView(width: (UIScreen.main.bounds.width * 0.8) - 32)
+                    Spacer()
+                    VStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color(.secondarySystemGroupedBackground))
+                                .frame(width: 50, height: 50)
+                                .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
+                            
+                            Image(systemName: "arrow.right")
+                                .font(.headline)
+                                .foregroundColor(Color.brown)
+                        }
+                        Text("See All")
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                    }
+                }
+                HStack {
+                    VStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color(.brown))
+                                .frame(width: 50, height: 50)
+                            
+                            Image(systemName: "cart.badge.plus")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                        }
+                        Text("Purchase")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    VStack {
+                        ZStack {
+                            Circle()
+                                .fill(Color(.secondarySystemGroupedBackground))
+                                .frame(width: 50, height: 50)
+                                .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
+                            
+                            Image(systemName: "plus")
+                                .font(.headline)
+                                .foregroundColor(Color.brown)
+                        }
+                        Text("Add")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
     // MARK: Personal
     var personalSection: some View {
-        sectionContainer(title: "Personal", icon: "person.text.rectangle") {
+        SettingsSection(title: "Personal", icon: "person.text.rectangle") {
             RowInSectionView(title: "Inbox", systemImage: "tray.fill",
                              badgeCount: inboxVM.displayedAnnouncements.filter { !$0.isRead }.count) {
                 isNavigateToInbox = true
             }
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
+            RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3") {
+                isNavigateToCardFlip = true
+            }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
                 isNavigateToFavorite = true
@@ -132,7 +203,7 @@ struct AccountView: View {
     
     // MARK: ShortCuts
     var shortcutsSection: some View {
-        sectionContainer(title: "Shortcuts", icon: "bolt.fill") {
+        SettingsSection(title: "Shortcuts", icon: "bolt.fill") {
             RowInSectionView(title: "Stores", systemImage: "building.2.fill")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Announcements", systemImage: "megaphone.fill") {
@@ -145,7 +216,7 @@ struct AccountView: View {
     
     // MARK: contacts
     var contactsSection: some View {
-        sectionContainer(title: "Contacts", icon: "bubble.left.and.bubble.right.fill") {
+        SettingsSection(title: "Contacts", icon: "bubble.left.and.bubble.right.fill") {
             RowInSectionView(title: "Customer Service", systemImage: "headset")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Feedback", systemImage: "bubble.left.fill")
@@ -185,36 +256,6 @@ struct AccountView: View {
                     .font(.headline)
                     .foregroundColor(Color.brown)
             }
-        }
-    }
-
-    func sectionContainer<Content: View>(
-        title: String,
-        icon: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundColor(Color.brown)
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
-            }
-            .padding(.leading, 4)
-            
-            VStack(spacing: 0) {
-                content()
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.secondarySystemGroupedBackground))
-                    .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
-            )
         }
     }
 }
