@@ -16,7 +16,7 @@ struct AccountView: View {
     @State var isNavigateToFavorite: Bool = false
     @State var isNavigateToAnnouncements: Bool = false
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
                 profileSection
                 personalSection
@@ -187,9 +187,7 @@ struct AccountView: View {
                 isNavigateToInbox = true
             }
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3") {
-                isNavigateToCardFlip = true
-            }
+            RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
                 isNavigateToFavorite = true

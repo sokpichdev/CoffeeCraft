@@ -34,7 +34,7 @@ struct CustomizationLibrarySheet: View {
                             .padding(.horizontal, 40)
                     }
                 } else {
-                    ScrollView {
+                    ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 12) {
                             ForEach(availableCustomizations) { category in
                                 LibraryCategoryCard(

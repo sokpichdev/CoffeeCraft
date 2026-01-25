@@ -11,7 +11,7 @@ struct FavoriteView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 12) {
                 ForEach(favoriteVM.favorites) { item in
                     FavoriteRowItemView(item: item)

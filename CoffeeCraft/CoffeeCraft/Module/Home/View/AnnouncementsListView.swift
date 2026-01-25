@@ -60,7 +60,7 @@ struct AnnouncementsListView: View {
     ]
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
                 ForEach(announcements) { ann in
                     NavigationLink {
