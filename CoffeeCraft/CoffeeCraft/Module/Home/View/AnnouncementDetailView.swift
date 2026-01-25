@@ -11,7 +11,7 @@ struct AnnouncementDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 
                 AsyncImageCard(

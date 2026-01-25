@@ -13,7 +13,7 @@ struct SettingsView: View {
     
     @State private var isNavigateToAppearance: Bool = false
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
                 SettingsSection(title: "Account", icon: "person.crop.circle.fill") {
                     RowInSectionView(title: "Account Settings", systemImage: "gearshape.fill")

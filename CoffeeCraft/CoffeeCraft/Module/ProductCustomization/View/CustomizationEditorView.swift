@@ -23,7 +23,7 @@ struct CustomizationEditorView: View {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
                 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         // Header info card
                         if customizations.isEmpty {
