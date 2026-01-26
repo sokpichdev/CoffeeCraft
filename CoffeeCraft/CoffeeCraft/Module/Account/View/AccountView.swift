@@ -65,8 +65,9 @@ struct AccountView: View {
             AnnouncementsListView()
         }
         .navigationDestination(isPresented: $isNavigateToSeeAllCards) {
-//            CardListView()
-//                .environmentObject(cardVM)
+            AllCardsView()
+                .environmentObject(cardVM)
+                .environmentObject(authVM)
         }
         .navigationDestination(isPresented: $isNavigateToPurchaseCard) {
             EmptyView()
