@@ -50,8 +50,7 @@ struct CustomizationLibrarySheet: View {
                     }
                 }
             }
-            .navigationTitle("Customization Library")
-            .navigationBarTitleDisplayMode(.inline)
+            .customNavigationBar("Customization Library")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {

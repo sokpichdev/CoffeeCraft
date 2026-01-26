@@ -38,7 +38,7 @@ struct AccountView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationBarTitle("Account", displayMode: .inline)
+        .customNavigationBar("Account")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {

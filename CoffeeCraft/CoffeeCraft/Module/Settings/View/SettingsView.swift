@@ -88,8 +88,7 @@ struct SettingsView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationBarTitle("Settings", displayMode: .inline)
-        .navigationBarBackButtonHidden(true)
+        .customNavigationBar("Setting")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: { dismiss() }) {

@@ -45,8 +45,7 @@ struct PickerSheetView: View {
                 }
                 .padding()
             }
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
+            .customNavigationBar(title)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {

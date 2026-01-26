@@ -19,8 +19,7 @@ struct FavoriteView: View {
             }
             .padding()
         }
-        .navigationBarTitle("Favorites", displayMode: .inline)
-        .navigationBarBackButtonHidden(true)
+        .customNavigationBar("Favorites")
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {

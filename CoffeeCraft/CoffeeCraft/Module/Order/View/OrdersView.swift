@@ -42,7 +42,7 @@ struct OrdersView: View {
                 }
             }
         }
-        .navigationBarTitle("My Orders", displayMode: .inline)
+        .customNavigationBar("My Orders")
         .onAppear {
             orderVM.listenToUserOrders()
         }

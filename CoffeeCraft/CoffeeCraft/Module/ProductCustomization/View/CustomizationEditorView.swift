@@ -126,8 +126,7 @@ struct CustomizationEditorView: View {
                 }
                 .scrollDismissesKeyboard(.immediately)
             }
-            .navigationTitle("Customizations")
-            .navigationBarTitleDisplayMode(.inline)
+            .customNavigationBar("Customizations")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {

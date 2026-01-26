@@ -52,7 +52,7 @@ struct MenuView: View {
                 selectedSectionID = firstSection.id
             }
         }
-        .navigationBarTitle("Menu", displayMode: .inline)
+        .customNavigationBar("Menu")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
