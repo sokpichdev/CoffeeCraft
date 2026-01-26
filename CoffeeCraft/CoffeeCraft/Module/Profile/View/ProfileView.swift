@@ -117,49 +117,29 @@ struct ProfileView: View {
         }
         .scrollDismissesKeyboard(.immediately)
         .background(Color(.systemGroupedBackground))
-        .customNavigationBar(isEditing ? "Editing Profile" : "Profile")
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: {
-                    if isEditing {
-                        cancelEditing()
-                    } else {
-                        dismiss()
-                    }
-                }) {
-                    HStack(spacing: 6) {
-                        if isEditing {
-                            Text("Cancel")
-                                .font(.headline)
-                                .foregroundColor(Color.brown)
-                        } else {
-                            Image(systemName: "chevron.left")
-                                .font(.headline)
-                                .foregroundColor(Color.brown)
-                        }
-                    }
+        .customNavigationBar(isEditing ? "Editing Profile" : "Profile") {
+            if isEditing {
+                ToolBarButton(placement: .topBarLeading, buttonType: .text("Cancel")) {
+                    cancelEditing()
+                }
+            } else {
+                ToolBarButton.back {
+                    dismiss()
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    if isEditing {
+            
+            if isSaving {
+                ToolBarProgress(placement: .topBarTrailing)
+            } else {
+                if isEditing {
+                    ToolBarButton(placement: .topBarTrailing, buttonType: .text("Save")) {
                         saveProfile()
-                    } else {
+                    }
+                } else {
+                    ToolBarButton(placement: .topBarTrailing, buttonType: .text("Edit")) {
                         startEditing()
                     }
-                } label: {
-                    if isSaving {
-                        ProgressView()
-                            .tint(.brown)
-                    } else {
-                        HStack(spacing: 6) {
-                            Text(isEditing ? "Save" : "Edit")
-                                .font(.headline)
-                                .foregroundColor(.brown)
-                        }
-                    }
                 }
-                .disabled(isSaving || (isEditing && name.isEmpty))
             }
         }
         .onAppear {

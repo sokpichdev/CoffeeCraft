@@ -50,14 +50,9 @@ struct CustomizationLibrarySheet: View {
                     }
                 }
             }
-            .customNavigationBar("Customization Library")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "checkmark")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
-                    }
+            .customNavigationBar("Customization Library"){
+                ToolBarButton(placement: .topBarTrailing, buttonType: .icon("checkmark")) {
+                    dismiss()
                 }
             }
         }

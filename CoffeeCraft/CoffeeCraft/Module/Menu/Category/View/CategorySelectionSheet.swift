@@ -106,14 +106,10 @@ struct CategorySelectionSheet: View {
                     .padding(.top)
                 }
             }
-            .customNavigationBar("Select Category")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        selectedCategory = tempSelectedCategory
-                        dismiss()
-                    }
-                    .foregroundColor(.brown)
+            .customNavigationBar("Select Category") {
+                ToolBarButton(placement: .topBarTrailing, buttonType: .text("Done")) {
+                    selectedCategory = tempSelectedCategory
+                    dismiss()
                 }
             }
             .onAppear {

@@ -165,36 +165,22 @@ struct ProductDetailView: View {
             Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
         }
         .ignoresSafeArea(edges: .bottom)
-        .toolbar {
+        .customNavigationBar(product.name) {
             if cartItem != nil { // sheet
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
-                    }
+                ToolBarButton(placement: .topBarLeading, buttonType: .icon("xmark")) {
+                    dismiss()
                 }
             } else { // navigation mode
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
-                    }
+                ToolBarButton.back {
+                    dismiss()
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    Task {
-                        await favVM.toggleFavorite(product: product, selections: selections, selectedExtras: selectedExtras)
-                    }
-                } label: {
-                    Image(systemName: favVM.isFavorite ? "heart.fill" : "heart")
-                        .font(.headline)
-                        .foregroundColor(favVM.isFavorite ? .red : .brown)
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon(favVM.isFavorite ? "heart.fill" : "heart"),
+                          tint: favVM.isFavorite ? .red : .brown) {
+                Task {
+                    await favVM.toggleFavorite(product: product, selections: selections, selectedExtras: selectedExtras)
                 }
             }
         }
-        .customNavigationBar(product.name)
     }
 }

@@ -45,8 +45,7 @@ struct PickerSheetView: View {
                 }
                 .padding()
             }
-            .customNavigationBar(title)
-            .toolbar {
+            .customNavigationBar(title) {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         dismiss()

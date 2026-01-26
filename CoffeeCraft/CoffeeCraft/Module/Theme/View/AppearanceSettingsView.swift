@@ -8,7 +8,7 @@ import SwiftUI
 
 struct AppearanceSettingsView: View {
     @EnvironmentObject var themeManager: ThemeManager
-
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
@@ -36,5 +36,10 @@ struct AppearanceSettingsView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationBarTitle("Appearance", displayMode: .inline)
+        .customNavigationBar("Appearance") {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
     }
 }

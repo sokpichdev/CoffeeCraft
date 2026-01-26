@@ -88,14 +88,9 @@ struct SettingsView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .customNavigationBar("Setting")
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
-                }
+        .customNavigationBar("Setting") {
+            ToolBarButton.back {
+                dismiss()
             }
         }
         .navigationDestination(isPresented: $isNavigateToAppearance) {
