@@ -15,10 +15,15 @@ struct AccountView: View {
     @State var isNavigateToInbox: Bool = false
     @State var isNavigateToFavorite: Bool = false
     @State var isNavigateToAnnouncements: Bool = false
+    @State var isNavigateToCardFlip: Bool = false
+    @State var isNavigateToSeeAllCards: Bool = false
+    @State var isNavigateToPurchaseCard: Bool = false
+    @State var isNavigateToAddCard: Bool = false
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
                 profileSection
+                myCardSection
                 personalSection
                 shortcutsSection
                 contactsSection
@@ -56,6 +61,18 @@ struct AccountView: View {
         }
         .navigationDestination(isPresented: $isNavigateToAnnouncements) {
             AnnouncementsListView()
+        }
+        .navigationDestination(isPresented: $isNavigateToCardFlip) {
+            FlippableCardView(width: UIScreen.main.bounds.width - 32)
+        }
+        .navigationDestination(isPresented: $isNavigateToSeeAllCards) {
+            EmptyView()
+        }
+        .navigationDestination(isPresented: $isNavigateToPurchaseCard) {
+            EmptyView()
+        }
+        .navigationDestination(isPresented: $isNavigateToAddCard) {
+            EmptyView()
         }
     }
     // MARK: Profile
@@ -129,52 +146,64 @@ struct AccountView: View {
                 HStack(spacing: 0) {
                     FlippableCardView(width: (UIScreen.main.bounds.width * 0.8) - 32)
                     Spacer()
-                    VStack {
-                        ZStack {
-                            Circle()
-                                .fill(Color(.secondarySystemGroupedBackground))
-                                .frame(width: 50, height: 50)
-                                .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
-                            
-                            Image(systemName: "arrow.right")
-                                .font(.headline)
-                                .foregroundColor(Color.brown)
-                        }
-                        Text("See All")
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                    }
-                }
-                HStack {
-                    VStack {
-                        ZStack {
-                            Circle()
-                                .fill(Color(.brown))
-                                .frame(width: 50, height: 50)
-                            
-                            Image(systemName: "cart.badge.plus")
-                                .font(.headline)
+                    Button(action: {
+                        isNavigateToSeeAllCards = true
+                    }, label: {
+                        VStack {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(.secondarySystemGroupedBackground))
+                                    .frame(width: 50, height: 50)
+                                    .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.headline)
+                                    .foregroundColor(Color.brown)
+                            }
+                            Text("See All")
+                                .font(.subheadline)
                                 .foregroundColor(.primary)
                         }
-                        Text("Purchase")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    VStack {
-                        ZStack {
-                            Circle()
-                                .fill(Color(.secondarySystemGroupedBackground))
-                                .frame(width: 50, height: 50)
-                                .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
-                            
-                            Image(systemName: "plus")
-                                .font(.headline)
-                                .foregroundColor(Color.brown)
+                    })
+                }
+                HStack {
+                    Button(action: {
+                        isNavigateToPurchaseCard = true
+                    }, label: {
+                        VStack {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(.brown))
+                                    .frame(width: 50, height: 50)
+                                
+                                Image(systemName: "cart.badge.plus")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            }
+                            Text("Purchase")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
-                        Text("Add")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
+                    })
+                    Button(action: {
+                        isNavigateToAddCard = true
+                    }, label: {
+                        VStack {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(.secondarySystemGroupedBackground))
+                                    .frame(width: 50, height: 50)
+                                    .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
+                                
+                                Image(systemName: "plus")
+                                    .font(.headline)
+                                    .foregroundColor(Color.brown)
+                            }
+                            Text("Add")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    })
                 }
             }
         }
