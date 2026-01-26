@@ -90,12 +90,58 @@ class AuthViewModel: ObservableObject {
             "email": email,
             "role": role.rawValue
         ])
+        
+        // Create initial card for new user
+        try await createInitialCardForUser(userId: uid, userName: name)
 
         DispatchQueue.main.async {
             self.currentUser = user
         }
     }
 
+    // MARK: - Create Initial Card
+    private func createInitialCardForUser(userId: String, userName: String) async throws {
+        // Generate unique card number
+        let cardNumber = generateCardNumber()
+        let memberSince = formatMemberSince(Date())
+        
+        // 1. Create global card in cards/ collection
+        try await db.collection("cards").document(cardNumber).setData([
+            "cardNumber": cardNumber,
+            "ownerId": userId,
+            "ownerName": userName,
+            "memberSince": memberSince,
+            "points": 0,
+            "createdAt": Timestamp(date: Date())
+        ])
+        
+        // 2. Create user's card reference in users/{userId}/cards/ subcollection
+        try await db.collection("users")
+            .document(userId)
+            .collection("cards")
+            .addDocument(data: [
+                "cardNumber": cardNumber,
+                "isOwner": true,
+                "isActive": true,
+                "addedAt": Timestamp(date: Date()),
+                "memberName": userName,
+                "memberSince": memberSince
+            ])
+    }
+
+    // MARK: - Helper Functions
+    private func generateCardNumber() -> String {
+        // Generate a unique 16-digit card number
+        let numbers = (0..<16).map { _ in String(Int.random(in: 0...9)) }
+        return numbers.joined()
+    }
+
+    private func formatMemberSince(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/yy"
+        return formatter.string(from: date)
+    }
+    
     func login(email: String, password: String) async throws {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
         fetchUserData(uid: result.user.uid)

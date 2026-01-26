@@ -7,7 +7,8 @@
 import SwiftUI
 
 struct FlippableCardView: View {
-    
+    var activeCard: UserCard
+    var activeCardDetails: Card
     let width: CGFloat
     let aspectRatio: CGFloat = 16 / 9   // width / height
     
@@ -159,19 +160,19 @@ struct FlippableCardView: View {
                     
                     Spacer()
                     
-                    // Card number
-                    Text("**** **** **** 4829")
+                    // Card number - Dynamic from active card
+                    Text(formatCardNumber(activeCard.cardNumber))
                         .font(.system(size: width * 0.045, weight: .semibold, design: .monospaced))
                         .foregroundStyle(.white)
                         .tracking(width * 0.008)
                     
-                    // Member info
+                    // Member info - Dynamic from active card
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("MEMBER")
                                 .font(.system(size: width * 0.022, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.6))
-                            Text("Sok PIch")
+                            Text(activeCard.memberName)
                                 .font(.system(size: width * 0.035, weight: .semibold))
                                 .foregroundStyle(.white)
                         }
@@ -182,7 +183,7 @@ struct FlippableCardView: View {
                             Text("MEMBER SINCE")
                                 .font(.system(size: width * 0.022, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.6))
-                            Text("01/24")
+                            Text(activeCard.memberSince)
                                 .font(.system(size: width * 0.035, weight: .semibold))
                                 .foregroundStyle(.white)
                         }
@@ -229,7 +230,7 @@ struct FlippableCardView: View {
                                                         .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
                                                         .frame(width: width * 0.06, height: width * 0.06)
                                                     
-                                                    if index < 7 {  // 7 stamps collected
+                                                    if index < activeCardDetails.points {
                                                         Image(systemName: "cup.and.saucer.fill")
                                                             .resizable()
                                                             .scaledToFit()
@@ -242,7 +243,7 @@ struct FlippableCardView: View {
                                     }
                                 }
                                 
-                                Text("3 more for a FREE drink!")
+                                Text("\(10 - activeCardDetails.points) more for a FREE drink!")
                                     .font(.system(size: width * 0.028, weight: .medium))
                                     .foregroundStyle(Color.orange)
                             }
@@ -300,5 +301,25 @@ struct FlippableCardView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
             )
+    }
+    
+    // MARK: - Helper
+    private func formatCardNumber(_ number: String) -> String {
+        let masked = String(repeating: "*", count: 12) + number.suffix(4)
+        var formatted = ""
+//        for (index, char) in masked.enumerated() {
+//            if index > 0 && index % 4 == 0 {
+//                formatted += " "
+//            }
+//            formatted += String(char)
+//        }
+        /// this is for later when we use auth to show card number
+        for (index, char) in number.enumerated() {
+        if index > 0 && index % 4 == 0 {
+            formatted += " "
+        }
+        formatted += String(char)
+    }
+        return formatted
     }
 }
