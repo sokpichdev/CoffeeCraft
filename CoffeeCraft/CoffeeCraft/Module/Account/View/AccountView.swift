@@ -8,6 +8,7 @@ import SwiftUI
 
 struct AccountView: View {
     @StateObject var inboxVM = InboxViewModel()
+    @StateObject var cardVM = CardViewModel()
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
@@ -16,7 +17,6 @@ struct AccountView: View {
     @State var isNavigateToInbox: Bool = false
     @State var isNavigateToFavorite: Bool = false
     @State var isNavigateToAnnouncements: Bool = false
-    @State var isNavigateToCardFlip: Bool = false
     @State var isNavigateToSeeAllCards: Bool = false
     @State var isNavigateToPurchaseCard: Bool = false
     @State var isNavigateToAddCard: Bool = false
@@ -44,6 +44,11 @@ struct AccountView: View {
                isNavigateToSetting = true
             }
         }
+        .onAppear {
+            if let userId = authVM.currentUser?.id {
+                cardVM.setUser(userId: userId)
+            }
+        }
         .navigationDestination(isPresented: $isNavigateToSetting, destination: {
             SettingsView()
                 .environmentObject(authVM)
@@ -59,19 +64,19 @@ struct AccountView: View {
         .navigationDestination(isPresented: $isNavigateToAnnouncements) {
             AnnouncementsListView()
         }
-        .navigationDestination(isPresented: $isNavigateToCardFlip) {
-            FlippableCardView(width: UIScreen.main.bounds.width - 32)
-        }
         .navigationDestination(isPresented: $isNavigateToSeeAllCards) {
-            EmptyView()
+//            CardListView()
+//                .environmentObject(cardVM)
         }
         .navigationDestination(isPresented: $isNavigateToPurchaseCard) {
             EmptyView()
         }
         .navigationDestination(isPresented: $isNavigateToAddCard) {
-            EmptyView()
+//            AddCardView()
+//                .environmentObject(cardVM)
         }
     }
+    
     // MARK: Profile
     var profileSection: some View {
         VStack(spacing: 16) {
@@ -141,7 +146,19 @@ struct AccountView: View {
             
             VStack(alignment: .center) {
                 HStack(spacing: 0) {
-                    FlippableCardView(width: (UIScreen.main.bounds.width * 0.8) - 32)
+                    if cardVM.isLoading && cardVM.activeCard == nil {
+                        // Loading state
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 200)
+                    } else {
+                        if let activeCard = cardVM.activeCard, let cardDetail = cardVM.activeCardDetails {
+                            FlippableCardView(
+                                activeCard: activeCard,
+                                activeCardDetails: cardDetail,
+                                width: (UIScreen.main.bounds.width * 0.8) - 32)
+                        }
+                    }
                     Spacer()
                     Button(action: {
                         isNavigateToSeeAllCards = true
