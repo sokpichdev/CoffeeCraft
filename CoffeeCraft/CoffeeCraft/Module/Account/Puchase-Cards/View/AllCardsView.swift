@@ -38,5 +38,9 @@ struct AllCardsView: View {
                 isNavigateToAddCard = true
             }
         }
+        .sheet(isPresented: $isNavigateToAddCard) {
+            AddCardView()
+                .environmentObject(cardVM)
+        }
     }
 }
