@@ -175,9 +175,8 @@ struct EditProductView: View {
             .padding(.top, 20)
             .frame(maxWidth: .infinity)
         }
-        .navigationTitle(isEditing ? "Edit Product" : "Add Product")
+        .customNavigationBar(isEditing ? "Edit Product" : "Add Product")
         .scrollDismissesKeyboard(.immediately)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: { dismiss() }) {
@@ -223,8 +222,7 @@ struct EditProductView: View {
             NavigationView {
                 if let url = webViewURL {
                     WebView(url: url)
-                        .navigationTitle("Get Image")
-                        .navigationBarTitleDisplayMode(.inline)
+                        .customNavigationBar("Get Image")
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
                                 Button("Done") {

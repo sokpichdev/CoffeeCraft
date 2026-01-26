@@ -117,8 +117,7 @@ struct ProfileView: View {
         }
         .scrollDismissesKeyboard(.immediately)
         .background(Color(.systemGroupedBackground))
-        .navigationBarBackButtonHidden(true)
-        .navigationBarTitle(isEditing ? "Editing Profile" : "Profile", displayMode: .inline)
+        .customNavigationBar(isEditing ? "Editing Profile" : "Profile")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {

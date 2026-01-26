@@ -66,8 +66,7 @@ struct SearchView: View {
                 .padding()
             }
             .searchable(text: $searchText, prompt: "Search products...")
-            .navigationTitle("Search")
-            .navigationBarTitleDisplayMode(.inline)
+            .customNavigationBar("Search")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {

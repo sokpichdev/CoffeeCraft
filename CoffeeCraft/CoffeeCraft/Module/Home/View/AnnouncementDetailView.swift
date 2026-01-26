@@ -32,8 +32,7 @@ struct AnnouncementDetailView: View {
                 .padding(.horizontal)
             }
         }
-        .navigationBarTitle("Announcement", displayMode: .inline)
-        .navigationBarBackButtonHidden(true)
+        .customNavigationBar("Announcement")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: { dismiss() }) {

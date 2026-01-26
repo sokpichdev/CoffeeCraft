@@ -106,8 +106,7 @@ struct CategorySelectionSheet: View {
                     .padding(.top)
                 }
             }
-            .navigationTitle("Select Category")
-            .navigationBarTitleDisplayMode(.inline)
+            .customNavigationBar("Select Category")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {

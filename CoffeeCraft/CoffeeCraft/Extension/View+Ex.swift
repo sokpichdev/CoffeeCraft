@@ -26,3 +26,13 @@ struct RoundedCorner: Shape {
         return Path(path.cgPath)
     }
 }
+
+// MARK: - Navigation
+extension View {
+    func customNavigationBar(_ title: String, displayMode: NavigationBarItem.TitleDisplayMode = .inline, hideBackBtn: Bool = true) -> some View {
+        self.navigationTitle(title)
+            .navigationBarTitleDisplayMode(displayMode)
+            .navigationBarBackButtonHidden(hideBackBtn)
+
+    }
+}

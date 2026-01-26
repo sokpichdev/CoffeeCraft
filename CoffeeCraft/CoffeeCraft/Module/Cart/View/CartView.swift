@@ -85,8 +85,7 @@ struct CartView: View {
                     .environmentObject(favVM)
                 }
             }
-            .navigationTitle("My Cart")
-            .navigationBarTitleDisplayMode(.inline)
+            .customNavigationBar("My Cart")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {

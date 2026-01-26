@@ -165,7 +165,6 @@ struct ProductDetailView: View {
             Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
         }
         .ignoresSafeArea(edges: .bottom)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
             if cartItem != nil { // sheet
                 ToolbarItem(placement: .topBarLeading) {
@@ -196,6 +195,6 @@ struct ProductDetailView: View {
                 }
             }
         }
-        .navigationBarTitle(product.name, displayMode: .inline)
+        .customNavigationBar(product.name)
     }
 }
