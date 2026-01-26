@@ -66,16 +66,9 @@ struct SearchView: View {
                 .padding()
             }
             .searchable(text: $searchText, prompt: "Search products...")
-            .customNavigationBar("Search")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.headline)
-                            .foregroundColor(.brown)
-                    }
+            .customNavigationBar("Search") {
+                ToolBarButton(placement: .navigationBarLeading, buttonType: .icon("xmark")) {
+                    dismiss()
                 }
             }
             .navigationDestination(for: Product.self) { product in

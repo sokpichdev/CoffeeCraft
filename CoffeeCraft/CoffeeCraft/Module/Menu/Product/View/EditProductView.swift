@@ -175,17 +175,12 @@ struct EditProductView: View {
             .padding(.top, 20)
             .frame(maxWidth: .infinity)
         }
-        .customNavigationBar(isEditing ? "Edit Product" : "Add Product")
-        .scrollDismissesKeyboard(.immediately)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
-                }
+        .customNavigationBar(isEditing ? "Edit Product" : "Add Product") {
+            ToolBarButton.back {
+                dismiss()
             }
         }
+        .scrollDismissesKeyboard(.immediately)
         .onAppear {
             tempName = productName
             tempDescription = productDescription
@@ -222,12 +217,9 @@ struct EditProductView: View {
             NavigationView {
                 if let url = webViewURL {
                     WebView(url: url)
-                        .customNavigationBar("Get Image")
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Done") {
-                                    showWebView = false
-                                }
+                        .customNavigationBar("Get Image") {
+                            ToolBarButton(placement: .cancellationAction, buttonType: .text("Done")) {
+                                showWebView = false
                             }
                         }
                 }

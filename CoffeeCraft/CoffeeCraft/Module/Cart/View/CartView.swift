@@ -85,13 +85,9 @@ struct CartView: View {
                     .environmentObject(favVM)
                 }
             }
-            .customNavigationBar("My Cart")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.brown)
-                    }
+            .customNavigationBar("My Cart") {
+                ToolBarButton.back {
+                    dismiss()
                 }
             }
             // MARK: - Checkout Confirmation

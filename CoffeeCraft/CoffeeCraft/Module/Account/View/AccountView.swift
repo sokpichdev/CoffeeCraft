@@ -12,6 +12,7 @@ struct AccountView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
     // navigate
+    @State var isNavigateToSetting: Bool = false
     @State var isNavigateToInbox: Bool = false
     @State var isNavigateToFavorite: Bool = false
     @State var isNavigateToAnnouncements: Bool = false
@@ -38,20 +39,16 @@ struct AccountView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
-        .customNavigationBar("Account")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    SettingsView()
-                        .environmentObject(authVM)
-                        .environmentObject(themeManager)
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
-                }
+        .customNavigationBar("Account") {
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
+               isNavigateToSetting = true
             }
         }
+        .navigationDestination(isPresented: $isNavigateToSetting, destination: {
+            SettingsView()
+                .environmentObject(authVM)
+                .environmentObject(themeManager)
+        })
         .navigationDestination(isPresented: $isNavigateToInbox, destination: {
             InboxView().environmentObject(inboxVM)
         })

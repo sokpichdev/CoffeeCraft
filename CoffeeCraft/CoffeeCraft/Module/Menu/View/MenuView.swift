@@ -52,15 +52,9 @@ struct MenuView: View {
                 selectedSectionID = firstSection.id
             }
         }
-        .customNavigationBar("Menu")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showSearchSheet = true
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.brown)
-                }
+        .customNavigationBar("Menu") {
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("magnifyingglass")) {
+                showSearchSheet = true
             }
         }
         .fullScreenCover(isPresented: $showCartSheet) {

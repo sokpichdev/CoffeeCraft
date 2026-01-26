@@ -9,24 +9,24 @@ import SwiftUI
 struct InboxView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var inboxVM: InboxViewModel
-    
+    @State var isNavigateToAnnouncementDetail: Bool = false
+    @State var selectedAnnouncement: Announcement?
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(inboxVM.filteredAnnouncements) { announcement in
-                    NavigationLink {
-                        AnnouncementDetailView(announcement: announcement)
-                            .onAppear {
-                                inboxVM.markAsRead(id: announcement.id)
-                            }
-                    } label: {
+                    Button(action: {
+                        selectedAnnouncement = announcement
+                        isNavigateToAnnouncementDetail = true
+                        inboxVM.markAsRead(id: announcement.id)
+                    }, label: {
                         InboxItemView(announcement: announcement)
                             .onAppear {
                                 if announcement.id == inboxVM.displayedAnnouncements.last?.id {
                                     inboxVM.loadMore()
                                 }
                             }
-                    }
+                    })
                     .buttonStyle(PlainButtonStyle())
                 }
                 
@@ -41,12 +41,8 @@ struct InboxView: View {
         .background(Color(.systemGroupedBackground))
         .navigationBarBackButtonHidden(true)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(.brown)
-                }
+            ToolBarButton.back {
+                dismiss()
             }
 
             // Center Title (Filter + Inbox)
@@ -75,18 +71,15 @@ struct InboxView: View {
             }
 
             // Read All Button
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    inboxVM.markAllAsRead()
-                } label: {
-                    Text("Read All")
-                        .font(.headline)
-                        .foregroundColor(.brown)
-                }
+            ToolBarButton(placement: .topBarTrailing, buttonType: .text("Real All")) {
+                inboxVM.markAllAsRead()
             }
         }
         .onAppear {
             inboxVM.loadInitial()
+        }
+        .navigationDestination(isPresented: $isNavigateToAnnouncementDetail) {
+            AnnouncementDetailView(announcement: selectedAnnouncement)
         }
     }
 }

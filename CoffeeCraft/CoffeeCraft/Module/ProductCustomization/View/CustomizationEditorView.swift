@@ -126,22 +126,13 @@ struct CustomizationEditorView: View {
                 }
                 .scrollDismissesKeyboard(.immediately)
             }
-            .customNavigationBar("Customizations")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
-                    }
+            .customNavigationBar("Customizations") {
+                ToolBarButton(placement: .topBarLeading, buttonType: .icon("xmark")) {
+                    dismiss()
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "checkmark")
-                            .font(.headline)
-                            .foregroundColor(Color.brown)
-                    }
+                ToolBarButton(placement: .topBarTrailing, buttonType: .icon("checkmark")) {
+                    dismiss()
                 }
             }
             .sheet(isPresented: $showAddFromLibrary) {

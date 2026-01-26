@@ -29,10 +29,36 @@ struct RoundedCorner: Shape {
 
 // MARK: - Navigation
 extension View {
-    func customNavigationBar(_ title: String, displayMode: NavigationBarItem.TitleDisplayMode = .inline, hideBackBtn: Bool = true) -> some View {
+    // MARK: - Function Overloading
+    func customNavigationBar(_ title: String, displayMode: NavigationBarItem.TitleDisplayMode = .inline, hideBackBtn: Bool = true
+    ) -> some View {
         self.navigationTitle(title)
             .navigationBarTitleDisplayMode(displayMode)
             .navigationBarBackButtonHidden(hideBackBtn)
+    }
+    
+    func customNavigationBar<T: ToolbarContent>(
+        _ title: String,
+        displayMode: NavigationBarItem.TitleDisplayMode = .inline,
+        hideBackBtn: Bool = true,
+        @ToolbarContentBuilder toolbar: () -> T
+    ) -> some View {
+        self.navigationTitle(title)
+            .navigationBarTitleDisplayMode(displayMode)
+            .navigationBarBackButtonHidden(hideBackBtn)
+            .toolbar {
+                toolbar()
+            }
+    }
+}
 
+extension ToolBarButton {
+    // preconfigured back button
+    static func back(_ action: @escaping () -> Void) -> ToolBarButton {
+        ToolBarButton(
+            placement: .topBarLeading,
+            buttonType: .icon("chevron.left"),
+            action: action
+        )
     }
 }

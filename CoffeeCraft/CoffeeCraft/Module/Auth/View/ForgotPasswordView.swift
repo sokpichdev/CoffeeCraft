@@ -72,12 +72,9 @@ struct ForgotPasswordView: View {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
             )
-            .customNavigationBar("Reset Password")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
-                        dismiss()
-                    }
+            .customNavigationBar("Reset Password") {
+                ToolBarButton(placement: .topBarLeading, buttonType: .text("Close")) {
+                    dismiss()
                 }
             }
             .alert("Password Reset", isPresented: $showAlert) {

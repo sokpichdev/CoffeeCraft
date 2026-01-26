@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct AnnouncementsListView: View {
-
+    @Environment(\.dismiss) private var dismiss
     private let announcements: [Announcement] = [
         Announcement(
             id: 1,
@@ -73,6 +73,10 @@ struct AnnouncementsListView: View {
             .padding(.horizontal)
             .padding(.top)
         }
-        .customNavigationBar("Announcements")
+        .customNavigationBar("Announcements") {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
     }
 }

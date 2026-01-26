@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct AnnouncementDetailView: View {
-    let announcement: Announcement
+    var announcement: Announcement?
     
     @Environment(\.dismiss) private var dismiss
     var body: some View {
@@ -15,31 +15,26 @@ struct AnnouncementDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 
                 AsyncImageCard(
-                    imageURL: announcement.imageName ?? "",
+                    imageURL: announcement?.imageName ?? "",
                     height: 240,
                     width: UIScreen.main.bounds.width,
                     corner: 0
                 )
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(announcement.title ?? "")
+                    Text(announcement?.title ?? "")
                         .font(.title2.bold())
                     
-                    Text(announcement.description ?? "")
+                    Text(announcement?.description ?? "")
                         .font(.body)
                         .foregroundColor(.gray)
                 }
                 .padding(.horizontal)
             }
         }
-        .customNavigationBar("Announcement")
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
-                }
+        .customNavigationBar("Announcement") {
+            ToolBarButton.back {
+                dismiss()
             }
         }
     }

@@ -19,24 +19,11 @@ struct FavoriteView: View {
             }
             .padding()
         }
-        .customNavigationBar("Favorites")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
-                }
+        .customNavigationBar("Favorites") {
+            ToolBarButton.back {
+                dismiss()
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.headline)
-                        .foregroundColor(Color.brown)
-                }
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("plus")) {
             }
         }
         .task {
