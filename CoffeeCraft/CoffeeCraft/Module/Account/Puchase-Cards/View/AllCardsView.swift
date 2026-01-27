@@ -17,18 +17,21 @@ struct AllCardsView: View {
     @State private var selectedCardForSharing: LoyaltyCard?
     @State private var enteredUserId = ""
     
-    private let cardWidth: CGFloat = UIScreen.main.bounds.width - 40
+    @State private var snapshotCards: [LoyaltyCard] = []
+    
+    private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
     
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
-                if cardVM.isLoading && cardVM.accessibleCards.isEmpty {
+                if cardVM.isLoading && snapshotCards.isEmpty {
                     ProgressView()
                         .frame(height: 300)
-                } else if cardVM.accessibleCards.isEmpty {
+                } else if snapshotCards.isEmpty {
                     emptyStateView
                 } else {
-                    ForEach(cardVM.accessibleCards) { card in
+                    // prevents refresh during swipe
+                    ForEach(snapshotCards) { card in
                         cardRow(card: card)
                     }
                 }
@@ -38,7 +41,7 @@ struct AllCardsView: View {
             }
             .padding()
         }
-        .customNavigationBar("My Cards (\(cardVM.accessibleCards.count))") {
+        .customNavigationBar("My Cards (\(snapshotCards.count))") {
             ToolBarButton.back {
                 dismiss()
             }
@@ -64,8 +67,12 @@ struct AllCardsView: View {
         .sheet(isPresented: $showingShareSheet) {
             shareCardSheet
         }
-        .task {
-            cardVM.setUser(userId: authVM.currentUser?.id ?? "")
+        .onChange(of: cardVM.activeCardNumber) { _, _ in
+            // Re-apply access filter when active card changes
+            snapshotCards = cardVM.cards.filter { $0.hasAccessForCurrentUser }
+        }
+        .onAppear {
+            snapshotCards = cardVM.accessibleCards
         }
     }
     
