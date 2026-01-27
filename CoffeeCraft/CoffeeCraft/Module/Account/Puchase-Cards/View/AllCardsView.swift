@@ -69,158 +69,133 @@ struct AllCardsView: View {
         }
     }
     
-    // MARK: - Individual Card Row (BIG SIZE)
+    // MARK: - Minimal Card Row
     private func cardRow(card: LoyaltyCard) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header with status badges
-            HStack {
-                Text(card.isActiveForCurrentUser ? "Active Card" : card.displayName)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                // Status badges
-                HStack(spacing: 6) {
-                    if card.isOwnedByCurrentUser {
-                        Image(systemName: "crown.fill")
-                            .foregroundStyle(.yellow)
-                            .font(.caption)
-                    }
-                    
-                    Text(card.isActiveForCurrentUser ? "ACTIVE" : "Shared")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            card.isActiveForCurrentUser ?
-                            Color.green.opacity(0.2) :
-                            Color.blue.opacity(0.2)
-                        )
-                        .foregroundStyle(
-                            card.isActiveForCurrentUser ?
-                            .green :
-                            .blue
-                        )
-                        .cornerRadius(8)
-                }
+        VStack(spacing: 12) {
+            // Status badge on TOP of card (only if shared)
+            if !card.isOwnedByCurrentUser {
+                Text("Shared")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.blue)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 8)
             }
             
-            // BIG FlippableCardView
             FlippableCardView(
                 card: card,
                 width: cardWidth
             )
             
-            // Points and action row
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(card.points) points")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
-                    
-                    Text(card.memberSince)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                
-                Spacer()
-                
-                // Action button
-                if card.isActiveForCurrentUser {
-                    Text("Active ✓")
-                        .font(.headline)
-                        .foregroundStyle(.green)
-                } else {
-                    Button("Make Active") {
-                        Task {
-                            try await cardVM.setActiveCard(card)
-                        }
+            if !card.isActiveForCurrentUser {
+                Button("Activate") {
+                    Task {
+                        try await cardVM.setActiveCard(card)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.blue)
                 }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(.ultraThinMaterial, in: Capsule())
             }
         }
-        .padding(16)
-        .background(Color(.systemGray6))
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
     }
     
-    // MARK: - Empty State
+    // MARK: - Compact Status Badge
+    private func statusBadge(for card: LoyaltyCard) -> some View {
+        HStack(spacing: 4) {
+            if card.isOwnedByCurrentUser {
+                Image(systemName: "crown")
+                    .font(.caption)
+                    .foregroundStyle(.yellow)
+            }
+            
+            if card.isActiveForCurrentUser {
+                Text("ACTIVE")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(.green)
+                    .clipShape(Capsule())
+            } else {
+                Text("Shared")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(.blue)
+                    .clipShape(Capsule())
+            }
+        }
+    }
+    
+    // MARK: - Minimal Empty State
     private var emptyStateView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             Image(systemName: "creditcard")
                 .font(.system(size: 80))
                 .foregroundStyle(.secondary)
+                .opacity(0.5)
             
-            Text("No Cards Yet")
-                .font(.largeTitle)
-                .fontWeight(.semibold)
-            
-            Text("Add your first loyalty card to start earning points")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            Button("Add Card") {
-                isNavigateToAddCard = true
+            VStack(spacing: 8) {
+                Text("No Cards")
+                    .font(.largeTitle.weight(.semibold))
+                
+                Button("Add Card") {
+                    isNavigateToAddCard = true
+                }
+                .font(.headline)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
         }
         .frame(maxHeight: .infinity)
     }
     
-    // MARK: - Share Card Sheet (unchanged)
+    // MARK: - Share Card Sheet (minimal)
     private var shareCardSheet: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Text("Share Card")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
+            VStack(spacing: 24) {
                 if let card = selectedCardForSharing {
-                    FlippableCardView(card: card, width: 280)
-                        .padding()
-                    
-                    VStack(spacing: 12) {
-                        Text("Share with friend")
-                            .font(.headline)
+                    VStack(spacing: 20) {
+                        FlippableCardView(card: card, width: 300)
                         
-                        TextField("Friend's User ID", text: $enteredUserId)
-                            .textFieldStyle(.roundedBorder)
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
-                        
-                        Button("Share Card") {
-                            Task {
-                                do {
-                                    try await cardVM.shareCard(card, with: enteredUserId)
-                                    enteredUserId = ""
-                                    showingShareSheet = false
-                                } catch {
-                                    print("Share error: \(error)")
+                        VStack(spacing: 12) {
+                            Text("Share this card")
+                                .font(.headline)
+                            
+                            TextField("Friend's User ID", text: $enteredUserId)
+                                .textFieldStyle(.roundedBorder)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                            
+                            Button("Share") {
+                                Task {
+                                    do {
+                                        try await cardVM.shareCard(card, with: enteredUserId)
+                                        enteredUserId = ""
+                                        showingShareSheet = false
+                                    } catch {
+                                        print("Share error: \(error)")
+                                    }
                                 }
                             }
+                            .font(.headline)
+                            .buttonStyle(.borderedProminent)
+                            .disabled(enteredUserId.isEmpty)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(enteredUserId.isEmpty)
                     }
                 }
                 
                 Spacer()
             }
             .padding()
-            .customNavigationBar("Share Card") {
-                ToolBarButton.back {
-                    showingShareSheet = false
-                }
-            }
+            .presentationDetents([.medium, .large])
         }
     }
 }
