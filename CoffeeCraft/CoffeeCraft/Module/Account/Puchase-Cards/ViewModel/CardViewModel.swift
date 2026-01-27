@@ -10,7 +10,7 @@ import SwiftUI
 
 class CardViewModel: ObservableObject {
     @Published var cards: [LoyaltyCard] = []
-    @Published var activeCardNumbers: Set<String> = []
+    @Published var activeCardNumber: String = ""
     @Published var isLoading = false
     @Published var errorMessage: String?
     
@@ -19,11 +19,8 @@ class CardViewModel: ObservableObject {
     private var cardsListener: ListenerRegistration?
     private var activeListener: ListenerRegistration?
     
-    // Computed properties
     var activeCard: LoyaltyCard? {
-        cards.first { card in
-            activeCardNumbers.contains(card.cardNumber) && card.hasAccessForCurrentUser
-        }
+        cards.first { $0.cardNumber == activeCardNumber && $0.hasAccessForCurrentUser }
     }
     
     var accessibleCards: [LoyaltyCard] {
@@ -36,137 +33,127 @@ class CardViewModel: ObservableObject {
         setupListeners()
     }
     
-//    private func setupListeners() {
-//        guard let userId = currentUserId else { return }
-//        
-//        // Listen to user's active card (only 1)
-//        activeListener?.remove()
-//        activeListener = db.collection("users").document(userId)
-//            .addSnapshotListener { [weak self] snapshot, error in
-//                if let data = snapshot?.data(),
-//                   let active = data["activeCards"] as? [String] {
-//                    self?.activeCardNumbers = Set(active)
-//                    LoyaltyCard.activeCardNumbers = Set(active)
-//                }
-//            }
-//        
-//        // Owned cards listener
-//        cardsListener?.remove()
-//        db.collection("loyalty_cards")
-//            .whereField("ownerId", isEqualTo: userId)
-//            .addSnapshotListener { [weak self] snapshot, error in
-//                self?.handleOwnedCards(snapshot, error)
-//            }
-//        
-//        // Shared cards listener
-//        db.collection("loyalty_cards")
-//            .whereField("sharedWith", arrayContains: userId)
-//            .addSnapshotListener { [weak self] snapshot, error in
-//                self?.handleSharedCards(snapshot, error)
-//            }
-//    }
     private func setupListeners() {
-            guard let userId = currentUserId else { return }
-            
-            // ✅ 1. User's active card
-            activeListener = db.collection("users").document(userId)
-                .addSnapshotListener { [weak self] snapshot, error in
-                    if let active = snapshot?.data()?["activeCards"] as? [String] {
-                        self?.activeCardNumbers = Set(active)
+        guard let userId = currentUserId else { return }
+        
+        // Listen to user document (activeCard + accessibleCards)
+        activeListener?.remove()
+        activeListener = db.collection("users").document(userId)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                guard let data = snapshot?.data() else { return }
+                
+                // Update activeCard
+                if let activeCardNum = data["activeCard"] as? String {
+                    self.activeCardNumber = activeCardNum
+                    LoyaltyCard.currentActiveCardNumber = activeCardNum
+                } else {
+                    self.activeCardNumber = ""
+                }
+                
+                // Fetch accessibleCards on login
+                if let accessibleCardNumbers = data["accessibleCards"] as? [String] {
+                    Task {
+                        await self.fetchAccessibleCards(accessibleCardNumbers)
                     }
                 }
-            
-            // ✅ 2. ONLY owned cards listener (always works)
-            cardsListener?.remove()
-            cardsListener = db.collection("loyalty_cards")
-                .whereField("ownerId", isEqualTo: userId)
-                .addSnapshotListener { [weak self] snapshot, error in
-                    self?.cards = snapshot?.documents.compactMap { try? $0.data(as: LoyaltyCard.self) } ?? []
-                }
-        }
-    // ✅ 3. Manually fetch shared cards when adding
-        func addCard(cardNumber: String) async throws {
-            guard let userId = currentUserId else { throw CardError.userNotAuthenticated }
-            
-            let cleanCardNumber = cardNumber.replacingOccurrences(of: " ", with: "")
-            let cardDoc = try await db.collection("loyalty_cards").document(cleanCardNumber).getDocument()
-            
-            guard let card = try? cardDoc.data(as: LoyaltyCard.self) else {
-                throw CardError.invalidCardNumber
             }
-            
-            // ✅ Validate access BEFORE sharing
-            if card.ownerId == userId {
-                // Owner - auto-access
-                print("✅ Owner access granted")
-            } else if card.sharedWith.contains(userId) {
-                // Already shared
-                print("✅ Already shared")
-            } else {
-                // Not owner, not shared → throw error
-                throw CardError.noAccess
-            }
-            
-            // ✅ Card is accessible → refresh local list
-            await fetchSharedCards()
-            print("✅ Card added: \(cleanCardNumber)")
-        }
         
-        // ✅ Fetch shared cards manually
-        private func fetchSharedCards() async {
-            guard let userId = currentUserId else { return }
-            
+        // Owned cards listener for real-time updates
+        cardsListener?.remove()
+        cardsListener = db.collection("loyalty_cards")
+            .whereField("ownerId", isEqualTo: userId)
+            .addSnapshotListener { [weak self] snapshot, error in
+                self?.cards = snapshot?.documents.compactMap { try? $0.data(as: LoyaltyCard.self) } ?? []
+            }
+    }
+
+    // Fetch all cards from accessibleCards array
+    private func fetchAccessibleCards(_ cardNumbers: [String]) async {
+        var allCards: [LoyaltyCard] = []
+        
+        for cardNumber in cardNumbers {
             do {
-                let snapshot = try await db.collection("loyalty_cards")
-                    .whereField("sharedWith", arrayContains: userId)
-                    .getDocuments()
+                let cardDoc = try await db.collection("loyalty_cards")
+                    .document(cardNumber)
+                    .getDocument()
                 
-                let sharedCards = snapshot.documents.compactMap { try? $0.data(as: LoyaltyCard.self) }
-                
-                await MainActor.run {
-                    // Merge with owned cards
-                    let ownedCardIds = Set(cards.map { $0.id ?? "" })
-                    let newSharedCards = sharedCards.filter { !ownedCardIds.contains($0.id ?? "") }
-                    self.cards.append(contentsOf: newSharedCards)
-                    self.cards.sort { $0.createdAt > $1.createdAt }
+                if let card = try? cardDoc.data(as: LoyaltyCard.self) {
+                    allCards.append(card)
                 }
             } catch {
-                print("Shared cards fetch error: \(error)")
+                print("Failed to fetch card \(cardNumber): \(error)")
             }
         }
+        
+        await MainActor.run {
+            self.cards = allCards
+            self.cards.sort { $0.createdAt > $1.createdAt }
+        }
+    }
     
-    // Handle owned cards
-    private func handleOwnedCards(_ snapshot: QuerySnapshot?, _ error: Error?) {
-        if let error = error {
-            self.errorMessage = error.localizedDescription
-            return
+    func addCard(cardNumber: String) async throws {
+        guard let userId = currentUserId else { throw CardError.userNotAuthenticated }
+        
+        let cleanCardNumber = cardNumber.replacingOccurrences(of: " ", with: "")
+        let cardDoc = try await db.collection("loyalty_cards").document(cleanCardNumber).getDocument()
+        
+        guard let card = try? cardDoc.data(as: LoyaltyCard.self) else {
+            throw CardError.invalidCardNumber
         }
         
-        let ownedCards = snapshot?.documents.compactMap { try? $0.data(as: LoyaltyCard.self) } ?? []
-        updateCards(with: ownedCards)
-    }
-    
-    // Handle shared cards
-    private func handleSharedCards(_ snapshot: QuerySnapshot?, _ error: Error?) {
-        if let error = error {
-            self.errorMessage = error.localizedDescription
-            return
+        // Validate access
+        if card.ownerId == userId {
+            print("✅ Owner access granted")
+        } else if card.sharedWith.contains(userId) {
+            print("✅ Already shared")
+        } else {
+            throw CardError.noAccess
         }
         
-        let sharedCards = snapshot?.documents.compactMap { try? $0.data(as: LoyaltyCard.self) } ?? []
-        updateCards(with: sharedCards)
-    }
-    
-    private func updateCards(with newCards: [LoyaltyCard]) {
-        // Merge owned + shared cards, remove duplicates
-        let existingIds = Set(cards.map { $0.id ?? "" })
-        let filteredNewCards = newCards.filter { !existingIds.contains($0.id ?? "") }
+        try await db.collection("users").document(userId).updateData([
+            "accessibleCards": FieldValue.arrayUnion([cleanCardNumber])
+        ])
         
-        cards.append(contentsOf: filteredNewCards)
-        cards.sort { $0.createdAt > $1.createdAt }
+        await fetchSharedCards()
+        
+        print("✅ Card added to accessibleCards: \(cleanCardNumber)")
     }
     
-    // Share card (owner only)
+    private func fetchSharedCards() async {
+        guard let userId = currentUserId else { return }
+        
+        do {
+            let snapshot = try await db.collection("loyalty_cards")
+                .whereField("sharedWith", arrayContains: userId)
+                .getDocuments()
+            
+            let sharedCards = snapshot.documents.compactMap { try? $0.data(as: LoyaltyCard.self) }
+            
+            await MainActor.run {
+                let ownedCardIds = Set(cards.map { $0.id ?? "" })
+                let newSharedCards = sharedCards.filter { !ownedCardIds.contains($0.id ?? "") }
+                self.cards.append(contentsOf: newSharedCards)
+                self.cards.sort { $0.createdAt > $1.createdAt }
+            }
+        } catch {
+            print("Shared cards fetch error: \(error)")
+        }
+    }
+    
+    func setActiveCard(_ card: LoyaltyCard) async throws {
+        guard let userId = currentUserId, card.hasAccessForCurrentUser else {
+            throw CardError.noAccess
+        }
+        
+        isLoading = true
+        defer { Task { @MainActor in isLoading = false } }
+        
+        try await db.collection("users").document(userId).updateData([
+            "activeCard": card.cardNumber
+        ])
+    }
+    
     func shareCard(_ card: LoyaltyCard, with userId: String) async throws {
         guard card.isOwnedByCurrentUser else {
             throw CardError.notOwner
@@ -174,21 +161,6 @@ class CardViewModel: ObservableObject {
         
         try await db.collection("loyalty_cards").document(card.id ?? "").updateData([
             "sharedWith": FieldValue.arrayUnion([userId])
-        ])
-    }
-
-    //  Set single active card
-    func setActiveCard(_ card: LoyaltyCard) async throws {
-        guard let userId = currentUserId, card.hasAccessForCurrentUser else {
-            throw CardError.noAccess
-        }
-        await MainActor.run {
-            isLoading = true
-            do { isLoading = false }
-        }
-        
-        try await db.collection("users").document(userId).updateData([
-            "activeCards": [card.cardNumber]  // Only 1 active card
         ])
     }
     
@@ -212,7 +184,8 @@ class CardViewModel: ObservableObject {
         ])
         
         try await db.collection("users").document(userId).setData([
-            "activeCards": [cardNumber],
+            "activeCards": cardNumber,
+            "accessibleCards": [cardNumber],
             "updatedAt": Timestamp(date: Date())
         ], merge: true)
     }
