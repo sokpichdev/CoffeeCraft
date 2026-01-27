@@ -152,13 +152,12 @@ struct AccountView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                             .frame(height: 200)
-                    } else {
-                        if let activeCard = cardVM.activeCard, let cardDetail = cardVM.activeCardDetails {
-                            FlippableCardView(
-                                activeCard: activeCard,
-                                activeCardDetails: cardDetail,
-                                width: (UIScreen.main.bounds.width * 0.8) - 32)
-                        }
+                    } else if let activeCard = cardVM.activeCard {
+                        // Single LoyaltyCard
+                        FlippableCardView(
+                            card: activeCard,  // Updated parameter
+                            width: (UIScreen.main.bounds.width * 0.8) - 32
+                        )
                     }
                     Spacer()
                     Button(action: {
