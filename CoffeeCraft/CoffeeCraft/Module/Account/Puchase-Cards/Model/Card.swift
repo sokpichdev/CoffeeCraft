@@ -38,7 +38,17 @@ struct LoyaltyCard: Identifiable, Codable {
     var isActive: Bool {
         LoyaltyCard.activeCardNumbers.contains(cardNumber)
     }
+    // Computed: Who can use this card
+    var authorizedUsers: [String] {
+        var users = sharedWith
+        users.append(ownerId)  // Owner always has access
+        return users
+    }
     
+    // Computed: Is this card active for current user?
+    var isActiveForCurrentUser: Bool {
+        LoyaltyCard.activeCardNumbers.contains(cardNumber)
+    }
     enum CodingKeys: String, CodingKey {
         case id, cardNumber, ownerId, ownerName, memberSince, points, createdAt, sharedWith
     }
