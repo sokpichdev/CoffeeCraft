@@ -11,26 +11,30 @@ struct AllCardsView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
-    @State var isNavigateToPurchaseCard: Bool = false
-    @State var isNavigateToAddCard: Bool = false
+    @State private var isNavigateToPurchaseCard = false
+    @State private var isNavigateToAddCard = false
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack {
-                if !cardVM.userCards.isEmpty, let activeCardDetail = cardVM.activeCardDetails {
-                    ForEach(cardVM.userCards) { card in
+            VStack(spacing: 16) {
+                if !cardVM.cards.isEmpty {
+                    ForEach(cardVM.cards.filter { $0.hasAccessForCurrentUser }) { card in
                         FlippableCardView(
-                            activeCard: card,
-                            activeCardDetails: activeCardDetail,
-                            width: UIScreen.main.bounds.width - 32)
+                            card: card,
+                            width: UIScreen.main.bounds.width - 32
+                        )
                     }
+                } else {
+                    Text("No cards yet")
+                        .foregroundColor(.secondary)
                 }
             }
+            .padding()
         }
         .customNavigationBar("My Cards") {
             ToolBarButton.back {
                 dismiss()
             }
-            
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("cart.badge.plus")) {
                 isNavigateToPurchaseCard = true
             }
@@ -43,6 +47,9 @@ struct AllCardsView: View {
                 AddCardView()
                     .environmentObject(cardVM)
             }
+        }
+        .task {
+            cardVM.setUser(userId: authVM.currentUser?.id ?? "")
         }
     }
 }

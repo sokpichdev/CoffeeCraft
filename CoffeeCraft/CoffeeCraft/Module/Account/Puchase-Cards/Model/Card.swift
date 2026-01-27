@@ -7,9 +7,9 @@
 
 import Foundation
 import FirebaseFirestore
+import SwiftUI
 
-// Global card (stored in cards/ collection)
-struct Card: Identifiable, Codable {
+struct LoyaltyCard: Identifiable, Codable {
     @DocumentID var id: String?
     let cardNumber: String
     let ownerId: String
@@ -17,35 +17,29 @@ struct Card: Identifiable, Codable {
     let memberSince: String
     var points: Int
     let createdAt: Date
+    var sharedWith: [String] = []
     
-    enum CodingKeys: String, CodingKey {
-        case id
-        case cardNumber
-        case ownerId
-        case ownerName
-        case memberSince
-        case points
-        case createdAt
+    // Computed properties (need static vars for current context)
+    static var currentUserId: String = ""
+    static var activeCardNumbers: Set<String> = []
+    
+    var displayName: String {
+        ownerName + (isOwnedByCurrentUser ? " (Mine)" : "")
     }
-}
-
-// User's card reference (stored in users/{userId}/cards/ subcollection)
-struct UserCard: Identifiable, Codable {
-    @DocumentID var id: String?
-    let cardNumber: String
-    let isOwner: Bool
-    var isActive: Bool
-    let addedAt: Date
-    let memberName: String
-    let memberSince: String
+    
+    var isOwnedByCurrentUser: Bool {
+        ownerId == LoyaltyCard.currentUserId
+    }
+    
+    var hasAccessForCurrentUser: Bool {
+        isOwnedByCurrentUser || sharedWith.contains(LoyaltyCard.currentUserId)
+    }
+    
+    var isActive: Bool {
+        LoyaltyCard.activeCardNumbers.contains(cardNumber)
+    }
     
     enum CodingKeys: String, CodingKey {
-        case id
-        case cardNumber
-        case isOwner
-        case isActive
-        case addedAt
-        case memberName
-        case memberSince
+        case id, cardNumber, ownerId, ownerName, memberSince, points, createdAt, sharedWith
     }
 }
