@@ -142,6 +142,16 @@ class CardViewModel: ObservableObject {
         }
     }
     
+    // input email return id
+    func findUserId(byEmail email: String) async throws -> String? {
+        let query = db.collection("users")
+            .whereField("email", isEqualTo: email.lowercased())
+            .limit(to: 1)
+        
+        let snapshot = try await query.getDocuments()
+        return snapshot.documents.first?.documentID  // Returns UID!
+        
+    }
     func setActiveCard(_ card: LoyaltyCard) async throws {
         guard let userId = currentUserId, card.hasAccessForCurrentUser else {
             throw CardError.noAccess
