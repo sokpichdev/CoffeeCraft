@@ -70,7 +70,7 @@ class CardViewModel: ObservableObject {
 
     // Fetch all cards from accessibleCards array
     private func fetchAccessibleCards(_ cardNumbers: [String]) async {
-        var allCards: [LoyaltyCard] = []
+        var fetchedCards: [LoyaltyCard] = []
         
         for cardNumber in cardNumbers {
             do {
@@ -79,15 +79,16 @@ class CardViewModel: ObservableObject {
                     .getDocument()
                 
                 if let card = try? cardDoc.data(as: LoyaltyCard.self) {
-                    allCards.append(card)
+                    fetchedCards.append(card)
                 }
             } catch {
                 print("Failed to fetch card \(cardNumber): \(error)")
             }
         }
         
+        let finalCards = fetchedCards
         await MainActor.run {
-            self.cards = allCards
+            self.cards = finalCards
             self.cards.sort { $0.createdAt > $1.createdAt }
         }
     }
