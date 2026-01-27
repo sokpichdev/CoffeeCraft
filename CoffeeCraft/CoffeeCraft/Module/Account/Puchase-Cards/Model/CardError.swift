@@ -13,6 +13,8 @@ enum CardError: LocalizedError {
     case noActiveCard
     case cardNotFound
     case userNotAuthenticated
+    case notOwner
+    case noAccess
     
     var errorDescription: String? {
         switch self {
@@ -28,6 +30,10 @@ enum CardError: LocalizedError {
             return "Card not found"
         case .userNotAuthenticated:
             return "User not authenticated"
+        case .notOwner:
+            return "You are not the owner"
+        case .noAccess: return "No access to this card"
+
         }
     }
 }

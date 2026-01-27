@@ -7,10 +7,9 @@
 import SwiftUI
 
 struct FlippableCardView: View {
-    var activeCard: UserCard
-    var activeCardDetails: Card
+    let card: LoyaltyCard
     let width: CGFloat
-    let aspectRatio: CGFloat = 16 / 9   // width / height
+    let aspectRatio: CGFloat = 16 / 9
     
     private var cardHeight: CGFloat {
         width / aspectRatio
@@ -105,7 +104,7 @@ struct FlippableCardView: View {
         !isFrontFaceVisible
     }
     
-    // MARK: - Front
+    // MARK: - Front (uses LoyaltyCard properties directly)
     private var frontView: some View {
         cardBase {
             ZStack {
@@ -160,8 +159,7 @@ struct FlippableCardView: View {
                     
                     Spacer()
                     
-                    // Card number - Dynamic from active card
-                    Text(formatCardNumber(activeCard.cardNumber))
+                    Text(formatCardNumber(card.cardNumber))
                         .font(.system(size: width * 0.045, weight: .semibold, design: .monospaced))
                         .foregroundStyle(.white)
                         .tracking(width * 0.008)
@@ -172,7 +170,7 @@ struct FlippableCardView: View {
                             Text("MEMBER")
                                 .font(.system(size: width * 0.022, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.6))
-                            Text(activeCard.memberName)
+                            Text(card.ownerName)
                                 .font(.system(size: width * 0.035, weight: .semibold))
                                 .foregroundStyle(.white)
                         }
@@ -183,7 +181,7 @@ struct FlippableCardView: View {
                             Text("MEMBER SINCE")
                                 .font(.system(size: width * 0.022, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.6))
-                            Text(activeCard.memberSince)
+                            Text(card.memberSince)
                                 .font(.system(size: width * 0.035, weight: .semibold))
                                 .foregroundStyle(.white)
                         }
@@ -196,98 +194,98 @@ struct FlippableCardView: View {
     
     // MARK: - Back
     private var backView: some View {
-            cardBase {
-                ZStack {
-                    // Background
-                    LinearGradient(
-                        colors: [Color(red: 0.35, green: 0.22, blue: 0.12), Color(red: 0.25, green: 0.15, blue: 0.1)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+        cardBase {
+            ZStack {
+                // Background
+                LinearGradient(
+                    colors: [Color(red: 0.35, green: 0.22, blue: 0.12), Color(red: 0.25, green: 0.15, blue: 0.1)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                
+                VStack(spacing: 0) {
+                    // Magnetic stripe
+                    Rectangle()
+                        .fill(Color.black)
+                        .frame(height: cardHeight * 0.12)
+                        .frame(maxWidth: .infinity)
                     
-                    VStack(spacing: 0) {
-                        // Magnetic stripe
-                        Rectangle()
-                            .fill(Color.black)
-                            .frame(height: cardHeight * 0.12)
-                            .frame(maxWidth: .infinity)
-                        
-                        VStack(alignment: .leading, spacing: cardHeight * 0.05) {
-                            // Rewards tracker
-                            VStack(alignment: .leading, spacing: cardHeight * 0.03) {
-                                Text("REWARDS TRACKER")
-                                    .font(.system(size: width * 0.028, weight: .semibold))
-                                    .foregroundStyle(.white.opacity(0.8))
-                                
-                                // Coffee stamp grid
-                                VStack(spacing: cardHeight * 0.025) {
-                                    ForEach(0..<2) { row in
-                                        HStack(spacing: width * 0.025) {
-                                            ForEach(0..<5) { col in
-                                                let index = row * 5 + col
-                                                ZStack {
-                                                    Circle()
-                                                        .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
-                                                        .frame(width: width * 0.06, height: width * 0.06)
-                                                    
-                                                    if index < activeCardDetails.points {
-                                                        Image(systemName: "cup.and.saucer.fill")
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: width * 0.035)
-                                                            .foregroundStyle(Color.orange)
-                                                    }
+                    VStack(alignment: .leading, spacing: cardHeight * 0.05) {
+                        // Rewards tracker
+                        VStack(alignment: .leading, spacing: cardHeight * 0.03) {
+                            Text("REWARDS TRACKER")
+                                .font(.system(size: width * 0.028, weight: .semibold))
+                                .foregroundStyle(.white.opacity(0.8))
+                            
+                            // Coffee stamp grid - Uses card.points
+                            VStack(spacing: cardHeight * 0.025) {
+                                ForEach(0..<2) { row in
+                                    HStack(spacing: width * 0.025) {
+                                        ForEach(0..<5) { col in
+                                            let index = row * 5 + col
+                                            ZStack {
+                                                Circle()
+                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
+                                                    .frame(width: width * 0.06, height: width * 0.06)
+                                                
+                                                if index < card.points {
+                                                    Image(systemName: "cup.and.saucer.fill")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: width * 0.035)
+                                                        .foregroundStyle(Color.orange)
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                
-                                Text("\(10 - activeCardDetails.points) more for a FREE drink!")
-                                    .font(.system(size: width * 0.028, weight: .medium))
-                                    .foregroundStyle(Color.orange)
                             }
                             
-                            // Barcode
-                            VStack(spacing: cardHeight * 0.015) {
-                                // Simulated barcode
-                                HStack(spacing: 1) {
-                                    ForEach(0..<30) { i in
-                                        Rectangle()
-                                            .fill(Color.black)
-                                            .frame(width: i % 3 == 0 ? 2 : 1.5, height: cardHeight * 0.1)
-                                    }
-                                }
-                                .background(Color.white)
-                                .cornerRadius(3)
-                                
-                                Text("1029384756102938")
-                                    .font(.system(size: width * 0.023, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(.white.opacity(0.7))
-                            }
-                            
-                            // Customer service
-                            HStack {
-                                Image(systemName: "phone.fill")
-                                    .font(.system(size: width * 0.023))
-                                Text("1-800-CRAFT-CAFE")
-                                    .font(.system(size: width * 0.023, weight: .medium))
-                                
-                                Spacer()
-                                
-                                Image(systemName: "globe")
-                                    .font(.system(size: width * 0.023))
-                                Text("Craftcafe.com")
-                                    .font(.system(size: width * 0.023, weight: .medium))
-                            }
-                            .foregroundStyle(.white.opacity(0.6))
+                            Text("\(10 - card.points) more for a FREE drink!")
+                                .font(.system(size: width * 0.028, weight: .medium))
+                                .foregroundStyle(Color.orange)
                         }
-                        .padding(.horizontal, width * 0.08)
-                        .padding(.vertical, cardHeight * 0.06)
+                        
+                        // Barcode
+                        VStack(spacing: cardHeight * 0.015) {
+                            // Simulated barcode
+                            HStack(spacing: 1) {
+                                ForEach(0..<30) { i in
+                                    Rectangle()
+                                        .fill(Color.black)
+                                        .frame(width: i % 3 == 0 ? 2 : 1.5, height: cardHeight * 0.1)
+                                }
+                            }
+                            .background(Color.white)
+                            .cornerRadius(3)
+                            
+                            Text("1029384756102938")
+                                .font(.system(size: width * 0.023, weight: .medium, design: .monospaced))
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+                        
+                        // Customer service
+                        HStack {
+                            Image(systemName: "phone.fill")
+                                .font(.system(size: width * 0.023))
+                            Text("1-800-CRAFT-CAFE")
+                                .font(.system(size: width * 0.023, weight: .medium))
+                            
+                            Spacer()
+                            
+                            Image(systemName: "globe")
+                                .font(.system(size: width * 0.023))
+                            Text("Craftcafe.com")
+                                .font(.system(size: width * 0.023, weight: .medium))
+                        }
+                        .foregroundStyle(.white.opacity(0.6))
                     }
+                    .padding(.horizontal, width * 0.08)
+                    .padding(.vertical, cardHeight * 0.06)
                 }
             }
         }
+    }
 
     // MARK: - Card Styling
     private func cardBase<Content: View>(

@@ -8,7 +8,7 @@ import SwiftUI
 
 struct RegisterView: View {
     @EnvironmentObject var authVM: AuthViewModel
-
+    @StateObject var cardVM = CardViewModel()
     var body: some View {
         VStack(spacing: 16) {
             CustomTextField1(text: $authVM.name,
@@ -63,13 +63,32 @@ struct RegisterView: View {
                 if authVM.validateRegisterForm() {
                     Task {
                         authVM.isLoading = true
-                        do {
-                            try await authVM.signUp(name: authVM.name, email: authVM.email, password: authVM.password, role: authVM.role)
-                        } catch {
-                            print("Sign Up Error: \(error.localizedDescription)")
+                        defer { authVM.isLoading = false }
+                        
+                        await authVM.signUp(name: authVM.name, email: authVM.email, password: authVM.password, role: authVM.role) { result in
+                            switch result {
+                            case .success(let userInfo):
+                                // Wrap card creation in Task (fire-and-forget)
+                                Task {
+                                    do {
+                                        try await cardVM.createInitialCard(
+                                            userId: userInfo.id,
+                                            userName: userInfo.name
+                                        )
+                                        print("✅ Card created successfully!")
+                                    } catch {
+                                        print("❌ Card Error: \(error.localizedDescription)")
+                                        // Signup succeeded, card failed = OK!
+                                    }
+                                }
+                                
+                            case .failure(let error):
+                                print("❌ Signup Error: \(error.localizedDescription)")
+                                authVM.errorMessage = error.localizedDescription
+                            }
                         }
-                        authVM.isLoading = false
                     }
+
                 }
             } label: {
                 HStack {
