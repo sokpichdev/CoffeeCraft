@@ -15,7 +15,6 @@ struct AllCardsView: View {
     @State private var isNavigateToAddCard = false
     @State private var showingShareSheet = false
     @State private var selectedCardForSharing: LoyaltyCard?
-    @State private var enteredUserId = ""
     
     @State private var snapshotCards: [LoyaltyCard] = []
     
@@ -65,7 +64,10 @@ struct AllCardsView: View {
             }
         }
         .sheet(isPresented: $showingShareSheet) {
-            shareCardSheet
+            if let card = selectedCardForSharing {
+                ShareCardSheet(card: card)
+                    .environmentObject(cardVM)
+            }
         }
         .onChange(of: cardVM.activeCardNumber) { _, _ in
             // Re-apply access filter when active card changes
@@ -112,35 +114,6 @@ struct AllCardsView: View {
         }
     }
     
-    // MARK: - Compact Status Badge
-    private func statusBadge(for card: LoyaltyCard) -> some View {
-        HStack(spacing: 4) {
-            if card.isOwnedByCurrentUser {
-                Image(systemName: "crown")
-                    .font(.caption)
-                    .foregroundStyle(.yellow)
-            }
-            
-            if card.isActiveForCurrentUser {
-                Text("ACTIVE")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(.green)
-                    .clipShape(Capsule())
-            } else {
-                Text("Shared")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(.blue)
-                    .clipShape(Capsule())
-            }
-        }
-    }
-    
     // MARK: - Minimal Empty State
     private var emptyStateView: some View {
         VStack(spacing: 24) {
@@ -162,47 +135,5 @@ struct AllCardsView: View {
             }
         }
         .frame(maxHeight: .infinity)
-    }
-    
-    // MARK: - Share Card Sheet (minimal)
-    private var shareCardSheet: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                if let card = selectedCardForSharing {
-                    VStack(spacing: 20) {
-                        FlippableCardView(card: card, width: 300)
-                        
-                        VStack(spacing: 12) {
-                            Text("Share this card")
-                                .font(.headline)
-                            
-                            TextField("Friend's User ID", text: $enteredUserId)
-                                .textFieldStyle(.roundedBorder)
-                                .autocorrectionDisabled()
-                                .textInputAutocapitalization(.never)
-                            
-                            Button("Share") {
-                                Task {
-                                    do {
-                                        try await cardVM.shareCard(card, with: enteredUserId)
-                                        enteredUserId = ""
-                                        showingShareSheet = false
-                                    } catch {
-                                        print("Share error: \(error)")
-                                    }
-                                }
-                            }
-                            .font(.headline)
-                            .buttonStyle(.borderedProminent)
-                            .disabled(enteredUserId.isEmpty)
-                        }
-                    }
-                }
-                
-                Spacer()
-            }
-            .padding()
-            .presentationDetents([.medium, .large])
-        }
     }
 }
