@@ -185,7 +185,7 @@ class CardViewModel: ObservableObject {
         ])
         
         try await db.collection("users").document(userId).setData([
-            "activeCards": cardNumber,
+            "activeCard": cardNumber,
             "accessibleCards": [cardNumber],
             "updatedAt": Timestamp(date: Date())
         ], merge: true)
