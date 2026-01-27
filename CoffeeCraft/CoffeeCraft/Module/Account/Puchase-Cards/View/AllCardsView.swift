@@ -67,6 +67,7 @@ struct AllCardsView: View {
             if let card = selectedCardForSharing {
                 ShareCardSheet(card: card)
                     .environmentObject(cardVM)
+                    .environmentObject(authVM)
             }
         }
         .onChange(of: cardVM.activeCardNumber) { _, _ in
