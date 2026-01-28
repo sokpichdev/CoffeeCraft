@@ -25,7 +25,11 @@ class AuthViewModel: ObservableObject {
     // MARK: - UI State
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var currentUser: User?
+    
+    // Access user through singleton instead of storing locally
+    var currentUser: User? {
+        return UserSession.shared.currentUser
+    }
     
     private let db = Firestore.firestore()
     
@@ -64,7 +68,7 @@ class AuthViewModel: ObservableObject {
                     dateOfBirth = dobTimestamp.dateValue()
                 }
                 
-                self.currentUser = User(
+                let user = User(
                     id: uid,
                     name: name,
                     email: email,
@@ -74,6 +78,9 @@ class AuthViewModel: ObservableObject {
                     dateOfBirth: dateOfBirth,
                     city: city
                 )
+                
+                // Store user in singleton
+                UserSession.shared.setUser(user)
                 
                 self.isLoading = false
             }
@@ -85,7 +92,7 @@ class AuthViewModel: ObservableObject {
         email: String,
         password: String,
         role: UserRole,
-        completion: @escaping (Result<User, Error>) -> Void // SYNCHRONOUS closure
+        completion: @escaping (Result<User, Error>) -> Void
     ) async {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
@@ -100,13 +107,14 @@ class AuthViewModel: ObservableObject {
             ])
             
             await MainActor.run {
-                self.currentUser = user
+                // Store user in singleton
+                UserSession.shared.setUser(user)
             }
             
-            completion(.success(user))  // Synchronous call
+            completion(.success(user))
             
         } catch {
-            completion(.failure(error))  // Synchronous call
+            completion(.failure(error))
         }
     }
     
@@ -114,6 +122,7 @@ class AuthViewModel: ObservableObject {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
         fetchUserData(uid: result.user.uid)
     }
+    
     func sendPasswordReset(email: String) async throws {
         try await Auth.auth().sendPasswordReset(withEmail: email)
     }
@@ -121,7 +130,8 @@ class AuthViewModel: ObservableObject {
     func logout(onResult: @escaping (Bool) -> Void) {
         do {
             try Auth.auth().signOut()
-            self.currentUser = nil
+            // Clear user from singleton
+            UserSession.shared.clearUser()
             onResult(true)
         } catch let error as NSError {
             print("Error signing out: \(error.localizedDescription)")
@@ -149,7 +159,7 @@ class AuthViewModel: ObservableObject {
                 .document(uid)
                 .setData(data, merge: true)
 
-            // Refresh current user
+            // Refresh current user in singleton
             fetchUserData(uid: uid)
             return true
         } catch {
@@ -249,4 +259,3 @@ extension AuthViewModel {
     }
 
 }
-
