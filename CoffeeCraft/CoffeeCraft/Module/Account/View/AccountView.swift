@@ -72,9 +72,11 @@ struct AccountView: View {
         .navigationDestination(isPresented: $isNavigateToPurchaseCard) {
             EmptyView()
         }
-        .navigationDestination(isPresented: $isNavigateToAddCard) {
-//            AddCardView()
-//                .environmentObject(cardVM)
+        .sheet(isPresented: $isNavigateToAddCard) {
+            NavigationStack {
+                AddCardView()
+                    .environmentObject(cardVM)
+            }
         }
     }
     
