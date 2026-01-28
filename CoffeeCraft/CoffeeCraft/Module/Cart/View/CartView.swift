@@ -53,20 +53,10 @@ struct CartView: View {
                             .font(.title2.bold())
                     }
                     
-                    Button {
+                    CustomCoffeeButton(title: "Checkout", bgColors: [Color.brown], isDisabled: cartManager.items.isEmpty) {
                         showCheckoutConfirm = true
-                    } label: {
-                        Text("Checkout")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(cartManager.items.isEmpty ? Color.gray : Color.brown)
-                            .cornerRadius(14)
-                            .shadow(radius: 3)
                     }
                     .padding(.bottom, 8)
-                    .disabled(cartManager.items.isEmpty)
                 }
                 .padding()
                 .background(.ultraThinMaterial)

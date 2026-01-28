@@ -118,7 +118,7 @@ struct ProductDetailView: View {
                         .bold()
                 }
 
-                Button(action: {
+                CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart", bgColors: [Color.brown]) {
                     if let cartItem = cartItem {
                         cartManager.updateCartItem(
                             item: cartItem,
@@ -134,15 +134,6 @@ struct ProductDetailView: View {
                         )
                     }
                     showAddedAlert = true
-                }) {
-                    Text(cartItem == nil ? "Add to Cart" : "Update Cart")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.brown)
-                        .cornerRadius(12)
-                        .shadow(radius: 3)
                 }
                 .alert("Added to Cart ☕️", isPresented: cartItem == nil ? $showAddedAlert : .constant(false)) {
                     Button("OK", role: .cancel) {}
