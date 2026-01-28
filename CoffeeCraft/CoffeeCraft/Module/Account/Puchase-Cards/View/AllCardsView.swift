@@ -83,23 +83,25 @@ struct AllCardsView: View {
     private func cardRow(card: LoyaltyCard) -> some View {
         VStack(spacing: 0) {
             // Top Status Badges
-            HStack(spacing: 8) {
-                // Active Card Badge
-                if card.isActiveForCurrentUser {
-                    StatusBadgeView(icon: "checkmark.circle.fill", text: "Active", bgColor: .coffeeOliveGreen)
+            if snapshotCards.count > 1 {
+                HStack(spacing: 8) {
+                    // Active Card Badge
+                    if card.isActiveForCurrentUser {
+                        StatusBadgeView(icon: "checkmark.circle.fill", text: "Active", bgColor: .coffeeOliveGreen)
+                    }
+                    
+                    // Ownership Status Badge
+                    if card.isOwnedByCurrentUser {
+                        StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.coffeeLight)
+                    } else {
+                        StatusBadgeView(icon: "person.2.fill",text: "Shared", textColor: .black, bgColor: Color.coffeeCream)
+                    }
+                    
+                    Spacer()
                 }
-                
-                // Ownership Status Badge
-                if card.isOwnedByCurrentUser {
-                    StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.coffeeLight)
-                } else {
-                    StatusBadgeView(icon: "person.2.fill",text: "Shared", textColor: .black, bgColor: Color.coffeeCream)
-                }
-                
-                Spacer()
+                .padding(.horizontal, 8)
+                .padding(.bottom, 8)
             }
-            .padding(.horizontal, 8)
-            .padding(.bottom, 8)
 
             FlippableCardView(card: card,  width: cardWidth)
             
@@ -131,8 +133,7 @@ struct AllCardsView: View {
             }
             .padding(.top, 12)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 4)
+        .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 24)
                 .fill(card.isActiveForCurrentUser ? Color.coffeeBrown.opacity(0.06) : Color.clear)
