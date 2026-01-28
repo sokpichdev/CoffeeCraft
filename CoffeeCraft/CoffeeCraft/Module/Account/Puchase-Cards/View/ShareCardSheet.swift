@@ -86,7 +86,6 @@ struct ShareCardSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
     }
     
     private func shareCard(userID: String) {
