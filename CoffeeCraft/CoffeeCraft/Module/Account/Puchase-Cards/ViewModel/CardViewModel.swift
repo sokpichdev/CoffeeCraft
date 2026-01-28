@@ -12,6 +12,7 @@ import SwiftUI
 class CardViewModel: ObservableObject {
     @Published var cards: [LoyaltyCard] = []
     @Published var activeCardNumber: String = ""
+    @Published var isActiveCardFetched: Bool = false
     @Published var isLoading = false
     @Published var errorMessage: String?
     
@@ -35,6 +36,7 @@ class CardViewModel: ObservableObject {
     }
     
     private func setupListeners() {
+        self.isActiveCardFetched = false
         guard let userId = currentUserId else { return }
         
         // Listen to user document (activeCard + accessibleCards)
@@ -48,6 +50,7 @@ class CardViewModel: ObservableObject {
                 if let activeCardNum = data["activeCard"] as? String {
                     self.activeCardNumber = activeCardNum
                     LoyaltyCard.currentActiveCardNumber = activeCardNum
+                    self.isActiveCardFetched = true
                 } else {
                     self.activeCardNumber = ""
                 }
