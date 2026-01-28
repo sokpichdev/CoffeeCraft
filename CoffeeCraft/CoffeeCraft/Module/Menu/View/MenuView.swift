@@ -47,6 +47,9 @@ struct MenuView: View {
         }
         .onAppear {
             productVM.listenProducts()
+            if let userId = UserSession.shared.userId {
+                cartManager.loadCartFromFirestore(userId: userId)
+            }
             // Set initial section
             if selectedSectionID == nil, let firstSection = productVM.sections.first {
                 selectedSectionID = firstSection.id

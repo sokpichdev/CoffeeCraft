@@ -121,6 +121,7 @@ struct ProductDetailView: View {
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart", bgColors: [Color.brown]) {
                     if let cartItem = cartItem {
                         cartManager.updateCartItem(
+                            userId: UserSession.shared.userId ?? "",
                             item: cartItem,
                             selections: selections,
                             extras: selectedExtras
@@ -128,6 +129,7 @@ struct ProductDetailView: View {
                         onUpdate?()
                     } else {
                         cartManager.addToCart(
+                            userId: UserSession.shared.userId ?? "",
                             product: product,
                             selections: selections,
                             extras: selectedExtras

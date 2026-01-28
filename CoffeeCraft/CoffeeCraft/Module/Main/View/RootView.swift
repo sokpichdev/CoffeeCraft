@@ -11,7 +11,7 @@ struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
     
-    @StateObject var cartManager = CartManager(userId: Auth.auth().currentUser?.uid ?? "guest")
+    @StateObject var cartManager = CartManager()
     @StateObject var favVM = FavoriteViewModel()
     @State private var selectedTab: Tab = .home
     

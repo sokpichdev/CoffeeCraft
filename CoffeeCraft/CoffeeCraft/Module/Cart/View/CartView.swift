@@ -32,7 +32,9 @@ struct CartView: View {
                             .buttonStyle(PlainButtonStyle())
                             .contextMenu {
                                 Button(role: .destructive) {
-                                    cartManager.removeFromCart(item: item)
+                                    if let userId = UserSession.shared.userId {
+                                        cartManager.removeFromCart(userId: userId, item: item)
+                                    }
                                 } label: {
                                     Label("Remove", systemImage: "trash")
                                 }
@@ -90,7 +92,7 @@ struct CartView: View {
             // MARK: - Order Result Alerts
             .alert("Order Placed!", isPresented: $showSuccess) {
                 Button("OK") {
-                    cartManager.clearCart()
+                    cartManager.clearCart(userId: UserSession.shared.userId ?? "")
                     dismiss()
                 }
             } message: {
