@@ -8,6 +8,7 @@ import Foundation
 import FirebaseFirestore
 import SwiftUI
 
+@MainActor
 class CardViewModel: ObservableObject {
     @Published var cards: [LoyaltyCard] = []
     @Published var activeCardNumber: String = ""
