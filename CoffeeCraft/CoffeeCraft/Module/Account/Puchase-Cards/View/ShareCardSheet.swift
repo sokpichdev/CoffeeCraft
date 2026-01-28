@@ -67,26 +67,11 @@ struct ShareCardSheet: View {
                     }
                     
                     // Share Button
-                    Button {
+                    CustomCoffeeButton(title: "Share Card", isDisabled: !authVM.emailValidation.isValid || isSharing) {
                         if authVM.emailValidation.isValid {
                             shareCard(userID: foundUserId)
                         }
-                    } label: {
-                        HStack {
-                            if isSharing {
-                                ProgressView()
-                                    .tint(.white)
-                            } else {
-                                Text("Share Card")
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(!authVM.emailValidation.isValid ? Color.gray : Color.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
-                    .disabled(!authVM.emailValidation.isValid || isSharing)
                 }
                 .padding(.horizontal)
                 

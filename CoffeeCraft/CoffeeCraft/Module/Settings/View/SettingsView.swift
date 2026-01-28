@@ -47,6 +47,14 @@ struct SettingsView: View {
                     RowInSectionView(title: "Write a Review", systemImage: "star.fill")
                 }
                 
+                CustomCoffeeButton(title: "Logout", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.red, Color.red.opacity(0.85)], contentPlacement: .leading) {
+                    authVM.logout() { isSuccess in
+                        if isSuccess {
+                            dismiss()
+                        }
+                    }
+                }
+                .padding(.top, 8)
                 Button {
                     authVM.logout() { isSuccess in
                         if isSuccess {

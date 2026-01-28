@@ -21,30 +21,16 @@ struct AddCardView: View {
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(12)
-                .padding(.horizontal)
+                
 
-            Button {
+            CustomCoffeeButton(title: "Add Card", isDisabled: cardNumber.isEmpty) {
                 Task {
                     await addCard()
                 }
-            } label: {
-                if cardVM.isLoading {
-                    ProgressView()
-                } else {
-                    Text("Add Card")
-                        .fontWeight(.semibold)
-                }
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.brown)
-            .foregroundColor(.white)
-            .cornerRadius(12)
-            .padding(.horizontal)
-            .disabled(cardNumber.isEmpty)
-
             Spacer()
         }
+        .padding(.horizontal)
         .customNavigationBar("Add Card") {
             ToolBarButton.back {
                 dismiss()
