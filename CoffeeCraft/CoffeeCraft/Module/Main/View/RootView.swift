@@ -12,6 +12,7 @@ struct RootView: View {
     @EnvironmentObject var themeManager: ThemeManager
     
     @StateObject var cartManager = CartManager()
+    @StateObject var cardVM = CardViewModel()
     @StateObject var favVM = FavoriteViewModel()
     @State private var selectedTab: Tab = .home
     
@@ -42,6 +43,7 @@ struct RootView: View {
                                 .environmentObject(favVM)
                                 .environmentObject(authVM)
                                 .environmentObject(themeManager)
+                                .environmentObject(cardVM)
                         }
                     case .manager:
                         switch selectedTab {
@@ -59,6 +61,7 @@ struct RootView: View {
                                 .environmentObject(favVM)
                                 .environmentObject(authVM)
                                 .environmentObject(themeManager)
+                                .environmentObject(cardVM)
                         }
                     }
                     TabBarView(selectedTab: $selectedTab)

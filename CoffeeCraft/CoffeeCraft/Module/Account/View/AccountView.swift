@@ -8,7 +8,7 @@ import SwiftUI
 
 struct AccountView: View {
     @StateObject var inboxVM = InboxViewModel()
-    @StateObject var cardVM = CardViewModel()
+    @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
@@ -45,8 +45,10 @@ struct AccountView: View {
             }
         }
         .onAppear {
-            if let userId = authVM.currentUser?.id {
-                cardVM.setUser(userId: userId)
+            if !cardVM.isActiveCardFetched {
+                if let userId = authVM.currentUser?.id {
+                    cardVM.setUser(userId: userId)
+                }
             }
         }
         .navigationDestination(isPresented: $isNavigateToSetting, destination: {
