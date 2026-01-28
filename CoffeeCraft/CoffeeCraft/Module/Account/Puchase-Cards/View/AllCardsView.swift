@@ -79,43 +79,67 @@ struct AllCardsView: View {
         }
     }
     
-    // MARK: - Minimal Card Row
+    // MARK: - Card Row
     private func cardRow(card: LoyaltyCard) -> some View {
-        VStack(spacing: 12) {
-            // Status badge on TOP of card (only if shared)
-            if !card.isOwnedByCurrentUser {
-                Text("Shared")
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.blue)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.trailing, 8)
+        VStack(spacing: 0) {
+            // Top Status Badges
+            HStack(spacing: 8) {
+                // Active Card Badge
+                if card.isActiveForCurrentUser {
+                    StatusBadgeView(icon: "checkmark.circle.fill", text: "Active", bgColor: .coffeeOliveGreen)
+                }
+                
+                // Ownership Status Badge
+                if card.isOwnedByCurrentUser {
+                    StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.coffeeLight)
+                } else {
+                    StatusBadgeView(icon: "person.2.fill",text: "Shared", textColor: .black, bgColor: Color.coffeeCream)
+                }
+                
+                Spacer()
             }
+            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
+
+            FlippableCardView(card: card,  width: cardWidth)
             
-            FlippableCardView(
-                card: card,
-                width: cardWidth
-            )
-            
-            if !card.isActiveForCurrentUser {
-                Button("Activate") {
-                    Task {
-                        try await cardVM.setActiveCard(card)
+            // buttons
+            HStack(spacing: 12) {
+                // Activate Button
+                if !card.isActiveForCurrentUser {
+                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle", bgColors: [Color.coffeeBrown, Color.coffeeLight]){
+                        Task {
+                            try await cardVM.setActiveCard(card)
+                        }
                     }
                 }
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(.ultraThinMaterial, in: Capsule())
+                
+                // Share Button (only for owned cards)
+                if card.isOwnedByCurrentUser {
+                    CustomCoffeeButton(
+                        title: card.isActiveForCurrentUser ? "Share" : "",
+                        buttonImage: "square.and.arrow.up",
+                        foregroundColor: .coffeeCream,
+                        bgColors: [Color(.secondarySystemGroupedBackground)],
+                        horinzontalPadding: card.isActiveForCurrentUser ? 0 : 16,
+                        maxWidth: card.isActiveForCurrentUser ? .infinity : nil
+                    ) {
+                        selectedCardForSharing = card
+                        showingShareSheet = true
+                    }
+                }
             }
+            .padding(.top, 12)
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(card.isActiveForCurrentUser ? Color.coffeeBrown.opacity(0.06) : Color.clear)
+        )
     }
     
-    // MARK: - Minimal Empty State
+    // MARK: - Empty State
     private var emptyStateView: some View {
         VStack(spacing: 24) {
             Image(systemName: "creditcard")
