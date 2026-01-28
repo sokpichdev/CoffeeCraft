@@ -35,9 +35,6 @@ struct AddCardView: View {
             .background(Color.blue.opacity(0.1))
             .cornerRadius(12)
             
-            // Divider
-            Divider()
-            
             // Input Section
             VStack(alignment: .leading, spacing: 12) {
                 Text("Card Number")
@@ -71,6 +68,9 @@ struct AddCardView: View {
             }
             
             Spacer()
+        }
+        .onTapGesture {
+            Utilize.hideKeyboard()
         }
         .padding(.horizontal)
         .customNavigationBar("Add Card") {

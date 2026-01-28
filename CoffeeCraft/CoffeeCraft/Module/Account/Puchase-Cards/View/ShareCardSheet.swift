@@ -77,13 +77,12 @@ struct ShareCardSheet: View {
                 
                 Spacer()
             }
-            .navigationTitle("Share Card")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+            .onTapGesture {
+                Utilize.hideKeyboard()
+            }
+            .customNavigationBar("Share Card") {
+                ToolBarButton(placement: .cancellationAction, buttonType: .text("Cancel")) {
+                    dismiss()
                 }
             }
         }
