@@ -13,6 +13,7 @@ struct MenuView: View {
     // MARK: - ViewModels
     @StateObject private var productVM = ProductViewModel()
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
 
     // MARK: - Scroll Sync State
@@ -64,6 +65,7 @@ struct MenuView: View {
             CartView()
                 .environmentObject(cartManager)
                 .environmentObject(favVM)
+                .environmentObject(cardVM)
         }
         .sheet(isPresented: $showSearchSheet) {
             SearchView(products: productVM.products)

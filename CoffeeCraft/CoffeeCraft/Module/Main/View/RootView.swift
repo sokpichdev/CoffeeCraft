@@ -36,6 +36,7 @@ struct RootView: View {
                             MenuView()
                                 .environmentObject(cartManager)
                                 .environmentObject(favVM)
+                                .environmentObject(cardVM)
                         case .orders:
                             OrdersView()
                         case .profile:
@@ -54,6 +55,7 @@ struct RootView: View {
                             MenuView(isManager: true)
                                 .environmentObject(cartManager)
                                 .environmentObject(favVM)
+                                .environmentObject(cardVM)
                         case .orders:
                             AdminOrdersView()
                         case .profile:
