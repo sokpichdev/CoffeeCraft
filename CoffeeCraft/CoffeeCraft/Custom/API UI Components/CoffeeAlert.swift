@@ -158,3 +158,74 @@ extension View {
         }
     }
 }
+
+//
+//  AlertManager.swift
+//  CoffeeCraft
+//
+//  Created by Sok Pich on 1/29/26.
+//
+
+import SwiftUI
+
+@MainActor
+class AlertManager: ObservableObject {
+    static let shared = AlertManager()
+    
+    @Published var showAlert = false
+    @Published var currentAlert: AlertModel?
+    
+    private init() {}
+    
+    // Show alert with custom message
+    func show(title: String, message: String, type: AlertType) {
+        currentAlert = AlertModel(type: type, title: title, message: message)
+        showAlert = true
+    }
+    
+    // Convenience methods
+    func showSuccess(title: String = "Success", message: String) {
+        show(title: title, message: message, type: .success)
+    }
+    
+    func showError(title: String = "Error", message: String) {
+        show(title: title, message: message, type: .error)
+    }
+    
+    func showWarning(title: String = "Warning", message: String) {
+        show(title: title, message: message, type: .warning)
+    }
+    
+    func dismiss() {
+        showAlert = false
+        currentAlert = nil
+    }
+}
+
+extension View {
+    func withAlertManager() -> some View {
+        ZStack {
+            self
+                .zIndex(0)
+            
+            AlertManagerView()
+                .zIndex(1)
+        }
+    }
+}
+
+// Separate view to observe AlertManager
+struct AlertManagerView: View {
+    @StateObject private var alertManager = AlertManager.shared
+    
+    var body: some View {
+        Group {
+            if alertManager.showAlert, let alert = alertManager.currentAlert {
+                CoffeeAlert(alertModel: alert) {
+                    alertManager.dismiss()
+                }
+                .transition(.opacity)
+            }
+        }
+    }
+}

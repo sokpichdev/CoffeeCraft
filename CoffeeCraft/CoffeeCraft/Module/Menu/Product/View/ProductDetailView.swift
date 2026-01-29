@@ -16,7 +16,6 @@ struct ProductDetailView: View {
     var onUpdate: (() -> Void)? = nil
     
     @State private var selectedExtras: [String]
-    @State private var showAddedAlert = false
     @State private var selections: [String: String] = [:]
     
     // MARK: - Init to set initial selections from cartItem or defaults
@@ -135,7 +134,6 @@ struct ProductDetailView: View {
                             extras: selectedExtras
                         )
                     }
-                    showAddedAlert = true
                 }
             }
             .padding()
@@ -145,7 +143,6 @@ struct ProductDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
-        .alertView(showAlert: $showAddedAlert, alert: cartManager.alert)
         .onAppear {
             Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
         }
@@ -156,7 +153,7 @@ struct ProductDetailView: View {
             Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
         }
         .ignoresSafeArea(edges: .bottom)
-        .customNavigationBar(product.name, hideToolbar: showAddedAlert) {
+        .customNavigationBar(product.name) {
             if cartItem != nil { // sheet
                 ToolBarButton(placement: .topBarLeading, buttonType: .icon("xmark")) {
                     dismiss()

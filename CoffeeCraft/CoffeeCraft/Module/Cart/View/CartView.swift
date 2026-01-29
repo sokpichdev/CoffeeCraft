@@ -110,7 +110,6 @@ struct CartView: View {
             }
         }
         .loaderView(isLoading: orderService.isPlacingOrder)
-        .alertView(showAlert: $showPlaceOrderAlert, alert: orderService.alert)
         .alertView(showAlert: $showAddPointAlert, alert: cardVM.alert)
     }
 }

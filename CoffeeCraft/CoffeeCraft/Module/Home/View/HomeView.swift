@@ -66,7 +66,9 @@ struct HomeView: View {
 
                     HStack(spacing: 20) {
                         PickUpButton(onClick: { selectedTab = .menu })
-                        PickUpButton(title: "Delivery") {}
+                        PickUpButton(title: "Delivery") {
+                            AlertManager.shared.showSuccess(message: "click devilery ☕️")
+                        }
                     }
                     .padding(.horizontal)
 
