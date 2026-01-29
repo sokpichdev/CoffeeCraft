@@ -7,9 +7,7 @@
 import SwiftUI
 
 struct CoffeeAlert: View {
-    let title: String
-    let message: String
-    let type: AlertType
+    var alertModel: AlertModel
     let onDismiss: () -> Void
     
     @State private var scale: CGFloat = 0.8
@@ -45,24 +43,24 @@ struct CoffeeAlert: View {
                 // Animated icon
                 ZStack {
                     Circle()
-                        .fill(type.color.opacity(0.15))
+                        .fill(alertModel.type.color.opacity(0.15))
                         .frame(width: 80, height: 80)
                     
-                    Image(systemName: type.icon)
+                    Image(systemName: alertModel.type.icon)
                         .font(.system(size: 36))
-                        .foregroundColor(type.color)
+                        .foregroundColor(alertModel.type.color)
                         .scaleEffect(iconScale)
                 }
                 .frame(height: 80)
                 
                 // Title
-                Text(title)
+                Text(alertModel.title)
                     .font(.title3)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
                 // Message
-                Text(message)
+                Text(alertModel.message)
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
@@ -77,13 +75,13 @@ struct CoffeeAlert: View {
                         .padding(.vertical, 14)
                         .background(
                             LinearGradient(
-                                colors: [type.color, type.color.opacity(0.8)],
+                                colors: [alertModel.type.color, alertModel.type.color.opacity(0.8)],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
                         .cornerRadius(12)
-                        .shadow(color: type.color.opacity(0.3), radius: 8, y: 4)
+                        .shadow(color: alertModel.type.color.opacity(0.3), radius: 8, y: 4)
                 }
             }
             .padding(28)
@@ -101,7 +99,7 @@ struct CoffeeAlert: View {
             animateAppearance()
             
             // Auto-dismiss for success alerts
-            if type == .success {
+            if alertModel.type == .success {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     dismissAlert()
                 }
@@ -133,13 +131,28 @@ struct CoffeeAlert: View {
     
     private func triggerHaptic() {
         let generator = UINotificationFeedbackGenerator()
-        switch type {
+        switch alertModel.type {
         case .success:
             generator.notificationOccurred(.success)
         case .warning:
             generator.notificationOccurred(.warning)
         case .error:
             generator.notificationOccurred(.error)
+        }
+    }
+}
+
+extension View {
+    func alertView(showAlert: Binding<Bool>, alert: AlertModel) -> some View {
+        ZStack {
+            self
+            
+            if showAlert.wrappedValue {
+                CoffeeAlert(alertModel: alert) {
+                    showAlert.wrappedValue = false
+                }
+                .transition(.opacity)
+            }
         }
     }
 }

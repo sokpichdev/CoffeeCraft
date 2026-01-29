@@ -25,3 +25,10 @@ enum AlertType {
         }
     }
 }
+
+struct AlertModel: Identifiable {
+    let id = UUID()
+    var type: AlertType = .success
+    var title: String = ""
+    var message: String = ""
+}
