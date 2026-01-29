@@ -50,6 +50,27 @@ extension View {
                 toolbar()
             }
     }
+    func customNavigationBar<T: ToolbarContent>(
+            _ title: String,
+            displayMode: NavigationBarItem.TitleDisplayMode = .inline,
+            hideBackBtn: Bool = true,
+            hideToolbar: Bool = false, // Add this parameter
+            @ToolbarContentBuilder toolbar: () -> T
+        ) -> some View {
+            self.navigationTitle(title)
+                .navigationBarTitleDisplayMode(displayMode)
+                .navigationBarBackButtonHidden(hideBackBtn)
+                .toolbar {
+                    if !hideToolbar { // Conditionally show toolbar
+                        toolbar()
+                    }
+                }
+        }
+    func hideNavigationBar(isHide: Bool = true) -> some View {
+        self.navigationBarBackButtonHidden(isHide)
+            .navigationTitle("")
+            .toolbar(isHide ? .hidden : .visible, for: .automatic)
+    }
 }
 
 extension ToolBarButton {

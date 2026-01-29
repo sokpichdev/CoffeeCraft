@@ -12,12 +12,12 @@ struct CartView: View {
     @EnvironmentObject var favVM: FavoriteViewModel
     @State private var editingItem: CartItem? = nil
     @State private var showCheckoutConfirm = false
-    @State private var isPlacingOrder = false
-    @State private var showSuccess = false
-    @State private var showError = false
+    @State private var showPlaceOrderAlert: Bool = false
+    @State private var showAddPointAlert: Bool = false
+    
     @Environment(\.dismiss) private var dismiss
 
-    private let orderService = OrderService()
+    @StateObject var orderService = OrderService()
 
     var body: some View {
         NavigationStack {
@@ -86,47 +86,31 @@ struct CartView: View {
             // MARK: - Checkout Confirmation
             .alert("Confirm Order", isPresented: $showCheckoutConfirm) {
                 Button("Cancel", role: .cancel) {}
-                Button("Yes") { placeOrder() }
+                Button("Yes") {
+                    orderService.placeOrder(
+                        cartItems: cartManager.items,
+                        total: cartManager.total
+                    ) {
+                        Task {
+                            if let activeCard = cardVM.activeCard {
+                                do {
+                                    try await cardVM.addPoints(to: activeCard, amount: 1)
+                                } catch {
+                                    print("Error Adding Point: \(error.localizedDescription)")
+                                }
+                            }
+                        }
+                        cartManager.clearCart(userId: UserSession.shared.userId ?? "")
+                        dismiss()
+                    }
+                }
+                
             } message: {
                 Text("Are you sure you want to place this order? ☕")
             }
-            // MARK: - Order Result Alerts
-            .alert("Order Placed!", isPresented: $showSuccess) {
-                Button("OK") {
-                    cartManager.clearCart(userId: UserSession.shared.userId ?? "")
-                    dismiss()
-                }
-            } message: {
-                Text("Your coffee order has been sent to the barista ☕")
-            }
-            .alert("Something went wrong", isPresented: $showError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Please try again later.")
-            }
         }
-    }
+        .loaderView(isLoading: orderService.isPlacingOrder)
+        .alertView(showAlert: $showPlaceOrderAlert, alert: orderService.alert)
 
-    // MARK: - Place Order
-    private func placeOrder() {
-        Task {
-            isPlacingOrder = true
-            do {
-                try await orderService.placeOrder(cartItems: cartManager.items, total: cartManager.total)
-                isPlacingOrder = false
-                showSuccess = true
-                if let activeCard = cardVM.activeCard {
-                    do {
-                        try await cardVM.addPoints(to: activeCard, amount: 1)
-                    } catch {
-                        print("Error Adding Point: \(error.localizedDescription)")
-                    }
-                }
-            } catch {
-                isPlacingOrder = false
-                showError = true
-                print("Error placing order: \(error.localizedDescription)")
-            }
-        }
     }
 }

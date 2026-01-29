@@ -146,11 +146,13 @@ extension View {
     func alertView(showAlert: Binding<Bool>, alert: AlertModel) -> some View {
         ZStack {
             self
+                .zIndex(0)
             
             if showAlert.wrappedValue {
                 CoffeeAlert(alertModel: alert) {
                     showAlert.wrappedValue = false
                 }
+                .zIndex(1)
                 .transition(.opacity)
             }
         }

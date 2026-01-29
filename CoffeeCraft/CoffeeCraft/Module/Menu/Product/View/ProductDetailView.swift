@@ -137,9 +137,6 @@ struct ProductDetailView: View {
                     }
                     showAddedAlert = true
                 }
-                .alert("Added to Cart ☕️", isPresented: cartItem == nil ? $showAddedAlert : .constant(false)) {
-                    Button("OK", role: .cancel) {}
-                }
             }
             .padding()
             .padding(.bottom, 8)
@@ -148,6 +145,7 @@ struct ProductDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
+        .alertView(showAlert: $showAddedAlert, alert: cartManager.alert)
         .onAppear {
             Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
         }
@@ -158,7 +156,7 @@ struct ProductDetailView: View {
             Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
         }
         .ignoresSafeArea(edges: .bottom)
-        .customNavigationBar(product.name) {
+        .customNavigationBar(product.name, hideToolbar: showAddedAlert) {
             if cartItem != nil { // sheet
                 ToolBarButton(placement: .topBarLeading, buttonType: .icon("xmark")) {
                     dismiss()
