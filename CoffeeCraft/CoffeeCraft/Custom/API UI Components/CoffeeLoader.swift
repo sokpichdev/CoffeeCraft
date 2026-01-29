@@ -42,3 +42,20 @@ struct CoffeeLoader: View {
         }
     }
 }
+
+// MARK: - View Extension
+extension View {
+    func loaderView(isLoading: Bool) -> some View {
+        ZStack {
+            self
+            
+            if isLoading {
+                Rectangle()
+                    .fill(.black.opacity(0.6))
+                    .ignoresSafeArea()
+                
+                CoffeeLoader()
+            }
+        }
+    }
+}
