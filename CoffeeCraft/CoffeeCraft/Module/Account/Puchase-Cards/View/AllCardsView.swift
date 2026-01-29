@@ -12,7 +12,9 @@ struct AllCardsView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var isNavigateToPurchaseCard = false
-    @State private var isNavigateToAddCard = false
+    @State private var isNavigateToAddOtherCard = false
+//    @State private var isNavigateToCreateOwnCard = false
+
     @State private var showingShareSheet = false
     @State private var selectedCardForSharing: LoyaltyCard?
     
@@ -27,7 +29,7 @@ struct AllCardsView: View {
                     ProgressView()
                         .frame(height: 300)
                 } else if snapshotCards.isEmpty {
-                    emptyStateView
+                    ownCardEmptyView
                 } else {
                     // prevents refresh during swipe
                     ForEach(snapshotCards) { card in
@@ -48,7 +50,7 @@ struct AllCardsView: View {
                 isNavigateToPurchaseCard = true
             }
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("plus")) {
-                isNavigateToAddCard = true
+                isNavigateToAddOtherCard = true
             }
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("square.and.arrow.up")) {
                 if let firstOwned = cardVM.cards.first(where: { $0.isOwnedByCurrentUser }) {
@@ -57,7 +59,7 @@ struct AllCardsView: View {
                 }
             }
         }
-        .sheet(isPresented: $isNavigateToAddCard) {
+        .sheet(isPresented: $isNavigateToAddOtherCard) {
             NavigationStack {
                 AddCardView()
                     .environmentObject(cardVM)
@@ -140,26 +142,35 @@ struct AllCardsView: View {
         )
     }
     
-    // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "creditcard")
-                .font(.system(size: 80))
-                .foregroundStyle(.secondary)
-                .opacity(0.5)
-            
-            VStack(spacing: 8) {
-                Text("No Cards")
-                    .font(.largeTitle.weight(.semibold))
-                
-                Button("Add Card") {
-                    isNavigateToAddCard = true
+    private var ownCardEmptyView: some View {
+        Button {
+            if let userId = UserSession.shared.userId, let userName = UserSession.shared.userName {
+                Task {
+                    try await cardVM.createInitialCard(userId: userId, userName: userName)
                 }
-                .font(.headline)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
             }
+//            isNavigateToCreateOwnCard = true
+        } label: {
+            VStack(spacing: 16) {
+                Image(systemName: "creditcard")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.secondary)
+                    .opacity(0.6)
+
+                Text("Create your own card")
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.primary)
+            }
+            .frame(width: cardWidth, height: cardWidth / (16 / 9))
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .strokeBorder(
+                        style: StrokeStyle(lineWidth: 2, dash: [8])
+                    )
+                    .foregroundColor(.coffeeBrown.opacity(0.4))
+            )
+            .contentShape(Rectangle())
         }
-        .frame(maxHeight: .infinity)
+        .buttonStyle(.plain)
     }
 }
