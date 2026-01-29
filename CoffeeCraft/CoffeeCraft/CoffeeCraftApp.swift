@@ -27,6 +27,7 @@ struct CoffeeCraftApp: App {
                     .preferredColorScheme(themeManager.theme.colorScheme)
                     .environmentObject(themeManager)
             }
+            .withAlertManager()
         }
     }
 
