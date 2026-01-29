@@ -16,26 +16,20 @@ struct CoffeeToast: View {
     @State private var offset: CGFloat = 0
     @State private var iconScale: CGFloat = 0
     @State private var iconRotation: Double = 0
-    @State private var checkmarkProgress: CGFloat = 0
     
     var body: some View {
         HStack(spacing: 12) {
             // Animated icon
             ZStack {
                 Circle()
-                    .fill(type.color.opacity(0.2))
+                    .fill(type.color.opacity(1))
                     .frame(width: 32, height: 32)
                 
-                if type == .success {
-                    AnimatedCheckmark(progress: checkmarkProgress, color: type.color)
-                        .frame(width: 16, height: 16)
-                } else {
-                    Image(systemName: type.icon)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(type.color)
-                        .scaleEffect(iconScale)
-                        .rotationEffect(.degrees(iconRotation))
-                }
+                Image(systemName: type.icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .scaleEffect(iconScale)
+                    .rotationEffect(.degrees(iconRotation))
             }
             
             // Message
@@ -51,24 +45,23 @@ struct CoffeeToast: View {
         .background(
             ZStack(alignment: .leading) {
                 // Background
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 0)
                     .fill(.ultraThinMaterial)
                     .shadow(color: .black.opacity(0.1), radius: 12, y: 6)
                 
                 // Progress bar
-                GeometryReader { geo in
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 0)
                         .fill(
                             LinearGradient(
-                                colors: [type.color.opacity(0.3), type.color.opacity(0.1)],
+                                colors: [type.color.opacity(0.5), type.color.opacity(0.25)],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: geo.size.width * progress)
-                }
+                        .frame(width: (UIScreen.main.bounds.width - 32)  * progress)
             }
         )
+        .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(type.color.opacity(0.3), lineWidth: 1)
@@ -100,19 +93,8 @@ struct CoffeeToast: View {
     
     private func animateAppearance() {
         // Icon animations
-        if type == .success {
-            withAnimation(.easeOut(duration: 0.5).delay(0.1)) {
-                checkmarkProgress = 1.0
-            }
-        } else if type == .error {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5).delay(0.1)) {
-                iconScale = 1.0
-                iconRotation = 360
-            }
-        } else {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.6).delay(0.1)) {
-                iconScale = 1.0
-            }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.6).delay(0.1)) {
+            iconScale = 1.0
         }
     }
     
@@ -152,10 +134,6 @@ class ToastManager: ObservableObject {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             toasts.append(toast)
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            self.dismiss(id: toast.id)
-        }
     }
     
     func dismiss(id: UUID) {
@@ -188,6 +166,7 @@ struct ToastModifier: ViewModifier {
                         ) {
                             manager.dismiss(id: toast.id)
                         }
+                        .id(toast.id) // Force unique instance for each toast
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
