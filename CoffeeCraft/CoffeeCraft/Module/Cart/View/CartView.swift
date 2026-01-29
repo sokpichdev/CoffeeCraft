@@ -13,7 +13,6 @@ struct CartView: View {
     @State private var editingItem: CartItem? = nil
     @State private var showCheckoutConfirm = false
     @State private var showPlaceOrderAlert: Bool = false
-    @State private var showAddPointAlert: Bool = false
     
     @Environment(\.dismiss) private var dismiss
 
@@ -96,7 +95,7 @@ struct CartView: View {
                                 do {
                                     try await cardVM.addPoints(to: activeCard, amount: 1)
                                 } catch {
-                                    cardVM.alert = errorAlert(title: "Add Point Failed", message: error.localizedDescription)
+                                    AlertManager.shared.showError(message: error.localizedDescription)
                                 }
                             }
                         }
@@ -110,6 +109,5 @@ struct CartView: View {
             }
         }
         .loaderView(isLoading: orderService.isPlacingOrder)
-        .alertView(showAlert: $showAddPointAlert, alert: cardVM.alert)
     }
 }
