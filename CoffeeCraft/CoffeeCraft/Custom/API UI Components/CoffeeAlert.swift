@@ -15,14 +15,12 @@ struct CoffeeAlert: View {
     @State private var scale: CGFloat = 0.8
     @State private var opacity: Double = 0
     @State private var iconScale: CGFloat = 0
-    @State private var checkmarkProgress: CGFloat = 0
-    @State private var shakeOffset: CGFloat = 0
     
     var body: some View {
         ZStack {
             // Backdrop - tappable to dismiss
             Rectangle()
-                .fill(.ultraThinMaterial)
+                .fill(.black.opacity(0.8))
                 .ignoresSafeArea()
                 .opacity(opacity)
                 .onTapGesture {
@@ -50,21 +48,10 @@ struct CoffeeAlert: View {
                         .fill(type.color.opacity(0.15))
                         .frame(width: 80, height: 80)
                     
-                    if type == .success {
-                        AnimatedCheckmark(progress: checkmarkProgress, color: type.color)
-                            .frame(width: 40, height: 40)
-                    } else if type == .error {
-                        Image(systemName: type.icon)
-                            .font(.system(size: 36))
-                            .foregroundColor(type.color)
-                            .scaleEffect(iconScale)
-                            .offset(x: shakeOffset)
-                    } else {
-                        Image(systemName: type.icon)
-                            .font(.system(size: 36))
-                            .foregroundColor(type.color)
-                            .scaleEffect(iconScale)
-                    }
+                    Image(systemName: type.icon)
+                        .font(.system(size: 36))
+                        .foregroundColor(type.color)
+                        .scaleEffect(iconScale)
                 }
                 .frame(height: 80)
                 
@@ -128,33 +115,8 @@ struct CoffeeAlert: View {
             opacity = 1.0
         }
         
-        // Icon animations
-        if type == .success {
-            withAnimation(.easeOut(duration: 0.6).delay(0.2)) {
-                checkmarkProgress = 1.0
-            }
-        } else if type == .error {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(0.2)) {
-                iconScale = 1.0
-            }
-            
-            // Shake animation for error
-            withAnimation(.default.delay(0.3)) {
-                shakeOffset = 10
-            }
-            withAnimation(.default.delay(0.4)) {
-                shakeOffset = -10
-            }
-            withAnimation(.default.delay(0.5)) {
-                shakeOffset = 5
-            }
-            withAnimation(.default.delay(0.6)) {
-                shakeOffset = 0
-            }
-        } else {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.6).delay(0.2)) {
-                iconScale = 1.0
-            }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(0.2)) {
+            iconScale = 1.0
         }
     }
     
