@@ -49,3 +49,9 @@ extension Color {
     static var coffeeWarmBrown: Color { Color(hex: "#6F4E37") }
     static var coffeeOliveGreen: Color { Color(hex: "#7A8F3A") }
 }
+
+extension Color {
+    static let leafGreen = Color(hex: "#6B8E23") // success
+    static let warningAmber = Color(hex: "#C97C5D") // warning
+    static let errorRed = Color(hex: "#9E3A2F") // error
+}
