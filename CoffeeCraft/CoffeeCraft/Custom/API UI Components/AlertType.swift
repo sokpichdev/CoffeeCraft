@@ -32,3 +32,11 @@ struct AlertModel: Identifiable {
     var title: String = ""
     var message: String = ""
 }
+
+func successAlert(title: String, message: String) -> AlertModel {
+    AlertModel(type: .success, title: title, message: message)
+}
+
+func errorAlert(title: String, message: String) -> AlertModel {
+    AlertModel(type: .error, title: title, message: message)
+}

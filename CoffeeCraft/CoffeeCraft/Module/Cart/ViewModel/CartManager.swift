@@ -10,6 +10,7 @@ import FirebaseFirestore
 // MARK: - Cart Manager
 class CartManager: ObservableObject {
     @Published var items: [CartItem] = []
+    @Published var alert: AlertModel = AlertModel()
     private let db = Firestore.firestore()
 
     func addToCart(userId: String,
@@ -51,15 +52,28 @@ class CartManager: ObservableObject {
     func saveCartToFirestore(userId: String) {
         do {
             let data = try items.map { try Firestore.Encoder().encode($0) }
-            db.collection("carts").document(userId).setData(["items": data]) { error in
-                if let error = error {
-                    print("Error saving cart: \(error.localizedDescription)")
-                } else {
-                    print("Cart saved successfully")
+
+            db.collection("carts").document(userId)
+                .setData(["items": data]) { [weak self] error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            self?.alert = errorAlert(
+                                title: "Cart not saved",
+                                message: error.localizedDescription
+                            )
+                        } else {
+                            self?.alert = successAlert(
+                                title: "Cart Saved",
+                                message: "Your cart was saved successfully ☕️"
+                            )
+                        }
+                    }
                 }
-            }
         } catch {
-            print("Encoding error: \(error.localizedDescription)")
+            alert = errorAlert(
+                title: "Encoding error",
+                message: error.localizedDescription
+            )
         }
     }
 

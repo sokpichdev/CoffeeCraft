@@ -8,37 +8,67 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
-class OrderService {
+@MainActor
+class OrderService: ObservableObject {
     private let db = Firestore.firestore()
-    
-    func placeOrder(cartItems: [CartItem], total: Double) async throws {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            throw NSError(domain: "OrderService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
-        }
-        
-        let orderData: [String: Any] = [
-            "userId": userId,
-            "timestamp": Timestamp(date: Date()),
-            "totalPrice": total,
-            "status": "Pending",
-            "items": cartItems.map { item in
-                var itemDict: [String: Any] = [
-                    "name": item.product.name,
-                    "price": item.totalPrice
+
+    @Published var isPlacingOrder = false
+    @Published var alert: AlertModel = AlertModel()
+
+    func placeOrder(
+        cartItems: [CartItem],
+        total: Double,
+        onSuccess: (() async -> Void)? = nil
+    ) {
+        Task {
+            isPlacingOrder = true
+            
+            do {
+                guard let userId = Auth.auth().currentUser?.uid else {
+                    throw NSError(domain: "OrderService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
+                }
+
+                let orderData: [String: Any] = [
+                    "userId": userId,
+                    "timestamp": Timestamp(date: Date()),
+                    "totalPrice": total,
+                    "status": "Pending",
+                    "items": cartItems.map { item in
+                        var dict: [String: Any] = [
+                            "name": item.product.name,
+                            "price": item.totalPrice
+                        ]
+
+                        if !item.selections.isEmpty {
+                            dict["selections"] = item.selections
+                        }
+                        if !item.extras.isEmpty {
+                            dict["extras"] = item.extras
+                        }
+                        return dict
+                    }
                 ]
+
+                let ref = try await db.collection("orders").addDocument(data: orderData)
+                try await MinimumLoadingTime(2.0).waitIfNeeded() // sleep for 2s
                 
-                if !item.selections.isEmpty {
-                    itemDict["selections"] = item.selections
-                }
-                
-                if !item.extras.isEmpty {
-                    itemDict["extras"] = item.extras
-                }
-                
-                return itemDict
+                alert = AlertModel(
+                    type: .success,
+                    title: "Order placed ☕️",
+                    message: "Your order #\(ref.documentID.prefix(6)) is being prepared."
+                )
+
+                await onSuccess?()
+
+            } catch {
+                alert = AlertModel(
+                    type: .error,
+                    title: "Order failed",
+                    message: error.localizedDescription
+                )
             }
-        ]
-        
-        try await db.collection("orders").addDocument(data: orderData)
+
+            isPlacingOrder = false
+        }
     }
 }
