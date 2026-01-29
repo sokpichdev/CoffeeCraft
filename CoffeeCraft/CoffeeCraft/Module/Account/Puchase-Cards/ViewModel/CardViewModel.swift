@@ -14,8 +14,8 @@ class CardViewModel: ObservableObject {
     @Published var activeCardNumber: String = ""
     @Published var isActiveCardFetched: Bool = false
     @Published var isLoading = false
-    @Published var errorMessage: String?
-    
+    @Published var alert = AlertModel()
+
     private let db = Firestore.firestore()
     private var currentUserId: String?
     private var cardsListener: ListenerRegistration?

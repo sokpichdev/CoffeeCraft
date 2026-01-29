@@ -96,7 +96,7 @@ struct CartView: View {
                                 do {
                                     try await cardVM.addPoints(to: activeCard, amount: 1)
                                 } catch {
-                                    print("Error Adding Point: \(error.localizedDescription)")
+                                    cardVM.alert = errorAlert(title: "Add Point Failed", message: error.localizedDescription)
                                 }
                             }
                         }
@@ -111,6 +111,6 @@ struct CartView: View {
         }
         .loaderView(isLoading: orderService.isPlacingOrder)
         .alertView(showAlert: $showPlaceOrderAlert, alert: orderService.alert)
-
+        .alertView(showAlert: $showAddPointAlert, alert: cardVM.alert)
     }
 }
