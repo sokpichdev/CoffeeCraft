@@ -8,6 +8,7 @@ import SwiftUI
 
 struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @State private var editingItem: CartItem? = nil
     @State private var showCheckoutConfirm = false
@@ -114,6 +115,13 @@ struct CartView: View {
                 try await orderService.placeOrder(cartItems: cartManager.items, total: cartManager.total)
                 isPlacingOrder = false
                 showSuccess = true
+                if let activeCard = cardVM.activeCard {
+                    do {
+                        try await cardVM.addPoints(to: activeCard, amount: 1)
+                    } catch {
+                        print("Error Adding Point: \(error.localizedDescription)")
+                    }
+                }
             } catch {
                 isPlacingOrder = false
                 showError = true
