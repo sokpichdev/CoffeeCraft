@@ -32,7 +32,7 @@ struct CoffeeLoader: View {
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.coffeeLight)
+                .fill(Color.coffeeCream)
                 .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
         )
         .onAppear {
