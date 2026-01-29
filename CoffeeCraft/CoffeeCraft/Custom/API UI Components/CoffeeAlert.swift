@@ -143,27 +143,3 @@ struct CoffeeAlert: View {
         }
     }
 }
-
-struct AnimatedCheckmark: View {
-    let progress: CGFloat
-    let color: Color
-    
-    var body: some View {
-        Canvas { context, size in
-            let path = Path { p in
-                // Draw checkmark path
-                p.move(to: CGPoint(x: size.width * 0.2, y: size.height * 0.5))
-                p.addLine(to: CGPoint(x: size.width * 0.4, y: size.height * 0.7))
-                p.addLine(to: CGPoint(x: size.width * 0.8, y: size.height * 0.25))
-            }
-            
-            let trimmedPath = path.trimmedPath(from: 0, to: progress)
-            
-            context.stroke(
-                trimmedPath,
-                with: .color(color),
-                style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round)
-            )
-        }
-    }
-}
