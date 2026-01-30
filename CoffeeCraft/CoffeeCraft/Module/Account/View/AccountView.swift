@@ -75,7 +75,7 @@ struct AccountView: View {
             EmptyView()
         }
         .sheet(isPresented: $isNavigateToAddCard) {
-            NavigationStack {
+            CustomNavigationStack {
                 AddCardView()
                     .environmentObject(cardVM)
             }

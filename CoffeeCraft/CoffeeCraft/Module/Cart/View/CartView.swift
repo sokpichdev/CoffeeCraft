@@ -19,7 +19,7 @@ struct CartView: View {
     @StateObject var orderService = OrderService()
 
     var body: some View {
-        NavigationStack {
+        CustomNavigationStack {
             ZStack(alignment: .bottom) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 12) {
@@ -56,7 +56,22 @@ struct CartView: View {
                     }
                     
                     CustomCoffeeButton(title: "Checkout", bgColors: [Color.brown], isDisabled: cartManager.items.isEmpty) {
-                        showCheckoutConfirm = true
+                        orderService.placeOrder(
+                            cartItems: cartManager.items,
+                            total: cartManager.total
+                        ) {
+                            Task {
+                                if let activeCard = cardVM.activeCard {
+                                    do {
+                                        try await cardVM.addPoints(to: activeCard, amount: 1)
+                                    } catch {
+                                        AlertManager.shared.showError(message: error.localizedDescription)
+                                    }
+                                }
+                            }
+                            cartManager.clearCart(userId: UserSession.shared.userId ?? "")
+                            dismiss()
+                        }
                     }
                     .padding(.bottom, 8)
                 }
@@ -67,7 +82,7 @@ struct CartView: View {
             }
             .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
-                NavigationStack {
+                CustomNavigationStack {
                     ProductDetailView(
                         product: item.product,
                         cartItem: item,
@@ -86,28 +101,27 @@ struct CartView: View {
             .alert("Confirm Order", isPresented: $showCheckoutConfirm) {
                 Button("Cancel", role: .cancel) {}
                 Button("Yes") {
-                    orderService.placeOrder(
-                        cartItems: cartManager.items,
-                        total: cartManager.total
-                    ) {
-                        Task {
-                            if let activeCard = cardVM.activeCard {
-                                do {
-                                    try await cardVM.addPoints(to: activeCard, amount: 1)
-                                } catch {
-                                    AlertManager.shared.showError(message: error.localizedDescription)
-                                }
-                            }
-                        }
-                        cartManager.clearCart(userId: UserSession.shared.userId ?? "")
-                        dismiss()
-                    }
+//                    orderService.placeOrder(
+//                        cartItems: cartManager.items,
+//                        total: cartManager.total
+//                    ) {
+//                        Task {
+//                            if let activeCard = cardVM.activeCard {
+//                                do {
+//                                    try await cardVM.addPoints(to: activeCard, amount: 1)
+//                                } catch {
+//                                    AlertManager.shared.showError(message: error.localizedDescription)
+//                                }
+//                            }
+//                        }
+//                        cartManager.clearCart(userId: UserSession.shared.userId ?? "")
+//                        dismiss()
+//                    }
                 }
                 
             } message: {
                 Text("Are you sure you want to place this order? ☕")
             }
         }
-        .loaderView(isLoading: orderService.isPlacingOrder)
     }
 }
