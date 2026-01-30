@@ -15,7 +15,7 @@ struct CoffeeLoaderView: View {
             // Filled coffee cup (clipped to show fill level)
             Image(systemName: "cup.and.saucer.fill")
                 .font(.system(size: imageSize))
-                .foregroundColor(.coffeeBrown)
+                .foregroundColor(.coffeeOliveGreen)
                 .mask(
                     VStack {
                         Spacer()
@@ -28,12 +28,13 @@ struct CoffeeLoaderView: View {
             // Cup outline (always visible)
             Image(systemName: "cup.and.saucer")
                 .font(.system(size: imageSize))
-                .foregroundColor(.coffeeDarkBrown.opacity(0.3))
+                .foregroundColor(.coffeeBrown.opacity(0.3))
         }
         .padding(8)
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.coffeeCream)
+            Image(systemName: "cup.and.saucer.fill")
+                .font(.system(size: imageSize * 1.1))
+                .foregroundColor(.coffeeDarkBrown)
                 .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
         )
         .onAppear {
