@@ -1,2 +1,5 @@
+# Xcode user state (safe to ignore)
 *.xcuserstate
-/CoffeeCraft
+
+# macOS junk
+.DS_Store
