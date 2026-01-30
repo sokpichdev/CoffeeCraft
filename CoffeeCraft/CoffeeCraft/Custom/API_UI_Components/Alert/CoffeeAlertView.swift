@@ -41,17 +41,21 @@ struct CoffeeAlertView: View {
                 .frame(height: 80)
                 
                 // Title
-                Text(alertModel.title)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
+                if alertModel.title != "" {
+                    Text(alertModel.title)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                }
                 
                 // Message
-                Text(alertModel.message)
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if alertModel.message != "" {
+                    Text(alertModel.message)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 
                 // Action buttons
                 if alertModel.hasTwoButtons {
@@ -86,69 +90,39 @@ struct CoffeeAlertView: View {
     // MARK: - Button Layouts
     
     private var singleButtonLayout: some View {
-        Button(action: dismissAlert) {
-            Text("OK")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(
-                    LinearGradient(
-                        colors: [alertModel.type.color, alertModel.type.color.opacity(0.8)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .cornerRadius(12)
-                .shadow(color: alertModel.type.color.opacity(0.3), radius: 8, y: 4)
+        CustomCoffeeButton(title: "OK", bgColors: alertModel.type.gradientColors) {
+            dismissAlert()
         }
+        .shadow(color: alertModel.type.color.opacity(0.3), radius: 8, y: 4)
     }
     
     private var twoButtonLayout: some View {
         HStack(spacing: 12) {
             // Secondary button (usually Cancel)
             if let secondaryAction = alertModel.secondaryAction {
-                Button(action: {
+                CustomCoffeeButton(
+                    title: secondaryAction.title,
+                    foregroundColor: secondaryAction.style.foregroundColor,
+                    bgColors: secondaryAction.style.gradientColors
+                ) {
                     secondaryAction.action()
                     if secondaryAction.style == .cancel {
                         dismissAlert()
                     }
-                }) {
-                    Text(secondaryAction.title)
-                        .font(.headline)
-                        .foregroundColor(secondaryAction.style.color)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(secondaryAction.style.color, lineWidth: 2)
-                        )
                 }
+                .shadow(color: secondaryAction.style.color.opacity(0.2), radius: 6, y: 3)
             }
             
             // Primary button (usually Confirm/Delete)
             if let primaryAction = alertModel.primaryAction {
-                Button(action: {
+                CustomCoffeeButton(
+                    title: primaryAction.title,
+                    foregroundColor: primaryAction.style.foregroundColor,
+                    bgColors: primaryAction.style.gradientColors
+                ) {
                     primaryAction.action()
-                }) {
-                    Text(primaryAction.title)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            LinearGradient(
-                                colors: [
-                                    primaryAction.style.color,
-                                    primaryAction.style.color.opacity(0.8)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(12)
-                        .shadow(color: primaryAction.style.color.opacity(0.3), radius: 8, y: 4)
                 }
+                .shadow(color: primaryAction.style.color.opacity(0.3), radius: 8, y: 4)
             }
         }
     }
