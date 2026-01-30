@@ -12,15 +12,13 @@ import FirebaseAuth
 class OrderService: ObservableObject {
     private let db = Firestore.firestore()
 
-    @Published var isPlacingOrder = false
-
     func placeOrder(
         cartItems: [CartItem],
         total: Double,
         onSuccess: (() async -> Void)? = nil
     ) {
         Task {
-            isPlacingOrder = true
+            LoaderManager.shared.showLoading()
             
             do {
                 guard let userId = Auth.auth().currentUser?.uid else {
@@ -51,17 +49,17 @@ class OrderService: ObservableObject {
 
                 let ref = try await db.collection("orders").addDocument(data: orderData)
                 try await MinimumLoadingTime(2.0).waitIfNeeded() // sleep for 2s
+                LoaderManager.shared.hideLoading()
                 AlertManager.shared.showSuccess(title: "Order placed ☕️", message: "Your order #\(ref.documentID.prefix(6)) is being prepared.")
 
                 await onSuccess?()
 
             } catch {
-                DispatchQueue.main.async {
+//                DispatchQueue.main.async {
+                    LoaderManager.shared.hideLoading()
                     AlertManager.shared.showError(title: "Order failed", message: error.localizedDescription)
-                }
+//                }
             }
-
-            isPlacingOrder = false
         }
     }
 }
