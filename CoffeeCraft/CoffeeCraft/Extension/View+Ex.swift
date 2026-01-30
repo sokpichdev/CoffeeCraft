@@ -68,3 +68,29 @@ extension ToolBarButton {
         )
     }
 }
+
+extension View {
+    func withAlertManager() -> some View {
+        ZStack {
+            self
+                .zIndex(0)
+            
+            AlertManagerView()
+                .zIndex(1)
+        }
+    }
+    
+    func withLoaderManager() -> some View {
+        ZStack {
+            self
+                .zIndex(0)
+            
+            LoaderManagerView()
+                .zIndex(1)
+        }
+    }
+    
+    func toastView(manager: ToastManager) -> some View {
+        modifier(ToastModifier(manager: manager))
+    }
+}
