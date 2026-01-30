@@ -21,13 +21,12 @@ struct CoffeeCraftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
+            CustomNavigationStack {
                 RootView()
                     .environmentObject(authVM)
                     .preferredColorScheme(themeManager.theme.colorScheme)
                     .environmentObject(themeManager)
             }
-            .withAlertManager()
         }
     }
 

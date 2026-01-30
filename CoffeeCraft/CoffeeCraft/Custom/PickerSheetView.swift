@@ -13,7 +13,7 @@ struct PickerSheetView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
+        CustomNavigationStack {
             ScrollView {
                 LazyVStack(spacing: 12) {
                     ForEach(options, id: \.self) { option in

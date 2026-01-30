@@ -34,7 +34,7 @@ struct SearchView: View {
     }
     
     var body: some View {
-        NavigationStack {
+        CustomNavigationStack {
             ScrollView {
                 LazyVStack(spacing: 12) {
                     if filteredResults.isEmpty {
