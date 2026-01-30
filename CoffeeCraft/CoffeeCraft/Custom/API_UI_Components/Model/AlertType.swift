@@ -24,10 +24,19 @@ enum AlertType {
         case .error: return .errorRed
         }
     }
+    
+    var gradientColors: [Color] {
+        switch self {
+        case .success: return [Color(red: 0.4, green: 0.7, blue: 0.4), Color(red: 0.35, green: 0.6, blue: 0.35)]
+        case .error: return [Color(red: 0.8, green: 0.3, blue: 0.2), Color(red: 0.7, green: 0.25, blue: 0.15)]
+        case .warning: return [Color(red: 0.9, green: 0.6, blue: 0.3), Color(red: 0.8, green: 0.5, blue: 0.25)]
+        }
+    }
 }
 
 struct AlertAction {
     let title: String
+
     let style: ActionStyle
     let action: () -> Void
     
@@ -38,14 +47,30 @@ struct AlertAction {
         
         var color: Color {
             switch self {
-            case .default: return .blue
-            case .cancel: return .gray
-            case .destructive: return .red
+            case .default: return .coffeeBrown
+            case .cancel: return .coffeeLight
+            case .destructive: return Color(red: 0.8, green: 0.3, blue: 0.2) // Coffee-toned red
+            }
+        }
+        
+        var gradientColors: [Color] {
+            switch self {
+            case .default: return [.coffeeBrown, .coffeeLight]
+            case .cancel: return [.coffeeCream.opacity(0.8), .coffeeCream.opacity(0.6)]
+            case .destructive: return [Color(red: 0.8, green: 0.3, blue: 0.2), Color(red: 0.7, green: 0.25, blue: 0.15)]
+            }
+        }
+        
+        var foregroundColor: Color {
+            switch self {
+            case .default: return .white
+            case .cancel: return .coffeeBrown
+            case .destructive: return .white
             }
         }
     }
     
-    init(title: String, style: ActionStyle = .default, action: @escaping () -> Void = {}) {
+    init(title: String = "", style: ActionStyle = .default, action: @escaping () -> Void = {}) {
         self.title = title
         self.style = style
         self.action = action
@@ -53,24 +78,32 @@ struct AlertAction {
 }
 
 struct AlertModel {
-    let type: AlertType = .success
-    let title: String = ""
-    let message: String = ""
+    let type: AlertType
+    let title: String
+    let message: String
     let primaryAction: AlertAction?
     let secondaryAction: AlertAction?
     
-    // Single button initializer (existing behavior)
-    init(type: AlertType = .success, title: String = "", message: String = "") {
+    // Single button / no-action initializer
+    init(type: AlertType, title: String, message: String) {
+        self.type = type
+        self.title = title
+        self.message = message
         self.primaryAction = nil
         self.secondaryAction = nil
     }
     
-    // Two button initializer
-    init(type: AlertType = .success,
-         title: String = "",
-         message: String = "",
-         primaryAction: AlertAction,
-         secondaryAction: AlertAction) {
+    // Two-button initializer
+    init(
+        type: AlertType,
+        title: String,
+        message: String,
+        primaryAction: AlertAction,
+        secondaryAction: AlertAction
+    ) {
+        self.type = type
+        self.title = title
+        self.message = message
         self.primaryAction = primaryAction
         self.secondaryAction = secondaryAction
     }
