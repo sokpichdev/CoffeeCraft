@@ -15,36 +15,33 @@ struct CoffeeLoaderView: View {
     var body: some View {
         ZStack {
             // Filled coffee cup (clipped to show fill level with wave)
-            ZStack {
-                Image("custom.cofee.fill")
-                    .foregroundColor(.coffeeOliveGreen)
-                Image("custom.saucer.fill")
-                    .foregroundColor(.coffeeCream)
-                Image("custom.cup.fill")
-                    .foregroundColor(.coffeeDarkBrown)
-                
-            }
-            .font(.system(size: imageSize))
-            .mask(
-                VStack {
-                    Spacer()
-                    WaveShape(offset: waveOffset, percent: fillLevel)
-                        .fill(Color.black)
-                        .frame(height: imageSize * fillLevel)
-                }
-                    .frame(height: imageSize)
-            )
-            
-            // Cup outline (always visible)
-            ZStack {
-                Image("custom.cup")
-                    .foregroundColor(.coffeeDarkBrown.opacity(0.5))
-                Image("custom.saucer.fill")
-                    .foregroundColor(.coffeeWarmBrown)
-            }
-                .font(.system(size: imageSize))
+            Image("custom.cofee.fill")
+                .foregroundColor(.coffeeOliveGreen)
+            Image("custom.saucer.fill")
+                .foregroundColor(.coffeeBrown)
+            Image("custom.cup.fill")
+                .foregroundColor(.coffeeDarkBrown)
         }
+        .font(.system(size: imageSize))
+        .mask(
+            VStack {
+                Spacer()
+                WaveShape(offset: waveOffset, percent: fillLevel)
+                    .fill(Color.black)
+                    .frame(height: imageSize * fillLevel)
+            }
+                .frame(height: imageSize)
+        )
         .padding(8)
+        .background(
+            ZStack {
+                // Cup outline (always visible)
+                Image("custom.cup")
+                Image("custom.saucer.fill")
+            }
+                .foregroundColor(.coffeeDarkBrown.opacity(0.5))
+                .font(.system(size: imageSize))
+        )
         .onAppear {
             withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
                 fillLevel = 1.2
