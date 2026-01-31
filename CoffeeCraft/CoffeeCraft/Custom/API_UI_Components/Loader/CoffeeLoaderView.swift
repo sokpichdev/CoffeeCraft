@@ -15,31 +15,36 @@ struct CoffeeLoaderView: View {
     var body: some View {
         ZStack {
             // Filled coffee cup (clipped to show fill level with wave)
-            Image(systemName: "cup.and.saucer.fill")
-                .font(.system(size: imageSize))
-                .foregroundColor(.coffeeOliveGreen)
-                .mask(
-                    VStack {
-                        Spacer()
-                        WaveShape(offset: waveOffset, percent: fillLevel)
-                            .fill(Color.black)
-                            .frame(height: imageSize * fillLevel)
-                    }
+            ZStack {
+                Image("custom.cofee.fill")
+                    .foregroundColor(.coffeeOliveGreen)
+                Image("custom.saucer.fill")
+                    .foregroundColor(.coffeeCream)
+                Image("custom.cup.fill")
+                    .foregroundColor(.coffeeDarkBrown)
+                
+            }
+            .font(.system(size: imageSize))
+            .mask(
+                VStack {
+                    Spacer()
+                    WaveShape(offset: waveOffset, percent: fillLevel)
+                        .fill(Color.black)
+                        .frame(height: imageSize * fillLevel)
+                }
                     .frame(height: imageSize)
-                )
+            )
             
             // Cup outline (always visible)
-            Image(systemName: "cup.and.saucer")
+            ZStack {
+                Image("custom.cup")
+                    .foregroundColor(.coffeeDarkBrown.opacity(0.5))
+                Image("custom.saucer.fill")
+                    .foregroundColor(.coffeeWarmBrown)
+            }
                 .font(.system(size: imageSize))
-                .foregroundColor(.coffeeDarkBrown.opacity(0.3))
         }
         .padding(8)
-        .background(
-            Image(systemName: "cup.and.saucer.fill")
-                .font(.system(size: imageSize * 1.1))
-                .foregroundColor(.coffeeDarkBrown)
-                .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
-        )
         .onAppear {
             withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
                 fillLevel = 1.2
@@ -50,7 +55,6 @@ struct CoffeeLoaderView: View {
         }
     }
 }
-
 struct WaveShape: Shape {
     var offset: CGFloat
     var percent: CGFloat
