@@ -18,9 +18,7 @@ struct RootView: View {
     
     var body: some View {
         Group {
-            if authVM.isLoading {
-                ProgressView("Loading...")
-            } else if authVM.currentUser == nil {
+            if authVM.currentUser == nil {
                 AuthView()
             } else {
                 VStack(spacing: 0) {

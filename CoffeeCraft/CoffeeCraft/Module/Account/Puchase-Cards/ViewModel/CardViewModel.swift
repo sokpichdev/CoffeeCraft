@@ -75,7 +75,8 @@ class CardViewModel: ObservableObject {
     // Fetch all cards from accessibleCards array
     private func fetchAccessibleCards(_ cardNumbers: [String]) async {
         var fetchedCards: [LoyaltyCard] = []
-        
+        var failedCardNumbers: [String] = []
+
         for cardNumber in cardNumbers {
             do {
                 let cardDoc = try await db.collection("loyalty_cards")
@@ -87,6 +88,7 @@ class CardViewModel: ObservableObject {
                 }
             } catch {
                 print("Failed to fetch card \(cardNumber): \(error)")
+                failedCardNumbers.append(cardNumber)
             }
         }
         
@@ -94,6 +96,9 @@ class CardViewModel: ObservableObject {
         await MainActor.run {
             self.cards = finalCards
             self.cards.sort { $0.createdAt > $1.createdAt }
+        }
+        if failedCardNumbers.count > 0 {
+            AlertManager.shared.showError(message: "Failed to fetch cards: \(failedCardNumbers.joined(separator: ", "))")
         }
     }
     

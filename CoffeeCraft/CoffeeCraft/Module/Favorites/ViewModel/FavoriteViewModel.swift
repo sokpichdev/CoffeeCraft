@@ -45,29 +45,42 @@ class FavoriteViewModel: ObservableObject {
     // MARK: - Toggle favorite for a product
     func toggleFavorite(product: Product, selections: [String: String], selectedExtras: [String]) async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-        let customizations = currentCustomizationForFavorite(selections: selections, selectedExtras: selectedExtras)
-        let hash = buildCustomizationHash(customizations)
+        
+        do {
+            let customizations = currentCustomizationForFavorite(
+                selections: selections,
+                selectedExtras: selectedExtras
+            )
+            let hash = buildCustomizationHash(customizations)
 
-        let ref = db.collection("users").document(userId).collection("favorites")
-        let snapshot = try? await ref
-            .whereField("productId", isEqualTo: product.id)
-            .whereField("customizationHash", isEqualTo: hash)
-            .getDocuments()
+            let ref = db
+                .collection("users")
+                .document(userId)
+                .collection("favorites")
 
-        if let doc = snapshot?.documents.first {
-            try? await doc.reference.delete()
-            isFavorite = false
-        } else {
-            try? await ref.addDocument(data: [
-                "productId": product.id,
-                "productName": product.name,
-                "imageURL": product.imageURL,
-                "basePrice": product.price,
-                "customizations": customizations,
-                "customizationHash": hash,
-                "createdAt": Date()
-            ])
-            isFavorite = true
+            let snapshot = try await ref
+                .whereField("productId", isEqualTo: product.id)
+                .whereField("customizationHash", isEqualTo: hash)
+                .getDocuments()
+
+            if let doc = snapshot.documents.first {
+                try await doc.reference.delete()
+                isFavorite = false
+            } else {
+                try await ref.addDocument(data: [
+                    "productId": product.id,
+                    "productName": product.name,
+                    "imageURL": product.imageURL,
+                    "basePrice": product.price,
+                    "customizations": customizations,
+                    "customizationHash": hash,
+                    "createdAt": Date()
+                ])
+                isFavorite = true
+            }
+        } catch {
+            print("❌ toggleFavorite failed:", error)
+            AlertManager.shared.showError(title: "Toggle Favorite Faild", message: error.localizedDescription)
         }
     }
 
@@ -103,6 +116,7 @@ class FavoriteViewModel: ObservableObject {
                 )
             }
         } catch {
+            AlertManager.shared.showError(title: "Failed to load favorites", message: error.localizedDescription)
             print("Failed to load favorites:", error)
         }
     }

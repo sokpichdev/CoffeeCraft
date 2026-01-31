@@ -38,53 +38,64 @@ class AuthViewModel: ObservableObject {
     }
 
     func checkUser() {
-        if let user = Auth.auth().currentUser {
-            fetchUserData(uid: user.uid)
-        } else {
-            isLoading = false
-        }
-    }
+        isLoading = true
 
-    func fetchUserData(uid: String) {
-        db.collection("users").document(uid).getDocument { snapshot, error in
-            DispatchQueue.main.async {
-                guard let data = snapshot?.data() else {
-                    self.isLoading = false
-                    return
-                }
-                
-                let name = data["name"] as? String ?? ""
-                let email = data["email"] as? String ?? ""
-                let roleString = data["role"] as? String ?? "customer"
-                let role = UserRole(rawValue: roleString) ?? .customer
-                
-                let phoneNumber = data["phoneNumber"] as? String
-                let gender = data["gender"] as? String
-                let city = data["city"] as? String
-                
-                // Convert Firestore Timestamp to Swift Date
-                var dateOfBirth: Date? = nil
-                if let dobTimestamp = data["dateOfBirth"] as? Timestamp {
-                    dateOfBirth = dobTimestamp.dateValue()
-                }
-                
-                let user = User(
-                    id: uid,
-                    name: name,
-                    email: email,
-                    role: role,
-                    phoneNumber: phoneNumber,
-                    gender: gender,
-                    dateOfBirth: dateOfBirth,
-                    city: city
+        guard let user = Auth.auth().currentUser else {
+            isLoading = false
+            return
+        }
+
+        Task {
+            do {
+                try await fetchUserData(uid: user.uid)
+                isLoading = false
+            } catch {
+                isLoading = false
+                UserSession.shared.clearUser()
+                AlertManager.shared.showError(
+                    title: "Session Error",
+                    message: "Failed to load user data"
                 )
-                
-                // Store user in singleton
-                UserSession.shared.setUser(user)
-                
-                self.isLoading = false
             }
         }
+    }
+    
+    func fetchUserData(uid: String) async throws {
+        let snapshot = try await db
+            .collection("users")
+            .document(uid)
+            .getDocument()
+
+        guard let data = snapshot.data() else {
+            throw NSError(domain: "UserDataError", code: 404)
+        }
+
+        let name = data["name"] as? String ?? ""
+        let email = data["email"] as? String ?? ""
+        let roleString = data["role"] as? String ?? "customer"
+        let role = UserRole(rawValue: roleString) ?? .customer
+
+        let phoneNumber = data["phoneNumber"] as? String
+        let gender = data["gender"] as? String
+        let city = data["city"] as? String
+
+        var dateOfBirth: Date?
+        if let dobTimestamp = data["dateOfBirth"] as? Timestamp {
+            dateOfBirth = dobTimestamp.dateValue()
+        }
+
+        let user = User(
+            id: uid,
+            name: name,
+            email: email,
+            role: role,
+            phoneNumber: phoneNumber,
+            gender: gender,
+            dateOfBirth: dateOfBirth,
+            city: city
+        )
+
+        UserSession.shared.setUser(user)
     }
 
     func signUp(
@@ -118,10 +129,32 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func login(email: String, password: String) async throws {
-        let result = try await Auth.auth().signIn(withEmail: email, password: password)
-        fetchUserData(uid: result.user.uid)
+    func login(email: String, password: String) async {
+        do {
+            isLoading = true
+            LoaderManager.shared.showLoading()
+
+            let result = try await Auth.auth()
+                .signIn(withEmail: email, password: password)
+
+            try await fetchUserData(uid: result.user.uid)
+            try await MinimumLoadingTime(2).waitIfNeeded()
+            
+            LoaderManager.shared.hideLoading()
+            isLoading = false
+
+            AlertManager.shared.showSuccess(message: "Logged in successfully")
+        } catch {
+            LoaderManager.shared.hideLoading()
+            isLoading = false
+
+            AlertManager.shared.showError(
+                title: "Login Error",
+                message: error.localizedDescription
+            )
+        }
     }
+
     
     func sendPasswordReset(email: String) async throws {
         try await Auth.auth().sendPasswordReset(withEmail: email)
@@ -134,36 +167,49 @@ class AuthViewModel: ObservableObject {
             UserSession.shared.clearUser()
             onResult(true)
         } catch let error as NSError {
-            print("Error signing out: \(error.localizedDescription)")
+            AlertManager.shared.showError(title: "Error signing out", message: error.localizedDescription)
             onResult(false)
         }
     }
     
     func updateProfile(user: User) async -> Bool {
-        guard let uid = Auth.auth().currentUser?.uid else { return false }
-
-        var data: [String: Any] = [
-            "name": user.name,
-            "email": user.email
-        ]
-
-        if let phone = user.phoneNumber { data["phoneNumber"] = phone }
-        if let gender = user.gender { data["gender"] = gender }
-        if let dob = user.dateOfBirth {
-            data["dateOfBirth"] = Timestamp(date: dob)
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return false
         }
-        if let city = user.city { data["city"] = city }
 
         do {
-            try await db.collection("users")
+            LoaderManager.shared.showLoading()
+
+            var data: [String: Any] = [
+                "name": user.name,
+                "email": user.email
+            ]
+
+            if let phone = user.phoneNumber { data["phoneNumber"] = phone }
+            if let gender = user.gender { data["gender"] = gender }
+            if let dob = user.dateOfBirth {
+                data["dateOfBirth"] = Timestamp(date: dob)
+            }
+            if let city = user.city { data["city"] = city }
+
+            try await db
+                .collection("users")
                 .document(uid)
                 .setData(data, merge: true)
 
-            // Refresh current user in singleton
-            fetchUserData(uid: uid)
+            // ✅ Ensure local user is updated
+            try await fetchUserData(uid: uid)
+
+            LoaderManager.shared.hideLoading()
+            AlertManager.shared.showSuccess(message: "Profile updated successfully")
+
             return true
         } catch {
-            print("Update profile failed:", error.localizedDescription)
+            LoaderManager.shared.hideLoading()
+            AlertManager.shared.showError(
+                title: "Update Failed",
+                message: error.localizedDescription
+            )
             return false
         }
     }
