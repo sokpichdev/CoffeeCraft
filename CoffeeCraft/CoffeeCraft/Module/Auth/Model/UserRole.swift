@@ -11,7 +11,7 @@ enum UserRole: String, Codable {
     case manager
 }
 
-struct User: Identifiable, Codable {
+struct User: Identifiable, Codable, Equatable {
     var id: String
     var name: String
     var email: String

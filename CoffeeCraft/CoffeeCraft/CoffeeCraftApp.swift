@@ -10,6 +10,7 @@ import Firebase
 
 @main
 struct CoffeeCraftApp: App {
+    @StateObject private var session = UserSession.shared
     @StateObject var authVM = AuthViewModel()
     @StateObject private var themeManager = ThemeManager()
 
@@ -23,6 +24,7 @@ struct CoffeeCraftApp: App {
         WindowGroup {
             CustomNavigationStack {
                 RootView()
+                    .environmentObject(session)
                     .environmentObject(authVM)
                     .preferredColorScheme(themeManager.theme.colorScheme)
                     .environmentObject(themeManager)
