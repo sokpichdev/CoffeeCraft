@@ -48,43 +48,17 @@ struct SettingsView: View {
                 }
                 
                 CustomCoffeeButton(title: "Logout", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.red, Color.red.opacity(0.85)], contentPlacement: .leading) {
-                    authVM.logout() { isSuccess in
-                        if isSuccess {
-                            dismiss()
+                    AlertManager.shared.showDestructive(
+                        title: "Log Out?",
+                        message: "Are you sure you want to log out?",
+                        destructiveTitle: "Log Out"
+                    ) {
+                        authVM.logout { isSuccess in
+                            if isSuccess {
+                                dismiss()
+                            }
                         }
                     }
-                }
-                .padding(.top, 8)
-                Button {
-                    authVM.logout() { isSuccess in
-                        if isSuccess {
-                            dismiss()
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: "rectangle.portrait.and.arrow.right.fill")
-                            .font(.system(size: 18))
-                        
-                        Text("Logout")
-                            .font(.system(size: 16, weight: .semibold))
-                        
-                        Spacer()
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.red, Color.red.opacity(0.85)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .shadow(color: Color.red.opacity(0.4), radius: 8, y: 4)
-                    )
                 }
                 .padding(.top, 8)
                 

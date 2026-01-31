@@ -54,22 +54,12 @@ struct LoginView: View {
             Button {
                 if authVM.validateLoginForm() {
                     Task {
-                        authVM.isLoading = true
-                        do {
-                            try await authVM.login(email: authVM.email, password: authVM.password)
-                        } catch {
-                            print("Login Error: \(error.localizedDescription)")
-                        }
-                        authVM.isLoading = false
+                        await authVM.login(email: authVM.email, password: authVM.password)
                     }
                 }
             } label: {
                 HStack {
-                    if authVM.isLoading {
-                        ProgressView().tint(.white)
-                    } else {
-                        Text("Login").fontWeight(.semibold)
-                    }
+                    Text("Login").fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
