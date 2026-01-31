@@ -12,6 +12,8 @@ struct AccountView: View {
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
+    
+    @EnvironmentObject var userSession: UserSession
     // navigate
     @State var isNavigateToSetting: Bool = false
     @State var isNavigateToInbox: Bool = false
@@ -28,7 +30,7 @@ struct AccountView: View {
                 personalSection
                 shortcutsSection
                 contactsSection
-//                Button("Seed Database") {
+//                Button("Seed Database") {s
 //                    Task {
 //                        await CustomizationSeeder.seedCustomizations()
 //                        print("✅ Database seeded successfully!")
@@ -45,10 +47,16 @@ struct AccountView: View {
             }
         }
         .onAppear {
-            if !cardVM.isActiveCardFetched {
-                if let userId = authVM.currentUser?.id {
-                    cardVM.setUser(userId: userId)
-                }
+            if let userId = UserSession.shared.userId {
+                // Always fetch on appear if user exists
+                cardVM.setUser(userId: userId)
+            }
+        }
+        .onChange(of: UserSession.shared.currentUser) { oldValue, newValue in
+            if let userId = newValue?.id {
+                // Reset and fetch when user changes (login/logout)
+                cardVM.isActiveCardFetched = false
+                cardVM.setUser(userId: userId)
             }
         }
         .navigationDestination(isPresented: $isNavigateToSetting, destination: {
@@ -105,7 +113,7 @@ struct AccountView: View {
             .shadow(color: Color.brown.opacity(0.3), radius: 8, y: 4)
             
             VStack(spacing: 6) {
-                Text(authVM.currentUser?.name ?? "User")
+                Text(UserSession.shared.userName ?? "")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)

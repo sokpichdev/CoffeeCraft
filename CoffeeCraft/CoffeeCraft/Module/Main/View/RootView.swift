@@ -8,6 +8,7 @@ import SwiftUI
 import FirebaseAuth
 
 struct RootView: View {
+    @EnvironmentObject var session: UserSession
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
     
@@ -18,13 +19,15 @@ struct RootView: View {
     
     var body: some View {
         Group {
-            if authVM.currentUser == nil {
+            if UserSession.shared.currentUser == nil {
                 AuthView()
+            } else if authVM.isLoading {
+                CoffeeLoaderView()
             } else {
                 VStack(spacing: 0) {
                     // MARK: - Main Content
                     // Show the selected tab's root view
-                    switch authVM.currentUser!.role {
+                    switch UserSession.shared.currentUser?.role {
                     case .customer:
                         switch selectedTab {
                         case .home:
@@ -63,6 +66,8 @@ struct RootView: View {
                                 .environmentObject(themeManager)
                                 .environmentObject(cardVM)
                         }
+                    case .none:
+                        AuthView()
                     }
                     TabBarView(selectedTab: $selectedTab)
                 }

@@ -60,42 +60,65 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func fetchUserData(uid: String) async throws {
-        let snapshot = try await db
-            .collection("users")
-            .document(uid)
-            .getDocument()
-
-        guard let data = snapshot.data() else {
-            throw NSError(domain: "UserDataError", code: 404)
+    func fetchUserData(uid: String, showLoader: Bool = false) async throws {
+        if showLoader {
+            LoaderManager.shared.showLoading()
         }
+        
+        do {
+            let snapshot = try await db
+                .collection("users")
+                .document(uid)
+                .getDocument()
 
-        let name = data["name"] as? String ?? ""
-        let email = data["email"] as? String ?? ""
-        let roleString = data["role"] as? String ?? "customer"
-        let role = UserRole(rawValue: roleString) ?? .customer
+            guard let data = snapshot.data() else {
+                if showLoader {
+                    LoaderManager.shared.hideLoading()
+                }
+                throw NSError(domain: "UserDataError", code: 404, userInfo: [NSLocalizedDescriptionKey: "User data not found"])
+            }
 
-        let phoneNumber = data["phoneNumber"] as? String
-        let gender = data["gender"] as? String
-        let city = data["city"] as? String
+            let name = data["name"] as? String ?? ""
+            let email = data["email"] as? String ?? ""
+            let roleString = data["role"] as? String ?? "customer"
+            let role = UserRole(rawValue: roleString) ?? .customer
 
-        var dateOfBirth: Date?
-        if let dobTimestamp = data["dateOfBirth"] as? Timestamp {
-            dateOfBirth = dobTimestamp.dateValue()
+            let phoneNumber = data["phoneNumber"] as? String
+            let gender = data["gender"] as? String
+            let city = data["city"] as? String
+
+            var dateOfBirth: Date?
+            if let dobTimestamp = data["dateOfBirth"] as? Timestamp {
+                dateOfBirth = dobTimestamp.dateValue()
+            }
+
+            let user = User(
+                id: uid,
+                name: name,
+                email: email,
+                role: role,
+                phoneNumber: phoneNumber,
+                gender: gender,
+                dateOfBirth: dateOfBirth,
+                city: city
+            )
+
+            UserSession.shared.setUser(user)
+            
+            if showLoader {
+                LoaderManager.shared.hideLoading()
+                AlertManager.shared.showSuccess(message: "User data loaded successfully")
+            }
+        } catch {
+            if showLoader {
+                LoaderManager.shared.hideLoading()
+                AlertManager.shared.showError(
+                    title: "Failed to Load User Data",
+                    message: error.localizedDescription
+                )
+            }
+            throw error
         }
-
-        let user = User(
-            id: uid,
-            name: name,
-            email: email,
-            role: role,
-            phoneNumber: phoneNumber,
-            gender: gender,
-            dateOfBirth: dateOfBirth,
-            city: city
-        )
-
-        UserSession.shared.setUser(user)
     }
 
     func signUp(

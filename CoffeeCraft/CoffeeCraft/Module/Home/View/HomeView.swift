@@ -59,7 +59,7 @@ struct HomeView: View {
                 
                 VStack(spacing: 12) {
 
-                    Text("Good Morning, \(authVM.currentUser?.name ?? "User")! ☀️")
+                    Text("Good Morning, \(UserSession.shared.userName ?? "User")! ☀️")
                         .font(.title2.bold())
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
