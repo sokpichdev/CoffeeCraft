@@ -12,7 +12,7 @@ class ProductViewModel: ObservableObject {
     @Published var products: [Product] = []
     @Published var sections: [SectionData] = []
     @Published var isLoading = false
-    @Published var errorMessage: String?
+//    @Published var errorMessage: String?
 
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
@@ -24,34 +24,39 @@ class ProductViewModel: ObservableObject {
     // MARK: - Fetch Once
     func fetchProducts() async {
         isLoading = true
-        errorMessage = nil
+        LoaderManager.shared.showLoading()
         do {
             let snapshot = try await db.collection("products").getDocuments()
             products = snapshot.documents.map { doc in
                 parseProduct(doc: doc)
             }
             computeSections()
+            LoaderManager.shared.hideLoading()
         } catch {
-            errorMessage = error.localizedDescription
+            LoaderManager.shared.hideLoading()
+            AlertManager.shared.showError(message: error.localizedDescription)
         }
         isLoading = false
     }
 
     // MARK: - Listen for real-time updates
     func listenProducts() {
+        LoaderManager.shared.showLoading()
         listener?.remove()
         listener = db.collection("products")
             .order(by: "category")
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 if let error = error {
-                    self.errorMessage = error.localizedDescription
+                    LoaderManager.shared.hideLoading()
+                    AlertManager.shared.showError(message: error.localizedDescription)
                     return
                 }
                 guard let docs = snapshot?.documents else { return }
 
                 self.products = docs.compactMap { self.parseProduct(doc: $0) }
                 self.computeSections()
+                LoaderManager.shared.hideLoading()
             }
     }
 
