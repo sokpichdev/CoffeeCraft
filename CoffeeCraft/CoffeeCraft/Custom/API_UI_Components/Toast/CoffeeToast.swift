@@ -61,9 +61,9 @@ struct CoffeeToast: View {
                         .frame(width: (UIScreen.main.bounds.width - 32)  * progress)
             }
         )
-        .cornerRadius(16)
+        .cornerRadius(20)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(type.color.opacity(0.3), lineWidth: 1)
         )
         .offset(x: offset)

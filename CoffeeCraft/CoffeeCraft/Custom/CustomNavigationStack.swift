@@ -19,6 +19,8 @@ struct CustomNavigationStack<Content: View>: View {
         }
         .withAlertManager()
         .withLoaderManager()
-        .withToastManager()
+        .withToastManagers()
+        .withLowerToastManager()
+        .withUpperToastManager()
     }
 }
