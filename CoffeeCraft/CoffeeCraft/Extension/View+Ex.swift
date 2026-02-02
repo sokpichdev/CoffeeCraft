@@ -89,8 +89,13 @@ extension View {
                 .zIndex(1)
         }
     }
-    
-    func toastView(manager: ToastManager) -> some View {
-        modifier(ToastModifier(manager: manager))
+    func withToastManager() -> some View {
+        ZStack(alignment: .bottom) {
+            self
+                .zIndex(0)
+            
+            ToastManagerView()
+                .zIndex(1)
+        }
     }
 }
