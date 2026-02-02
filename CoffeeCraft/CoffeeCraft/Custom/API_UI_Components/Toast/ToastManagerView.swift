@@ -25,7 +25,7 @@ struct ToastManagerView: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(position == .top ? .top : .bottom, position == .bottom ? 70 : 24)
+        .padding(position == .top ? .top : .bottom, position == .bottom ? 50 : 30)
     }
     
     private var filteredToasts: [ToastItem] {
