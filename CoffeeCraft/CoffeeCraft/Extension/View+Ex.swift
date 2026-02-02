@@ -89,13 +89,42 @@ extension View {
                 .zIndex(1)
         }
     }
-    func withToastManager() -> some View {
+    
+    func withUpperToastManager() -> some View {
+        ZStack(alignment: .top) {
+            self
+                .zIndex(0)
+            
+            ToastManagerView(position: .top)
+                .zIndex(1)
+        }
+    }
+    
+    func withLowerToastManager() -> some View {
         ZStack(alignment: .bottom) {
             self
                 .zIndex(0)
             
-            ToastManagerView()
+            ToastManagerView(position: .bottom)
                 .zIndex(1)
+        }
+    }
+    
+    // Convenience method to add both toast managers at once
+    func withToastManagers() -> some View {
+        ZStack {
+            self
+                .zIndex(0)
+            
+            VStack {
+                ToastManagerView(position: .top)
+                    .zIndex(2)
+                
+                Spacer()
+                
+                ToastManagerView(position: .bottom)
+                    .zIndex(1)
+            }
         }
     }
 }

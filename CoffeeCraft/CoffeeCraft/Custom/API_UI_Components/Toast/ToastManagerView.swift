@@ -8,10 +8,11 @@ import SwiftUI
 
 struct ToastManagerView: View {
     @ObservedObject private var toastManager = ToastManager.shared
+    let position: ToastPosition
     
     var body: some View {
         VStack(spacing: 12) {
-            ForEach(toastManager.toasts) { toast in
+            ForEach(filteredToasts) { toast in
                 CoffeeToast(
                     message: toast.message,
                     type: toast.type,
@@ -19,11 +20,15 @@ struct ToastManagerView: View {
                 ) {
                     toastManager.dismiss(id: toast.id)
                 }
-                .id(toast.id) // Force unique instance for each toast
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .id(toast.id)
+                .transition(.move(edge: position == .top ? .top : .bottom).combined(with: .opacity))
             }
         }
         .padding(.horizontal, 16)
-        .padding(.bottom, 24)
+        .padding(position == .top ? .top : .bottom, position == .bottom ? 70 : 24)
+    }
+    
+    private var filteredToasts: [ToastItem] {
+        toastManager.toasts.filter { $0.position == position }
     }
 }
