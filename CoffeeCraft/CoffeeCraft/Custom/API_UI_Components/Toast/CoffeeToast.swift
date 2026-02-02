@@ -125,7 +125,10 @@ struct CoffeeToast: View {
 }
 
 // Toast Manager for stacking multiple toasts
+@MainActor
 class ToastManager: ObservableObject {
+    static let shared = ToastManager()
+    
     @Published var toasts: [ToastItem] = []
     
     func show(message: String, type: AlertType, duration: Double = 3.0) {
