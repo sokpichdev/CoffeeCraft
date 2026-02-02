@@ -58,13 +58,15 @@ class CartManager: ObservableObject {
                         if let error = error {
                             AlertManager.shared.showError(message: error.localizedDescription)
                         } else {
-                            AlertManager.shared.showSuccess(message: "Your cart was saved successfully ☕️")
+//                            AlertManager.shared.showSuccess(message: "Your cart was saved successfully ☕️")
+                            ToastManager.shared.show(message: "Your cart was saved successfully ☕️", type: .success)
                         }
                     }
                 }
         } catch {
             DispatchQueue.main.sync {
                 AlertManager.shared.showError(title: "Encoding error", message: error.localizedDescription)
+
             }
         }
     }
