@@ -12,7 +12,7 @@ import UIKit
 enum AppFontConfig {
     
     /// Change this ONE line to switch the entire app font
-    static var primary: AppFont = .nunito
+    static var primary: AppFont = .system
 }
 
 // MARK: - App Font Weight
@@ -52,6 +52,7 @@ enum AppFontWeight {
 // MARK: - App Font Family
 
 enum AppFont {
+    case system
     case nokora
     case roboto
     case poppins
@@ -62,6 +63,7 @@ enum AppFont {
     
     private var family: String {
         switch self {
+        case .system: return ""
         case .nokora:      return "Nokora"
         case .roboto:      return "Roboto"
         case .poppins:     return "Poppins"
