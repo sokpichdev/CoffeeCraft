@@ -109,22 +109,4 @@ extension View {
                 .zIndex(1)
         }
     }
-    
-    // Convenience method to add both toast managers at once
-    func withToastManagers() -> some View {
-        ZStack {
-            self
-                .zIndex(0)
-            
-            VStack {
-                ToastManagerView(position: .top)
-                    .zIndex(2)
-                
-                Spacer()
-                
-                ToastManagerView(position: .bottom)
-                    .zIndex(1)
-            }
-        }
-    }
 }
