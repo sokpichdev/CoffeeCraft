@@ -67,24 +67,13 @@ struct CustomizationCategoryCard: View {
                     }
                     
                     // Add option button
-                    Button(action: {
+                    CustomCoffeeButton(title: "Add Option",
+                                       buttonImage: "plus.circle.fill",
+                                       foregroundColor: Color.coffeeBrown,
+                                       bgColors: [Color.coffeeBrown.opacity(0.1)]) {
                         withAnimation {
                             category.options.append(CustomizationOption(name: "", price: 0.0))
                         }
-                    }) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.brown)
-                            Text("Add Option")
-                                .fontWeight(.medium)
-                                .foregroundColor(.brown)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.brown.opacity(0.1))
-                        )
                     }
                 }
                 .padding()

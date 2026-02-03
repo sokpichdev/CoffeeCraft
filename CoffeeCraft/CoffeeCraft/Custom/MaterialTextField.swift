@@ -471,7 +471,7 @@ class Dimens {
     static let largePadding: CGFloat = 16
     static let extraLargePadding: CGFloat = 20
     
-    static let cornerRadius: CGFloat = 10
+    static let cornerRadius: CGFloat = 16
     static let largeCornerRadius: CGFloat = 16
     
     static let gaps: CGFloat = 10
