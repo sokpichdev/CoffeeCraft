@@ -12,6 +12,15 @@
 		<string>Nunito-Medium.ttf</string>
 		<string>Nunito-Regular.ttf</string>
 		<string>Nunito-SemiBold.ttf</string>
+		<string>PlayfairDisplay-Black.ttf</string>
+		<string>PlayfairDisplay-Bold.ttf</string>
+		<string>PlayfairDisplay-Medium.ttf</string>
+		<string>PlayfairDisplay-Regular.ttf</string>
+		<string>PlayfairDisplay-SemiBold.ttf</string>
+		<string>LibreBaskerville-Bold.ttf</string>
+		<string>LibreBaskerville-Medium.ttf</string>
+		<string>LibreBaskerville-SemiBold.ttf</string>
+		<string>LibreBaskerville-Regular.ttf</string>
 	</array>
 </dict>
 </plist>
