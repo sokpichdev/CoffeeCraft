@@ -57,9 +57,9 @@ enum AppFont {
     case roboto
     case poppins
     case montserrat
-    case nunito
+    case nunito // body, button, text, Prices
     case playfairDisplay
-    case LibreBaskerville
+    case LibreBaskerville // Big Title, Header
     
     private var family: String {
         switch self {
