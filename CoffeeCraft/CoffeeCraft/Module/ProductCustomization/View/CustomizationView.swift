@@ -1,5 +1,5 @@
 //
-//  CustomizationEditorView.swift
+//  CustomizationView.swift
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 1/17/26.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct CustomizationEditorView: View {
+struct CustomizationView: View {
     @Binding var customizations: [CustomizationCategory]
-    @StateObject private var customizationVM = CustomizationViewModel()
+    @StateObject var customizationVM = CustomizationViewModel()
     @Environment(\.dismiss) var dismiss
     
     @State private var showAddFromLibrary = false
@@ -17,7 +17,7 @@ struct CustomizationEditorView: View {
     @State private var newCategoryName = ""
     
     var body: some View {
-        NavigationView {
+        CustomNavigationStack {
             ZStack {
                 // Background gradient
                 Color(.systemGroupedBackground)
@@ -125,6 +125,9 @@ struct CustomizationEditorView: View {
                     .padding(.top, 10)
                 }
                 .scrollDismissesKeyboard(.immediately)
+            }
+            .onAppear {
+                customizationVM.fetchCustomizations()
             }
             .customNavigationBar("Customizations") {
                 ToolBarButton(placement: .topBarLeading, buttonType: .icon("xmark")) {

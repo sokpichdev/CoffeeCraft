@@ -9,56 +9,53 @@ import Foundation
 import FirebaseFirestore
 import Combine
 
+@MainActor
 class CustomizationViewModel: ObservableObject {
     @Published var availableCustomizations: [CustomizationCategory] = []
     @Published var isLoading = false
-    @Published var errorMessage: String?
     
     private let db = Firestore.firestore()
-    
-    init() {
-        fetchCustomizations()
-    }
     
     // Fetch all customization categories from Firestore
     func fetchCustomizations() {
         isLoading = true
-        
+        LoaderManager.shared.showLoading()
         db.collection("customizations").getDocuments { [weak self] snapshot, error in
             guard let self = self else { return }
             
-            self.isLoading = false
-            
-            if let error = error {
-                self.errorMessage = "Failed to load customizations: \(error.localizedDescription)"
-                print("❌ Error fetching customizations: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let documents = snapshot?.documents else {
-                self.errorMessage = "No customizations found"
-                return
-            }
-            
-            self.availableCustomizations = documents.compactMap { doc -> CustomizationCategory? in
-                let data = doc.data()
-                guard let name = data["name"] as? String,
-                      let optionsData = data["options"] as? [[String: Any]] else {
-                    return nil
+            Task { @MainActor in
+                self.isLoading = false
+                LoaderManager.shared.hideLoading()
+                
+                if let error = error {
+                    AlertManager.shared.showError(title: "Failed to load customizations", message: error.localizedDescription)
+                    return
                 }
                 
-                let options = optionsData.compactMap { optionDict -> CustomizationOption? in
-                    guard let optionName = optionDict["name"] as? String,
-                          let price = optionDict["price"] as? Double else {
+                guard let documents = snapshot?.documents else {
+                    AlertManager.shared.showError(message: "No customizations found")
+                    return
+                }
+                
+                self.availableCustomizations = documents.compactMap { doc -> CustomizationCategory? in
+                    let data = doc.data()
+                    guard let name = data["name"] as? String,
+                          let optionsData = data["options"] as? [[String: Any]] else {
                         return nil
                     }
-                    return CustomizationOption(name: optionName, price: price)
-                }
-                
-                return CustomizationCategory(name: name, options: options)
-            }.sorted { $0.name < $1.name }
-            
-            print("✅ Loaded \(self.availableCustomizations.count) customization categories")
+                    
+                    let options = optionsData.compactMap { optionDict -> CustomizationOption? in
+                        guard let optionName = optionDict["name"] as? String,
+                              let price = optionDict["price"] as? Double else {
+                            return nil
+                        }
+                        return CustomizationOption(name: optionName, price: price)
+                    }
+                    
+                    return CustomizationCategory(name: name, options: options)
+                }.sorted { $0.name < $1.name }
+                print("✅ Loaded \(self.availableCustomizations.count) customization categories")
+            }
         }
     }
     
@@ -80,14 +77,9 @@ class CustomizationViewModel: ObservableObject {
             print("✅ Saved customization: \(category.name)")
             
             // Refresh the list
-            await MainActor.run {
-                fetchCustomizations()
-            }
+            fetchCustomizations()
         } catch {
-            await MainActor.run {
-                self.errorMessage = "Failed to save customization: \(error.localizedDescription)"
-            }
-            print("❌ Error saving customization: \(error.localizedDescription)")
+            AlertManager.shared.showError(title: "Failed to save customization", message: error.localizedDescription)
         }
     }
     
@@ -100,14 +92,9 @@ class CustomizationViewModel: ObservableObject {
             print("✅ Deleted customization: \(category.name)")
             
             // Refresh the list
-            await MainActor.run {
-                fetchCustomizations()
-            }
+            fetchCustomizations()
         } catch {
-            await MainActor.run {
-                self.errorMessage = "Failed to delete customization: \(error.localizedDescription)"
-            }
-            print("❌ Error deleting customization: \(error.localizedDescription)")
+            AlertManager.shared.showError(title: "Failed to delete customization", message: error.localizedDescription)
         }
     }
 }
