@@ -34,7 +34,7 @@ struct CoffeeAlertView: View {
                         .frame(width: 80, height: 80)
                     
                     Image(systemName: alertModel.type.icon)
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundColor(alertModel.type.color)
                         .scaleEffect(iconScale)
                 }

@@ -93,7 +93,7 @@ struct CustomTextField1<TrailingView: View>: View {
                             onTapCountry?()
                         } label: {
                             Text(countryText ?? "")
-                                .font(.system(size: 14))
+                                .font(.subheadline)
                                 .foregroundColor(.commonText)
                                 .padding(.leading, leadingIcon == nil ? 8 : 20)
                             
@@ -133,7 +133,7 @@ struct CustomTextField1<TrailingView: View>: View {
             }
             if showValidate {
                 Text(validateText)
-                    .font(.system(size: 12))
+                    .font(.caption)
                     .foregroundColor(Color.textFieldError)
             }
         }

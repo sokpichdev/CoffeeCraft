@@ -132,7 +132,7 @@ struct InboxItemView: View {
                 
                 if let description = announcement.description {
                     Text(description)
-                        .font(.system(size: 14))
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -141,9 +141,9 @@ struct InboxItemView: View {
                 if let createdDate = announcement.createdDate {
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
-                            .font(.system(size: 11))
+                            .font(.caption)
                         Text(createdDate)
-                            .font(.system(size: 12))
+                            .font(.caption2)
                     }
                     .foregroundStyle(.tertiary)
                     .padding(.top, 2)
