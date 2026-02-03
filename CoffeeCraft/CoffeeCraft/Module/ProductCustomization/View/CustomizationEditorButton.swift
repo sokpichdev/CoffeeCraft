@@ -68,7 +68,7 @@ struct CustomizationEditorButton: View {
         }
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showEditor) {
-            CustomizationEditorView(customizations: $customizations)
+            CustomizationView(customizations: $customizations)
         }
     }
 }

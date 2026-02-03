@@ -11,7 +11,7 @@ import UIKit
 enum AppFontConfig {
     
     /// Change this ONE line to switch the entire app font
-    static var primary: AppFont = .nunito
+    static var primary: AppFont = .nokora
 }
 
 // MARK: - App Font Weight
