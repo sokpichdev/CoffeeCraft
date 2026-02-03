@@ -341,13 +341,11 @@ struct RowInSectionView: View {
                     if let label = label {
                         Text(label)
                             .font(.caption)
-                            .fontWeight(.medium)
                             .foregroundStyle(.secondary)
                     }
                     
                     Text(title)
-                        .font(.system(size: 15))
-                        .fontWeight(.medium)
+                        .font(.subheadline)
                         .foregroundStyle(.primary)
                 }
                 

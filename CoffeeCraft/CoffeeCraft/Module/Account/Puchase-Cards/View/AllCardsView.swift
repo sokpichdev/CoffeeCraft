@@ -158,7 +158,7 @@ struct AllCardsView: View {
                     .opacity(0.6)
 
                 Text("Create your own card")
-                    .font(.title2.weight(.semibold))
+                    .font(.title2)
                     .foregroundColor(.primary)
             }
             .frame(width: cardWidth, height: cardWidth / (16 / 9))

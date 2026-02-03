@@ -26,7 +26,7 @@ struct CoffeeToast: View {
                     .frame(width: 32, height: 32)
                 
                 Image(systemName: type.icon)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.headline)
                     .foregroundColor(.white)
                     .scaleEffect(iconScale)
                     .rotationEffect(.degrees(iconRotation))
