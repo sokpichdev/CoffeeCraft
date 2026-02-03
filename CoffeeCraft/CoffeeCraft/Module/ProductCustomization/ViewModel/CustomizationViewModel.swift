@@ -19,13 +19,13 @@ class CustomizationViewModel: ObservableObject {
     // Fetch all customization categories from Firestore
     func fetchCustomizations() {
         isLoading = true
-        LoaderManager.shared.showLoading()
+//        LoaderManager.shared.showLoading()
         db.collection("customizations").getDocuments { [weak self] snapshot, error in
             guard let self = self else { return }
             
             Task { @MainActor in
                 self.isLoading = false
-                LoaderManager.shared.hideLoading()
+//                LoaderManager.shared.hideLoading()
                 
                 if let error = error {
                     AlertManager.shared.showError(title: "Failed to load customizations", message: error.localizedDescription)

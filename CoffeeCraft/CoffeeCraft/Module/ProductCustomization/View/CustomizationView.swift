@@ -26,103 +26,57 @@ struct CustomizationView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         // Header info card
-                        if customizations.isEmpty {
-                            EmptyCustomizationsCard()
-                                .padding(.horizontal)
+                        if customizationVM.isLoading {
+                            ShimmerView()
+                                .frame(height: 155)
                                 .padding(.top)
-                        }
-                        
-                        // Existing customizations
-                        ForEach($customizations) { $category in
-                            CustomizationCategoryCard(
-                                category: $category,
-                                onDelete: {
-                                    withAnimation {
-                                        if let index = customizations.firstIndex(where: { $0.id == category.id }) {
-                                            customizations.remove(at: index)
+                        } else {
+                            if customizations.isEmpty {
+                                EmptyCustomizationsCard()
+                                    .padding(.top)
+                            }
+                            
+                            // Existing customizations
+                            ForEach($customizations) { $category in
+                                CustomizationCategoryCard(
+                                    category: $category,
+                                    onDelete: {
+                                        withAnimation {
+                                            if let index = customizations.firstIndex(where: { $0.id == category.id }) {
+                                                customizations.remove(at: index)
+                                            }
                                         }
                                     }
-                                }
-                            )
-                            .padding(.horizontal)
+                                )
+                            }
                         }
                         
                         // Add buttons
                         VStack(spacing: 12) {
-                            Button(action: {
+                            ActionCardButton(
+                                iconName: "book.fill",
+                                title: "Add from Library",
+                                subtitle: "Choose pre-defined options",
+                                gradientColors: [Color.brown, Color.brown.opacity(0.8)],
+                                shadowColor: Color.brown
+                            ) {
                                 showAddFromLibrary = true
-                            }) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "book.fill")
-                                        .font(.title3)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Add from Library")
-                                            .font(.headline)
-                                        Text("Choose pre-defined options")
-                                            .font(.caption)
-                                            .foregroundColor(.white.opacity(0.8))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .font(.headline)
-                                        .foregroundColor(Color.brown)
-                                }
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    LinearGradient(
-                                        colors: [Color.brown, Color.brown.opacity(0.8)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .foregroundColor(.white)
-                                .cornerRadius(16)
-                                .shadow(color: .brown.opacity(0.3), radius: 8, x: 0, y: 4)
                             }
                             
-                            Button(action: {
+                            ActionCardButton(
+                                iconName: "plus.circle.fill",
+                                title: "Create Custom",
+                                subtitle: "Design your own category",
+                                gradientColors: [Color.orange, Color.orange.opacity(0.8)],
+                                shadowColor: Color.orange
+                            ) {
                                 showCreateCustom = true
-                            }) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.title3)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Create Custom")
-                                            .font(.headline)
-                                        Text("Design your own category")
-                                            .font(.caption)
-                                            .foregroundColor(.white.opacity(0.8))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .font(.headline)
-                                        .foregroundColor(Color.brown)
-                                }
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    LinearGradient(
-                                        colors: [Color.orange, Color.orange.opacity(0.8)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .foregroundColor(.white)
-                                .cornerRadius(16)
-                                .shadow(color: .orange.opacity(0.3), radius: 8, x: 0, y: 4)
                             }
                         }
-                        .padding(.horizontal)
                         .padding(.bottom, 20)
                     }
                     .padding(.top, 10)
+                    .padding(.horizontal)
                 }
                 .scrollDismissesKeyboard(.immediately)
             }
