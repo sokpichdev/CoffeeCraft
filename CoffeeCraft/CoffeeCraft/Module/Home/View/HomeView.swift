@@ -60,7 +60,7 @@ struct HomeView: View {
                 VStack(spacing: 12) {
 
                     Text("Good Morning, \(UserSession.shared.userName ?? "User")! ☀️")
-                        .font(.title2.bold())
+                        .font(.app(.LibreBaskerville, weight: .bold, size: 22))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
 
@@ -73,14 +73,15 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
 
-                    announcementLabel
-                    
-                    VStack(spacing: 20) {
-                        ForEach(announcements.prefix(3)) { ann in
-                            NavigationLink {
-                                AnnouncementDetailView(announcement: ann)
-                            } label: {
-                                AnnouncementCardView(announcement: ann)
+                    VStack(spacing: 6) {
+                        announcementLabel
+                        VStack(spacing: 20) {
+                            ForEach(announcements.prefix(3)) { ann in
+                                NavigationLink {
+                                    AnnouncementDetailView(announcement: ann)
+                                } label: {
+                                    AnnouncementCardView(announcement: ann)
+                                }
                             }
                         }
                     }
@@ -107,6 +108,7 @@ struct HomeView: View {
                 AnnouncementsListView()
             } label: {
                 Text("See All")
+                    .font(.headline)
                     .padding(8)
             }
             .buttonStyle(.plain)
