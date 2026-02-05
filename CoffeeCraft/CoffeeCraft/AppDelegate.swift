@@ -79,15 +79,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 // MARK: - MessagingDelegate
 extension AppDelegate: MessagingDelegate {
-    
     // Handle FCM token refresh
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("🔑 FCM Token: \(fcmToken ?? "no token")")
         
-        // You can send this token to your backend server
-        // For testing, you'll use this token in Firebase Console
+        guard let token = fcmToken else { return }
         
-        let dataDict: [String: String] = ["token": fcmToken ?? ""]
+        // Save token to Firestore
+        FCMTokenService.shared.saveFCMToken(token)
+        
+        // Post notification for other parts of app that might need it
+        let dataDict: [String: String] = ["token": token]
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),
             object: nil,

@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseMessaging
 
 @MainActor
 class AuthViewModel: ObservableObject {
@@ -32,9 +33,27 @@ class AuthViewModel: ObservableObject {
     }
     
     private let db = Firestore.firestore()
-    
+    private var fcmTokenObserver: NSObjectProtocol?
+
     init() {
         checkUser()
+        
+        // Listen for FCM token updates
+        fcmTokenObserver = NotificationCenter.default.addObserver(
+            forName: Notification.Name("FCMToken"),
+            object: nil,
+            queue: .main
+        ) { notification in
+            if let token = notification.userInfo?["token"] as? String {
+                print("🔄 FCM Token updated via NotificationCenter: \(token)")
+                // Token is already saved in AppDelegate, but you can do additional handling here
+            }
+        }
+    }
+    deinit {
+        if let observer = fcmTokenObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     func checkUser() {
@@ -160,6 +179,7 @@ class AuthViewModel: ObservableObject {
             let result = try await Auth.auth()
                 .signIn(withEmail: email, password: password)
 
+            handleSuccessfulLogin()
             try await fetchUserData(uid: result.user.uid)
             try await MinimumLoadingTime(2).waitIfNeeded()
             
@@ -178,6 +198,18 @@ class AuthViewModel: ObservableObject {
         }
     }
 
+    func handleSuccessfulLogin() {
+        
+        // Request current FCM token and save it
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("❌ Error fetching FCM token: \(error.localizedDescription)")
+            } else if let token = token {
+                print("🔑 Retrieved FCM token after login: \(token)")
+                FCMTokenService.shared.saveFCMToken(token)
+            }
+        }
+    }
     
     func sendPasswordReset(email: String) async throws {
         try await Auth.auth().sendPasswordReset(withEmail: email)
@@ -185,6 +217,7 @@ class AuthViewModel: ObservableObject {
     
     func logout(onResult: @escaping (Bool) -> Void) {
         do {
+            FCMTokenService.shared.removeFCMToken()
             try Auth.auth().signOut()
             // Clear user from singleton
             UserSession.shared.clearUser()
