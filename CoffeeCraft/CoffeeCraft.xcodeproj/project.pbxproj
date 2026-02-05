@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6AB42FC42F3496C300852891 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC32F3496C300852891 /* FirebaseAnalytics */; };
+		6AB42FC62F3496C300852891 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC52F3496C300852891 /* FirebaseCore */; };
+		6AB42FC82F3496C300852891 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC72F3496C300852891 /* FirebaseFunctions */; };
+		6AB42FCA2F3496C300852891 /* FirebaseInAppMessaging-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC92F3496C300852891 /* FirebaseInAppMessaging-Beta */; };
+		6AB42FCC2F3496C300852891 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FCB2F3496C300852891 /* FirebaseMessaging */; };
 		6AFAC5382EA5E88E00037932 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6AFAC5372EA5E88E00037932 /* FirebaseAuth */; };
 		6AFAC53A2EA5E88E00037932 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 6AFAC5392EA5E88E00037932 /* FirebaseDatabase */; };
 		6AFAC53C2EA5E88E00037932 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6AFAC53B2EA5E88E00037932 /* FirebaseFirestore */; };
@@ -46,7 +51,12 @@
 			files = (
 				6AFAC5B32EA61BCA00037932 /* SDWebImageSwiftUI in Frameworks */,
 				6AFAC53A2EA5E88E00037932 /* FirebaseDatabase in Frameworks */,
+				6AB42FCC2F3496C300852891 /* FirebaseMessaging in Frameworks */,
+				6AB42FCA2F3496C300852891 /* FirebaseInAppMessaging-Beta in Frameworks */,
+				6AB42FC42F3496C300852891 /* FirebaseAnalytics in Frameworks */,
+				6AB42FC82F3496C300852891 /* FirebaseFunctions in Frameworks */,
 				6AFAC53E2EA5E88E00037932 /* FirebaseStorage in Frameworks */,
+				6AB42FC62F3496C300852891 /* FirebaseCore in Frameworks */,
 				6AFAC5382EA5E88E00037932 /* FirebaseAuth in Frameworks */,
 				6AFAC53C2EA5E88E00037932 /* FirebaseFirestore in Frameworks */,
 			);
@@ -96,6 +106,11 @@
 				6AFAC53B2EA5E88E00037932 /* FirebaseFirestore */,
 				6AFAC53D2EA5E88E00037932 /* FirebaseStorage */,
 				6AFAC5B22EA61BCA00037932 /* SDWebImageSwiftUI */,
+				6AB42FC32F3496C300852891 /* FirebaseAnalytics */,
+				6AB42FC52F3496C300852891 /* FirebaseCore */,
+				6AB42FC72F3496C300852891 /* FirebaseFunctions */,
+				6AB42FC92F3496C300852891 /* FirebaseInAppMessaging-Beta */,
+				6AB42FCB2F3496C300852891 /* FirebaseMessaging */,
 			);
 			productName = CoffeeCraft;
 			productReference = 6AFAC5232EA5E69C00037932 /* CoffeeCraft.app */;
@@ -229,6 +244,7 @@
 				APP_DISPLAY_NAME = "Coffee Dev";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CoffeeCraft/CoffeeCraft.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
@@ -326,6 +342,7 @@
 				APP_DISPLAY_NAME = CoffeeCraft;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CoffeeCraft/CoffeeCraft.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
@@ -423,6 +440,7 @@
 				APP_DISPLAY_NAME = "coffee SIT";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CoffeeCraft/CoffeeCraft.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
@@ -520,6 +538,7 @@
 				APP_DISPLAY_NAME = "Coffee UAT";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CoffeeCraft/CoffeeCraft.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
@@ -595,6 +614,31 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6AB42FC32F3496C300852891 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		6AB42FC52F3496C300852891 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		6AB42FC72F3496C300852891 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		6AB42FC92F3496C300852891 /* FirebaseInAppMessaging-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseInAppMessaging-Beta";
+		};
+		6AB42FCB2F3496C300852891 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
 		6AFAC5372EA5E88E00037932 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

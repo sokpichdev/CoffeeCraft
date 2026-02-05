@@ -6,13 +6,16 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseCore
+import FirebaseMessaging
+import UserNotifications
 
 @main
 struct CoffeeCraftApp: App {
     @StateObject private var session = UserSession.shared
     @StateObject var authVM = AuthViewModel()
     @StateObject private var themeManager = ThemeManager()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     let currentEnv = Constants.currentEnv
 
@@ -33,7 +36,6 @@ struct CoffeeCraftApp: App {
     }
 
     func configureFirebase(for env: FirebaseEnvironment) {
-
         let plistName: String
 
         switch env {
