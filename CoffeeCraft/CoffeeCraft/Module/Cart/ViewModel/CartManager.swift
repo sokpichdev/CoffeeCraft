@@ -36,9 +36,7 @@ class CartManager: ObservableObject {
 
     func clearCart(userId: String) {
         items.removeAll()
-        saveCartToFirestore(userId: userId) {
-            ToastManager.shared.show(message: "Your cart was cleared successfully ☕️", type: .success)
-        }
+        saveCartToFirestore(userId: userId) {}
     }
     func updateCartItem(userId: String, item: CartItem, selections: [String: String], extras: [String]) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
