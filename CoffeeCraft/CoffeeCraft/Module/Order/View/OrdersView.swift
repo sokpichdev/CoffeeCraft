@@ -8,45 +8,83 @@ import SwiftUI
 
 struct OrdersView: View {
     @StateObject private var orderVM = OrderViewModel()
-
+    @StateObject private var coordinator = NotificationCoordinator.shared
+    @State private var navigationPath = NavigationPath()
+    
     var body: some View {
-        ZStack {
-            // Adaptive background
-            Color(uiColor: .systemGroupedBackground)
-                .ignoresSafeArea()
-            
-            if orderVM.orders.isEmpty {
-                VStack(spacing: 16) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.brown.opacity(0.7))
-                    Text("No Orders Yet")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                    Text("Your recent coffee orders will appear here.")
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 16) {
-                        ForEach(orderVM.orders) { order in
-                            OrderCardView(order: order)
-                                .padding(.horizontal)
-                        }
+        NavigationStack(path: $navigationPath) {
+            ZStack {
+                // Adaptive background
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                if orderVM.orders.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "cup.and.saucer.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.brown.opacity(0.7))
+                        Text("No Orders Yet")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                        Text("Your recent coffee orders will appear here.")
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
                     }
-                    .padding(.vertical)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(spacing: 16) {
+                            ForEach(orderVM.orders) { order in
+                                // Make it tappable with NavigationLink
+                                NavigationLink(value: order) {
+                                    OrderCardView(order: order)
+                                        .padding(.horizontal)
+                                }
+                                .buttonStyle(.plain)  // Remove default button styling
+                            }
+                        }
+                        .padding(.vertical)
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .navigationDestination(for: Order.self) { order in
+                OrderDetailView(order: order)
+            }
+            .customNavigationBar("My Orders")
+            .onAppear {
+                orderVM.listenToUserOrders()
+            }
+            .onChange(of: coordinator.selectedOrderId) { oldValue, newValue in
+                handleDeepLink()
+            }
+        }
+    }
+    
+    private func handleDeepLink() {
+        guard let orderId = coordinator.selectedOrderId else { return }
+        
+        print("🔗 OrdersView: Handling deep link to order: \(orderId)")
+        
+        // Find the order
+        if let order = orderVM.orders.first(where: { $0.id == orderId }) {
+            print("✅ Order found, navigating...")
+            navigationPath.append(order)
+            coordinator.clearNavigation()
+        } else {
+            print("⚠️ Order not found yet, waiting for orders to load...")
+            // If orders haven't loaded yet, wait a bit and try again
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                if let order = orderVM.orders.first(where: { $0.id == orderId }) {
+                    navigationPath.append(order)
+                    coordinator.clearNavigation()
+                } else {
+                    print("❌ Order still not found after delay")
+                    coordinator.clearNavigation()
                 }
             }
         }
-        .customNavigationBar("My Orders")
-        .onAppear {
-            orderVM.listenToUserOrders()
-        }
-
     }
 }
 

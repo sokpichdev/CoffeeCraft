@@ -7,6 +7,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseMessaging
 
 @MainActor
 class OrderService: ObservableObject {
@@ -26,11 +27,15 @@ class OrderService: ObservableObject {
                     throw NSError(domain: "OrderService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
                 }
 
+                // Get FCM token
+                let fcmToken = try? await Messaging.messaging().token()
+
                 let orderData: [String: Any] = [
                     "userId": userId,
                     "timestamp": Timestamp(date: Date()),
                     "totalPrice": total,
                     "status": "Pending",
+                    "deviceToken": fcmToken ?? "",
                     "items": cartItems.map { item in
                         var dict: [String: Any] = [
                             "name": item.product.name,
@@ -55,10 +60,8 @@ class OrderService: ObservableObject {
                 await onSuccess?()
 
             } catch {
-//                DispatchQueue.main.async {
-                    LoaderManager.shared.hideLoading()
-                    AlertManager.shared.showError(title: "Order failed", message: error.localizedDescription)
-//                }
+                LoaderManager.shared.hideLoading()
+                AlertManager.shared.showError(title: "Order failed", message: error.localizedDescription)
             }
         }
     }
