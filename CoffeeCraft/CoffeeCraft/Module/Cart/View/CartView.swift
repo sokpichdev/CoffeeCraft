@@ -56,21 +56,23 @@ struct CartView: View {
                     }
                     
                     CustomCoffeeButton(title: "Checkout", bgColors: [Color.brown], isDisabled: cartManager.items.isEmpty) {
-                        orderService.placeOrder(
-                            cartItems: cartManager.items,
-                            total: cartManager.total
-                        ) {
-                            Task {
-                                if let activeCard = cardVM.activeCard {
-                                    do {
-                                        try await cardVM.addPoints(to: activeCard, amount: 1)
-                                    } catch {
-                                        AlertManager.shared.showError(message: error.localizedDescription)
+                        AlertManager.shared.showConfirmation(title: "Confirm Order", message: "the order total is \(String(format: "$%.2f", cartManager.total))", confirmTitle: "Place") {
+                            orderService.placeOrder(
+                                cartItems: cartManager.items,
+                                total: cartManager.total
+                            ) {
+                                Task {
+                                    if let activeCard = cardVM.activeCard {
+                                        do {
+                                            try await cardVM.addPoints(to: activeCard, amount: 1)
+                                        } catch {
+                                            AlertManager.shared.showError(message: error.localizedDescription)
+                                        }
                                     }
                                 }
+                                cartManager.clearCart(userId: UserSession.shared.userId ?? "")
+                                dismiss()
                             }
-                            cartManager.clearCart(userId: UserSession.shared.userId ?? "")
-                            dismiss()
                         }
                     }
                     .padding(.bottom, 8)
