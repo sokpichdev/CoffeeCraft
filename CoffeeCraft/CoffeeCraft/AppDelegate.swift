@@ -10,90 +10,172 @@ import FirebaseMessaging
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    let currentEnv = Constants.currentEnv
     
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
+    ) -> Bool {
+        // Configure Firebase
+        configureFirebase(for: currentEnv)
         
-        // Request notification permissions
-        UNUserNotificationCenter.current().delegate = self
-        
-        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(
-            options: authOptions,
-            completionHandler: { granted, error in
-                if granted {
-                    print("✅ Notification permission granted")
-                } else {
-                    print("❌ Notification permission denied")
-                }
-            }
-        )
-        
-        application.registerForRemoteNotifications()
-        
-        // Set FCM messaging delegate
-        Messaging.messaging().delegate = self
+        // Setup notifications
+        setupNotifications(application)
         
         return true
     }
     
-    // Handle APNs token registration
-    func application(_ application: UIApplication,
-                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Messaging.messaging().apnsToken = deviceToken
-        print("✅ APNs token registered")
+    // MARK: - Notification Setup
+    
+    private func setupNotifications(_ application: UIApplication) {
+        // Set delegates
+        UNUserNotificationCenter.current().delegate = self
+        Messaging.messaging().delegate = self
+        Messaging.messaging().isAutoInitEnabled = true
+        
+        // Request permissions
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, error in
+            if granted {
+                print("✅ Notification permission granted")
+            } else if let error = error {
+                print("❌ Notification permission error: \(error.localizedDescription)")
+            } else {
+                print("❌ Notification permission denied")
+            }
+        }
+        
+        // Register for remote notifications
+        application.registerForRemoteNotifications()
     }
     
-    func application(_ application: UIApplication,
-                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("❌ Failed to register for remote notifications: \(error)")
+    // MARK: - Remote Notification Registration
+    
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        // Pass device token to FCM
+        Messaging.messaging().apnsToken = deviceToken
+        
+        // Log device token for debugging
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("📱 APNs Device Token: \(tokenString)")
+    }
+    
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        print("❌ Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+    
+    // MARK: - Background Notification Handling
+    
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        print("📩 Remote notification received:")
+        print(userInfo)
+        
+        // Inform FCM about the message
+        Messaging.messaging().appDidReceiveMessage(userInfo)
+        
+        completionHandler(.newData)
     }
 }
 
 // MARK: - UNUserNotificationCenterDelegate
+
 extension AppDelegate: UNUserNotificationCenterDelegate {
     
-    // Handle notification when app is in foreground
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    /// Handle notification when app is in foreground
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
         let userInfo = notification.request.content.userInfo
         print("📬 Notification received in foreground:")
         print(userInfo)
         
-        // Show notification even when app is in foreground
-        completionHandler([[.banner, .sound, .badge]])
+        // Inform FCM about the message
+        Messaging.messaging().appDidReceiveMessage(userInfo)
+        
+        // Show notification banner and play sound even when app is in foreground
+        completionHandler([.banner, .sound, .badge])
     }
     
-    // Handle notification tap
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                didReceive response: UNNotificationResponse,
-                                withCompletionHandler completionHandler: @escaping () -> Void) {
+    /// Handle notification tap
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
         let userInfo = response.notification.request.content.userInfo
-        print("📬 Notification tapped:")
+        print("👆 Notification tapped:")
         print(userInfo)
+        
+        // Inform FCM about the message
+        Messaging.messaging().appDidReceiveMessage(userInfo)
+        
+        // TODO: Handle deep linking based on notification data
+        // Example: Navigate to specific order screen
         
         completionHandler()
     }
 }
 
 // MARK: - MessagingDelegate
+
 extension AppDelegate: MessagingDelegate {
-    // Handle FCM token refresh
+    
+    /// Handle FCM token refresh
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("🔑 FCM Token: \(fcmToken ?? "no token")")
+        guard let token = fcmToken else {
+            print("⚠️ FCM token is nil")
+            return
+        }
         
-        guard let token = fcmToken else { return }
+        print("🔑 FCM Token: \(token)")
         
         // Save token to Firestore
         FCMTokenService.shared.saveFCMToken(token)
         
-        // Post notification for other parts of app that might need it
-        let dataDict: [String: String] = ["token": token]
+        // Broadcast token to other parts of the app
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),
             object: nil,
-            userInfo: dataDict
+            userInfo: ["token": token]
         )
+    }
+}
+
+// MARK: - Firebase Configuration
+
+extension AppDelegate {
+    
+    private func configureFirebase(for env: FirebaseEnvironment) {
+        let plistName: String
+        
+        switch env {
+        case .dev:  plistName = "GoogleService-Info-Dev"
+        case .sit:  plistName = "GoogleService-Info-SIT"
+        case .uat:  plistName = "GoogleService-Info-UAT"
+        case .prod: plistName = "GoogleService-Info"
+        }
+        
+        guard let filePath = Bundle.main.path(forResource: plistName, ofType: "plist") else {
+            fatalError("❌ Could not find plist file: \(plistName).plist")
+        }
+        
+        guard let options = FirebaseOptions(contentsOfFile: filePath) else {
+            fatalError("❌ Could not load Firebase options from plist: \(plistName).plist")
+        }
+        
+        FirebaseApp.configure(options: options)
+        print("✅ Firebase configured for \(env) with bundle ID: \(options.bundleID)")
     }
 }
