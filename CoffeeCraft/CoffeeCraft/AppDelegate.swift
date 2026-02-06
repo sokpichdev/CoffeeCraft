@@ -121,8 +121,15 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         // Inform FCM about the message
         Messaging.messaging().appDidReceiveMessage(userInfo)
         
-        // TODO: Handle deep linking based on notification data
-        // Example: Navigate to specific order screen
+        // Handle deep linking to order
+        if let orderId = userInfo["orderId"] as? String {
+            print("🔗 Deep linking to order: \(orderId)")
+            NotificationCenter.default.post(
+                name: Notification.Name("NavigateToOrder"),
+                object: nil,
+                userInfo: ["orderId": orderId]
+            )
+        }
         
         completionHandler()
     }
