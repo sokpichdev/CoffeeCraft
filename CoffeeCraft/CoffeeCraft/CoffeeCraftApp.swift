@@ -14,6 +14,8 @@ import UserNotifications
 struct CoffeeCraftApp: App {
     @StateObject private var session = UserSession.shared
     @StateObject var authVM = AuthViewModel()
+    @StateObject private var orderVM = OrderViewModel()
+    @StateObject private var coordinator = NotificationCoordinator.shared
     @StateObject private var themeManager = ThemeManager()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
@@ -25,6 +27,8 @@ struct CoffeeCraftApp: App {
                     .environmentObject(authVM)
                     .preferredColorScheme(themeManager.theme.colorScheme)
                     .environmentObject(themeManager)
+                    .environmentObject(orderVM)
+                    .environmentObject(coordinator)
             }
         }
     }
