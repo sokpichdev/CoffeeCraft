@@ -12,6 +12,8 @@ struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
     
+    @EnvironmentObject var orderVM: OrderViewModel
+    @EnvironmentObject var coordinator: NotificationCoordinator
     @StateObject var cartManager = CartManager()
     @StateObject var cardVM = CardViewModel()
     @StateObject var favVM = FavoriteViewModel()
@@ -40,6 +42,8 @@ struct RootView: View {
                                 .environmentObject(cardVM)
                         case .orders:
                             OrdersView()
+                                .environmentObject(orderVM)
+                                .environmentObject(coordinator)
                         case .profile:
                             AccountView()
                                 .environmentObject(favVM)
@@ -73,6 +77,9 @@ struct RootView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
             }
+        }
+        .onChange(of: coordinator.shouldNavigateToOrders) { _, _ in
+            selectedTab = .orders
         }
     }
 }

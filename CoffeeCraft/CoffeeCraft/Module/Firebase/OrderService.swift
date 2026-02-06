@@ -29,6 +29,7 @@ class OrderService: ObservableObject {
 
                 // Get FCM token
                 let fcmToken = try? await Messaging.messaging().token()
+                print("📱 Placing order with FCM token: \(fcmToken ?? "none")")
 
                 let orderData: [String: Any] = [
                     "userId": userId,

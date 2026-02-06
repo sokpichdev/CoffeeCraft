@@ -7,8 +7,8 @@
 import SwiftUI
 
 struct OrdersView: View {
-    @StateObject private var orderVM = OrderViewModel()
-    @StateObject private var coordinator = NotificationCoordinator.shared
+    @EnvironmentObject var orderVM: OrderViewModel
+    @EnvironmentObject var coordinator: NotificationCoordinator
     @State private var navigationPath = NavigationPath()
     
     var body: some View {
@@ -55,6 +55,7 @@ struct OrdersView: View {
             .customNavigationBar("My Orders")
             .onAppear {
                 orderVM.listenToUserOrders()
+                handleDeepLink()
             }
             .onChange(of: coordinator.selectedOrderId) { oldValue, newValue in
                 handleDeepLink()
