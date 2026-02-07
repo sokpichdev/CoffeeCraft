@@ -101,7 +101,7 @@ struct OrderCardView: View {
                     Text(order.timestamp.formatted(date: .abbreviated, time: .shortened))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text("Order #\(order.id?.prefix(6) ?? "x")")
+                    Text("Order #\(order.orderId)")
                         .font(.footnote)
                         .foregroundColor(.gray)
                 }

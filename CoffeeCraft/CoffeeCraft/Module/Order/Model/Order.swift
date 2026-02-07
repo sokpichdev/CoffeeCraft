@@ -10,6 +10,7 @@ import FirebaseFirestore
 
 struct Order: Identifiable, Codable, Hashable {
     @DocumentID var id: String?
+    var orderId: Int
     var userId: String
     var items: [CartItemData]
     var totalPrice: Double
