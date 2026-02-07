@@ -66,3 +66,27 @@ extension String {
             .joined()
     }
 }
+
+// MARK: Order
+extension String {
+    
+    static var todayCounterId: String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return "orders_\(formatter.string(from: Date()))"
+    }
+
+}
+extension Int {
+    var formattedDailyOrderId: String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        let date = formatter.string(from: Date())
+        return "\(date)-" + String(format: "%03d", self)
+    }
+}
