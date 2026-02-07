@@ -15,7 +15,7 @@ struct OrderDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Order Header
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Order #\(order.id?.prefix(6) ?? "Unknown")")
+                    Text("Order #\(order.orderId)")
                         .font(.title2)
                         .fontWeight(.bold)
                     

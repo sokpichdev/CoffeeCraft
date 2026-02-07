@@ -67,7 +67,6 @@ class OrderService: ObservableObject {
 
                 let orderData: [String: Any] = [
                     "orderId": orderNumber,
-                    "displayOrderId": formattedOrderId,
                     "userId": userId,
                     "timestamp": Timestamp(date: Date()),
                     "totalPrice": total,
@@ -98,7 +97,7 @@ class OrderService: ObservableObject {
 
                 AlertManager.shared.showSuccess(
                     title: "Order placed ☕️",
-                    message: "Your order #\(formattedOrderId) is being prepared."
+                    message: "Your order #\(orderNumber) is being prepared."
                 )
 
                 await onSuccess?()
