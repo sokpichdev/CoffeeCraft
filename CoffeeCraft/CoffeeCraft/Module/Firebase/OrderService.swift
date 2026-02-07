@@ -20,18 +20,54 @@ class OrderService: ObservableObject {
     ) {
         Task {
             LoaderManager.shared.showLoading()
-            
             do {
                 guard let userId = Auth.auth().currentUser?.uid else {
-                    AlertManager.shared.showError(message: "User not logged in")
-                    throw NSError(domain: "OrderService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
+                    throw NSError(
+                        domain: "Auth",
+                        code: 401,
+                        userInfo: [NSLocalizedDescriptionKey: "User not logged in"]
+                    )
                 }
 
-                // Get FCM token
                 let fcmToken = try? await Messaging.messaging().token()
-                print("📱 Placing order with FCM token: \(fcmToken ?? "none")")
+                let counterId = String.todayCounterId
+                let counterRef = db.collection("counters").document(counterId)
+
+                let result = try await db.runTransaction { transaction, errorPointer -> Any? in
+                    let snapshot: DocumentSnapshot
+
+                    do {
+                        snapshot = try transaction.getDocument(counterRef)
+                    } catch {
+                        errorPointer?.pointee = error as NSError
+                        return nil
+                    }
+                    // First order of the day → start at 1
+                    if !snapshot.exists {
+                        transaction.setData(["current": 1], forDocument: counterRef)
+                        return 1
+                    }
+                    // incrment
+                    let current = snapshot.data()?["current"] as? Int ?? 0
+                    let next = current + 1
+                    transaction.updateData(["current": next], forDocument: counterRef)
+                    return next
+                }
+
+                guard let orderNumber = result as? Int else {
+                    throw NSError(
+                        domain: "OrderService",
+                        code: 500,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to generate order number"]
+                    )
+                }
+
+
+                let formattedOrderId = orderNumber.formattedDailyOrderId
 
                 let orderData: [String: Any] = [
+                    "orderId": orderNumber,
+                    "displayOrderId": formattedOrderId,
                     "userId": userId,
                     "timestamp": Timestamp(date: Date()),
                     "totalPrice": total,
@@ -42,7 +78,6 @@ class OrderService: ObservableObject {
                             "name": item.product.name,
                             "price": item.totalPrice
                         ]
-
                         if !item.selections.isEmpty {
                             dict["selections"] = item.selections
                         }
@@ -53,16 +88,27 @@ class OrderService: ObservableObject {
                     }
                 ]
 
-                let ref = try await db.collection("orders").addDocument(data: orderData)
-                try await MinimumLoadingTime(2.0).waitIfNeeded() // sleep for 2s
+                try await db
+                    .collection("orders")
+                    .document(formattedOrderId)
+                    .setData(orderData)
+
+                try await MinimumLoadingTime(2.0).waitIfNeeded()
                 LoaderManager.shared.hideLoading()
-                AlertManager.shared.showSuccess(title: "Order placed ☕️", message: "Your order #\(ref.documentID.prefix(6)) is being prepared.")
+
+                AlertManager.shared.showSuccess(
+                    title: "Order placed ☕️",
+                    message: "Your order #\(formattedOrderId) is being prepared."
+                )
 
                 await onSuccess?()
 
             } catch {
                 LoaderManager.shared.hideLoading()
-                AlertManager.shared.showError(title: "Order failed", message: error.localizedDescription)
+                AlertManager.shared.showError(
+                    title: "Order failed",
+                    message: error.localizedDescription
+                )
             }
         }
     }
