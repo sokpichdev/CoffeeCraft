@@ -1,6 +1,6 @@
-import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
+import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -10,7 +10,7 @@ admin.initializeApp();
  * "Completed"
  *
  * Triggers: When any document in the "orders" collection is updated
- * Action: Sends FCM notification to the device that placed the order
+ * Action: Sends FCM notification to all user devices using userId
  */
 export const sendOrderCompletedNotification = onDocumentUpdated(
   "orders/{orderId}",
@@ -50,19 +50,50 @@ export const sendOrderCompletedNotification = onDocumentUpdated(
           `Order ${orderId} completed! Sending notification...`
         );
 
-        // Get device token from the order
-        const deviceToken = afterData.deviceToken;
+        // Get userId from the order
+        const userId = afterData.userId;
 
-        if (!deviceToken) {
-          logger.warn(
-            `No device token found for order ${orderId}`
-          );
+        if (!userId) {
+          logger.warn(`No userId found for order ${orderId}`);
           return;
         }
 
+        // Retrieve user document to get fcmTokens array
+        const userDoc = await admin
+          .firestore()
+          .collection("users")
+          .doc(userId)
+          .get();
+
+        if (!userDoc.exists) {
+          logger.warn(`User document not found for userId ${userId}`);
+          return;
+        }
+
+        const userData = userDoc.data();
+        const fcmTokensArray = userData?.fcmTokens;
+
+        if (!fcmTokensArray || !Array.isArray(fcmTokensArray)) {
+          logger.warn(`No fcmTokens array found for user ${userId}`);
+          return;
+        }
+
+        // Extract tokens from the array
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tokens: string[] = fcmTokensArray
+          .map((tokenObj: any) => tokenObj.token)
+          .filter((token: string) => token && token.length > 0);
+
+        if (tokens.length === 0) {
+          logger.warn(`No valid tokens found for user ${userId}`);
+          return;
+        }
+
+        logger.info(`Found ${tokens.length} token(s) for user ${userId}`);
+
         // Build notification payload
-        const payload: admin.messaging.Message = {
-          token: deviceToken,
+        const payload: admin.messaging.MulticastMessage = {
+          tokens: tokens,
           notification: {
             title: "Your Order is Ready!",
             body:
@@ -83,9 +114,13 @@ export const sendOrderCompletedNotification = onDocumentUpdated(
           },
         };
 
-        // Send the notification
-        const response = await admin.messaging().send(payload);
-        logger.info("Notification sent successfully:", response);
+        // Send to all tokens
+        const response =
+          await admin.messaging().sendEachForMulticast(payload);
+        logger.info(
+          `Notification sent: ${response.successCount} successful, ` +
+          `${response.failureCount} failed`
+        );
 
         return response;
       } else {
@@ -100,89 +135,3 @@ export const sendOrderCompletedNotification = onDocumentUpdated(
     }
   }
 );
-
-/**
- * Optional: Send notification for other status changes
- * Uncomment if you want to notify users on all status changes
- */
-/*
-export const sendOrderStatusNotification = onDocumentUpdated(
-  "orders/{orderId}",
-  async (event) => {
-    try {
-      const orderId = event.params.orderId;
-
-      if (!event.data) {
-        logger.warn("No data associated with the event");
-        return;
-      }
-
-      const beforeData = event.data.before.data();
-      const afterData = event.data.after.data();
-
-      if (!beforeData || !afterData) {
-        logger.warn(`Missing data for order ${orderId}`);
-        return;
-      }
-
-      // Only send if status actually changed
-      if (beforeData.status === afterData.status) {
-        return;
-      }
-
-      const deviceToken = afterData.deviceToken;
-      if (!deviceToken) {
-        logger.warn(`No device token for order ${orderId}`);
-        return;
-      }
-
-      // Different messages for different statuses
-      let title = "Order Update";
-      let body = "";
-
-      switch (afterData.status) {
-      case "InProgress":
-        title = "Order In Progress";
-        body = `Your order #${orderId.substring(0, 6)} is being prepared.`;
-        break;
-      case "Ready":
-        title = "Order Ready!";
-        body = `Your order #${orderId.substring(0, 6)} is ready for pickup.`;
-        break;
-      case "Completed":
-        title = "Order Complete";
-        body = `Thank you! Order #${orderId.substring(0, 6)} is completed.`;
-        break;
-      default:
-        return;
-      }
-
-      const payload: admin.messaging.Message = {
-        token: deviceToken,
-        notification: {title, body},
-        data: {
-          orderId: orderId,
-          status: afterData.status,
-          type: "order_status_update",
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: "default",
-              badge: 1,
-            },
-          },
-        },
-      };
-
-      const response = await admin.messaging().send(payload);
-      logger.info(`Notification sent for ${afterData.status}:`, response);
-
-      return response;
-    } catch (error) {
-      logger.error("Error sending notification:", error);
-      throw error;
-    }
-  }
-);
-*/
