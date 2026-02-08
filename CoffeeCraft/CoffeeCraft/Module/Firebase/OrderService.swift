@@ -7,7 +7,6 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
-import FirebaseMessaging
 
 @MainActor
 class OrderService: ObservableObject {
@@ -29,7 +28,6 @@ class OrderService: ObservableObject {
                     )
                 }
 
-                let fcmToken = try? await Messaging.messaging().token()
                 let counterId = String.todayCounterId
                 let counterRef = db.collection("counters").document(counterId)
 
@@ -62,7 +60,6 @@ class OrderService: ObservableObject {
                     )
                 }
 
-
                 let formattedOrderId = orderNumber.formattedDailyOrderId
 
                 let orderData: [String: Any] = [
@@ -71,7 +68,6 @@ class OrderService: ObservableObject {
                     "timestamp": Timestamp(date: Date()),
                     "totalPrice": total,
                     "status": "Pending",
-                    "deviceToken": fcmToken ?? "",
                     "items": cartItems.map { item in
                         var dict: [String: Any] = [
                             "name": item.product.name,

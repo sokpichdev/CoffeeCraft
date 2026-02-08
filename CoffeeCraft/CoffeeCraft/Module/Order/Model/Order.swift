@@ -16,7 +16,6 @@ struct Order: Identifiable, Codable, Hashable {
     var totalPrice: Double
     var status: String
     var timestamp: Date
-    var deviceToken: String?  // For targeted notifications
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {
