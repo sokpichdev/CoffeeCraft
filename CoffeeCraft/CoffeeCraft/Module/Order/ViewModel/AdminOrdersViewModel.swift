@@ -6,21 +6,49 @@
 //
 import SwiftUI
 import FirebaseFirestore
+import FirebaseAuth
 
 class AdminOrdersViewModel: ObservableObject {
-    @Published var orders: [Order] = []
+    @Published var allOrders: [Order] = []
+    @Published var myOrders: [Order] = []
     private let db = Firestore.firestore()
+    private var allOrdersListener: ListenerRegistration?
+    private var myOrdersListener: ListenerRegistration?
 
     init() {
-        fetchOrders()
+        fetchAllOrders()
+        fetchMyOrders()
+    }
+    
+    deinit {
+        allOrdersListener?.remove()
+        myOrdersListener?.remove()
     }
 
-    func fetchOrders() {
-        db.collection("orders")
+    func fetchAllOrders() {
+        allOrdersListener?.remove()
+        
+        allOrdersListener = db.collection("orders")
             .order(by: "timestamp", descending: true)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let docs = snapshot?.documents else { return }
-                self?.orders = docs.compactMap { doc -> Order? in
+                self?.allOrders = docs.compactMap { doc -> Order? in
+                    try? doc.data(as: Order.self)
+                }
+            }
+    }
+    
+    func fetchMyOrders() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        myOrdersListener?.remove()
+        
+        myOrdersListener = db.collection("orders")
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "timestamp", descending: true)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let docs = snapshot?.documents else { return }
+                self?.myOrders = docs.compactMap { doc -> Order? in
                     try? doc.data(as: Order.self)
                 }
             }
@@ -36,4 +64,3 @@ class AdminOrdersViewModel: ObservableObject {
             }
     }
 }
-

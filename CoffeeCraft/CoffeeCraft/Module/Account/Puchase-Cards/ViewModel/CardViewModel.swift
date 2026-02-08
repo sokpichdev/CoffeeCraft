@@ -97,7 +97,7 @@ class CardViewModel: ObservableObject {
             self.cards = finalCards
             self.cards.sort { $0.createdAt > $1.createdAt }
         }
-        if failedCardNumbers.count > 0 {
+        if let user = UserSession.shared.currentUser, failedCardNumbers.count > 0 {
             AlertManager.shared.showError(message: "Failed to fetch cards: \(failedCardNumbers.joined(separator: ", "))")
         }
     }
