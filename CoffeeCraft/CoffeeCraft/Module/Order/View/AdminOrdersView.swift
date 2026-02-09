@@ -81,17 +81,25 @@ struct ActiveOrdersContent: View {
                                     AnyView(
                                         HStack(spacing: 8) {
                                             Button("Start") {
-                                                vm.updateOrderStatus(order: order, status: "InProgress")
+                                                vm.updateOrderStatus(order: order, status: "InProgress") { success in
+                                                    
+                                                }
                                             }
                                             .disabled(order.status != "Pending")
 
                                             Button("Ready") {
-                                                vm.updateOrderStatus(order: order, status: "Ready")
+                                                vm.updateOrderStatus(order: order, status: "Ready") { success in
+                                                    
+                                                }
                                             }
                                             .disabled(order.status != "InProgress")
 
                                             Button("Complete") {
-                                                vm.updateOrderStatus(order: order, status: "Completed")
+                                                vm.updateOrderStatus(order: order, status: "Completed") { success in
+                                                    if success {
+                                                        ToastManager.shared.show(message: "Order Completed", type: .success)
+                                                    }
+                                                }
                                             }
                                             .disabled(order.status != "Ready")
                                         }

@@ -239,16 +239,60 @@ class AdminOrdersViewModel: ObservableObject {
         fetchMyOrders(pageNum: 1, completion: completion)
     }
 
-    func updateOrderStatus(order: Order, status: String) {
-        guard let orderId = order.id else { return }
-        db.collection("orders").document(orderId)
-            .updateData(["status": status]) { error in
+    @MainActor
+    func updateOrderStatus(
+        order: Order,
+        status: String,
+        completion: @escaping (Bool) -> Void
+    ) {
+        guard let orderId = order.id else {
+            completion(false)
+            return
+        }
+
+        db.collection("orders")
+            .document(orderId)
+            .updateData(["status": status]) { [weak self] error in
                 if let error = error {
                     print("Error updating status: \(error.localizedDescription)")
                     Task { @MainActor in
-                        AlertManager.shared.showError(title: "Error updating status", message: error.localizedDescription)
+                        AlertManager.shared.showError(
+                            title: "Error updating status",
+                            message: error.localizedDescription
+                        )
                     }
+                    completion(false)
+                    return
+                }
+
+                // ✅ Update local state immediately (optimistic UI)
+                Task { @MainActor in
+                    self?.applyLocalStatusChange(orderId: orderId, status: status)
+                    completion(true)
                 }
             }
     }
+
+    @MainActor
+    func applyLocalStatusChange(orderId: String, status: String) {
+
+        // Update in allOrders
+        if let index = allOrders.firstIndex(where: { $0.id == orderId }) {
+            if status == "Completed" {
+                allOrders.remove(at: index)   // 🔥 remove immediately
+            } else {
+                allOrders[index].status = status
+            }
+        }
+
+        // Update in myOrders if needed
+        if let index = myOrders.firstIndex(where: { $0.id == orderId }) {
+            if status == "Completed" {
+                myOrders.remove(at: index)
+            } else {
+                myOrders[index].status = status
+            }
+        }
+    }
+
 }
