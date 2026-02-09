@@ -10,6 +10,8 @@ struct OrdersView: View {
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
     @State private var navigationPath = NavigationPath()
+    @State private var isPaginating = false
+    @State private var pageNum = 1
     
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -35,17 +37,49 @@ struct OrdersView: View {
                 } else {
                     ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 16) {
-                            ForEach(orderVM.orders) { order in
-                                // Make it tappable with NavigationLink
+                            ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
                                 NavigationLink(value: order) {
                                     OrderCardView(order: order)
                                         .padding(.horizontal)
                                 }
-                                .buttonStyle(.plain)  // Remove default button styling
+                                .buttonStyle(.plain)
+                                .onAppear {
+                                    if orderVM.orders.count < orderVM.totalOrdersCount {
+                                        if !orderVM.orders.isEmpty {
+                                            if order.id == orderVM.orders.last?.id, !isPaginating {
+                                                isPaginating = true
+                                                pageNum += 1
+                                                Task {
+                                                    let timer = MinimumLoadingTime(0.5)
+                                                    try? await timer.waitIfNeeded()
+                                                    
+                                                    await MainActor.run {
+                                                        orderVM.fetchOrders(pageNum: pageNum) { success in
+                                                            isPaginating = false
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            if isPaginating {
+                                ProgressView()
+                                    .padding()
                             }
                         }
                         .padding(.vertical)
                         .frame(maxWidth: .infinity)
+                    }
+                    .refreshable {
+                        pageNum = 1
+                        await withCheckedContinuation { continuation in
+                            orderVM.refreshOrders { _ in
+                                continuation.resume()
+                            }
+                        }
                     }
                 }
             }
@@ -54,7 +88,7 @@ struct OrdersView: View {
             }
             .customNavigationBar("My Orders")
             .onAppear {
-                orderVM.listenToUserOrders()
+                orderVM.fetchOrders(pageNum: 1)
                 handleDeepLink()
             }
             .onChange(of: coordinator.selectedOrderId) { oldValue, newValue in

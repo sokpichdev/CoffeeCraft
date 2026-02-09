@@ -303,7 +303,7 @@ struct FlippableCardView: View {
     
     // MARK: - Helper
     private func formatCardNumber(_ number: String) -> String {
-        let masked = String(repeating: "*", count: 12) + number.suffix(4)
+//        let masked = String(repeating: "*", count: 12) + number.suffix(4)
         var formatted = ""
 //        for (index, char) in masked.enumerated() {
 //            if index > 0 && index % 4 == 0 {

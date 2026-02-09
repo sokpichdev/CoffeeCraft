@@ -42,8 +42,8 @@ struct AdminOrdersView: View {
             }
             .customNavigationBar("Orders")
             .task {
-                vm.fetchAllOrders()
-                vm.fetchMyOrders()
+                vm.fetchAllOrders(pageNum: 1)
+                vm.fetchMyOrders(pageNum: 1)
             }
         }
     }
@@ -53,6 +53,8 @@ struct AdminOrdersView: View {
 struct ActiveOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @Binding var navigationPath: NavigationPath
+    @State private var isPaginating = false
+    @State private var pageNum = 1
     
     private var filteredOrders: [Order] {
         vm.allOrders
@@ -78,7 +80,7 @@ struct ActiveOrdersContent: View {
         } else {
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 16) {
-                    ForEach(filteredOrders) { order in
+                    ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
                         Button {
                             navigationPath.append(order)
                         } label: {
@@ -107,9 +109,44 @@ struct ActiveOrdersContent: View {
                             .padding(.horizontal)
                         }
                         .buttonStyle(.plain)
+                        .onAppear {
+                            // Pagination logic
+                            if vm.allOrders.count < vm.totalAllOrdersCount {
+                                if !vm.allOrders.isEmpty {
+                                    if order.id == vm.allOrders.last?.id, !isPaginating {
+                                        isPaginating = true
+                                        pageNum += 1
+                                        Task {
+                                            let timer = MinimumLoadingTime(0.5)
+                                            try? await timer.waitIfNeeded()
+                                            
+                                            await MainActor.run {
+                                                vm.fetchAllOrders(pageNum: pageNum) { success in
+                                                    isPaginating = false
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Loading indicator
+                    if isPaginating {
+                        ProgressView()
+                            .padding()
                     }
                 }
                 .padding(.vertical)
+            }
+            .refreshable {
+                pageNum = 1
+                await withCheckedContinuation { continuation in
+                    vm.refreshAllOrders { _ in
+                        continuation.resume()
+                    }
+                }
             }
         }
     }
@@ -119,6 +156,8 @@ struct ActiveOrdersContent: View {
 struct MyOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @Binding var navigationPath: NavigationPath
+    @State private var isPaginating = false
+    @State private var pageNum = 1
     
     var body: some View {
         if vm.myOrders.isEmpty {
@@ -138,7 +177,7 @@ struct MyOrdersContent: View {
         } else {
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 16) {
-                    ForEach(vm.myOrders) { order in
+                    ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
                         Button {
                             navigationPath.append(order)
                         } label: {
@@ -146,9 +185,44 @@ struct MyOrdersContent: View {
                                 .padding(.horizontal)
                         }
                         .buttonStyle(.plain)
+                        .onAppear {
+                            // Pagination logic
+                            if vm.myOrders.count < vm.totalMyOrdersCount {
+                                if !vm.myOrders.isEmpty {
+                                    if order.id == vm.myOrders.last?.id, !isPaginating {
+                                        isPaginating = true
+                                        pageNum += 1
+                                        Task {
+                                            let timer = MinimumLoadingTime(0.5)
+                                            try? await timer.waitIfNeeded()
+                                            
+                                            await MainActor.run {
+                                                vm.fetchMyOrders(pageNum: pageNum) { success in
+                                                    isPaginating = false
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Loading indicator
+                    if isPaginating {
+                        ProgressView()
+                            .padding()
                     }
                 }
                 .padding(.vertical)
+            }
+            .refreshable {
+                pageNum = 1
+                await withCheckedContinuation { continuation in
+                    vm.refreshMyOrders { _ in
+                        continuation.resume()
+                    }
+                }
             }
         }
     }
