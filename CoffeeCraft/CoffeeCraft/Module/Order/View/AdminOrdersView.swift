@@ -9,25 +9,23 @@ import FirebaseAuth
 
 struct AdminOrdersView: View {
     @StateObject var vm = AdminOrdersViewModel()
-    @State private var selectedTab: AdminOrderTab = .activeOrders
+    @State private var selectedTab: Segment = .activeOrders
     @State private var navigationPath = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
-                Color(uiColor: .systemGroupedBackground)
-                    .ignoresSafeArea()
+                LinearGradient(colors: [ Color(hex: "FFECE0"), Color.white], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .cornerRadius(41, corners: [.topLeft, .topRight])
+                    .edgesIgnoringSafeArea(.bottom)
 
                 VStack(spacing: 0) {
                     // Segmented Picker
-                    Picker("Order Type", selection: $selectedTab) {
-                        ForEach(AdminOrderTab.allCases, id: \.self) { tab in
-                            Text(tab.rawValue).tag(tab)
-                        }
-                    }
-                    .pickerStyle(.segmented)
+                    CustomSegmentedControl(
+                        selectedSegment: $selectedTab,
+                        segments: [.activeOrders, .myOrders]
+                    ) {}
                     .padding()
-                    .background(Color(uiColor: .systemGroupedBackground))
 
                     // Content based on selected tab
                     if selectedTab == .activeOrders {
