@@ -40,7 +40,7 @@ class AdminOrdersViewModel: ObservableObject {
         
         // Fetch paginated data
         db.collection("orders")
-            .order(by: "timestamp", descending: true)
+            .order(by: "timestamp", descending: false)
             .getDocuments { [weak self] snapshot, error in
                 guard let self = self else {
                     completion?(false)
@@ -96,8 +96,8 @@ class AdminOrdersViewModel: ObservableObject {
         allOrdersListener?.remove()
         
         allOrdersListener = db.collection("orders")
-            .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
+            .order(by: "timestamp", descending: false)
+            .limit(toLast: pageSize) // ensures I still listen to the newest ones, bcuz ordering ascending, new documents arrive at the end
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 guard let changes = snapshot?.documentChanges else { return }
@@ -107,7 +107,7 @@ class AdminOrdersViewModel: ObservableObject {
                         if let newOrder = try? change.document.data(as: Order.self) {
                             // Add to beginning if not already present
                             if !self.allOrders.contains(where: { $0.id == newOrder.id }) {
-                                self.allOrders.insert(newOrder, at: 0)
+                                self.allOrders.append(newOrder) // oldest first
                                 self.totalAllOrdersCount += 1
                             }
                         }
