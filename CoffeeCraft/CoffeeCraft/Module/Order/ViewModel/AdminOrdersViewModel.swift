@@ -18,11 +18,6 @@ class AdminOrdersViewModel: ObservableObject {
     private var allOrdersListener: ListenerRegistration?
     private var myOrdersListener: ListenerRegistration?
     private let pageSize = 5
-
-    init() {
-        fetchAllOrders(pageNum: 1)
-        fetchMyOrders(pageNum: 1)
-    }
     
     deinit {
         allOrdersListener?.remove()

@@ -39,10 +39,6 @@ struct AdminOrdersView: View {
                 OrderDetailView(order: order)
             }
             .customNavigationBar("Orders")
-            .task {
-                vm.fetchAllOrders(pageNum: 1)
-                vm.fetchMyOrders(pageNum: 1)
-            }
         }
     }
 }
@@ -61,66 +57,68 @@ struct ActiveOrdersContent: View {
     }
     
     var body: some View {
-        if filteredOrders.isEmpty {
-            VStack(spacing: 16) {
-                Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.brown.opacity(0.8))
-                Text("No Active Orders")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                Text("All orders have been completed. New ones will appear here.")
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            ScrollView(showsIndicators: false) {
-                LazyVStack(spacing: 16) {
-                    ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
-                        Button {
-                            navigationPath.append(order)
-                        } label: {
-                            OrderCardView(order: order) {
-                                AnyView(
-                                    HStack(spacing: 8) {
-                                        Button("Start") {
-                                            vm.updateOrderStatus(order: order, status: "InProgress")
-                                        }
-                                        .disabled(order.status != "Pending")
+        Group {
+            if filteredOrders.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.brown.opacity(0.8))
+                    Text("No Active Orders")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("All orders have been completed. New ones will appear here.")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 16) {
+                        ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
+                            Button {
+                                navigationPath.append(order)
+                            } label: {
+                                OrderCardView(order: order) {
+                                    AnyView(
+                                        HStack(spacing: 8) {
+                                            Button("Start") {
+                                                vm.updateOrderStatus(order: order, status: "InProgress")
+                                            }
+                                            .disabled(order.status != "Pending")
 
-                                        Button("Ready") {
-                                            vm.updateOrderStatus(order: order, status: "Ready")
-                                        }
-                                        .disabled(order.status != "InProgress")
+                                            Button("Ready") {
+                                                vm.updateOrderStatus(order: order, status: "Ready")
+                                            }
+                                            .disabled(order.status != "InProgress")
 
-                                        Button("Complete") {
-                                            vm.updateOrderStatus(order: order, status: "Completed")
+                                            Button("Complete") {
+                                                vm.updateOrderStatus(order: order, status: "Completed")
+                                            }
+                                            .disabled(order.status != "Ready")
                                         }
-                                        .disabled(order.status != "Ready")
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.brown)
-                                )
+                                        .buttonStyle(.borderedProminent)
+                                        .tint(.brown)
+                                    )
+                                }
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
-                        }
-                        .buttonStyle(.plain)
-                        .onAppear {
-                            // Pagination logic
-                            if vm.allOrders.count < vm.totalAllOrdersCount {
-                                if !vm.allOrders.isEmpty {
-                                    if order.id == vm.allOrders.last?.id, !isPaginating {
-                                        isPaginating = true
-                                        pageNum += 1
-                                        Task {
-                                            let timer = MinimumLoadingTime(0.5)
-                                            try? await timer.waitIfNeeded()
-                                            
-                                            await MainActor.run {
-                                                vm.fetchAllOrders(pageNum: pageNum) { success in
-                                                    isPaginating = false
+                            .buttonStyle(.plain)
+                            .onAppear {
+                                // Pagination logic
+                                if vm.allOrders.count < vm.totalAllOrdersCount {
+                                    if !vm.allOrders.isEmpty {
+                                        if order.id == vm.allOrders.last?.id, !isPaginating {
+                                            isPaginating = true
+                                            pageNum += 1
+                                            Task {
+                                                let timer = MinimumLoadingTime(0.5)
+                                                try? await timer.waitIfNeeded()
+                                                
+                                                await MainActor.run {
+                                                    vm.fetchAllOrders(pageNum: pageNum) { success in
+                                                        isPaginating = false
+                                                    }
                                                 }
                                             }
                                         }
@@ -128,24 +126,27 @@ struct ActiveOrdersContent: View {
                                 }
                             }
                         }
+                        
+                        // Loading indicator
+                        if isPaginating {
+                            ProgressView()
+                                .padding()
+                        }
                     }
-                    
-                    // Loading indicator
-                    if isPaginating {
-                        ProgressView()
-                            .padding()
+                    .padding(.vertical)
+                }
+                .refreshable {
+                    pageNum = 1
+                    await withCheckedContinuation { continuation in
+                        vm.refreshAllOrders { _ in
+                            continuation.resume()
+                        }
                     }
                 }
-                .padding(.vertical)
             }
-            .refreshable {
-                pageNum = 1
-                await withCheckedContinuation { continuation in
-                    vm.refreshAllOrders { _ in
-                        continuation.resume()
-                    }
-                }
-            }
+        }
+        .onAppear {
+            vm.fetchAllOrders(pageNum: 1)
         }
     }
 }
@@ -158,45 +159,47 @@ struct MyOrdersContent: View {
     @State private var pageNum = 1
     
     var body: some View {
-        if vm.myOrders.isEmpty {
-            VStack(spacing: 16) {
-                Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.brown.opacity(0.7))
-                Text("No Orders Yet")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                Text("Your coffee orders will appear here.")
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            ScrollView(showsIndicators: false) {
-                LazyVStack(spacing: 16) {
-                    ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
-                        Button {
-                            navigationPath.append(order)
-                        } label: {
-                            OrderCardView(order: order)
-                                .padding(.horizontal)
-                        }
-                        .buttonStyle(.plain)
-                        .onAppear {
-                            // Pagination logic
-                            if vm.myOrders.count < vm.totalMyOrdersCount {
-                                if !vm.myOrders.isEmpty {
-                                    if order.id == vm.myOrders.last?.id, !isPaginating {
-                                        isPaginating = true
-                                        pageNum += 1
-                                        Task {
-                                            let timer = MinimumLoadingTime(0.5)
-                                            try? await timer.waitIfNeeded()
-                                            
-                                            await MainActor.run {
-                                                vm.fetchMyOrders(pageNum: pageNum) { success in
-                                                    isPaginating = false
+        Group {
+            if vm.myOrders.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.brown.opacity(0.7))
+                    Text("No Orders Yet")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("Your coffee orders will appear here.")
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 16) {
+                        ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
+                            Button {
+                                navigationPath.append(order)
+                            } label: {
+                                OrderCardView(order: order)
+                                    .padding(.horizontal)
+                            }
+                            .buttonStyle(.plain)
+                            .onAppear {
+                                // Pagination logic
+                                if vm.myOrders.count < vm.totalMyOrdersCount {
+                                    if !vm.myOrders.isEmpty {
+                                        if order.id == vm.myOrders.last?.id, !isPaginating {
+                                            isPaginating = true
+                                            pageNum += 1
+                                            Task {
+                                                let timer = MinimumLoadingTime(0.5)
+                                                try? await timer.waitIfNeeded()
+                                                
+                                                await MainActor.run {
+                                                    vm.fetchMyOrders(pageNum: pageNum) { success in
+                                                        isPaginating = false
+                                                    }
                                                 }
                                             }
                                         }
@@ -204,24 +207,27 @@ struct MyOrdersContent: View {
                                 }
                             }
                         }
+                        
+                        // Loading indicator
+                        if isPaginating {
+                            ProgressView()
+                                .padding()
+                        }
                     }
-                    
-                    // Loading indicator
-                    if isPaginating {
-                        ProgressView()
-                            .padding()
+                    .padding(.vertical)
+                }
+                .refreshable {
+                    pageNum = 1
+                    await withCheckedContinuation { continuation in
+                        vm.refreshMyOrders { _ in
+                            continuation.resume()
+                        }
                     }
                 }
-                .padding(.vertical)
             }
-            .refreshable {
-                pageNum = 1
-                await withCheckedContinuation { continuation in
-                    vm.refreshMyOrders { _ in
-                        continuation.resume()
-                    }
-                }
-            }
+        }
+        .onAppear {
+            vm.fetchMyOrders(pageNum: 1)
         }
     }
 }

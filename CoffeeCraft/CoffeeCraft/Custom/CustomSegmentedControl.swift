@@ -36,7 +36,7 @@ struct CustomSegmentedControl: View {
                         .foregroundColor(
                             selectedSegment == segment
                             ? .white
-                            : Color.brown.opacity(0.75)
+                            : Color.coffeeBrown
                         )
                 }
                 .frame(maxWidth: .infinity, minHeight: height)
@@ -53,7 +53,7 @@ struct CustomSegmentedControl: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.brown.opacity(0.15))
+                .fill(Color.coffeeBrown.opacity(0.15))
         )
     }
 }
