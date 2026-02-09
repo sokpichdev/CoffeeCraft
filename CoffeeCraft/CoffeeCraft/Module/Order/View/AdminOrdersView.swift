@@ -51,7 +51,9 @@ struct ActiveOrdersContent: View {
     @State private var pageNum = 1
     
     private var filteredOrders: [Order] {
-        vm.allOrders.filter { $0.status != "Completed" }
+        vm.allOrders
+            .filter { $0.status != "Completed" }
+            .sorted(by: { $0.timestamp > $1.timestamp })
     }
     
     var body: some View {
