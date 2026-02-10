@@ -21,7 +21,7 @@ struct CustomSegmentedControl: View {
                 ZStack {
                     // Selected background
                     if selectedSegment == segment {
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 24)
                             .fill(
                                 LinearGradient(
                                     colors: [Color.coffeeWarmBrown, Color.coffeeWarmBrown.opacity(0.85)],
@@ -58,7 +58,7 @@ struct CustomSegmentedControl: View {
         }
         .padding(4)
         .background(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: 24)
                 .fill(Color.white.opacity(0.75))
                 .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
         )
