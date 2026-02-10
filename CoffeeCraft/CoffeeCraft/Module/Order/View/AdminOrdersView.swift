@@ -15,7 +15,11 @@ struct AdminOrdersView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
-                LinearGradient(colors: [ Color(hex: "FFECE0"), Color.white], startPoint: .topLeading, endPoint: .bottomTrailing)
+                LinearGradient(colors: [
+                    Color.coffeeDarkBrown.opacity(0.5),
+                    Color.coffeeDarkBrown.opacity(0.35)
+                ],
+                               startPoint: .topLeading, endPoint: .bottomTrailing)
                     .cornerRadius(41, corners: [.topLeft, .topRight])
                     .edgesIgnoringSafeArea(.bottom)
 
@@ -34,9 +38,14 @@ struct AdminOrdersView: View {
                         MyOrdersContent(vm: vm, navigationPath: $navigationPath)
                     }
                 }
+                .background(
+                    RoundedRectangle(cornerRadius: 28)
+                        .fill(.ultraThinMaterial)
+                        .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
+                )
             }
             .navigationDestination(for: Order.self) { order in
-                OrderDetailView(order: order)
+                OrderDetailView(order: order, isActive: selectedTab == .activeOrders ? true : false)
             }
             .customNavigationBar("Orders")
         }

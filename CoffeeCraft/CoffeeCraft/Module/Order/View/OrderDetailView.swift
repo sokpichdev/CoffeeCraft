@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OrderDetailView: View {
     let order: Order
-    
+    var isActive: Bool = false
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {

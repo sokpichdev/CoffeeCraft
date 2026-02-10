@@ -22,7 +22,13 @@ struct CustomSegmentedControl: View {
                     // Selected background
                     if selectedSegment == segment {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.brown)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.coffeeWarmBrown, Color.coffeeWarmBrown.opacity(0.85)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
                             .matchedGeometryEffect(
                                 id: "SEGMENT_BG",
                                 in: animation
@@ -53,7 +59,8 @@ struct CustomSegmentedControl: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.coffeeBrown.opacity(0.15))
+                .fill(Color.white.opacity(0.75))
+                .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
         )
     }
 }
