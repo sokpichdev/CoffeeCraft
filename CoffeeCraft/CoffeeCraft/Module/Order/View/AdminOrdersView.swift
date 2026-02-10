@@ -146,7 +146,9 @@ struct ActiveOrdersContent: View {
                                 .padding()
                         }
                     }
+                    .padding(.bottom)
                 }
+                .padding(.bottom)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .refreshable {
                     pageNum = 1
@@ -226,7 +228,9 @@ struct MyOrdersContent: View {
                                 .padding()
                         }
                     }
+                    .padding(.bottom)
                 }
+                .padding(.bottom)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .refreshable {
                     pageNum = 1
