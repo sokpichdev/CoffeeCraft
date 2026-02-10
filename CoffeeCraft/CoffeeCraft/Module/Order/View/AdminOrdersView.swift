@@ -15,14 +15,14 @@ struct AdminOrdersView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
-                LinearGradient(colors: [
-                    Color.coffeeDarkBrown.opacity(0.5),
-                    Color.coffeeDarkBrown.opacity(0.35)
-                ],
-                               startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .cornerRadius(41, corners: [.topLeft, .topRight])
-                    .edgesIgnoringSafeArea(.bottom)
-
+                LinearGradient(colors: [/*Color.coffeeDarkBrown,*/
+                                        Color.coffeeDarkBrown.opacity(0.75),
+                                        Color.coffeeDarkBrown.opacity(0.5),
+                                        Color(.systemBackground)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .cornerRadius(36, corners: [.topLeft, .topRight])
+                .edgesIgnoringSafeArea(.bottom)
                 VStack(spacing: 0) {
                     // Segmented Picker
                     CustomSegmentedControl(
@@ -34,15 +34,12 @@ struct AdminOrdersView: View {
                     // Content based on selected tab
                     if selectedTab == .activeOrders {
                         ActiveOrdersContent(vm: vm, navigationPath: $navigationPath)
+                            .padding(.horizontal)
                     } else {
                         MyOrdersContent(vm: vm, navigationPath: $navigationPath)
+                            .padding(.horizontal)
                     }
                 }
-                .background(
-                    RoundedRectangle(cornerRadius: 28)
-                        .fill(.ultraThinMaterial)
-                        .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
-                )
             }
             .navigationDestination(for: Order.self) { order in
                 OrderDetailView(order: order, isActive: selectedTab == .activeOrders ? true : false)
@@ -83,7 +80,7 @@ struct ActiveOrdersContent: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: 8) {
                         ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
                             Button {
                                 navigationPath.append(order)
@@ -118,7 +115,6 @@ struct ActiveOrdersContent: View {
                                         .tint(.brown)
                                     )
                                 }
-                                .padding(.horizontal)
                             }
                             .buttonStyle(.plain)
                             .onAppear {
@@ -150,8 +146,8 @@ struct ActiveOrdersContent: View {
                                 .padding()
                         }
                     }
-                    .padding(.vertical)
                 }
+                .clipShape(RoundedRectangle(cornerRadius: 24))
                 .refreshable {
                     pageNum = 1
                     await withCheckedContinuation { continuation in
@@ -193,13 +189,12 @@ struct MyOrdersContent: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: 8) {
                         ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
                             Button {
                                 navigationPath.append(order)
                             } label: {
                                 OrderCardView(order: order)
-                                    .padding(.horizontal)
                             }
                             .buttonStyle(.plain)
                             .onAppear {
@@ -231,8 +226,8 @@ struct MyOrdersContent: View {
                                 .padding()
                         }
                     }
-                    .padding(.vertical)
                 }
+                .clipShape(RoundedRectangle(cornerRadius: 24))
                 .refreshable {
                     pageNum = 1
                     await withCheckedContinuation { continuation in

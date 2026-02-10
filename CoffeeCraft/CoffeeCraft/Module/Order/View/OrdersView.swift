@@ -36,7 +36,7 @@ struct OrdersView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView(showsIndicators: false) {
-                        LazyVStack(spacing: 16) {
+                        LazyVStack(spacing: 8) {
                             ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
                                 NavigationLink(value: order) {
                                     OrderCardView(order: order)
@@ -227,7 +227,7 @@ struct OrderCardView: View {
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 24)
                 .fill(Color(uiColor: .tertiarySystemBackground))
         )
         .shadow(color: Color.primary.opacity(0.05), radius: 6, x: 0, y: 3)

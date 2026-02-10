@@ -15,7 +15,7 @@ struct TabBarView: View {
             .background(
                 Color(UIColor.systemBackground)
                     .mask(
-                        RoundedCorner(radius: 30, corners: [.topLeft, .topRight])
+                        RoundedCorner(radius: 24, corners: [.topLeft, .topRight])
                     )
             )
             .frame(height: 70)
