@@ -7,6 +7,9 @@
 import SwiftUI
 
 struct CoffeeLoaderView: View {
+    
+    var progress: CGFloat? = nil
+    
     @State private var fillLevel: CGFloat = 0
     @State private var waveOffset: CGFloat = 0
 
@@ -26,9 +29,10 @@ struct CoffeeLoaderView: View {
         .mask(
             VStack {
                 Spacer()
-                WaveShape(offset: waveOffset, percent: fillLevel)
+                WaveShape(offset: waveOffset,
+                          percent: progress ?? fillLevel)
                     .fill(Color.black)
-                    .frame(height: imageSize * fillLevel)
+                    .frame(height: imageSize * (progress ?? fillLevel))
             }
                 .frame(height: imageSize)
         )
@@ -43,8 +47,10 @@ struct CoffeeLoaderView: View {
                 .font(.system(size: imageSize))
         )
         .onAppear {
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                fillLevel = 1.2
+            if progress == nil {
+                withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                    fillLevel = 1.2
+                }
             }
             withAnimation(.linear(duration: 0.5).repeatForever(autoreverses: false)) {
                 waveOffset = 1

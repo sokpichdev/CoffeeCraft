@@ -17,7 +17,7 @@ class AnnouncementViewModel: ObservableObject {
     @Published var announcements: [Announcement] = []
     @Published var isLoading: Bool = false
     @Published var isAnnouncementsFetched: Bool = false
-    
+    @Published var isRefreshing: Bool = false
     // MARK: - Fetch All Announcements
     func fetchAnnouncements() async throws -> [Announcement] {
         isLoading = true
