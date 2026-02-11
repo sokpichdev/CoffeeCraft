@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct AccountView: View {
-    @StateObject var inboxVM = InboxViewModel()
+//    @StateObject var inboxVM = InboxViewModel()
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var authVM: AuthViewModel
@@ -64,9 +64,9 @@ struct AccountView: View {
                 .environmentObject(authVM)
                 .environmentObject(themeManager)
         })
-        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
-            InboxView().environmentObject(inboxVM)
-        })
+//        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
+//            InboxView().environmentObject(inboxVM)
+//        })
         .navigationDestination(isPresented: $isNavigateToFavorite) {
             FavoriteView()
                 .environmentObject(favVM)
@@ -237,11 +237,11 @@ struct AccountView: View {
     // MARK: Personal
     var personalSection: some View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
-            RowInSectionView(title: "Inbox", systemImage: "tray.fill",
-                             badgeCount: inboxVM.displayedAnnouncements.filter { !$0.isRead }.count) {
-                isNavigateToInbox = true
-            }
-            DeviderInSectionView(padding: 44)
+//            RowInSectionView(title: "Inbox", systemImage: "tray.fill",
+//                             badgeCount: inboxVM.displayedAnnouncements.filter { !$0.isRead }.count) {
+//                isNavigateToInbox = true
+//            }
+//            DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
