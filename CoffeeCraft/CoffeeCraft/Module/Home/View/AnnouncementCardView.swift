@@ -32,3 +32,22 @@ struct AnnouncementCardView: View {
         .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
     }
 }
+
+struct AnnouncementCardShimmerView: View {
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ShimmerView(cornerRadius: 0).frame(width: UIScreen.main.bounds.width - 32, height: 200)
+            VStack(alignment: .leading, spacing: 5) {
+                ShimmerView().frame(width: UIScreen.main.bounds.width * 0.4, height: 17)
+                
+                ShimmerView().frame(height: 15)
+            }
+            .padding(.horizontal, 5)
+            .padding(.bottom, 10)
+        }
+        .background(.ultraThinMaterial)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
+    }
+}

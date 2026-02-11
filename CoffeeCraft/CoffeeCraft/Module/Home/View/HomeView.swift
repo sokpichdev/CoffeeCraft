@@ -9,54 +9,20 @@ import SwiftUI
 // MARK: - HomeView
 struct HomeView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    
+    @StateObject var announcementVM = AnnouncementViewModel()
     @Binding var selectedTab: Tab
-    private let originalBanners = [
-        "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
-        "https://i.postimg.cc/7hwm7VhT/image.png",
-        "https://i.postimg.cc/Z5Wn4zHf/image.png",
-        "https://i.postimg.cc/G903q40J/image.png"
-    ]
-
     @State private var currentIndex: Int = 0
-    let announcements = [
-        Announcement(id: 1, title: "New Coffee Blend!", description: "Try our new seasonal coffee.", imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg", createdDate: ""),
-        Announcement(id: 2, title: "Weekend Special", description: "Discount for all drinks this weekend.", imageName: "", createdDate: ""),
-        Announcement(id: 3, title: "Free Cookie", description: "Get a free cookie with any coffee.", imageName: "", createdDate: "")
-    ]
+    private var bannerImages: [String] {
+        announcementVM.announcements
+            .prefix(4)
+            .compactMap { $0.imageName }
+            .filter { !$0.isEmpty }
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
-                
-                // MARK: - Stretchy Header Banner
-                GeometryReader { geo in
-                    let minY = geo.frame(in: .global).minY
-                    let baseHeight: CGFloat = 250
-                    let dynamicHeight = baseHeight + (minY > 0 ? minY : 0)
-                    
-                    InfiniteCarousel(
-                        items: originalBanners,
-                        height: dynamicHeight,
-                        width: UIScreen.main.bounds.width,
-                        currentIndex: $currentIndex
-                    ) { urlString in
-                        AsyncImageCard(
-                            imageURL: urlString,
-                            height: dynamicHeight,
-                            width: UIScreen.main.bounds.width,
-                            corner: 0
-                        )
-                    }
-                    .overlay(
-                        PageIndicator(count: originalBanners.count, currentIndex: currentIndex)
-                            .padding(.bottom, 15), // Gap from the bottom of the image
-                        alignment: .bottom
-                    )
-                    .offset(y: minY > 0 ? -minY : 0)
-                }
-                .frame(height: 250)
-                
+                headerBannerView  // MARK: - Stretchy Header Banner
                 VStack(spacing: 12) {
 
                     Text("Good Morning, \(UserSession.shared.userName ?? "User")! ☀️")
@@ -67,7 +33,6 @@ struct HomeView: View {
                     HStack(spacing: 20) {
                         PickUpButton(onClick: { selectedTab = .menu })
                         PickUpButton(title: "Delivery") {
-//                            AlertManager.shared.showSuccess(message: "click devilery ☕️")
                             LoaderManager.shared.showLoading(autoHide: true, delay: 10)
                         }
                     }
@@ -75,12 +40,27 @@ struct HomeView: View {
 
                     VStack(spacing: 6) {
                         announcementLabel
-                        VStack(spacing: 20) {
-                            ForEach(announcements.prefix(3)) { ann in
-                                NavigationLink {
-                                    AnnouncementDetailView(announcement: ann)
-                                } label: {
-                                    AnnouncementCardView(announcement: ann)
+                        
+                        if announcementVM.isLoading {
+                            VStack {
+                                ForEach(0..<3) { _ in
+                                    AnnouncementCardShimmerView()
+                                }
+                            }
+                        } else if announcementVM.announcements.isEmpty {
+                            Text("No announcements yet")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 40)
+                        } else {
+                            VStack {
+                                ForEach(announcementVM.announcements.prefix(3)) { ann in
+                                    NavigationLink {
+                                        AnnouncementDetailView(announcement: ann)
+                                    } label: {
+                                        AnnouncementCardView(announcement: ann)
+                                    }
                                 }
                             }
                         }
@@ -92,11 +72,67 @@ struct HomeView: View {
             }
         }
         .edgesIgnoringSafeArea(.top)
-//        .task {
-//            await ProductSeeder.seedSampleProducts()
-//        }
+        .onAppear {
+            if !announcementVM.isAnnouncementsFetched {
+                Task {
+                    try? await announcementVM.fetchAnnouncements()
+                }
+            }
+        }
+        .refreshable {
+            Task {
+                try? await announcementVM.fetchAnnouncements()
+            }
+        }
     }
-        
+       
+    var headerBannerView: some View {
+        GeometryReader { geo in
+            let minY = geo.frame(in: .global).minY
+            let baseHeight: CGFloat = 250
+            let dynamicHeight = baseHeight + (minY > 0 ? minY : 0)
+            
+            if bannerImages.count > 0 {
+                InfiniteCarousel(
+                    items: bannerImages,
+                    height: dynamicHeight,
+                    width: UIScreen.main.bounds.width,
+                    currentIndex: $currentIndex
+                ) { urlString in
+                    AsyncImageCard(
+                        imageURL: urlString,
+                        height: dynamicHeight,
+                        width: UIScreen.main.bounds.width,
+                        corner: 0
+                    )
+                }
+                .overlay(
+                    PageIndicator(count: bannerImages.count, currentIndex: currentIndex)
+                        .padding(.bottom, 15),
+                    alignment: .bottom
+                )
+                .offset(y: minY > 0 ? -minY : 0)
+            } else {
+                ZStack {
+                    Color.coffeeBrown.opacity(0.1)
+                    
+                    VStack(spacing: 12) {
+                        Image(systemName: "photo.on.rectangle.angled")
+                            .font(.system(size: 50))
+                            .foregroundColor(.coffeeBrown.opacity(0.5))
+                        
+                        Text("No Banners Available")
+                            .font(.headline)
+                            .foregroundColor(.coffeeBrown.opacity(0.7))
+                    }
+                }
+                .frame(height: dynamicHeight)
+                .frame(maxWidth: .infinity)
+                .offset(y: minY > 0 ? -minY : 0)
+            }
+        }
+        .frame(height: 250)
+    }
     var announcementLabel: some View {
         HStack {
             Text("Announcements")
@@ -106,6 +142,7 @@ struct HomeView: View {
             
             NavigationLink {
                 AnnouncementsListView()
+                    .environmentObject(announcementVM)
             } label: {
                 Text("See All")
                     .font(.headline)
@@ -113,7 +150,6 @@ struct HomeView: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal)
     }
 }
 
@@ -136,15 +172,6 @@ struct PickUpButton: View {
         .contentShape(Rectangle())
         .buttonStyle(PlainButtonStyle())
     }
-}
-
-struct Announcement: Identifiable {
-    let id: Int
-    let title: String?
-    let description: String?
-    let imageName: String?
-    let createdDate: String?
-    var isRead: Bool = false
 }
 
 struct PageIndicator: View {
