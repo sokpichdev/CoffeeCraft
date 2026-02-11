@@ -6,167 +6,167 @@
 //
 import SwiftUI
 
-struct InboxView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var inboxVM: InboxViewModel
-    @State var isNavigateToAnnouncementDetail: Bool = false
-    @State var selectedAnnouncement: Announcement?
-    var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(inboxVM.filteredAnnouncements) { announcement in
-                    Button(action: {
-                        selectedAnnouncement = announcement
-                        isNavigateToAnnouncementDetail = true
-                        inboxVM.markAsRead(id: announcement.id)
-                    }, label: {
-                        InboxItemView(announcement: announcement)
-                            .onAppear {
-                                if announcement.id == inboxVM.displayedAnnouncements.last?.id {
-                                    inboxVM.loadMore()
-                                }
-                            }
-                    })
-                    .buttonStyle(PlainButtonStyle())
-                }
-                
-                // Loading indicator
-                if inboxVM.isLoading {
-                    ProgressView()
-                        .padding()
-                }
-            }
-            .padding()
-        }
-        .background(Color(.systemGroupedBackground))
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolBarButton.back {
-                dismiss()
-            }
-
-            // Center Title (Filter + Inbox)
-            ToolbarItem(placement: .principal) {
-                Menu {
-                    Picker("Filter", selection: $inboxVM.selectedFilter) {
-                        ForEach(InboxFilter.allCases) { filter in
-                            Text(filter.rawValue).tag(filter)
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        HStack(spacing: 2) {
-                            Image(systemName: "chevron.down")
-                                .font(.caption)
-                            Text(inboxVM.selectedFilter.rawValue)
-                                .font(.headline)
-                        }
-                        .foregroundColor(.brown)
-                        
-                        Text("Inbox")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
-
-            // Read All Button
-            ToolBarButton(placement: .topBarTrailing, buttonType: .text("Real All")) {
-                inboxVM.markAllAsRead()
-            }
-        }
-        .onAppear {
-            inboxVM.loadInitial()
-        }
-        .navigationDestination(isPresented: $isNavigateToAnnouncementDetail) {
-            AnnouncementDetailView(announcement: selectedAnnouncement)
-        }
-    }
-}
-
-struct InboxItemView: View {
-    let announcement: Announcement
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            // Icon/Image
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.brown, Color.brown.opacity(0.5)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 50, height: 50)
-                
-                if let imageUrl = announcement.imageName {
-                    AsyncImageCard(imageURL: imageUrl, height: 50, width: 50)
-                        .clipShape(Circle())
-                }
-            }
-            
-            // Content
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    if let title = announcement.title {
-                        Text(title)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .lineLimit(2)
-                    }
-                    
-                    Spacer()
-                    
-                    // Unread indicator
-                    if !announcement.isRead {
-                        Circle()
-                            .fill(Color(red: 0.55, green: 0.35, blue: 0.18))
-                            .frame(width: 8, height: 8)
-                    }
-
-                }
-                
-                if let description = announcement.description {
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                }
-                
-                if let createdDate = announcement.createdDate {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.caption)
-                        Text(createdDate)
-                            .font(.caption2)
-                    }
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 2)
-                }
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemGroupedBackground))
-                .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
-        )
-    }
-}
-
-// static mock data
-let announcements: [Announcement] = (1...100).map { id in
-    Announcement(
-        id: id,
-        title: "New Year Promotion! ☕",
-        description: "Celebrate 2026 with 20% off all beverages. Valid until January 31st. Don't miss out on your favorite coffee!",
-        imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
-        createdDate: "2 hours ago",
-        isRead: false
-    )
-}
+//struct InboxView: View {
+//    @Environment(\.dismiss) private var dismiss
+//    @EnvironmentObject var inboxVM: InboxViewModel
+//    @State var isNavigateToAnnouncementDetail: Bool = false
+//    @State var selectedAnnouncement: Announcement?
+//    var body: some View {
+//        ScrollView {
+//            LazyVStack(spacing: 12) {
+//                ForEach(inboxVM.filteredAnnouncements) { announcement in
+//                    Button(action: {
+//                        selectedAnnouncement = announcement
+//                        isNavigateToAnnouncementDetail = true
+//                        inboxVM.markAsRead(id: announcement.id)
+//                    }, label: {
+//                        InboxItemView(announcement: announcement)
+//                            .onAppear {
+//                                if announcement.id == inboxVM.displayedAnnouncements.last?.id {
+//                                    inboxVM.loadMore()
+//                                }
+//                            }
+//                    })
+//                    .buttonStyle(PlainButtonStyle())
+//                }
+//                
+//                // Loading indicator
+//                if inboxVM.isLoading {
+//                    ProgressView()
+//                        .padding()
+//                }
+//            }
+//            .padding()
+//        }
+//        .background(Color(.systemGroupedBackground))
+//        .navigationBarBackButtonHidden(true)
+//        .toolbar {
+//            ToolBarButton.back {
+//                dismiss()
+//            }
+//
+//            // Center Title (Filter + Inbox)
+//            ToolbarItem(placement: .principal) {
+//                Menu {
+//                    Picker("Filter", selection: $inboxVM.selectedFilter) {
+//                        ForEach(InboxFilter.allCases) { filter in
+//                            Text(filter.rawValue).tag(filter)
+//                        }
+//                    }
+//                } label: {
+//                    HStack(spacing: 6) {
+//                        HStack(spacing: 2) {
+//                            Image(systemName: "chevron.down")
+//                                .font(.caption)
+//                            Text(inboxVM.selectedFilter.rawValue)
+//                                .font(.headline)
+//                        }
+//                        .foregroundColor(.brown)
+//                        
+//                        Text("Inbox")
+//                            .font(.headline)
+//                            .foregroundColor(.primary)
+//                    }
+//                }
+//            }
+//
+//            // Read All Button
+//            ToolBarButton(placement: .topBarTrailing, buttonType: .text("Real All")) {
+//                inboxVM.markAllAsRead()
+//            }
+//        }
+//        .onAppear {
+//            inboxVM.loadInitial()
+//        }
+//        .navigationDestination(isPresented: $isNavigateToAnnouncementDetail) {
+//            AnnouncementDetailView(announcement: selectedAnnouncement)
+//        }
+//    }
+//}
+//
+//struct InboxItemView: View {
+//    let announcement: Announcement
+//    
+//    var body: some View {
+//        HStack(alignment: .top, spacing: 14) {
+//            // Icon/Image
+//            ZStack {
+//                Circle()
+//                    .fill(
+//                        LinearGradient(
+//                            colors: [
+//                                Color.brown, Color.brown.opacity(0.5)
+//                            ],
+//                            startPoint: .topLeading,
+//                            endPoint: .bottomTrailing
+//                        )
+//                    )
+//                    .frame(width: 50, height: 50)
+//                
+//                if let imageUrl = announcement.imageName {
+//                    AsyncImageCard(imageURL: imageUrl, height: 50, width: 50)
+//                        .clipShape(Circle())
+//                }
+//            }
+//            
+//            // Content
+//            VStack(alignment: .leading, spacing: 6) {
+//                HStack {
+//                    if let title = announcement.title {
+//                        Text(title)
+//                            .font(.system(size: 16, weight: .semibold))
+//                            .foregroundStyle(.primary)
+//                            .lineLimit(2)
+//                    }
+//                    
+//                    Spacer()
+//                    
+//                    // Unread indicator
+//                    if !announcement.isRead {
+//                        Circle()
+//                            .fill(Color(red: 0.55, green: 0.35, blue: 0.18))
+//                            .frame(width: 8, height: 8)
+//                    }
+//
+//                }
+//                
+//                if let description = announcement.description {
+//                    Text(description)
+//                        .font(.subheadline)
+//                        .foregroundStyle(.secondary)
+//                        .lineLimit(2)
+//                        .multilineTextAlignment(.leading)
+//                }
+//                
+//                if let createdDate = announcement.createdDate {
+//                    HStack(spacing: 4) {
+//                        Image(systemName: "clock")
+//                            .font(.caption)
+//                        Text(createdDate)
+//                            .font(.caption2)
+//                    }
+//                    .foregroundStyle(.tertiary)
+//                    .padding(.top, 2)
+//                }
+//            }
+//        }
+//        .padding(16)
+//        .background(
+//            RoundedRectangle(cornerRadius: 16)
+//                .fill(Color(.secondarySystemGroupedBackground))
+//                .shadow(color: Color.black.opacity(0.04), radius: 6, y: 2)
+//        )
+//    }
+//}
+//
+//// static mock data
+//let announcements: [Announcement] = (1...100).map { id in
+//    Announcement(
+//        id: id,
+//        title: "New Year Promotion! ☕",
+//        description: "Celebrate 2026 with 20% off all beverages. Valid until January 31st. Don't miss out on your favorite coffee!",
+//        imageName: "https://i.postimg.cc/8z4DrKCv/Affogato-0.jpg",
+//        createdDate: "2 hours ago",
+//        isRead: false
+//    )
+//}
