@@ -11,11 +11,7 @@ struct AnnouncementsListView: View {
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     
     var body: some View {
-        CustomRefreshScrollView(
-            onRefresh: {
-                try? await announcementVM.fetchAnnouncements()
-            }
-        ) {
+        CustomRefreshScrollView( {
             if announcementVM.isLoading {
                 VStack {
                     ForEach(0..<5) { _ in
@@ -53,7 +49,9 @@ struct AnnouncementsListView: View {
                     .padding(.top)
                 }
             }
-        }
+        }, onRefresh: {
+            try? await announcementVM.fetchAnnouncements()
+        })
         .customNavigationBar("Announcements") {
             ToolBarButton.back {
                 dismiss()
@@ -72,17 +70,19 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
 
 struct CustomRefreshScrollView<Content: View>: View {
     
-    var threshold: CGFloat = 60
-    var onRefresh: () async -> Void
+    var threshold: CGFloat = 80
     var content: () -> Content
+    var onRefresh: () async -> Void
     
     @State private var offset: CGFloat = 0
     @State private var isRefreshing = false
+    @State private var isLocked = false
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
+    
     init(
-        threshold: CGFloat = 60,
-        onRefresh: @escaping () async -> Void,
-        @ViewBuilder content: @escaping () -> Content
+        threshold: CGFloat = 80,
+        @ViewBuilder _ content: @escaping () -> Content,
+        onRefresh: @escaping () async -> Void
     ) {
         self.threshold = threshold
         self.onRefresh = onRefresh
@@ -94,7 +94,7 @@ struct CustomRefreshScrollView<Content: View>: View {
             VStack(spacing: 0) {
                 if offset > 0 || isRefreshing {
                     CoffeeLoaderView(progress: isRefreshing ? nil : min(offset / threshold, 1), imageSize: 50)
-                    .frame(height: isRefreshing ? 60 : min(offset, 60))
+                        .frame(height: isRefreshing ? 80 : min(offset, 80))
                 }
 
                 content()
@@ -106,42 +106,53 @@ struct CustomRefreshScrollView<Content: View>: View {
                         .onAppear {}
                         .preference(key: ScrollOffsetPreferenceKey.self, value: currentY)
                 }
-                .frame(height: 0), // Keeps it from affecting layout
+                .frame(height: 0),
                 alignment: .top
             )
         }
-        .coordinateSpace(name: "SCROLL") // Ensure this is exactly the same string
+        .scrollDisabled(isLocked) // Disable scroll when locked
+        .coordinateSpace(name: "SCROLL")
         .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-            if !isRefreshing {
-                // 2. Detect only positive pull-down values
+            // Only process offset changes when not locked
+            if !isRefreshing && !isLocked {
                 if value > 0 {
                     offset = value
+                    
+                    // Trigger refresh when threshold is exceeded
+                    if value > threshold {
+                        triggerRefresh()
+                    }
                 } else if offset != 0 {
                     offset = 0
-                }
-                
-                if value > threshold {
-                    triggerRefresh()
                 }
             }
         }
     }
     
     private func triggerRefresh() {
-        // 1. Guard against double-triggering
-        guard !isRefreshing else { return }
+        guard !isRefreshing && !isLocked else { return }
         
         hapticGenerator.prepare()
         hapticGenerator.impactOccurred()
         
-            isRefreshing = true
-            offset = 0
+        isRefreshing = true
+        isLocked = true
+        
+        // Snap offset to threshold position
+        withAnimation(.easeOut(duration: 0.2)) {
+            offset = threshold
+        }
         
         Task {
             await onRefresh()
+            
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 isRefreshing = false
+                offset = 0
             }
+            
+            try await MinimumLoadingTime(0.4).waitIfNeeded()
+            isLocked = false
         }
     }
 }

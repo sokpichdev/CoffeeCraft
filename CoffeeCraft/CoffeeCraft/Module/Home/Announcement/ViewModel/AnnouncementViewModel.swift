@@ -4,7 +4,6 @@
 //
 //  Created by Sok Pich on 2/11/26.
 //
-
 import Foundation
 import FirebaseFirestore
 
@@ -18,6 +17,7 @@ class AnnouncementViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isAnnouncementsFetched: Bool = false
     @Published var isRefreshing: Bool = false
+    
     // MARK: - Fetch All Announcements
     func fetchAnnouncements() async throws -> [Announcement] {
         isLoading = true
@@ -27,23 +27,25 @@ class AnnouncementViewModel: ObservableObject {
                 .order(by: "createdDate", descending: true)
                 .getDocuments()
             
-            let announcements = snapshot.documents.compactMap { document -> Announcement? in
+            let fetchedAnnouncements = snapshot.documents.compactMap { document -> Announcement? in
                 try? document.data(as: Announcement.self)
             }
             
             try await MinimumLoadingTime(0.5).waitIfNeeded()
+            
+            // Update announcements BEFORE setting isLoading to false
             await MainActor.run {
-                self.announcements = announcements
-                self.isLoading = false
+                self.announcements = fetchedAnnouncements
                 self.isAnnouncementsFetched = true
+                self.isLoading = false
             }
             
-            return announcements
+            return fetchedAnnouncements
         } catch {
             await MainActor.run {
-                AlertManager.shared.showError(message: error.localizedDescription)
-                self.isLoading = false
                 self.isAnnouncementsFetched = true
+                self.isLoading = false
+                AlertManager.shared.showError(message: error.localizedDescription)
             }
             throw error
         }
