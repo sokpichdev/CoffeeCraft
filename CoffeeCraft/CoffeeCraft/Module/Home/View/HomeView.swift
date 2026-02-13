@@ -20,9 +20,13 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        CustomRefreshScrollView( {
             VStack(alignment: .leading, spacing: 10) {
-                headerBannerView  // MARK: - Stretchy Header Banner
+                if announcementVM.isLoading {
+                    ShimmerView(cornerRadius: 0).frame(height: 250)
+                } else {
+                    headerBannerView
+                }
                 VStack(spacing: 12) {
 
                     Text("Good Morning, \(UserSession.shared.userName ?? "User")! ☀️")
@@ -70,7 +74,11 @@ struct HomeView: View {
                 
                 Spacer(minLength: 30)
             }
-        }
+        }, onRefresh: {
+            Task {
+                try? await announcementVM.fetchAnnouncements()
+            }
+        })
         .edgesIgnoringSafeArea(.top)
         .onAppear {
             if !announcementVM.isAnnouncementsFetched {
@@ -79,14 +87,117 @@ struct HomeView: View {
                 }
             }
         }
-        .refreshable {
-            Task {
-                try? await announcementVM.fetchAnnouncements()
+    }
+    
+    var headerBannerView: some View {
+        Group {
+            let height: CGFloat = 250
+            
+            if bannerImages.count > 0 {
+                InfiniteCarousel(
+                    items: bannerImages,
+                    height: height,
+                    width: UIScreen.main.bounds.width,
+                    currentIndex: $currentIndex
+                ) { urlString in
+                    AsyncImageCard(
+                        imageURL: urlString,
+                        height: height,
+                        width: UIScreen.main.bounds.width,
+                        corner: 0
+                    )
+                }
+                .overlay(
+                    PageIndicator(count: bannerImages.count, currentIndex: currentIndex)
+                        .padding(.bottom, 15),
+                    alignment: .bottom
+                )
+                .frame(height: height)
+                .clipped()
+            } else {
+                ZStack {
+                    Color.coffeeBrown.opacity(0.1)
+                    
+                    VStack(spacing: 12) {
+                        Image(systemName: "photo.on.rectangle.angled")
+                            .font(.system(size: 50))
+                            .foregroundColor(.coffeeBrown.opacity(0.5))
+                        
+                        Text("No Banners Available")
+                            .font(.headline)
+                            .foregroundColor(.coffeeBrown.opacity(0.7))
+                    }
+                }
+                .frame(height: height)
+                .frame(maxWidth: .infinity)
+                .clipped()
+            }
+        }
+        .frame(height: 250)
+    }
+    
+    var announcementLabel: some View {
+        HStack {
+            Text("Announcements")
+                .font(.headline)
+            
+            Spacer()
+            
+            NavigationLink {
+                AnnouncementsListView()
+                    .environmentObject(announcementVM)
+            } label: {
+                Text("See All")
+                    .font(.headline)
+                    .padding(8)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+struct PickUpButton: View {
+    var title: String = "Pickup"
+    var onClick: (() -> Void)?
+    
+    var body: some View {
+        Button(action: {
+            onClick?()
+        }, label: {
+            Text(title)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity)
+                .frame(height: 80)
+                .background(Color.brown)
+                .cornerRadius(15)
+        })
+        .foregroundColor(.white)
+        .contentShape(Rectangle())
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct PageIndicator: View {
+    let count: Int
+    let currentIndex: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<count, id: \.self) { index in
+                Capsule()
+                    .fill(index == currentIndex ? Color.brown : Color.white.opacity(0.8))
+                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                    .frame(
+                        width: index == currentIndex ? 18 : 8,
+                        height: 8
+                    )
+                    .animation(.easeInOut(duration: 0.25), value: currentIndex)
             }
         }
     }
-       
-    var headerBannerView: some View {
+}
+
+extension HomeView {
+    var headerBannerStickyView: some View {
         GeometryReader { geo in
             let minY = geo.frame(in: .global).minY
             let baseHeight: CGFloat = 250
@@ -132,64 +243,5 @@ struct HomeView: View {
             }
         }
         .frame(height: 250)
-    }
-    var announcementLabel: some View {
-        HStack {
-            Text("Announcements")
-                .font(.headline)
-            
-            Spacer()
-            
-            NavigationLink {
-                AnnouncementsListView()
-                    .environmentObject(announcementVM)
-            } label: {
-                Text("See All")
-                    .font(.headline)
-                    .padding(8)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-}
-
-struct PickUpButton: View {
-    var title: String = "Pickup"
-    var onClick: (() -> Void)?
-    
-    var body: some View {
-        Button(action: {
-            onClick?()
-        }, label: {
-            Text(title)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity)
-                .frame(height: 80)
-                .background(Color.brown)
-                .cornerRadius(15)
-        })
-        .foregroundColor(.white)
-        .contentShape(Rectangle())
-        .buttonStyle(PlainButtonStyle())
-    }
-}
-
-struct PageIndicator: View {
-    let count: Int
-    let currentIndex: Int
-
-    var body: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<count, id: \.self) { index in
-                Capsule()
-                    .fill(index == currentIndex ? Color.brown : Color.white.opacity(0.8))
-                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
-                    .frame(
-                        width: index == currentIndex ? 18 : 8,
-                        height: 8
-                    )
-                    .animation(.easeInOut(duration: 0.25), value: currentIndex)
-            }
-        }
     }
 }
