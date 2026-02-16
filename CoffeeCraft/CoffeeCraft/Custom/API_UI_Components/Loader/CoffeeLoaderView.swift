@@ -34,15 +34,15 @@ struct CoffeeLoaderView: View {
                 Spacer()
                 ZStack {
                     // Layer 1 - Bottom wave (slowest, largest)
-                    WaveShape(offset: waveOffset1, percent: progress ?? fillLevel, amplitude: 4 * waveIntensity)
+                    WaveShape(offset: waveOffset1, percent: progress ?? fillLevel, amplitude: 6 * waveIntensity)
                     .fill(Color.black.opacity(0.3))
                     
                     // Layer 2 - Middle wave (medium speed)
-                    WaveShape(offset: waveOffset2, percent: progress ?? fillLevel, amplitude: 3 * waveIntensity)
+                    WaveShape(offset: waveOffset2, percent: progress ?? fillLevel, amplitude: 5 * waveIntensity)
                     .fill(Color.black.opacity(0.5))
                     
                     // Layer 3 - Top wave (fastest, smallest)
-                    WaveShape(offset: waveOffset3, percent: progress ?? fillLevel, amplitude: 2 * waveIntensity)
+                    WaveShape(offset: waveOffset3, percent: progress ?? fillLevel, amplitude: 4 * waveIntensity)
                     .fill(Color.black)
                 }
                 .frame(height: imageSize * (progress ?? fillLevel))
@@ -62,8 +62,8 @@ struct CoffeeLoaderView: View {
         .onChange(of: progress) { oldValue, newValue in
             if let newValue = newValue {
                 // Control wave intensity based on progress
-                // More progress = calmer waves, less progress = more intense waves
-                let targetIntensity = max(0.2, 1.0 - (newValue * 0.5))
+                // More progress = calmer waves, less progress = more intense waves, 0.5 so it's not too calm
+                let targetIntensity = max(0.5, 1.0 - (newValue * 0.5))
                 withAnimation(.easeInOut(duration: 0.3)) {
                     waveIntensity = targetIntensity
                 }
