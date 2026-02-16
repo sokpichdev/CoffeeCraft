@@ -116,13 +116,22 @@ struct CustomRefreshScrollView<Content: View>: View {
             .coordinateSpace(name: "SCROLL")
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
+                    .onChanged { value in
+                        // Only handle vertical drags (ignore horizontal swipes for navigation)
+                        let horizontalAmount = abs(value.translation.width)
+                        let verticalAmount = abs(value.translation.height)
+                        
+                        // If horizontal movement is greater, let navigation handle it
+                        if horizontalAmount > verticalAmount {
+                            return
+                        }
+                        
                         if !isDragging {
                             isDragging = true
                             hasTriggered = false
                         }
                     }
-                    .onEnded { _ in
+                    .onEnded { value in
                         isDragging = false
                         hasTriggered = false
                         
