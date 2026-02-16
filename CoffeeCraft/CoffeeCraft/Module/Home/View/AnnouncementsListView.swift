@@ -70,13 +70,15 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
 
 struct CustomRefreshScrollView<Content: View>: View {
     
-    var threshold: CGFloat = 80
+    var threshold: CGFloat = 100
     var content: () -> Content
     var onRefresh: () async -> Void
     
     @State private var offset: CGFloat = 0
     @State private var isRefreshing = false
     @State private var isLocked = false
+    @State private var isDragging = false
+    @State private var hasTriggered = false
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
     
     init(
@@ -93,8 +95,11 @@ struct CustomRefreshScrollView<Content: View>: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
                 if offset > 0 || isRefreshing {
-                    CoffeeLoaderView(progress: isRefreshing ? nil : min(offset / threshold, 1), imageSize: 50)
-                        .frame(height: isRefreshing ? 80 : min(offset, 80))
+                    CoffeeLoaderView(
+                        progress: isRefreshing ? nil : min(offset / threshold, 1),
+                        imageSize: 50
+                    )
+                    .frame(height: isRefreshing ? threshold : min(offset, threshold))
                 }
 
                 content()
@@ -110,20 +115,48 @@ struct CustomRefreshScrollView<Content: View>: View {
                 alignment: .top
             )
         }
-        .scrollDisabled(isLocked) // Disable scroll when locked
+        .scrollDisabled(isLocked)
         .coordinateSpace(name: "SCROLL")
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !isDragging {
+                        isDragging = true
+                        hasTriggered = false
+                    }
+                }
+                .onEnded { _ in
+                    isDragging = false
+                    hasTriggered = false
+                    
+                    // Reset offset if not refreshing
+                    if !isRefreshing {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            offset = 0
+                        }
+                    }
+                }
+        )
         .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-            // Only process offset changes when not locked
-            if !isRefreshing && !isLocked {
+            // Only update offset when user is dragging and not refreshing
+            if isDragging && !isRefreshing && !isLocked {
                 if value > 0 {
                     offset = value
                     
-                    // Trigger refresh when threshold is exceeded
-                    if value > threshold {
+                    // Trigger refresh immediately when threshold is crossed while dragging
+                    if value > threshold && !hasTriggered {
+                        hasTriggered = true
                         triggerRefresh()
                     }
-                } else if offset != 0 {
+                } else {
                     offset = 0
+                }
+            } else if !isRefreshing && !isLocked && !isDragging {
+                // Reset offset when not dragging
+                if offset != 0 {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        offset = 0
+                    }
                 }
             }
         }
@@ -153,6 +186,7 @@ struct CustomRefreshScrollView<Content: View>: View {
             
             try await MinimumLoadingTime(0.4).waitIfNeeded()
             isLocked = false
+            hasTriggered = false
         }
     }
 }

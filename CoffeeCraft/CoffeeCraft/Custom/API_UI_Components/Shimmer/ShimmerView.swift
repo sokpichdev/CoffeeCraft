@@ -9,9 +9,9 @@ import SwiftUI
 struct ShimmerView: View {
     var cornerRadius: CGFloat = Dimens.cornerRadius
     private let gradient = Gradient(colors: [
-        Color(hex: "6F4E37").opacity(0.3), // base brown
-        Color(hex: "D3B8AE").opacity(0.6), // lighter shimmer
-        Color(hex: "6F4E37").opacity(0.3)
+        Color(hex: "6F4E37").opacity(0.1), // base brown
+        Color(hex: "6F4E37").opacity(0.3), // lighter shimmer
+        Color(hex: "6F4E37").opacity(0.1)
     ])
     
     var body: some View {
