@@ -92,71 +92,76 @@ struct CustomRefreshScrollView<Content: View>: View {
     }
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
-                if offset > 0 || isRefreshing {
+        ZStack(alignment: .top) {
+            ScrollView(showsIndicators: false) {
+                content()
+                    .overlay(
+                        GeometryReader { geo in
+                            let currentY = geo.frame(in: .named("SCROLL")).minY
+                            Color.clear
+                                .onAppear {}
+                                .preference(key: ScrollOffsetPreferenceKey.self, value: currentY)
+                        }
+                        .frame(height: 0),
+                        alignment: .top
+                    )
+            }
+            .scrollDisabled(isLocked)
+            .coordinateSpace(name: "SCROLL")
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isDragging {
+                            isDragging = true
+                            hasTriggered = false
+                        }
+                    }
+                    .onEnded { _ in
+                        isDragging = false
+                        hasTriggered = false
+                        
+                        // Reset offset if not refreshing
+                        if !isRefreshing {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                offset = 0
+                            }
+                        }
+                    }
+            )
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                // Only update offset when user is dragging and not refreshing
+                if isDragging && !isRefreshing && !isLocked {
+                    if value > 0 {
+                        offset = value
+                        
+                        // Trigger refresh immediately when threshold is crossed while dragging
+                        if value > threshold && !hasTriggered {
+                            hasTriggered = true
+                            triggerRefresh()
+                        }
+                    } else {
+                        offset = 0
+                    }
+                } else if !isRefreshing && !isLocked && !isDragging {
+                    // Reset offset when not dragging
+                    if offset != 0 {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            offset = 0
+                        }
+                    }
+                }
+            }
+            
+            // Sticky loader at the top
+            if offset > 0 || isRefreshing {
+                VStack {
                     CoffeeLoaderView(
                         progress: isRefreshing ? nil : min(offset / threshold, 1),
                         imageSize: 50
                     )
                     .frame(height: isRefreshing ? threshold : min(offset, threshold))
-                }
-
-                content()
-            }
-            .overlay(
-                GeometryReader { geo in
-                    let currentY = geo.frame(in: .named("SCROLL")).minY
-                    Color.clear
-                        .onAppear {}
-                        .preference(key: ScrollOffsetPreferenceKey.self, value: currentY)
-                }
-                .frame(height: 0),
-                alignment: .top
-            )
-        }
-        .scrollDisabled(isLocked)
-        .coordinateSpace(name: "SCROLL")
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if !isDragging {
-                        isDragging = true
-                        hasTriggered = false
-                    }
-                }
-                .onEnded { _ in
-                    isDragging = false
-                    hasTriggered = false
                     
-                    // Reset offset if not refreshing
-                    if !isRefreshing {
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            offset = 0
-                        }
-                    }
-                }
-        )
-        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-            // Only update offset when user is dragging and not refreshing
-            if isDragging && !isRefreshing && !isLocked {
-                if value > 0 {
-                    offset = value
-                    
-                    // Trigger refresh immediately when threshold is crossed while dragging
-                    if value > threshold && !hasTriggered {
-                        hasTriggered = true
-                        triggerRefresh()
-                    }
-                } else {
-                    offset = 0
-                }
-            } else if !isRefreshing && !isLocked && !isDragging {
-                // Reset offset when not dragging
-                if offset != 0 {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        offset = 0
-                    }
+                    Spacer()
                 }
             }
         }
