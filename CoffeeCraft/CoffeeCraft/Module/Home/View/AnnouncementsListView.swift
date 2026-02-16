@@ -79,6 +79,8 @@ struct CustomRefreshScrollView<Content: View>: View {
     @State private var isLocked = false
     @State private var isDragging = false
     @State private var hasTriggered = false
+    @State private var animationProgress: CGFloat = 0
+    @State private var showLoader = false
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
     
     init(
@@ -95,6 +97,7 @@ struct CustomRefreshScrollView<Content: View>: View {
         ZStack(alignment: .top) {
             ScrollView(showsIndicators: false) {
                 content()
+                    .offset(y: isRefreshing ? threshold * animationProgress : 0)
                     .overlay(
                         GeometryReader { geo in
                             let currentY = geo.frame(in: .named("SCROLL")).minY
@@ -124,6 +127,7 @@ struct CustomRefreshScrollView<Content: View>: View {
                         if !isRefreshing {
                             withAnimation(.easeOut(duration: 0.3)) {
                                 offset = 0
+                                showLoader = false
                             }
                         }
                     }
@@ -134,6 +138,13 @@ struct CustomRefreshScrollView<Content: View>: View {
                     if value > 0 {
                         offset = value
                         
+                        // Show loader with animation when pulling starts
+                        if value > 5 && !showLoader {
+                            withAnimation(.easeIn(duration: 0.2)) {
+                                showLoader = true
+                            }
+                        }
+                        
                         // Trigger refresh immediately when threshold is crossed while dragging
                         if value > threshold && !hasTriggered {
                             hasTriggered = true
@@ -141,25 +152,32 @@ struct CustomRefreshScrollView<Content: View>: View {
                         }
                     } else {
                         offset = 0
+                        if !isRefreshing {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                showLoader = false
+                            }
+                        }
                     }
                 } else if !isRefreshing && !isLocked && !isDragging {
                     // Reset offset when not dragging
                     if offset != 0 {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             offset = 0
+                            showLoader = false
                         }
                     }
                 }
             }
             
-            // Sticky loader at the top
-            if offset > 0 || isRefreshing {
+            // Sticky loader at the top with animation
+            if showLoader || isRefreshing {
                 VStack {
                     CoffeeLoaderView(
-                        progress: isRefreshing ? nil : min(offset / threshold, 1),
+                        progress: isRefreshing ? (1 - animationProgress) : min(offset / threshold, 1),
                         imageSize: 50
                     )
                     .frame(height: isRefreshing ? threshold : min(offset, threshold))
+                    .transition(.move(edge: .top).combined(with: .opacity))
                     
                     Spacer()
                 }
@@ -175,6 +193,7 @@ struct CustomRefreshScrollView<Content: View>: View {
         
         isRefreshing = true
         isLocked = true
+        showLoader = true
         
         // Snap offset to threshold position
         withAnimation(.easeOut(duration: 0.2)) {
@@ -182,14 +201,26 @@ struct CustomRefreshScrollView<Content: View>: View {
         }
         
         Task {
+            // Animate the coffee emptying and content pushing up
+            withAnimation(.easeInOut(duration: 1.5)) {
+                animationProgress = 1.0
+            }
+            
+            // Now perform the actual refresh
             await onRefresh()
             
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            // Reset everything
+            withAnimation(.spring(response: 0.4, dampingFraction: 1.5)) {
                 isRefreshing = false
                 offset = 0
+                animationProgress = 0
             }
             
             try await MinimumLoadingTime(0.4).waitIfNeeded()
+            
+            withAnimation(.easeOut(duration: 0.2)) {
+                showLoader = false
+            }
             isLocked = false
             hasTriggered = false
         }
