@@ -71,6 +71,7 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
 struct CustomRefreshScrollView<Content: View>: View {
     
     var threshold: CGFloat = 100
+    var loaderOffset: CGFloat = 0
     var content: () -> Content
     var onRefresh: () async -> Void
     
@@ -85,10 +86,12 @@ struct CustomRefreshScrollView<Content: View>: View {
     
     init(
         threshold: CGFloat = 80,
+        loaderOffset: CGFloat = 0,
         @ViewBuilder _ content: @escaping () -> Content,
         onRefresh: @escaping () async -> Void
     ) {
         self.threshold = threshold
+        self.loaderOffset = loaderOffset
         self.onRefresh = onRefresh
         self.content = content
     }
@@ -176,6 +179,7 @@ struct CustomRefreshScrollView<Content: View>: View {
                         progress: isRefreshing ? (1 - animationProgress) : min(offset / threshold, 1),
                         imageSize: 50
                     )
+                    .offset(y: loaderOffset)
                     .frame(height: isRefreshing ? threshold : min(offset, threshold))
                     .transition(.move(edge: .top).combined(with: .opacity))
                     
