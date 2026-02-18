@@ -35,7 +35,7 @@ struct SearchView: View {
     
     var body: some View {
         CustomNavigationStack {
-            ScrollView {
+            CustomRefreshScrollView( {
                 LazyVStack(spacing: 12) {
                     if filteredResults.isEmpty {
                         VStack(spacing: 12) {
@@ -64,7 +64,9 @@ struct SearchView: View {
                     }
                 }
                 .padding()
-            }
+            }, onRefresh: {
+                
+            })
             .searchable(text: $searchText, prompt: "Search products...")
             .customNavigationBar("Search") {
                 ToolBarButton(placement: .navigationBarLeading, buttonType: .icon("xmark")) {

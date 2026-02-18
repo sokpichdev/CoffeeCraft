@@ -11,7 +11,7 @@ struct OrderDetailView: View {
     let order: Order
     var isActive: Bool = false
     var body: some View {
-        ScrollView {
+        CustomRefreshScrollView( {
             VStack(alignment: .leading, spacing: 20) {
                 // Order Header
                 VStack(alignment: .leading, spacing: 8) {
@@ -121,7 +121,9 @@ struct OrderDetailView: View {
                 StatusTimelineView(status: order.status)
             }
             .padding()
-        }
+        }, onRefresh: {
+            
+        })
         .navigationTitle("Order Details")
         .navigationBarTitleDisplayMode(.inline)
     }

@@ -11,14 +11,17 @@ struct FavoriteView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        CustomRefreshScrollView( {
+
             LazyVStack(spacing: 12) {
                 ForEach(favoriteVM.favorites) { item in
                     FavoriteRowItemView(item: item)
                 }
             }
             .padding()
-        }
+        }, onRefresh: {
+            
+        })
         .customNavigationBar("Favorites") {
             ToolBarButton.back {
                 dismiss()

@@ -61,7 +61,7 @@ struct ProductDetailView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            ScrollView(showsIndicators: false) {
+            CustomRefreshScrollView( {
                 VStack(alignment: .leading, spacing: 20) {
                     AsyncImageCard(imageURL: product.imageURL, height: 300, width: UIScreen.main.bounds.width - 32, corner: 20)
                         .shadow(radius: 5)
@@ -104,7 +104,9 @@ struct ProductDetailView: View {
                     Spacer(minLength: 180)
                 }
                 .padding()
-            }
+            }, onRefresh: {
+                
+            })
 
             // MARK: - Sticky Footer
             VStack(spacing: 12) {

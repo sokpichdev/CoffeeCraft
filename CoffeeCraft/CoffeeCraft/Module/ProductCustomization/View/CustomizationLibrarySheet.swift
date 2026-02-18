@@ -34,7 +34,7 @@ struct CustomizationLibrarySheet: View {
                             .padding(.horizontal, 40)
                     }
                 } else {
-                    ScrollView(showsIndicators: false) {
+                    CustomRefreshScrollView( {
                         LazyVStack(spacing: 12) {
                             ForEach(availableCustomizations) { category in
                                 LibraryCategoryCard(
@@ -47,7 +47,9 @@ struct CustomizationLibrarySheet: View {
                             }
                         }
                         .padding()
-                    }
+                    }, onRefresh: {
+                        
+                    })
                 }
             }
             .customNavigationBar("Customization Library"){

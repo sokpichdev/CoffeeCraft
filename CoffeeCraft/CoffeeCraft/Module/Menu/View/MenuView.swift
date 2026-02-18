@@ -155,7 +155,7 @@ struct MenuView: View {
     // MARK: - Product List
     private var productList: some View {
         ScrollViewReader { proxy in
-            ScrollView(.vertical, showsIndicators: false) {
+            CustomRefreshScrollView( {
                 LazyVStack(alignment: .leading, spacing: 24) {
                     ForEach(productVM.sections) { section in
                         sectionView(section)
@@ -163,7 +163,9 @@ struct MenuView: View {
                     }
                 }
                 .padding(.bottom, 100)
-            }
+            }, onRefresh: {
+                
+            })
             .onAppear {
                 productScrollProxy = proxy
             }
@@ -173,6 +175,7 @@ struct MenuView: View {
                 guard !isScrollingProgrammatically else { return }
                 updateVisibleSection(values: values)
             }
+            
         }
     }
 

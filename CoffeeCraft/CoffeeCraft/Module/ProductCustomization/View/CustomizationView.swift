@@ -23,7 +23,7 @@ struct CustomizationView: View {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
                 
-                ScrollView(showsIndicators: false) {
+                CustomRefreshScrollView( {
                     VStack(spacing: 20) {
                         // Header info card
                         if customizationVM.isLoading {
@@ -77,7 +77,9 @@ struct CustomizationView: View {
                     }
                     .padding(.top, 10)
                     .padding(.horizontal)
-                }
+                }, onRefresh: {
+                    
+                })
                 .scrollDismissesKeyboard(.immediately)
             }
             .onAppear {

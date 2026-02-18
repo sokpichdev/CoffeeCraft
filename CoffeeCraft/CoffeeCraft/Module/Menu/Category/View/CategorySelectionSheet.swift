@@ -49,7 +49,7 @@ struct CategorySelectionSheet: View {
                         }
                     )
                     .padding([.top, .horizontal])
-                ScrollView(showsIndicators: true) {
+                CustomRefreshScrollView( {
                     LazyVStack(spacing: 0) {
                         ForEach(filteredCategories, id: \.self) { category in
                             Button(action: {
@@ -104,7 +104,9 @@ struct CategorySelectionSheet: View {
                         }
                     }
                     .padding(.top)
-                }
+                }, onRefresh: {
+                    
+                })
             }
             .customNavigationBar("Select Category") {
                 ToolBarButton(placement: .topBarTrailing, buttonType: .text("Done")) {

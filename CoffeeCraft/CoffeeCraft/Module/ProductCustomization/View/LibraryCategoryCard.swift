@@ -49,7 +49,7 @@ struct LibraryCategoryCard: View {
                         }
                     }) {
                         Image(systemName: showDetails ? "chevron.up.circle.fill" : "info.circle.fill")
-                            .font(.headline)
+                            .font(.title2)
                             .foregroundColor(Color.brown)
                     }
                     .buttonStyle(PlainButtonStyle())

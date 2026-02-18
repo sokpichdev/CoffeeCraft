@@ -23,7 +23,7 @@ struct AccountView: View {
     @State var isNavigateToPurchaseCard: Bool = false
     @State var isNavigateToAddCard: Bool = false
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        CustomRefreshScrollView( {
             VStack(spacing: 20) {
                 profileSection
                 myCardSection
@@ -39,7 +39,9 @@ struct AccountView: View {
                 footerSection
             }
             .padding()
-        }
+        }, onRefresh: {
+            
+        })
         .background(Color(.systemGroupedBackground))
         .customNavigationBar("Account") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
