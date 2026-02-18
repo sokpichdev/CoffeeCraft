@@ -23,7 +23,7 @@ struct AllCardsView: View {
     private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        CustomRefreshScrollView( {
             VStack(spacing: 24) {
                 if cardVM.isLoading && snapshotCards.isEmpty {
                     ProgressView()
@@ -41,7 +41,9 @@ struct AllCardsView: View {
                     .frame(height: 100)
             }
             .padding()
-        }
+        }, onRefresh: {
+            
+        })
         .customNavigationBar("My Cards (\(snapshotCards.count))") {
             ToolBarButton.back {
                 dismiss()

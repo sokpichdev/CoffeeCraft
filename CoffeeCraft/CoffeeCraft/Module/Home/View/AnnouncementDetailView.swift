@@ -11,7 +11,7 @@ struct AnnouncementDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        CustomRefreshScrollView( {
             VStack(alignment: .leading, spacing: 16) {
                 
                 AsyncImageCard(
@@ -31,7 +31,9 @@ struct AnnouncementDetailView: View {
                 }
                 .padding(.horizontal)
             }
-        }
+        }, onRefresh: {
+            
+        })
         .customNavigationBar("Announcement") {
             ToolBarButton.back {
                 dismiss()

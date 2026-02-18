@@ -35,7 +35,7 @@ struct OrdersView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ScrollView(showsIndicators: false) {
+                    CustomRefreshScrollView( {
                         LazyVStack(spacing: 8) {
                             ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
                                 NavigationLink(value: order) {
@@ -72,15 +72,14 @@ struct OrdersView: View {
                         }
                         .padding(.vertical)
                         .frame(maxWidth: .infinity)
-                    }
-                    .refreshable {
+                    }, onRefresh: {
                         pageNum = 1
                         await withCheckedContinuation { continuation in
                             orderVM.refreshOrders { _ in
                                 continuation.resume()
                             }
                         }
-                    }
+                    })
                 }
             }
             .navigationDestination(for: Order.self) { order in

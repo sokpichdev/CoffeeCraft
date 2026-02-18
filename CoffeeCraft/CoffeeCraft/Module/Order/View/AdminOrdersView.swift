@@ -79,7 +79,7 @@ struct ActiveOrdersContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ScrollView(showsIndicators: false) {
+                CustomRefreshScrollView(threshold: 110, loaderOffset: 25, {
                     LazyVStack(spacing: 8) {
                         ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
                             Button {
@@ -147,17 +147,17 @@ struct ActiveOrdersContent: View {
                         }
                     }
                     .padding(.bottom)
-                }
-                .padding(.bottom)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .refreshable {
+                }, onRefresh: {
                     pageNum = 1
                     await withCheckedContinuation { continuation in
                         vm.refreshAllOrders { _ in
                             continuation.resume()
                         }
                     }
-                }
+                })
+                .padding(.bottom)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+
             }
         }
         .onAppear {
@@ -190,7 +190,7 @@ struct MyOrdersContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ScrollView(showsIndicators: false) {
+                CustomRefreshScrollView(threshold: 110, loaderOffset: 25, {
                     LazyVStack(spacing: 8) {
                         ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
                             Button {
@@ -229,17 +229,16 @@ struct MyOrdersContent: View {
                         }
                     }
                     .padding(.bottom)
-                }
-                .padding(.bottom)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .refreshable {
+                }, onRefresh: {
                     pageNum = 1
                     await withCheckedContinuation { continuation in
                         vm.refreshMyOrders { _ in
                             continuation.resume()
                         }
                     }
-                }
+                })
+                .padding(.bottom)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
         .onAppear {

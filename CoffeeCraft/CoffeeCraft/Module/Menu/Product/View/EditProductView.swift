@@ -40,7 +40,7 @@ struct EditProductView: View {
     @State private var mutableCategoryNames: [String] = []
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        CustomRefreshScrollView( {
             VStack(spacing: 32) {
                 // MARK: - Image Preview
                 VStack(spacing: 16) {
@@ -174,7 +174,9 @@ struct EditProductView: View {
             }
             .padding(.top, 20)
             .frame(maxWidth: .infinity)
-        }
+        }, onRefresh: {
+            
+        })
         .customNavigationBar(isEditing ? "Edit Product" : "Add Product") {
             ToolBarButton.back {
                 dismiss()

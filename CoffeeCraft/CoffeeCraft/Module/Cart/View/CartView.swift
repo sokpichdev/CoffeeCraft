@@ -21,7 +21,7 @@ struct CartView: View {
     var body: some View {
         CustomNavigationStack {
             ZStack(alignment: .bottom) {
-                ScrollView(showsIndicators: false) {
+               CustomRefreshScrollView( {
                     VStack(spacing: 12) {
                         ForEach(cartManager.items) { item in
                             Button {
@@ -43,7 +43,9 @@ struct CartView: View {
                     }
                     .padding()
                     .padding(.bottom, 100) // space for sticky footer
-                }
+                }, onRefresh: {
+                    
+                })
                 
                 // MARK: - Checkout Footer
                 VStack(spacing: 12) {
