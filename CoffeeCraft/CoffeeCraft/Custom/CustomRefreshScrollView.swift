@@ -124,7 +124,7 @@ struct CustomRefreshScrollView<Content: View>: View {
                         imageSize: 50
                     )
                     .offset(y: loaderOffset)
-                    .frame(height: isRefreshing ? threshold : min(offset, threshold))
+//                    .frame(height: isRefreshing ? threshold : min(offset, threshold))
                     .transition(.move(edge: .top).combined(with: .opacity))
                     
                     Spacer()
