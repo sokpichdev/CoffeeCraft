@@ -6,25 +6,25 @@
 - Logout  
 
 ## 2. Product - Admin
-- Create Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- Edit Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- Remove Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Create Product __________ (done)
+- Edit Product __________ (done)
+- Remove Product __________ (done)
 
 ## 3. Product - Customer
-- View Product Detail _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- Add product to cart _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- View Product Detail __________ (done)
+- Add product to cart __________ (done)
 
 ## 4. Cart
-- View Product Detail _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- Remove product from cart _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- Checkout Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- View Product Detail __________ (done)
+- Remove product from cart __________ (done)
+- Checkout Product __________ (done)
 
 ## 5. Order - Admin
-- View Orders _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- Update Order Status _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- View Orders __________ (done)
+- Update Order Status __________ (done)
 
 ## 6. Order - Customer
-- View own orders _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- View own orders __________ (done)
 
 ## 7. Home
 - none  
@@ -55,21 +55,21 @@
 ### ⭐ 2. Account / Profile
 
 **Must-have**
-- ⭐ View profile (name, email) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- ⭐ Edit profile  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- ⭐ Change password  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
-- ⭐ Logout _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- ⭐ View profile (name, email) __________ (done)
+- ⭐ Edit profile  __________ (done)
+- ⭐ Change password  __________ (done)
+- ⭐ Logout __________ (done)
 **Nice-to-have**
 - Order history shortcut  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Saved addresses  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Saved payment method (if any)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- App settings (language, dark mode)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- App settings (language, dark mode)  __________ (done)
 
 ---
 
 ### ⭐ 3. Order Enhancements
 Make ordering more realistic.
-- Order detail screen  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Order detail screen  __________ (done)
 - Reorder button (order again)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Cancel order (only if status = Pending)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 
@@ -79,7 +79,7 @@ Make ordering more realistic.
 Firebase + push notifications 👌
 - ⭐ Order status updates  
 - Promotions / discounts  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- Admin → notify customer when order is ready  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Admin → notify customer when order is ready  __________ (done)
 
 **Example:**  
 ☕ “Your Latte is ready for pickup!”  
@@ -91,7 +91,7 @@ Depending on scope:
 - Multiple payment methods _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)  
 - Cash  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - QR / Wallet  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- Order summary before confirm  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Order summary before confirm  __________ (done)
 - Promo / discount code  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Tax & service fee breakdown  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 
@@ -99,7 +99,7 @@ Depending on scope:
 
 ### ⭐ 6. Product Experience
 Make products feel premium.
-- ⭐ Favorite / Wishlist  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- ⭐ Favorite / Wishlist  __________ (done)
 - Product rating ⭐⭐⭐⭐⭐  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Reviews & comments  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Product availability (Out of stock)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
@@ -119,7 +119,7 @@ If this is also a management system:
 
 ### ⭐ 8. Loyalty & Retention (Advanced)
 These make app “real business ready”.
-- ⭐ Loyalty points (buy 10 coffees → free 1) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done) // only point for now
+- ⭐ Loyalty points (buy 10 coffees → free 1) __________ (done) // only point for now
 - Membership / VIP level _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Coupons / vouchers _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Birthday reward 🎂☕ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
@@ -132,7 +132,7 @@ Small things that matter a lot.
 - Empty states (Home / Orders / Cart)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (in progress)
 - Error handling (network fail) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Pull-to-refresh _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- Dark mode _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Dark mode __________ (done)
 
 ---
 
