@@ -79,7 +79,7 @@ struct ActiveOrdersContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                CustomRefreshScrollView(threshold: 110, loaderOffset: 25, {
+                CustomRefreshScrollView(loaderOffset: 25, {
                     LazyVStack(spacing: 8) {
                         ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
                             Button {
@@ -190,7 +190,7 @@ struct MyOrdersContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                CustomRefreshScrollView(threshold: 110, loaderOffset: 25, {
+                CustomRefreshScrollView(loaderOffset: 25, {
                     LazyVStack(spacing: 8) {
                         ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
                             Button {
