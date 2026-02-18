@@ -41,8 +41,6 @@ struct AllCardsView: View {
                     .frame(height: 100)
             }
             .padding()
-        }, onRefresh: {
-            
         })
         .customNavigationBar("My Cards (\(snapshotCards.count))") {
             ToolBarButton.back {

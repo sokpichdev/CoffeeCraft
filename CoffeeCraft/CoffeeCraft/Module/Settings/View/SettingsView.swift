@@ -68,8 +68,6 @@ struct SettingsView: View {
                     .padding(.top, 12)
             }
             .padding()
-        }, onRefresh: {
-            
         })
         .background(Color(.systemGroupedBackground))
         .customNavigationBar("Setting") {

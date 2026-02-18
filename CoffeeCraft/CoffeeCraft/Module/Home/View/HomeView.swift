@@ -20,7 +20,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        CustomRefreshScrollView(threshold: 120, loaderOffset: 20, {
+        CustomRefreshScrollView(loaderOffset: 20, {
             VStack(alignment: .leading, spacing: 10) {
                 if announcementVM.isLoading {
                     ShimmerView(cornerRadius: 0).frame(height: 250)

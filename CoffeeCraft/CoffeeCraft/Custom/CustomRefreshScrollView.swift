@@ -7,10 +7,10 @@
 import SwiftUI
 struct CustomRefreshScrollView<Content: View>: View {
     
-    var threshold: CGFloat = 100
+    var threshold: CGFloat = 140
     var loaderOffset: CGFloat = 0
     var content: () -> Content
-    var onRefresh: () async -> Void
+    var onRefresh: (() async -> Void)?
     
     @State private var offset: CGFloat = 0
     @State private var isRefreshing = false
@@ -22,10 +22,10 @@ struct CustomRefreshScrollView<Content: View>: View {
     private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
     
     init(
-        threshold: CGFloat = 80,
+        threshold: CGFloat = 140,
         loaderOffset: CGFloat = 0,
         @ViewBuilder _ content: @escaping () -> Content,
-        onRefresh: @escaping () async -> Void
+        onRefresh: (() async -> Void)? = nil
     ) {
         self.threshold = threshold
         self.loaderOffset = loaderOffset
@@ -42,7 +42,6 @@ struct CustomRefreshScrollView<Content: View>: View {
                         GeometryReader { geo in
                             let currentY = geo.frame(in: .named("SCROLL")).minY
                             Color.clear
-                                .onAppear {}
                                 .preference(key: ScrollOffsetPreferenceKey.self, value: currentY)
                         }
                         .frame(height: 0),
@@ -95,7 +94,7 @@ struct CustomRefreshScrollView<Content: View>: View {
                         }
                         
                         // Trigger refresh immediately when threshold is crossed while dragging
-                        if value > threshold && !hasTriggered {
+                        if value > threshold && !hasTriggered && onRefresh != nil {
                             hasTriggered = true
                             triggerRefresh()
                         }
@@ -108,7 +107,6 @@ struct CustomRefreshScrollView<Content: View>: View {
                         }
                     }
                 } else if !isRefreshing && !isLocked && !isDragging {
-                    // Reset offset when not dragging
                     if offset != 0 {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             offset = 0
@@ -119,7 +117,7 @@ struct CustomRefreshScrollView<Content: View>: View {
             }
             
             // Sticky loader at the top with animation
-            if showLoader || isRefreshing {
+            if (showLoader || isRefreshing) && onRefresh != nil {
                 VStack {
                     CoffeeLoaderView(
                         progress: isRefreshing ? (1 - animationProgress) : min(offset / threshold, 1),
@@ -157,7 +155,7 @@ struct CustomRefreshScrollView<Content: View>: View {
             }
             
             // Now perform the actual refresh
-            await onRefresh()
+            await onRefresh?()
             
             // Reset everything
             withAnimation(.spring(response: 0.4, dampingFraction: 1.5)) {
