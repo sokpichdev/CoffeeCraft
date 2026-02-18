@@ -6,25 +6,25 @@
 - Logout  
 
 ## 2. Product - Admin
-- Create Product  
-- Edit Product  
-- Remove Product  
+- Create Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Edit Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Remove Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ## 3. Product - Customer
-- View Product Detail  
-- Add product to cart  
+- View Product Detail _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Add product to cart _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ## 4. Cart
-- View Product Detail  
-- Remove product from cart  
-- Checkout Product  
+- View Product Detail _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Remove product from cart _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Checkout Product _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ## 5. Order - Admin
-- View Orders  
-- Update Order Status  
+- View Orders _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Update Order Status _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ## 6. Order - Customer
-- View own orders  
+- View own orders _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ## 7. Home
 - none  
@@ -39,48 +39,47 @@
 ### ⭐ 1. Home Screen (Very important)
 
 **Must-have**
-- ⭐ Featured / Popular Drinks  
-- ⭐ Best Sellers  
-- ⭐ New Arrivals  
-- ⭐ Search (by name)  
-- ⭐ Category filter (Hot / Iced / Espresso / Latte / etc.)  
+- ⭐ Featured / Popular Drinks _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- ⭐ Best Sellers  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- ⭐ New Arrivals  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- ⭐ Search (by name)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- ⭐ Category filter (Hot / Iced / Espresso / Latte / etc.)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
 
 **Nice-to-have**
-- Promotions banner (e.g. “Buy 2 Get 1 Free”)  
-- Today’s recommendation  
-- Recently viewed products  
+- Promotions banner (e.g. “Buy 2 Get 1 Free”)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Today’s recommendation  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Recently viewed products  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
 
 ---
 
 ### ⭐ 2. Account / Profile
 
 **Must-have**
-- ⭐ View profile (name, email)  
-- ⭐ Edit profile  
-- ⭐ Change password  
-- ⭐ Logout (already done)  
-
+- ⭐ View profile (name, email) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- ⭐ Edit profile  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- ⭐ Change password  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- ⭐ Logout _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 **Nice-to-have**
-- Order history shortcut  
-- Saved addresses  
-- Saved payment method (if any)  
-- App settings (language, dark mode)  
+- Order history shortcut  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Saved addresses  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Saved payment method (if any)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- App settings (language, dark mode)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ---
 
 ### ⭐ 3. Order Enhancements
 Make ordering more realistic.
-- Order detail screen  
-- Reorder button (order again)  
-- Cancel order (only if status = Pending)  
+- Order detail screen  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Reorder button (order again)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Cancel order (only if status = Pending)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
 
 ---
 
 ### ⭐ 4. Notifications (Big value 🚀)
 Firebase + push notifications 👌
 - ⭐ Order status updates  
-- Promotions / discounts  
-- Admin → notify customer when order is ready  
+- Promotions / discounts  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Admin → notify customer when order is ready  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 **Example:**  
 ☕ “Your Latte is ready for pickup!”  
@@ -89,51 +88,51 @@ Firebase + push notifications 👌
 
 ### ⭐ 5. Payment & Checkout Improvements
 Depending on scope:
-- Multiple payment methods  
-- Cash  
-- QR / Wallet  
-- Order summary before confirm  
-- Promo / discount code  
-- Tax & service fee breakdown  
+- Multiple payment methods _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)  
+- Cash  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- QR / Wallet  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Order summary before confirm  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Promo / discount code  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Tax & service fee breakdown  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
 
 ---
 
 ### ⭐ 6. Product Experience
 Make products feel premium.
-- ⭐ Favorite / Wishlist  
-- Product rating ⭐⭐⭐⭐⭐  
-- Reviews & comments  
-- Product availability (Out of stock)  
+- ⭐ Favorite / Wishlist  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Product rating ⭐⭐⭐⭐⭐  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Reviews & comments  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Product availability (Out of stock)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
 
 ---
 
 ### ⭐ 7. Admin Power Features
 If this is also a management system:
-- Dashboard (charts)  
-- Daily sales  
-- Best-selling drinks  
-- Order analytics  
-- Product stock status  
-- User management (optional)  
+- Dashboard (charts) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet) 
+- Daily sales _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Best-selling drinks _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Order analytics _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Product stock status _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)  
+- User management (optional) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not included)  
 
 ---
 
 ### ⭐ 8. Loyalty & Retention (Advanced)
 These make app “real business ready”.
-- ⭐ Loyalty points (buy 10 coffees → free 1)  
-- Membership / VIP level  
-- Coupons / vouchers  
-- Birthday reward 🎂☕  
+- ⭐ Loyalty points (buy 10 coffees → free 1) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done) // only point for now
+- Membership / VIP level _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Coupons / vouchers _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Birthday reward 🎂☕ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
 
 ---
 
 ### ⭐ 9. UX & Polish (Often overlooked)
 Small things that matter a lot.
-- Loading skeletons  
-- Empty states (Home / Orders / Cart)  
-- Error handling (network fail)  
-- Pull-to-refresh  
-- Dark mode  
+- Loading skeletons _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (in progress)
+- Empty states (Home / Orders / Cart)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (in progress)
+- Error handling (network fail) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Pull-to-refresh _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (non yet)
+- Dark mode _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
 
 ---
 
