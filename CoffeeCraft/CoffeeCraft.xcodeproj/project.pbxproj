@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6A240F962F45C7EA00BB551E /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 6A240F952F45C7EA00BB551E /* SwiftUIIntrospect */; };
 		6AB42FC42F3496C300852891 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC32F3496C300852891 /* FirebaseAnalytics */; };
 		6AB42FC62F3496C300852891 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC52F3496C300852891 /* FirebaseCore */; };
 		6AB42FC82F3496C300852891 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 6AB42FC72F3496C300852891 /* FirebaseFunctions */; };
@@ -54,6 +55,7 @@
 				6AB42FCC2F3496C300852891 /* FirebaseMessaging in Frameworks */,
 				6AB42FCA2F3496C300852891 /* FirebaseInAppMessaging-Beta in Frameworks */,
 				6AB42FC42F3496C300852891 /* FirebaseAnalytics in Frameworks */,
+				6A240F962F45C7EA00BB551E /* SwiftUIIntrospect in Frameworks */,
 				6AB42FC82F3496C300852891 /* FirebaseFunctions in Frameworks */,
 				6AFAC53E2EA5E88E00037932 /* FirebaseStorage in Frameworks */,
 				6AB42FC62F3496C300852891 /* FirebaseCore in Frameworks */,
@@ -111,6 +113,7 @@
 				6AB42FC72F3496C300852891 /* FirebaseFunctions */,
 				6AB42FC92F3496C300852891 /* FirebaseInAppMessaging-Beta */,
 				6AB42FCB2F3496C300852891 /* FirebaseMessaging */,
+				6A240F952F45C7EA00BB551E /* SwiftUIIntrospect */,
 			);
 			productName = CoffeeCraft;
 			productReference = 6AFAC5232EA5E69C00037932 /* CoffeeCraft.app */;
@@ -143,6 +146,7 @@
 			packageReferences = (
 				6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				6AFAC5B12EA61BCA00037932 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				6A240F942F45C7EA00BB551E /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AFAC5242EA5E69C00037932 /* Products */;
@@ -603,6 +607,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6A240F942F45C7EA00BB551E /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 26.0.0;
+			};
+		};
 		6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -622,6 +634,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6A240F952F45C7EA00BB551E /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A240F942F45C7EA00BB551E /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
+		};
 		6AB42FC32F3496C300852891 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
