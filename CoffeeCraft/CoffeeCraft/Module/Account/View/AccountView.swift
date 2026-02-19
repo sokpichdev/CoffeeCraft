@@ -22,6 +22,7 @@ struct AccountView: View {
     @State var isNavigateToSeeAllCards: Bool = false
     @State var isNavigateToPurchaseCard: Bool = false
     @State var isNavigateToAddCard: Bool = false
+//    @Environment(\.pushScreen) var push
     var body: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
