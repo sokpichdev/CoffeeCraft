@@ -38,11 +38,12 @@ struct OrdersView: View {
                     CustomRefreshScrollView( {
                         LazyVStack(spacing: 8) {
                             ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
-                                NavigationLink(value: order) {
+                                PushLink(value: order) { order in
+                                    OrderDetailView(order: order)
+                                } label: {
                                     OrderCardView(order: order)
                                         .padding(.horizontal)
                                 }
-                                .buttonStyle(.plain)
                                 .onAppear {
                                     if orderVM.orders.count < orderVM.totalOrdersCount {
                                         if !orderVM.orders.isEmpty {
@@ -81,9 +82,6 @@ struct OrdersView: View {
                         }
                     })
                 }
-            }
-            .navigationDestination(for: Order.self) { order in
-                OrderDetailView(order: order)
             }
             .customNavigationBar("My Orders")
             .onAppear {

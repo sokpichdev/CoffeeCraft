@@ -53,7 +53,9 @@ struct SearchView: View {
                         .frame(maxWidth: .infinity)
                     } else {
                         ForEach(filteredResults, id: \.product.id) { result in
-                            NavigationLink(value: result.product) {
+                            PushLink(value: result.product) { product in
+                                ProductDetailView(product: product)
+                            } label: {
                                 SearchResultRow(
                                     product: result.product,
                                     matchType: result.matchType,
@@ -72,11 +74,6 @@ struct SearchView: View {
                 ToolBarButton(placement: .navigationBarLeading, buttonType: .icon("xmark")) {
                     dismiss()
                 }
-            }
-            .navigationDestination(for: Product.self) { product in
-                ProductDetailView(product: product)
-                    .environmentObject(cartManager)
-                    .environmentObject(favVM)
             }
         }
     }
