@@ -16,8 +16,8 @@ import SwiftUI
 // ============================================================
 
 extension View {
-    func installSwipeBack() -> some View {
-        self.background(SwipeBackInstaller())
+    func installSwipeBack(router: NavigationRouter) -> some View {
+        self.background(SwipeBackInstaller(router: router))
     }
 }
 
@@ -40,18 +40,17 @@ extension View {
 // ============================================================
 
 private struct SwipeBackInstaller: UIViewControllerRepresentable {
+    let router: NavigationRouter   // ← receive the router
 
-    // The coordinator is created once and kept alive for the lifetime
-    // of this representable. It holds the gesture and delegate strongly.
     func makeCoordinator() -> SwipeBackCoordinator { SwipeBackCoordinator() }
 
     func makeUIViewController(context: Context) -> SwipeBackViewController {
         let vc = SwipeBackViewController()
         vc.coordinator = context.coordinator
+        vc.router = router           // ← pass it down
         return vc
     }
 
-    // Nothing to update — this VC has no dynamic content.
     func updateUIViewController(_ uiViewController: SwipeBackViewController, context: Context) {}
 }
 
@@ -70,11 +69,12 @@ private struct SwipeBackInstaller: UIViewControllerRepresentable {
 
 final class SwipeBackViewController: UIViewController {
     var coordinator: SwipeBackCoordinator?
+    var router: NavigationRouter?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
-        view.isUserInteractionEnabled = false   // must not intercept any touches
+        view.isUserInteractionEnabled = false
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -82,8 +82,6 @@ final class SwipeBackViewController: UIViewController {
         // At this point self.navigationController is SwiftUI's internal
         // UINavigationController. Pass it to the coordinator to set up
         // the gesture and delegate. The coordinator guards against running twice.
-        coordinator?.install(on: navigationController)
+        coordinator?.install(on: navigationController, router: router!)
     }
 }
-
-

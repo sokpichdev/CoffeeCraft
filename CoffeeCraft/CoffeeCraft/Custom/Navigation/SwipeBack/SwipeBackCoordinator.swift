@@ -37,9 +37,10 @@ final class SwipeBackCoordinator: NSObject,
     // if SwiftUI re-renders and viewDidAppear fires again.
     // --------------------------------------------------------
 
-    func install(on nav: UINavigationController?) {
+    func install(on nav: UINavigationController?, router: NavigationRouter) {
         guard let nav, navController == nil else { return }
         navController = nav
+        router.navigationController = nav
 
         // Remove the built-in swipe-back so it doesn't conflict with ours.
         nav.interactivePopGestureRecognizer?.isEnabled = false
