@@ -169,6 +169,7 @@ struct CustomRefreshScrollView<Content: View>: View {
                         : min(max(offset, 0) / threshold, 1),
                     imageSize: 50
                 )
+                .offset(y: loaderOffset)
                 .transition(.opacity)
             }
         }
@@ -246,7 +247,7 @@ struct CustomRefreshScrollView<Content: View>: View {
             }
 
             // Brief pause so the loader's exit animation plays before it disappears.
-            try? await Task.sleep(nanoseconds: 300_000_000)   // 0.3 seconds
+            try await MinimumLoadingTime(0.3).waitIfNeeded()
 
             withAnimation(.easeOut(duration: 0.2)) { showLoader = false }
 
