@@ -10,8 +10,6 @@ import FirebaseCore
 import FirebaseMessaging
 import UserNotifications
 
-import SwiftUI
-
 @main
 struct CoffeeCraftApp: App {
     @StateObject private var session = UserSession.shared
