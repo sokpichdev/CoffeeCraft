@@ -1,8 +1,184 @@
 import SwiftUI
+import UIKit
 
-// MARK: - Main Component
+// ============================================================
+// MARK: HOW TO USE
+// ============================================================
+//
+// 1. In your @main App, replace WindowGroup content with AppRootView:
+//
+//    @main
+//    struct MyApp: App {
+//        var body: some Scene {
+//            WindowGroup {
+//                AppRootView {
+//                    HomeScreen()        // ← your root screen
+//                }
+//            }
+//        }
+//    }
+//
+// 2. On every screen (root + children), use CustomRefreshScrollView
+//    as your scroll container:
+//
+//    struct HomeScreen: View {
+//        var body: some View {
+//            CustomRefreshScrollView(onRefresh: {
+//                await viewModel.reload()
+//            }) {
+//                // your content here
+//            }
+//        }
+//    }
+//
+// 3. To push a child screen, read the environment action:
+//
+//    @Environment(\.pushScreen) var push
+//    ...
+//    Button("Open Detail") { push(AnyView(DetailScreen())) }
+//
+// 4. The root screen cannot swipe back (nothing to go back to).
+//    Child screens automatically get the interactive swipe-back.
+//
+// ============================================================
+
+// MARK: - AppRootView
+// Use this as the single root of your window.
+// It owns the UINavigationController so the delegate is never overwritten.
+
+struct AppRootView<Root: View>: UIViewControllerRepresentable {
+    let root: () -> Root
+
+    init(@ViewBuilder _ root: @escaping () -> Root) {
+        self.root = root
+    }
+
+    func makeUIViewController(context: Context) -> AppNavigationController {
+        let nav = AppNavigationController()
+        let rootVC = Self.makeHostingVC(for: AnyView(root()), nav: nav)
+        nav.setViewControllers([rootVC], animated: false)
+        return nav
+    }
+
+    func updateUIViewController(_ nav: AppNavigationController, context: Context) {}
+
+    /// Wraps any SwiftUI view in a hosting controller, injecting the push action.
+    static func makeHostingVC(for view: AnyView, nav: AppNavigationController) -> UIViewController {
+        let enriched = view.environment(\.pushScreen) { destination in
+            let vc = makeHostingVC(for: destination, nav: nav)
+            nav.pushViewController(vc, animated: true)
+        }
+        let hc = UIHostingController(rootView: enriched)
+        hc.view.backgroundColor = .systemBackground
+        return hc
+    }
+}
+
+
+// MARK: - AppNavigationController
+// One nav controller, one delegate, one edge-pan gesture — set up once and never stolen.
+
+final class AppNavigationController: UINavigationController,
+                                      UINavigationControllerDelegate
+                                      /*UIGestureRecognizerDelegate*/ {
+
+    private var interactiveTransition: UIPercentDrivenInteractiveTransition?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        delegate = self
+        navigationBar.isHidden = true
+
+        // Disable the system interactive pop — we replace it entirely.
+        interactivePopGestureRecognizer?.isEnabled = false
+        interactivePopGestureRecognizer?.delegate = nil
+
+        setupEdgePanGesture()
+    }
+
+    // MARK: Edge Pan Setup
+
+    private func setupEdgePanGesture() {
+        let edgePan = UIScreenEdgePanGestureRecognizer(
+            target: self,
+            action: #selector(handleEdgePan(_:))
+        )
+        edgePan.edges = .left
+        edgePan.delegate = self
+        view.addGestureRecognizer(edgePan)
+    }
+
+    @objc private func handleEdgePan(_ gesture: UIScreenEdgePanGestureRecognizer) {
+        let progress = max(0, min(1, gesture.translation(in: view).x / view.bounds.width))
+
+        switch gesture.state {
+        case .began:
+            // gestureRecognizerShouldBegin already blocks this on the root screen.
+            let t = UIPercentDrivenInteractiveTransition()
+            t.wantsInteractiveStart = true   // start paused, wait for update() calls
+            t.completionCurve = .linear      // finger position maps 1:1 to progress
+            interactiveTransition = t
+            popViewController(animated: true)
+
+        case .changed:
+            interactiveTransition?.update(progress)
+
+        case .ended:
+            let velocity = gesture.velocity(in: view).x
+            let shouldFinish = progress > 0.4 || velocity > 800
+            interactiveTransition?.completionSpeed = 0.9
+            shouldFinish ? interactiveTransition?.finish() : interactiveTransition?.cancel()
+            interactiveTransition = nil
+
+        case .cancelled:
+            interactiveTransition?.completionSpeed = 0.9
+            interactiveTransition?.cancel()
+            interactiveTransition = nil
+
+        default:
+            interactiveTransition?.cancel()
+            interactiveTransition = nil
+        }
+    }
+
+    // MARK: UIGestureRecognizerDelegate
+
+    /// Blocks swipe-back on the root (parent) screen — nothing to go back to.
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return viewControllers.count > 1
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
+    ) -> Bool {
+        return true
+    }
+
+    // MARK: UINavigationControllerDelegate
+
+    func navigationController(
+        _ navigationController: UINavigationController,
+        animationControllerFor operation: UINavigationController.Operation,
+        from fromVC: UIViewController,
+        to toVC: UIViewController
+    ) -> UIViewControllerAnimatedTransitioning? {
+        // Custom transition only for pop; push stays default.
+        return operation == .pop ? InteractiveSlideTransition() : nil
+    }
+
+    func navigationController(
+        _ navigationController: UINavigationController,
+        interactionControllerFor animationController: UIViewControllerAnimatedTransitioning
+    ) -> UIViewControllerInteractiveTransitioning? {
+        return interactiveTransition
+    }
+}
+
+// MARK: - CustomRefreshScrollView
+// Pull-to-refresh only. Navigation logic lives entirely in AppNavigationController.
+
 struct CustomRefreshScrollView<Content: View>: View {
-    @Environment(\.dismiss) var dismiss
     var threshold: CGFloat = 120
     var loaderOffset: CGFloat = 0
     var content: () -> Content
@@ -15,13 +191,11 @@ struct CustomRefreshScrollView<Content: View>: View {
     @State private var hasTriggered = false
     @State private var animationProgress: CGFloat = 0
     @State private var showLoader = false
-    @State private var isEdgeSwipe = false
     @State private var lastOffsetUpdate = Date()
-    
-    private let hapticGenerator = UIImpactFeedbackGenerator(style: .medium)
-    private let edgeThreshold: CGFloat = 20
-    private let debounceInterval: TimeInterval = 1/120
-    
+
+    private let haptic = UIImpactFeedbackGenerator(style: .medium)
+    private let debounce: TimeInterval = 1.0 / 120.0
+
     init(
         threshold: CGFloat = 120,
         loaderOffset: CGFloat = 0,
@@ -33,372 +207,157 @@ struct CustomRefreshScrollView<Content: View>: View {
         self.onRefresh = onRefresh
         self.content = content
     }
-    
+
     var body: some View {
         ZStack(alignment: .top) {
             ScrollView {
                 content()
+                    .offset(y: isRefreshing ? threshold : 0)
                     .background(
                         GeometryReader { geo -> Color in
-                            let currentY = geo.frame(in: .named("scrollSpace")).minY
-                            
+                            let y = geo.frame(in: .named("scroll")).minY
                             DispatchQueue.main.async {
                                 let now = Date()
-                                if now.timeIntervalSince(lastOffsetUpdate) >= debounceInterval {
-                                    lastOffsetUpdate = now
-                                    handleOffsetChange(currentY)
-                                }
+                                guard now.timeIntervalSince(lastOffsetUpdate) >= debounce else { return }
+                                lastOffsetUpdate = now
+                                handleOffset(y)
                             }
-                            return Color.clear
+                            return .clear
                         }
                     )
-                    .offset(y: isRefreshing ? threshold : 0)
             }
-            .scrollDisabled(isLocked || isEdgeSwipe)
-            .coordinateSpace(name: "scrollSpace")
+            .scrollDisabled(isLocked)
+            .coordinateSpace(name: "scroll")
             .simultaneousGesture(
                 DragGesture(minimumDistance: 5)
-                    .onChanged { value in
-                        let horizontalAmount = value.translation.width
-                        let verticalAmount = value.translation.height
-                        let startX = value.startLocation.x
-                        
-                        if !isEdgeSwipe && startX < edgeThreshold && horizontalAmount > 0 {
-                            isEdgeSwipe = true
-                        }
-                        
-                        if isEdgeSwipe && horizontalAmount > 30 && !isRefreshing {
-                            triggerNavigationBack()
-                            return
-                        }
-                        
-                        if abs(horizontalAmount) > abs(verticalAmount) && !isEdgeSwipe {
-                            return
-                        }
-                        
-                        if !isDragging && !isEdgeSwipe {
-                            isDragging = true
-                            hasTriggered = false
-                        }
+                    .onChanged { v in
+                        // Ignore horizontal drags — the edge-pan gesture owns those.
+                        guard abs(v.translation.height) > abs(v.translation.width) else { return }
+                        if !isDragging { isDragging = true; hasTriggered = false }
                     }
                     .onEnded { _ in
                         isDragging = false
-                        isEdgeSwipe = false
-                        
-                        if !isRefreshing {
-                            withAnimation(.easeOut(duration: 0.25)) {
-                                offset = 0
-                                showLoader = false
-                            }
-                        }
+                        guard !isRefreshing else { return }
+                        withAnimation(.easeOut(duration: 0.25)) { offset = 0; showLoader = false }
                     }
             )
-            
-            if (showLoader || isRefreshing) && onRefresh != nil && !isEdgeSwipe {
+
+            if (showLoader || isRefreshing) && onRefresh != nil {
+                // ↓ Replace with your own loader view
                 CoffeeLoaderView(
                     progress: isRefreshing ? (1 - animationProgress) : min(max(offset, 0) / threshold, 1),
                     imageSize: 50
                 )
-//                .offset(y: loaderOffset + (isRefreshing ? threshold : min(offset, threshold)))
-//                .transition(.asymmetric(
-//                    insertion: .move(edge: .top).combined(with: .opacity),
-//                    removal: .opacity
-//                ))
                 .transition(.opacity)
             }
         }
     }
-    
-    private func handleOffsetChange(_ value: CGFloat) {
-        guard !isEdgeSwipe else { return }
-        
+
+    private func handleOffset(_ value: CGFloat) {
         if isDragging && !isRefreshing && !isLocked {
             if value > 0 {
                 offset = value
-                
                 if value > 10 && !showLoader {
-                    withAnimation(.easeIn(duration: 0.15)) {
-                        showLoader = true
-                    }
+                    withAnimation(.easeIn(duration: 0.15)) { showLoader = true }
                 }
-                
                 if value > threshold && !hasTriggered && onRefresh != nil {
                     hasTriggered = true
                     triggerRefresh()
                 }
             } else {
                 offset = 0
-                if !isRefreshing {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        showLoader = false
-                    }
-                }
+                if !isRefreshing { withAnimation(.easeOut(duration: 0.2)) { showLoader = false } }
             }
         } else if !isRefreshing && !isLocked && !isDragging && offset != 0 {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                offset = 0
-                showLoader = false
-            }
+            withAnimation(.easeInOut(duration: 0.2)) { offset = 0; showLoader = false }
         }
     }
-    
-    private func triggerNavigationBack() {
-        let impact = UIImpactFeedbackGenerator(style: .light)
-        impact.impactOccurred()
-        dismiss()
-    }
-    
+
     private func triggerRefresh() {
         guard !isRefreshing && !isLocked else { return }
-        
-        hapticGenerator.prepare()
-        hapticGenerator.impactOccurred()
-        
-        isRefreshing = true
-        isLocked = true
-        showLoader = true
-        
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            offset = threshold
-        }
-        
+        haptic.prepare(); haptic.impactOccurred()
+
+        isRefreshing = true; isLocked = true; showLoader = true
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { offset = threshold }
+
         Task {
-            withAnimation(.easeInOut(duration: 1.2)) {
-                animationProgress = 1.0
-            }
-            
+            withAnimation(.easeInOut(duration: 1.2)) { animationProgress = 1.0 }
             await onRefresh?()
-            
             withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) {
-                isRefreshing = false
-                offset = 0
-                animationProgress = 0
+                isRefreshing = false; offset = 0; animationProgress = 0
             }
-            
             try? await Task.sleep(nanoseconds: 300_000_000)
-            
-            withAnimation(.easeOut(duration: 0.2)) {
-                showLoader = false
-            }
-            isLocked = false
-            hasTriggered = false
+            withAnimation(.easeOut(duration: 0.2)) { showLoader = false }
+            isLocked = false; hasTriggered = false
         }
     }
 }
 
-// MARK: - Type-erased wrapper to avoid generic issues
-struct AnyRefreshableView: View {
-    let view: AnyView
-    let onRefresh: (() async -> Void)?
-    
-    init<Content: View>(content: Content, onRefresh: (() async -> Void)?) {
-        self.view = AnyView(
-            CustomRefreshScrollView(
-                threshold: 120,
-                { content },
-                onRefresh: onRefresh
-            )
-        )
-        self.onRefresh = onRefresh
+
+// ============================================================
+// MARK: - Example Screens (delete before shipping)
+// ============================================================
+
+/*
+@main
+struct ExampleApp: App {
+    var body: some Scene {
+        WindowGroup {
+            AppRootView {
+                HomeScreen()
+            }
+        }
     }
-    
+}
+
+struct HomeScreen: View {
+    @Environment(\.pushScreen) var push
+
     var body: some View {
-        view
-    }
-}
-
-// MARK: - UIViewControllerRepresentable
-struct NavigableScrollView<Content: View>: UIViewControllerRepresentable {
-    @ViewBuilder var content: Content
-    var onRefresh: (() async -> Void)?
-    
-    func makeUIViewController(context: Context) -> NavigableScrollViewController {
-        let vc = NavigableScrollViewController()
-        vc.updateContent(content, onRefresh: onRefresh)
-        return vc
-    }
-    
-    func updateUIViewController(_ uiViewController: NavigableScrollViewController, context: Context) {
-        uiViewController.updateContent(content, onRefresh: onRefresh)
-    }
-}
-
-// MARK: - UIViewController (non-generic)
-class NavigableScrollViewController: UIViewController, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
-    
-    private var hostingController: UIHostingController<AnyRefreshableView>?
-    private var scrollView: UIScrollView!
-    private var currentOnRefresh: (() async -> Void)?
-    
-    private var interactiveTransition: UIPercentDrivenInteractiveTransition?
-    private var edgePanGesture: UIScreenEdgePanGestureRecognizer?
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupScrollView()
-        setupEdgePanGesture()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        navigationController?.delegate = self
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        if navigationController?.delegate === self {
-            navigationController?.delegate = nil
-        }
-    }
-    
-    func updateContent<Content: View>(_ content: Content, onRefresh: (() async -> Void)?) {
-        self.currentOnRefresh = onRefresh
-        
-        // Remove old hosting controller
-        hostingController?.willMove(toParent: nil)
-        hostingController?.view.removeFromSuperview()
-        hostingController?.removeFromParent()
-        
-        // Create new hosting controller with type-erased view
-        let refreshableView = AnyRefreshableView(content: content, onRefresh: onRefresh)
-        let newHostingController = UIHostingController(rootView: refreshableView)
-        hostingController = newHostingController
-        
-        addChild(newHostingController)
-        scrollView.addSubview(newHostingController.view)
-        newHostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            newHostingController.view.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            newHostingController.view.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            newHostingController.view.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            newHostingController.view.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            newHostingController.view.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
-        ])
-        
-        newHostingController.didMove(toParent: self)
-    }
-    
-    private func setupScrollView() {
-        scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.alwaysBounceVertical = true
-        
-        view.addSubview(scrollView)
-        NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
-    private func setupEdgePanGesture() {
-        let edgePan = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleEdgePan(_:)))
-        edgePan.edges = .left
-        edgePan.delegate = self
-        view.addGestureRecognizer(edgePan)
-        edgePanGesture = edgePan
-    }
-    
-    @objc private func handleEdgePan(_ gesture: UIScreenEdgePanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        let progress = max(0, min(1, translation.x / view.bounds.width * 0.5))
-        
-        switch gesture.state {
-        case .began:
-            guard let nav = navigationController else { return }
-            
-            let transition = UIPercentDrivenInteractiveTransition()
-            interactiveTransition = transition
-            
-            nav.delegate = self
-            nav.popViewController(animated: true)
-            
-        case .changed:
-            interactiveTransition?.update(progress)
-            
-        case .ended, .cancelled:
-            let velocity = gesture.velocity(in: view).x
-            
-            if progress > 0.4 || velocity > 800 {
-                interactiveTransition?.finish()
-            } else {
-                interactiveTransition?.cancel()
+        CustomRefreshScrollView(onRefresh: {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+        }) {
+            VStack(spacing: 24) {
+                Text("Home — root screen").font(.title2).bold()
+                Text("Swipe-back is disabled here (nowhere to go)").foregroundStyle(.secondary)
+                Button("Open Detail →") { push(AnyView(DetailScreen())) }
+                    .buttonStyle(.borderedProminent)
             }
-            interactiveTransition = nil
-            
-        default:
-            interactiveTransition?.cancel()
-            interactiveTransition = nil
+            .frame(maxWidth: .infinity)
+            .padding(.top, 60)
         }
-    }
-    
-    // MARK: - UIGestureRecognizerDelegate
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
-    
-    // MARK: - UINavigationControllerDelegate
-    func navigationController(
-        _ navigationController: UINavigationController,
-        animationControllerFor operation: UINavigationController.Operation,
-        from fromVC: UIViewController,
-        to toVC: UIViewController
-    ) -> UIViewControllerAnimatedTransitioning? {
-        
-        if operation == .pop {
-            return SlideTransition(direction: .pop)
-        }
-        return nil
-    }
-    
-    func navigationController(
-        _ navigationController: UINavigationController,
-        interactionControllerFor animationController: UIViewControllerAnimatedTransitioning
-    ) -> UIViewControllerInteractiveTransitioning? {
-        
-        return interactiveTransition
     }
 }
 
-// MARK: - Custom Animated Transition
-class SlideTransition: NSObject, UIViewControllerAnimatedTransitioning {
-    enum Direction { case push, pop }
-    let direction: Direction
-    
-    init(direction: Direction) {
-        self.direction = direction
-        super.init()
-    }
-    
-    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        return 0.35
-    }
-    
-    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        guard let fromView = transitionContext.view(forKey: .from),
-              let toView = transitionContext.view(forKey: .to) else {
-            transitionContext.completeTransition(false)
-            return
-        }
-        
-        let container = transitionContext.containerView
-        let duration = transitionDuration(using: transitionContext)
-        
-        if direction == .pop {
-            container.addSubview(toView)
-            container.addSubview(fromView)
-            
-            toView.frame.origin.x = -container.bounds.width * 0.3
-            fromView.frame.origin.x = 0
-            
-            UIView.animate(withDuration: duration, delay: 0, options: .curveEaseOut, animations: {
-                fromView.frame.origin.x = container.bounds.width
-                toView.frame.origin.x = 0
-            }) { _ in
-                transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+struct DetailScreen: View {
+    @Environment(\.pushScreen) var push
+
+    var body: some View {
+        CustomRefreshScrollView(onRefresh: {
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+        }) {
+            VStack(spacing: 24) {
+                Text("Detail — child screen").font(.title2).bold()
+                Text("Swipe left edge to go back — hold mid-swipe ✓").foregroundStyle(.secondary)
+                Button("Go deeper →") { push(AnyView(DeepScreen())) }
+                    .buttonStyle(.bordered)
             }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 60)
         }
     }
 }
+
+struct DeepScreen: View {
+    var body: some View {
+        CustomRefreshScrollView {
+            VStack(spacing: 16) {
+                Text("Deep screen").font(.title2).bold()
+                Text("Swipe back works here too").foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 60)
+        }
+    }
+}
+*/

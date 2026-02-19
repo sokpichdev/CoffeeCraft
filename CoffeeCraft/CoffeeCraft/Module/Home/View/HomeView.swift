@@ -18,9 +18,9 @@ struct HomeView: View {
             .compactMap { $0.imageName }
             .filter { !$0.isEmpty }
     }
-
+    @Environment(\.pushScreen) var push
     var body: some View {
-        CustomRefreshScrollView(loaderOffset: 20, {
+        CustomRefreshScrollView( {
             VStack(alignment: .leading, spacing: 10) {
                 if announcementVM.isLoading {
                     ShimmerView(cornerRadius: 0).frame(height: 250)
@@ -60,11 +60,11 @@ struct HomeView: View {
                         } else {
                             VStack {
                                 ForEach(announcementVM.announcements.prefix(3)) { ann in
-                                    NavigationLink {
-                                        AnnouncementDetailView(announcement: ann)
-                                    } label: {
+                                    Button(action: {
+                                        push(AnyView(AnnouncementDetailView(announcement: ann)))
+                                    }, label: {
                                         AnnouncementCardView(announcement: ann)
-                                    }
+                                    })
                                 }
                             }
                         }
@@ -143,14 +143,14 @@ struct HomeView: View {
             
             Spacer()
             
-            NavigationLink {
-                AnnouncementsListView()
-                    .environmentObject(announcementVM)
-            } label: {
+            Button(action: {
+                push(AnyView(AnnouncementsListView()
+                    .environmentObject(announcementVM)))
+            }, label: {
                 Text("See All")
                     .font(.headline)
                     .padding(8)
-            }
+            })
             .buttonStyle(.plain)
         }
     }
