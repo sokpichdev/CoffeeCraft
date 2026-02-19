@@ -9,7 +9,6 @@ import SwiftUI
 struct AnnouncementsListView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var announcementVM: AnnouncementViewModel
-    @Environment(\.pushScreen) var push
     var body: some View {
         CustomRefreshScrollView( {
             if announcementVM.isLoading {
@@ -38,11 +37,11 @@ struct AnnouncementsListView: View {
                 } else {
                     VStack {
                         ForEach(announcementVM.announcements) { ann in
-                            Button(action: {
-                                push(AnyView(AnnouncementDetailView(announcement: ann)))
-                            }, label: {
+                            PushLink {
+                                AnnouncementDetailView(announcement: ann)
+                            } label: {
                                 AnnouncementCardView(announcement: ann)
-                            })
+                            }
                         }
                     }
                     .padding(.horizontal)

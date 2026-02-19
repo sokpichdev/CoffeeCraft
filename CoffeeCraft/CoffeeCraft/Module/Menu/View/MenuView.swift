@@ -72,11 +72,6 @@ struct MenuView: View {
                 .environmentObject(cartManager)
                 .environmentObject(favVM)
         }
-        .navigationDestination(for: Product.self) { product in
-            ProductDetailView(product: product)
-                .environmentObject(cartManager)
-                .environmentObject(favVM)
-        }
         .navigationDestination(item: $selectedProductToEdit) { product in
             if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
                 EditProductView(productVM: productVM,
@@ -189,7 +184,11 @@ struct MenuView: View {
 
             VStack(spacing: 10) {
                 ForEach(section.items) { product in
-                    NavigationLink(value: product) {
+                    PushLink(value: product) { product in
+                        ProductDetailView(product: product)
+                            .environmentObject(cartManager)
+                            .environmentObject(favVM)
+                    } label: {
                         MenuItemRow(item: product)
                             .id("\(section.id)_\(product.id)")
                             .contextMenu(isManager ? ContextMenu(menuItems: {

@@ -121,7 +121,7 @@ struct AccountView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)
                 
-                NavigationLink {
+                PushLink {
                     ProfileView()
                         .environmentObject(authVM)
                 } label: {
