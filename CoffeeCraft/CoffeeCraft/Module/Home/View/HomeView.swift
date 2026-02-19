@@ -136,20 +136,21 @@ struct HomeView: View {
     }
     
     var announcementLabel: some View {
-        HStack {
-            Text("Announcements")
-                .font(.headline)
-            
-            Spacer()
-            PushLink {
-                AnnouncementsListView()
-                    .environmentObject(announcementVM)
-            } label: {
+        PushLink {
+            AnnouncementsListView()
+                .environmentObject(announcementVM)
+        } label: {
+            HStack {
+                Text("Announcements")
+                    .font(.headline)
+                
+                Spacer()
+                
                 Text("See All")
                     .font(.headline)
                     .padding(8)
             }
-            .buttonStyle(.plain)
+            .contentShape(Rectangle()) // ← fixes Spacer hit-test transparency
         }
     }
 }

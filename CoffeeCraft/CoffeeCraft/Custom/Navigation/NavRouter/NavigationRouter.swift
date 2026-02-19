@@ -23,12 +23,26 @@ import SwiftUI
 
 final class NavigationRouter: ObservableObject {
 
-    // The live stack of pushed screens. NavigationStack observes this directly.
+    // No longer needed for pushing — kept only so NavigationStack
+    // has a path binding and can still receive UIKit-driven pops.
     @Published var path = NavigationPath()
 
-    /// Pushes any SwiftUI view onto the navigation stack.
-    /// Call via @Environment(\.pushScreen) — do not call this directly from views.
+    // Weak ref to the UIKit nav controller, set by SwipeBackCoordinator
+    // once it installs itself.
+    weak var navigationController: UINavigationController?
+
     func push(_ view: AnyView) {
-        path.append(PushedScreen(view: view))
+        guard let nav = navigationController else {
+            // Fallback: if UIKit nav isn't wired yet, use SwiftUI path.
+            path.append(PushedScreen(view: view))
+            return
+        }
+        let host = UIHostingController(rootView: view)
+        host.navigationItem.hidesBackButton = true
+        // Re-inject push so deeply nested screens can push further.
+        host.rootView = AnyView(
+            view.environment(\.pushScreen, push)
+        )
+        nav.pushViewController(host, animated: true)
     }
 }

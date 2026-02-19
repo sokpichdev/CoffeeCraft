@@ -51,7 +51,7 @@ struct CustomNavigationStack<Content: View>: View {
                 // Install our custom swipe-back gesture and transition delegate
                 // into the UINavigationController that SwiftUI creates internally.
                 // Must be placed on the root content so it fires once on appear.
-                .installSwipeBack()
+                .installSwipeBack(router: router)
         }
         // Inject the push action into the entire view tree so any descendant
         // can call:  @Environment(\.pushScreen) var push
