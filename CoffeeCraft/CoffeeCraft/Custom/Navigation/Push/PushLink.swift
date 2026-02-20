@@ -22,6 +22,32 @@ import SwiftUI
    } label: {
        ItemCardView(item: item)
    }
+
+ // ============================================================
+ // MARK: - When to use PushLink vs push() directly
+ // ============================================================
+
+ Use PushLink when:
+   • The label is a plain view with no interactive elements inside
+     (Text, Image, custom card views, rows that are not Buttons)
+
+     ✅ PushLink { DetailView() } label: { ItemCardView() }
+     ✅ PushLink { DetailView() } label: { Text("Go") }
+
+ Use @Environment(\.pushScreen) var push directly when:
+   • The component already contains a Button internally — nesting
+     PushLink (a Button) inside another Button causes the tap to
+     be swallowed and navigation will not fire.
+
+     ✅ RowInSectionView(title: "Favorites") { push(AnyView(FavoriteView())) }
+     ✅ Toolbar or context menu actions — these are not SwiftUI views
+        so PushLink cannot be used as the tap target at all.
+
+ Never:
+   • Nest PushLink inside a component that already has a Button.
+   • Call push() manually when a PushLink would work — PushLink
+     handles AnyView wrapping and the shared navigation lock for you.
+   • Use NavigationLink — it bypasses the custom transition animator.
 // ============================================================ */
 
 struct PushLink<Destination: View, Label: View>: View {
