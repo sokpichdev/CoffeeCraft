@@ -17,6 +17,7 @@ struct RootView: View {
     @StateObject var cartManager = CartManager()
     @StateObject var cardVM = CardViewModel()
     @StateObject var favVM = FavoriteViewModel()
+    @StateObject var announcementVM = AnnouncementViewModel()
     @State private var selectedTab: Tab = .home
     
     var body: some View {
@@ -35,6 +36,7 @@ struct RootView: View {
                         case .home:
                             HomeView(selectedTab: $selectedTab)
                                 .environmentObject(authVM)
+                                .environmentObject(announcementVM)
                         case .menu:
                             MenuView()
                                 .environmentObject(cartManager)
@@ -56,6 +58,7 @@ struct RootView: View {
                         case .home:
                             HomeView(selectedTab: $selectedTab)
                                 .environmentObject(authVM)
+                                .environmentObject(announcementVM)
                         case .menu:
                             MenuView(isManager: true)
                                 .environmentObject(cartManager)
@@ -66,6 +69,7 @@ struct RootView: View {
                         case .profile:
                             AccountView()
                                 .environmentObject(favVM)
+                                .environmentObject(announcementVM)
                                 .environmentObject(authVM)
                                 .environmentObject(themeManager)
                                 .environmentObject(cardVM)

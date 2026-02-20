@@ -9,7 +9,7 @@ import SwiftUI
 // MARK: - HomeView
 struct HomeView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @StateObject var announcementVM = AnnouncementViewModel()
+    @EnvironmentObject var announcementVM: AnnouncementViewModel
     @Binding var selectedTab: Tab
     @State private var currentIndex: Int = 0
     private var bannerImages: [String] {
