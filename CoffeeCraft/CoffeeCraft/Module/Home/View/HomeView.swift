@@ -42,7 +42,10 @@ struct HomeView: View {
                     .padding(.horizontal)
 
                     VStack(spacing: 6) {
-                        announcementLabel
+                        HStack {
+                            Text("Announcements").font(.headline)
+                            Spacer()
+                        }
                         
                         if announcementVM.isLoading {
                             VStack {
@@ -64,6 +67,19 @@ struct HomeView: View {
                                     } label: {
                                         AnnouncementCardView(announcement: ann)
                                     }
+                                }
+                                
+                                PushLink {
+                                    AnnouncementsListView().environmentObject(announcementVM)
+                                } label: {
+                                    HStack {
+                                        Text("See All")
+                                            .font(.headline)
+                                        Image(systemName: "arrow.right")
+                                            .font(.headline)
+                                            .foregroundColor(Color.brown)
+                                    }
+                                    .contentShape(Rectangle()) // ← fixes Spacer hit-test transparency
                                 }
                             }
                         }
@@ -133,25 +149,6 @@ struct HomeView: View {
             }
         }
         .frame(height: 250)
-    }
-    
-    var announcementLabel: some View {
-        PushLink {
-            AnnouncementsListView()
-                .environmentObject(announcementVM)
-        } label: {
-            HStack {
-                Text("Announcements")
-                    .font(.headline)
-                
-                Spacer()
-                
-                Text("See All")
-                    .font(.headline)
-                    .padding(8)
-            }
-            .contentShape(Rectangle()) // ← fixes Spacer hit-test transparency
-        }
     }
 }
 struct PickUpButton: View {
