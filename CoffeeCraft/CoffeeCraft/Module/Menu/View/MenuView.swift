@@ -159,7 +159,7 @@ struct MenuView: View {
                 }
                 .padding(.bottom, 100)
             }, onRefresh: {
-                
+                await productVM.refreshProducts()
             })
             .onAppear {
                 productScrollProxy = proxy

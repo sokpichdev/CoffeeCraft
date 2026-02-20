@@ -59,6 +59,15 @@ class ProductViewModel: ObservableObject {
                 LoaderManager.shared.hideLoading()
             }
     }
+    // MARK: - Refresh
+    func refreshProducts() async {
+        listener?.remove() // Remove the existing listener to avoid duplicate listeners
+        listener = nil
+        
+        await fetchProducts() // Re-fetch once immediately to force a fresh pull
+        
+        listenProducts() // Re-attach the real-time listener for ongoing updates
+    }
 
     private func parseProduct(doc: QueryDocumentSnapshot) -> Product {
         let data = doc.data()
