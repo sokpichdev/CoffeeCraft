@@ -5,14 +5,6 @@
 //  Created by Sok Pich on 2/11/26.
 //
 
-
-//
-//  Announcement.swift
-//  CoffeeCraft
-//
-//  Created by Claude on 2/11/26.
-//
-
 import Foundation
 import FirebaseFirestore
 

@@ -27,9 +27,14 @@ class FavoriteViewModel: ObservableObject {
 
     // MARK: - Load favorite state for a product
     func loadFavoriteState(product: Product, selections: [String: String], selectedExtras: [String]) async {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+        guard let userId = Auth.auth().currentUser?.uid else {
+            AppLog.menu.warning("⚠️ loadFavoriteState — no authenticated user, skipping")
+            return
+        }
+
         let customizations = currentCustomizationForFavorite(selections: selections, selectedExtras: selectedExtras)
         let hash = buildCustomizationHash(customizations)
+        AppLog.menu.debug("🔍 loadFavoriteState — productId: \(product.id), hash: \(hash)")
 
         let snapshot = try? await db
             .collection("users")
@@ -40,18 +45,25 @@ class FavoriteViewModel: ObservableObject {
             .getDocuments()
 
         isFavorite = !(snapshot?.documents.isEmpty ?? true)
+        AppLog.menu.debug("❤️ loadFavoriteState — isFavorite: \(self.isFavorite) for productId: \(product.id)")
     }
     
     // MARK: - Toggle favorite for a product
     func toggleFavorite(product: Product, selections: [String: String], selectedExtras: [String]) async {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        
+        guard let userId = Auth.auth().currentUser?.uid else {
+            AppLog.menu.warning("⚠️ toggleFavorite — no authenticated user, skipping")
+            return
+        }
+
+        AppLog.menu.debug("🔀 toggleFavorite — productId: \(product.id), productName: \(product.name)")
+
         do {
             let customizations = currentCustomizationForFavorite(
                 selections: selections,
                 selectedExtras: selectedExtras
             )
             let hash = buildCustomizationHash(customizations)
+            AppLog.menu.debug("🔀 toggleFavorite — customizationHash: \(hash)")
 
             let ref = db
                 .collection("users")
@@ -66,8 +78,9 @@ class FavoriteViewModel: ObservableObject {
             if let doc = snapshot.documents.first {
                 try await doc.reference.delete()
                 isFavorite = false
+                AppLog.menu.debug("🗑️ toggleFavorite — removed favorite, docId: \(doc.documentID), productId: \(product.id)")
             } else {
-                try await ref.addDocument(data: [
+                let docRef = try await ref.addDocument(data: [
                     "productId": product.id,
                     "productName": product.name,
                     "imageURL": product.imageURL,
@@ -77,16 +90,21 @@ class FavoriteViewModel: ObservableObject {
                     "createdAt": Date()
                 ])
                 isFavorite = true
+                AppLog.menu.debug("✅ toggleFavorite — added favorite, docId: \(docRef.documentID), productId: \(product.id)")
             }
         } catch {
-            print("❌ toggleFavorite failed:", error)
-            AlertManager.shared.showError(title: "Toggle Favorite Faild", message: error.localizedDescription)
+            AppLog.menu.error("❌ toggleFavorite — failed for productId: \(product.id): \(error.localizedDescription)")
+            AlertManager.shared.showError(title: "Toggle Favorite Failed", message: error.localizedDescription)
         }
     }
 
     // MARK: - Load all favorites for current user
     func loadAllFavorites() async {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+        guard let userId = Auth.auth().currentUser?.uid else {
+            AppLog.menu.warning("⚠️ loadAllFavorites — no authenticated user, skipping")
+            return
+        }
+        AppLog.menu.debug("📋 loadAllFavorites — fetching favorites for uid: \(userId)")
 
         do {
             let snapshot = try await db
@@ -103,7 +121,10 @@ class FavoriteViewModel: ObservableObject {
                     let basePrice = doc["basePrice"] as? Double,
                     let customizations = doc["customizations"] as? [String: String],
                     let customizationHash = doc["customizationHash"] as? String
-                else { return nil }
+                else {
+                    AppLog.menu.warning("⚠️ loadAllFavorites — skipped malformed doc: \(doc.documentID)")
+                    return nil
+                }
 
                 return FavoriteItem(
                     id: doc.documentID,
@@ -115,9 +136,10 @@ class FavoriteViewModel: ObservableObject {
                     customizationHash: customizationHash
                 )
             }
+            AppLog.printList(favorites, label: "Favorites", logger: AppLog.menu)
         } catch {
+            AppLog.menu.error("❌ loadAllFavorites — failed for uid: \(userId): \(error.localizedDescription)")
             AlertManager.shared.showError(title: "Failed to load favorites", message: error.localizedDescription)
-            print("Failed to load favorites:", error)
         }
     }
 

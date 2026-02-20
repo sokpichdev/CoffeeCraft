@@ -19,20 +19,22 @@ class CustomizationViewModel: ObservableObject {
     // Fetch all customization categories from Firestore
     func fetchCustomizations() {
         isLoading = true
-//        LoaderManager.shared.showLoading()
+        AppLog.menu.debug("🔍 fetchCustomizations — fetching all customization categories")
+
         db.collection("customizations").getDocuments { [weak self] snapshot, error in
             guard let self = self else { return }
             
             Task { @MainActor in
                 self.isLoading = false
-//                LoaderManager.shared.hideLoading()
                 
                 if let error = error {
+                    AppLog.menu.error("❌ fetchCustomizations — error: \(error.localizedDescription)")
                     AlertManager.shared.showError(title: "Failed to load customizations", message: error.localizedDescription)
                     return
                 }
                 
                 guard let documents = snapshot?.documents else {
+                    AppLog.menu.warning("⚠️ fetchCustomizations — snapshot has no documents")
                     AlertManager.shared.showError(message: "No customizations found")
                     return
                 }
@@ -41,12 +43,14 @@ class CustomizationViewModel: ObservableObject {
                     let data = doc.data()
                     guard let name = data["name"] as? String,
                           let optionsData = data["options"] as? [[String: Any]] else {
+                        AppLog.menu.warning("⚠️ fetchCustomizations — skipped malformed doc: \(doc.documentID)")
                         return nil
                     }
                     
                     let options = optionsData.compactMap { optionDict -> CustomizationOption? in
                         guard let optionName = optionDict["name"] as? String,
                               let price = optionDict["price"] as? Double else {
+                            AppLog.menu.warning("⚠️ fetchCustomizations — skipped malformed option in doc: \(doc.documentID)")
                             return nil
                         }
                         return CustomizationOption(name: optionName, price: price)
@@ -54,7 +58,9 @@ class CustomizationViewModel: ObservableObject {
                     
                     return CustomizationCategory(name: name, options: options)
                 }.sorted { $0.name < $1.name }
-                print("✅ Loaded \(self.availableCustomizations.count) customization categories")
+
+                AppLog.menu.debug("✅ fetchCustomizations — loaded \(self.availableCustomizations.count) category(s)")
+                AppLog.printList(self.availableCustomizations, label: "Customization Categories", logger: AppLog.menu)
             }
         }
     }
@@ -62,7 +68,8 @@ class CustomizationViewModel: ObservableObject {
     // Save a new customization category to Firestore
     func saveCustomization(_ category: CustomizationCategory) async {
         let customID = category.name.lowercased().replacingOccurrences(of: " ", with: "_")
-        
+        AppLog.menu.debug("💾 saveCustomization — name: \(category.name), docId: \(customID), options: \(category.options.count)")
+
         let options = category.options.map { option in
             ["name": option.name, "price": option.price]
         }
@@ -74,11 +81,10 @@ class CustomizationViewModel: ObservableObject {
         
         do {
             try await db.collection("customizations").document(customID).setData(data)
-            print("✅ Saved customization: \(category.name)")
-            
-            // Refresh the list
+            AppLog.menu.debug("✅ saveCustomization — saved: \(category.name)")
             fetchCustomizations()
         } catch {
+            AppLog.menu.error("❌ saveCustomization — failed for \(category.name): \(error.localizedDescription)")
             AlertManager.shared.showError(title: "Failed to save customization", message: error.localizedDescription)
         }
     }
@@ -86,14 +92,14 @@ class CustomizationViewModel: ObservableObject {
     // Delete a customization category from Firestore
     func deleteCustomization(_ category: CustomizationCategory) async {
         let customID = category.name.lowercased().replacingOccurrences(of: " ", with: "_")
-        
+        AppLog.menu.debug("🗑️ deleteCustomization — name: \(category.name), docId: \(customID)")
+
         do {
             try await db.collection("customizations").document(customID).delete()
-            print("✅ Deleted customization: \(category.name)")
-            
-            // Refresh the list
+            AppLog.menu.debug("✅ deleteCustomization — deleted: \(category.name)")
             fetchCustomizations()
         } catch {
+            AppLog.menu.error("❌ deleteCustomization — failed for \(category.name): \(error.localizedDescription)")
             AlertManager.shared.showError(title: "Failed to delete customization", message: error.localizedDescription)
         }
     }

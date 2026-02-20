@@ -75,15 +75,15 @@ struct RegisterView: View {
                                             userId: userInfo.id,
                                             userName: userInfo.name
                                         )
-                                        print("✅ Card created successfully!")
+                                        AppLog.auth.info("✅ Card created successfully!")
                                     } catch {
-                                        print("❌ Card Error: \(error.localizedDescription)")
+                                        AppLog.auth.error("❌ Card Error: \(error.localizedDescription)")
                                         // Signup succeeded, card failed = OK!
                                     }
                                 }
                                 
                             case .failure(let error):
-                                print("❌ Signup Error: \(error.localizedDescription)")
+                                AppLog.auth.error("❌ Signup Error: \(error.localizedDescription)")
                                 authVM.errorMessage = error.localizedDescription
                             }
                         }

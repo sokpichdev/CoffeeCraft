@@ -49,7 +49,7 @@ struct ShareCardSheet: View {
                                     do {
                                         foundUserId = try await cardVM.findUserId(byEmail: authVM.email) ?? ""
                                     } catch {
-                                        print("Error finding user: \(error)")
+                                        AppLog.firestore.error("Error finding user: \(error.localizedDescription)")
                                         foundUserId = ""
                                     }
                                 }

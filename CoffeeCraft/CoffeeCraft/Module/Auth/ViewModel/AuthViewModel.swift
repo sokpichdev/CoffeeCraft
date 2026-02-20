@@ -45,11 +45,11 @@ class AuthViewModel: ObservableObject {
             queue: .main
         ) { notification in
             if let token = notification.userInfo?["token"] as? String {
-                print("🔄 FCM Token updated via NotificationCenter: \(token)")
-                // Token is already saved in AppDelegate, but you can do additional handling here
+                AppLog.auth.debug("🔄 FCM token updated via NotificationCenter: \(token)")
             }
         }
     }
+    
     deinit {
         if let observer = fcmTokenObserver {
             NotificationCenter.default.removeObserver(observer)
@@ -60,15 +60,20 @@ class AuthViewModel: ObservableObject {
         isLoading = true
 
         guard let user = Auth.auth().currentUser else {
+            AppLog.auth.debug("👤 checkUser — no authenticated user found, skipping fetch")
             isLoading = false
             return
         }
 
+        AppLog.auth.debug("👤 checkUser — existing session found for uid: \(user.uid)")
+
         Task {
             do {
                 try await fetchUserData(uid: user.uid)
+                AppLog.auth.debug("✅ checkUser — user data fetched successfully")
                 isLoading = false
             } catch {
+                AppLog.auth.error("❌ checkUser — failed to fetch user data: \(error.localizedDescription)")
                 isLoading = false
                 UserSession.shared.clearUser()
                 AlertManager.shared.showError(
@@ -80,6 +85,8 @@ class AuthViewModel: ObservableObject {
     }
     
     func fetchUserData(uid: String, showLoader: Bool = false) async throws {
+        AppLog.auth.debug("🔍 fetchUserData — uid: \(uid), showLoader: \(showLoader)")
+        
         if showLoader {
             LoaderManager.shared.showLoading()
         }
@@ -91,9 +98,8 @@ class AuthViewModel: ObservableObject {
                 .getDocument()
 
             guard let data = snapshot.data() else {
-                if showLoader {
-                    LoaderManager.shared.hideLoading()
-                }
+                AppLog.auth.error("❌ fetchUserData — no data found for uid: \(uid)")
+                if showLoader { LoaderManager.shared.hideLoading() }
                 throw NSError(domain: "UserDataError", code: 404, userInfo: [NSLocalizedDescriptionKey: "User data not found"])
             }
 
@@ -123,12 +129,14 @@ class AuthViewModel: ObservableObject {
             )
 
             UserSession.shared.setUser(user)
-            
+            AppLog.printItem(user, label: "Fetched User", logger: AppLog.auth)
+
             if showLoader {
                 LoaderManager.shared.hideLoading()
                 AlertManager.shared.showSuccess(message: "User data loaded successfully")
             }
         } catch {
+            AppLog.auth.error("❌ fetchUserData — error: \(error.localizedDescription)")
             if showLoader {
                 LoaderManager.shared.hideLoading()
                 AlertManager.shared.showError(
@@ -147,6 +155,8 @@ class AuthViewModel: ObservableObject {
         role: UserRole,
         completion: @escaping (Result<User, Error>) -> Void
     ) async {
+        AppLog.auth.debug("📝 signUp — attempting for email: \(email), role: \(role.rawValue)")
+        
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             let uid = result.user.uid
@@ -160,25 +170,31 @@ class AuthViewModel: ObservableObject {
             ])
             
             await MainActor.run {
-                // Store user in singleton
                 UserSession.shared.setUser(user)
             }
+            
+            AppLog.auth.debug("✅ signUp — success, uid: \(uid), email: \(email)")
+            AppLog.printItem(user, label: "Signed Up User", logger: AppLog.auth)
             
             completion(.success(user))
             
         } catch {
+            AppLog.auth.error("❌ signUp — failed for email: \(email): \(error.localizedDescription)")
             completion(.failure(error))
         }
     }
     
     func login(email: String, password: String) async {
+        AppLog.auth.debug("🔐 login — attempting for email: \(email)")
+        
         do {
             isLoading = true
             LoaderManager.shared.showLoading()
 
-            let result = try await Auth.auth()
-                .signIn(withEmail: email, password: password)
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
 
+            AppLog.auth.debug("✅ login — Firebase sign-in success, uid: \(result.user.uid)")
+            
             handleSuccessfulLogin()
             try await fetchUserData(uid: result.user.uid)
             try await MinimumLoadingTime(2).waitIfNeeded()
@@ -186,11 +202,12 @@ class AuthViewModel: ObservableObject {
             LoaderManager.shared.hideLoading()
             isLoading = false
 
+            AppLog.auth.debug("✅ login — fully completed for uid: \(result.user.uid)")
             AlertManager.shared.showSuccess(message: "Logged in successfully")
         } catch {
+            AppLog.auth.error("❌ login — failed for email: \(email): \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             isLoading = false
-
             AlertManager.shared.showError(
                 title: "Login Error",
                 message: error.localizedDescription
@@ -199,30 +216,40 @@ class AuthViewModel: ObservableObject {
     }
 
     func handleSuccessfulLogin() {
+        AppLog.auth.debug("🔑 handleSuccessfulLogin — requesting FCM token")
         
-        // Request current FCM token and save it
         Messaging.messaging().token { token, error in
             if let error = error {
-                print("❌ Error fetching FCM token: \(error.localizedDescription)")
+                AppLog.auth.error("❌ handleSuccessfulLogin — FCM token fetch failed: \(error.localizedDescription)")
             } else if let token = token {
-                print("🔑 Retrieved FCM token after login: \(token)")
+                AppLog.auth.debug("🔑 handleSuccessfulLogin — FCM token retrieved: \(token)")
                 FCMTokenService.shared.saveFCMToken(token)
             }
         }
     }
     
     func sendPasswordReset(email: String) async throws {
-        try await Auth.auth().sendPasswordReset(withEmail: email)
+        AppLog.auth.debug("📧 sendPasswordReset — sending to: \(email)")
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+            AppLog.auth.debug("✅ sendPasswordReset — email sent to: \(email)")
+        } catch {
+            AppLog.auth.error("❌ sendPasswordReset — failed for \(email): \(error.localizedDescription)")
+            throw error
+        }
     }
     
     func logout(onResult: @escaping (Bool) -> Void) {
+        AppLog.auth.debug("🚪 logout — attempting sign out")
+        
         do {
             FCMTokenService.shared.removeFCMToken()
             try Auth.auth().signOut()
-            // Clear user from singleton
             UserSession.shared.clearUser()
+            AppLog.auth.debug("✅ logout — sign out successful, user session cleared")
             onResult(true)
         } catch let error as NSError {
+            AppLog.auth.error("❌ logout — sign out failed: \(error.localizedDescription)")
             AlertManager.shared.showError(title: "Error signing out", message: error.localizedDescription)
             onResult(false)
         }
@@ -230,8 +257,12 @@ class AuthViewModel: ObservableObject {
     
     func updateProfile(user: User) async -> Bool {
         guard let uid = Auth.auth().currentUser?.uid else {
+            AppLog.auth.error("❌ updateProfile — no authenticated user found")
             return false
         }
+
+        AppLog.auth.debug("✏️ updateProfile — updating uid: \(uid)")
+        AppLog.printItem(user, label: "Profile Update Payload", logger: AppLog.auth)
 
         do {
             LoaderManager.shared.showLoading()
@@ -243,9 +274,7 @@ class AuthViewModel: ObservableObject {
 
             if let phone = user.phoneNumber { data["phoneNumber"] = phone }
             if let gender = user.gender { data["gender"] = gender }
-            if let dob = user.dateOfBirth {
-                data["dateOfBirth"] = Timestamp(date: dob)
-            }
+            if let dob = user.dateOfBirth { data["dateOfBirth"] = Timestamp(date: dob) }
             if let city = user.city { data["city"] = city }
 
             try await db
@@ -253,12 +282,13 @@ class AuthViewModel: ObservableObject {
                 .document(uid)
                 .setData(data, merge: true)
 
-            // ✅ Ensure local user is updated
             try await fetchUserData(uid: uid)
 
             LoaderManager.shared.hideLoading()
+            AppLog.auth.debug("✅ updateProfile — profile updated successfully for uid: \(uid)")
             return true
         } catch {
+            AppLog.auth.error("❌ updateProfile — failed for uid: \(uid): \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             AlertManager.shared.showError(
                 title: "Update Failed",
@@ -281,7 +311,7 @@ extension AuthViewModel {
         }
     }
 
-    func validateStrictPassword() { // strict validation
+    func validateStrictPassword() {
         if password.isEmpty {
             passwordValidation = .init(isValid: false, message: "Password is required")
         } else if password.count < 8 {
