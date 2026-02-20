@@ -268,31 +268,14 @@ struct AccountView: View {
                 .foregroundStyle(.secondary)
             
             HStack(spacing: 20) {
-                socialIcon("paperplane.fill")
-                socialIcon("link.circle.fill")
-                socialIcon("camera.fill")
-                socialIcon("music.note")
-                socialIcon("play.rectangle.fill")
+                SocialMediaButton(icon: "play.rectangle.fill", url: "")
+                SocialMediaButton(icon: "music.note", url: "")
+                SocialMediaButton(icon: "camera.fill", url: "")
+                SocialMediaButton(icon: "link", url: "")
             }
         }
         .padding(.vertical, 20)
         .padding(.top, 8)
-    }
-    
-    func socialIcon(_ systemName: String) -> some View {
-        Button {
-            // coming soon
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(Color(.tertiarySystemGroupedBackground))
-                    .frame(width: 44, height: 44)
-                
-                Image(systemName: systemName)
-                    .font(.headline)
-                    .foregroundColor(Color.brown)
-            }
-        }
     }
 }
 
@@ -366,5 +349,30 @@ struct DeviderInSectionView: View {
     var padding: CGFloat = 50
     var body: some View {
         Divider().padding(.leading, padding)
+    }
+}
+
+struct SocialMediaButton: View {
+    let icon: String
+    let url: String
+
+    var body: some View {
+        Button {
+            openURL()
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(Color(.tertiarySystemGroupedBackground))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundColor(Color.brown)
+            }
+        }
+    }
+    private func openURL() {
+        guard let url = URL(string: url) else { return }
+        UIApplication.shared.open(url)
     }
 }

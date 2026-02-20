@@ -29,5 +29,13 @@
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>youtube</string>
+        <string>tiktok</string>
+        <string>instagram</string>
+        <string>twitter</string>
+        <string>fb</string>
+    </array>
 </dict>
 </plist>
