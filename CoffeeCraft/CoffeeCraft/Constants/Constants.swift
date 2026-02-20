@@ -24,3 +24,11 @@ struct Constants {
         #endif
     }
 }
+extension FirebaseEnvironment: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .dev: return "dev"
+        default: return "dev"
+        }
+    }
+}

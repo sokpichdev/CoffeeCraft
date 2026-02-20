@@ -254,9 +254,9 @@ struct ProductSeeder {
                 let productName = product["name"] as! String
                 let customID = productName.generateProductID()
                 try await productsRef.document(customID).setData(product)
-                print("✅ Added product with ID: \(customID)")
+                AppLog.firestore.info("✅ Added product with ID: \(customID)")
             } catch {
-                print("❌ Failed to add product: \(error.localizedDescription)")
+                AppLog.firestore.error("❌ Failed to add product: \(error.localizedDescription)")
             }
         }
     }

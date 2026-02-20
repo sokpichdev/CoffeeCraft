@@ -29,7 +29,6 @@ struct AccountView: View {
 //                Button("Seed Database") {s
 //                    Task {
 //                        await CustomizationSeeder.seedCustomizations()
-//                        print("✅ Database seeded successfully!")
 //                    }
 //                }
                 footerSection

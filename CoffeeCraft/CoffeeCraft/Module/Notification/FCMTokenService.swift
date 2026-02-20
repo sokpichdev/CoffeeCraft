@@ -23,7 +23,7 @@ class FCMTokenService {
     /// Save FCM token to Firestore as part of a tokens array
     func saveFCMToken(_ token: String) {
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("⚠️ No user logged in, cannot save FCM token")
+            AppLog.auth.warning("⚠️ No user logged in — cannot save FCM token")
             return
         }
         
@@ -34,7 +34,7 @@ class FCMTokenService {
             guard let self = self else { return }
             
             if let error = error {
-                print("❌ Error fetching user document: \(error.localizedDescription)")
+                AppLog.firestore.error("❌ Error fetching user doc: \(error.localizedDescription)")
                 return
             }
             
@@ -58,7 +58,7 @@ class FCMTokenService {
                     "platform": "ios",
                     "updatedAt": Timestamp(date: Date())
                 ]
-                print("🔄 Updating existing token for device: \(deviceId)")
+                AppLog.firestore.info("🔄 Updating FCM token for device: \(deviceId)")
             } else {
                 // Add new token for this device
                 tokensArray.append([
@@ -67,7 +67,7 @@ class FCMTokenService {
                     "platform": "ios",
                     "updatedAt": Timestamp(date: Date())
                 ])
-                print("➕ Adding new token for device: \(deviceId)")
+                AppLog.firestore.info("➕ Adding new FCM token for device: \(deviceId)")
             }
             
             // Save the updated array
@@ -76,10 +76,9 @@ class FCMTokenService {
                 "updatedAt": FieldValue.serverTimestamp()
             ], merge: true) { error in
                 if let error = error {
-                    print("❌ Error saving FCM token: \(error.localizedDescription)")
+                    AppLog.firestore.error("❌ Error saving FCM token: \(error.localizedDescription)")
                 } else {
-                    print("✅ FCM token saved successfully for user: \(userId)")
-                    print("📱 Total devices: \(tokensArray.count)")
+                    AppLog.firestore.info("✅ FCM token saved for user: \(userId) | devices: \(tokensArray.count)")
                 }
             }
         }
@@ -88,7 +87,7 @@ class FCMTokenService {
     /// Remove FCM token for current device from the tokens array
     func removeFCMToken() {
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("⚠️ No user logged in, cannot remove FCM token")
+            AppLog.firestore.error("⚠️ No user logged in, cannot remove FCM token")
             return
         }
         
@@ -97,13 +96,13 @@ class FCMTokenService {
         
         userRef.getDocument { snapshot, error in
             if let error = error {
-                print("❌ Error fetching user document: \(error.localizedDescription)")
+                AppLog.firestore.error("❌ Error fetching user doc: \(error.localizedDescription)")
                 return
             }
             
             guard let data = snapshot?.data(),
                   var tokensArray = data["fcmTokens"] as? [[String: Any]] else {
-                print("⚠️ No tokens found for user")
+                AppLog.auth.warning("⚠️ No tokens found for user")
                 return
             }
             
@@ -120,9 +119,9 @@ class FCMTokenService {
                     "updatedAt": FieldValue.serverTimestamp()
                 ]) { error in
                     if let error = error {
-                        print("❌ Error removing FCM tokens field: \(error.localizedDescription)")
+                        AppLog.firestore.error("❌ Error removing FCM tokens field: \(error.localizedDescription)")
                     } else {
-                        print("✅ All FCM tokens removed for user: \(userId)")
+                        AppLog.firestore.info("🗑 Removed FCM token for device: \(deviceId)")
                     }
                 }
             } else {
@@ -132,10 +131,10 @@ class FCMTokenService {
                     "updatedAt": FieldValue.serverTimestamp()
                 ]) { error in
                     if let error = error {
-                        print("❌ Error removing FCM token: \(error.localizedDescription)")
+                        AppLog.firestore.error("❌ Error removing FCM token: \(error.localizedDescription)")
                     } else {
-                        print("✅ FCM token removed for device: \(deviceId)")
-                        print("📱 Remaining devices: \(tokensArray.count)")
+                        AppLog.firestore.info("✅ FCM token removed for device: \(deviceId) | Remaining devices: \(tokensArray.count)")
+
                     }
                 }
             }
@@ -145,7 +144,8 @@ class FCMTokenService {
     /// Remove all FCM tokens for the user (useful for complete logout/account deletion)
     func removeAllFCMTokens() {
         guard let userId = Auth.auth().currentUser?.uid else {
-            print("⚠️ No user logged in, cannot remove FCM tokens")
+            AppLog.auth.warning("⚠️ No user logged in — cannot remove FCM token")
+
             return
         }
         
@@ -156,9 +156,9 @@ class FCMTokenService {
             "updatedAt": FieldValue.serverTimestamp()
         ]) { error in
             if let error = error {
-                print("❌ Error removing all FCM tokens: \(error.localizedDescription)")
+                AppLog.firestore.error("❌ Error removing all FCM tokens: \(error.localizedDescription)")
             } else {
-                print("✅ All FCM tokens removed for user: \(userId)")
+                AppLog.firestore.info("✅ All FCM tokens removed for user: \(userId)")
             }
         }
     }
@@ -172,7 +172,7 @@ class FCMTokenService {
         
         userRef.getDocument { snapshot, error in
             if let error = error {
-                print("❌ Error fetching user document: \(error.localizedDescription)")
+                AppLog.firestore.error("❌ Error fetching user doc: \(error.localizedDescription)")
                 return
             }
             
@@ -197,9 +197,9 @@ class FCMTokenService {
                     "updatedAt": FieldValue.serverTimestamp()
                 ]) { error in
                     if let error = error {
-                        print("❌ Error cleaning up tokens: \(error.localizedDescription)")
+                        AppLog.firestore.error("❌ Error cleaning up tokens: \(error.localizedDescription)")
                     } else {
-                        print("✅ Cleaned up \(originalCount - tokensArray.count) old tokens")
+                        AppLog.firestore.info("🧹 Cleaned \(originalCount - tokensArray.count) old tokens")
                     }
                 }
             }

@@ -29,7 +29,7 @@ class NotificationCoordinator: ObservableObject {
     
     @objc private func handleNavigateToOrder(_ notification: Notification) {
         if let orderId = notification.userInfo?["orderId"] as? String {
-            print("🔔 NotificationCoordinator: Navigating to order: \(orderId)")
+            AppLog.firestore.debug("🔔 NotificationCoordinator: Navigating to order: \(orderId)")
             DispatchQueue.main.async {
                 self.selectedOrderId = orderId
                 self.shouldNavigateToOrders = true

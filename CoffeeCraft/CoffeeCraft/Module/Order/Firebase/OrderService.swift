@@ -19,8 +19,12 @@ class OrderService: ObservableObject {
     ) {
         Task {
             LoaderManager.shared.showLoading()
+            
+            AppLog.order.info("🛒 Placing order with \(cartItems.count) item(s), total: \(total)")
+
             do {
                 guard let userId = Auth.auth().currentUser?.uid else {
+                    AppLog.auth.error("❌ placeOrder failed: user not logged in")
                     throw NSError(
                         domain: "Auth",
                         code: 401,
@@ -28,37 +32,42 @@ class OrderService: ObservableObject {
                     )
                 }
 
+                AppLog.order.debug("👤 UserID: \(userId)")
+
                 let counterId = String.todayCounterId
                 let counterRef = db.collection("counters").document(counterId)
 
-                let result = try await db.runTransaction { transaction, errorPointer -> Any? in
-                    let snapshot: DocumentSnapshot
+                AppLog.firestore.debug("🔢 Starting counter transaction for \(counterId)")
 
+                let result = try await db.runTransaction { transaction, errorPointer -> Any? in
                     do {
-                        snapshot = try transaction.getDocument(counterRef)
+                        let snapshot = try transaction.getDocument(counterRef)
+
+                        if !snapshot.exists {
+                            transaction.setData(["current": 1], forDocument: counterRef)
+                            return 1
+                        }
+
+                        let current = snapshot.data()?["current"] as? Int ?? 0
+                        let next = current + 1
+                        transaction.updateData(["current": next], forDocument: counterRef)
+                        return next
                     } catch {
                         errorPointer?.pointee = error as NSError
                         return nil
                     }
-                    // First order of the day → start at 1
-                    if !snapshot.exists {
-                        transaction.setData(["current": 1], forDocument: counterRef)
-                        return 1
-                    }
-                    // incrment
-                    let current = snapshot.data()?["current"] as? Int ?? 0
-                    let next = current + 1
-                    transaction.updateData(["current": next], forDocument: counterRef)
-                    return next
                 }
 
                 guard let orderNumber = result as? Int else {
+                    AppLog.order.error("❌ Failed to generate order number")
                     throw NSError(
                         domain: "OrderService",
                         code: 500,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to generate order number"]
                     )
                 }
+
+                AppLog.order.debug("🔢 Generated order number: \(orderNumber)")
 
                 let formattedOrderId = orderNumber.formattedDailyOrderId
 
@@ -73,20 +82,20 @@ class OrderService: ObservableObject {
                             "name": item.product.name,
                             "price": item.totalPrice
                         ]
-                        if !item.selections.isEmpty {
-                            dict["selections"] = item.selections
-                        }
-                        if !item.extras.isEmpty {
-                            dict["extras"] = item.extras
-                        }
+                        if !item.selections.isEmpty { dict["selections"] = item.selections }
+                        if !item.extras.isEmpty { dict["extras"] = item.extras }
                         return dict
                     }
                 ]
+
+                AppLog.firestore.debug("💾 Saving order document: \(formattedOrderId)")
 
                 try await db
                     .collection("orders")
                     .document(formattedOrderId)
                     .setData(orderData)
+
+                AppLog.order.info("✅ Order saved successfully: #\(orderNumber)")
 
                 try await MinimumLoadingTime(2.0).waitIfNeeded()
                 LoaderManager.shared.hideLoading()
@@ -100,6 +109,9 @@ class OrderService: ObservableObject {
 
             } catch {
                 LoaderManager.shared.hideLoading()
+
+                AppLog.order.error("❌ Order failed: \(error.localizedDescription)")
+
                 AlertManager.shared.showError(
                     title: "Order failed",
                     message: error.localizedDescription

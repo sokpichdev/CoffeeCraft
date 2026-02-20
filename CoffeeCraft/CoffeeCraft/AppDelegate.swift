@@ -37,11 +37,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, error in
             if granted {
-                print("✅ Notification permission granted")
+                AppLog.firestore.info("✅ Notification permission granted")
             } else if let error = error {
-                print("❌ Notification permission error: \(error.localizedDescription)")
+                AppLog.firestore.error("❌ Notification permission error: \(error.localizedDescription)")
             } else {
-                print("❌ Notification permission denied")
+                AppLog.firestore.error("❌ Notification permission denied")
             }
         }
         
@@ -60,14 +60,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         // Log device token for debugging
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        print("📱 APNs Device Token: \(tokenString)")
+        AppLog.firestore.info("📱 APNs Device Token: \(tokenString)")
     }
     
     func application(
         _ application: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
-        print("❌ Failed to register for remote notifications: \(error.localizedDescription)")
+        AppLog.firestore.error("❌ Failed to register for remote notifications: \(error.localizedDescription)")
     }
     
     // MARK: - Background Notification Handling
@@ -77,9 +77,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable : Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
-        print("📩 Remote notification received:")
-        print(userInfo)
-        
+        AppLog.printItem(userInfo, label: "📩 Remote notification received")
         // Inform FCM about the message
         Messaging.messaging().appDidReceiveMessage(userInfo)
         
@@ -98,8 +96,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         let userInfo = notification.request.content.userInfo
-        print("📬 Notification received in foreground:")
-        print(userInfo)
+        AppLog.printItem(userInfo, label: "📬 Notification received in foreground")
+
         
         // Inform FCM about the message
         Messaging.messaging().appDidReceiveMessage(userInfo)
@@ -115,15 +113,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        print("👆 Notification tapped:")
-        print(userInfo)
+        AppLog.printItem(userInfo, label: "📬 Notification received in foreground")
         
         // Inform FCM about the message
         Messaging.messaging().appDidReceiveMessage(userInfo)
         
         // Handle deep linking to order
         if let orderId = userInfo["orderId"] as? String {
-            print("🔗 Deep linking to order: \(orderId)")
+            AppLog.firestore.debug("🔗 Deep linking to order: \(orderId)")
             NotificationCenter.default.post(
                 name: Notification.Name("NavigateToOrder"),
                 object: nil,
@@ -142,11 +139,11 @@ extension AppDelegate: MessagingDelegate {
     /// Handle FCM token refresh
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else {
-            print("⚠️ FCM token is nil")
+            AppLog.firestore.warning("⚠️ FCM token is nil")
             return
         }
         
-        print("🔑 FCM Token: \(token)")
+        AppLog.firestore.info("🔑 FCM Token: \(token)")
         
         // Save token to Firestore
         FCMTokenService.shared.saveFCMToken(token)
@@ -183,6 +180,6 @@ extension AppDelegate {
         }
         
         FirebaseApp.configure(options: options)
-        print("✅ Firebase configured for \(env) with bundle ID: \(options.bundleID)")
+        AppLog.firestore.debug("Firebase configured for \(env) with bundle ID: \(options.bundleID)")
     }
 }

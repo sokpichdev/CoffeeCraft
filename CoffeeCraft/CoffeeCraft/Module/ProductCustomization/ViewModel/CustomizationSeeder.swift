@@ -109,9 +109,9 @@ struct CustomizationSeeder {
                 let name = customization["name"] as! String
                 let customID = name.lowercased().replacingOccurrences(of: " ", with: "_")
                 try await customizationsRef.document(customID).setData(customization)
-                print("✅ Added customization: \(name)")
+                AppLog.menu.info("✅ Added customization: \(name)")
             } catch {
-                print("❌ Failed to add customization: \(error.localizedDescription)")
+                AppLog.menu.error("❌ Failed to add customization: \(error.localizedDescription)")
             }
         }
     }

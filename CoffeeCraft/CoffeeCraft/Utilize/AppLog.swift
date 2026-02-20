@@ -16,7 +16,7 @@ import Firebase
 // - Categorized loggers (Auth, Menu, Order, etc.) for easy filtering in Xcode console
 // - Automatically formats any Swift model as clean JSON
 // - Handles Firebase-specific types: @DocumentID, Timestamp
-// - Handles plain Swift types: String, Date, Optional
+// - Handles plain Swift types: String, Date, Optional, Enum
 //
 // HOW TO USE:
 //   List:   AppLog.printList(fetchedItems, label: "Menu Items", logger: AppLog.menu)
@@ -58,6 +58,7 @@ struct AppLog {
     //   Date            → formats to readable string e.g. "Jan 1, 2025 at 8:00 AM"
     //   Timestamp       → converts Firebase Timestamp to Date, then formats it
     //   @DocumentID     → unwraps the property wrapper to get the raw String value
+    //   Enum            → uses rawValue if RawRepresentable, otherwise String(describing:)
     //   Struct / Class  → recursively extracts all properties into a [String: Any] dict
     //   Everything else → returned as-is (String, Int, Bool, etc.)
     private static func extractValue(_ value: Any) -> Any {
@@ -79,6 +80,22 @@ struct AppLog {
         // Convert Firebase Timestamp → Date → readable formatted string
         if let timestamp = value as? Timestamp {
             return timestamp.dateValue().formatted(date: .abbreviated, time: .shortened)
+        }
+
+        // Handle Swift enums — JSONSerialization cannot serialize a raw __SwiftValue,
+        // so we extract the rawValue for RawRepresentable enums (e.g. "customer", "admin"),
+        // and fall back to String(describing:) for enums without a raw type.
+        if mirror.displayStyle == .enum {
+            // Try common raw types in order: String → Int → Double → Bool
+            if let e = value as? any RawRepresentable {
+                let raw = e.rawValue
+                if let s = raw as? String  { return s }
+                if let i = raw as? Int     { return i }
+                if let d = raw as? Double  { return d }
+                if let b = raw as? Bool    { return b }
+            }
+            // Non-RawRepresentable enum (e.g. associated values) — use case name as string
+            return String(describing: value)
         }
 
         // Unwrap @DocumentID property wrapper
@@ -114,12 +131,18 @@ struct AppLog {
     // Uses extractValue() to handle Firebase types before serialization.
     // Falls back to String(describing:) if JSON serialization fails.
     private static func toJSON<T>(_ item: T) -> String {
-        let extracted = extractValue(item)
-        guard let dict = extracted as? [String: Any],
-              let data = try? JSONSerialization.data(withJSONObject: dict, options: [.prettyPrinted, .sortedKeys]),
-              let json = String(data: data, encoding: .utf8) else {
-            return String(describing: item) // fallback for non-serializable types
+        let safeObject = extractValue(item)
+
+        guard JSONSerialization.isValidJSONObject(safeObject),
+              let data = try? JSONSerialization.data(
+                  withJSONObject: safeObject,
+                  options: [.prettyPrinted, .sortedKeys]
+              ),
+              let json = String(data: data, encoding: .utf8)
+        else {
+            return String(describing: item)
         }
+
         return json
     }
 

@@ -81,7 +81,7 @@ class CartManager: ObservableObject {
     func loadCartFromFirestore(userId: String) {
         db.collection("carts").document(userId).getDocument { [weak self] snapshot, error in
             if let error = error {
-                print("Error loading cart: \(error.localizedDescription)")
+                AppLog.firestore.error("Error loading cart: \(error.localizedDescription)")
                 return
             }
             
@@ -94,7 +94,7 @@ class CartManager: ObservableObject {
                     self?.items = decoded
                 }
             } catch {
-                print("Decoding error: \(error.localizedDescription)")
+                AppLog.firestore.error("Decoding error: \(error.localizedDescription)")
             }
         }
     }
