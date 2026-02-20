@@ -10,19 +10,14 @@ struct AccountView: View {
 //    @StateObject var inboxVM = InboxViewModel()
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
+    @EnvironmentObject var announcementVM: AnnouncementViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
     
     @EnvironmentObject var userSession: UserSession
-    // navigate
-    @State var isNavigateToSetting: Bool = false
-    @State var isNavigateToInbox: Bool = false
-    @State var isNavigateToFavorite: Bool = false
-    @State var isNavigateToAnnouncements: Bool = false
-    @State var isNavigateToSeeAllCards: Bool = false
-    @State var isNavigateToPurchaseCard: Bool = false
-    @State var isNavigateToAddCard: Bool = false
-//    @Environment(\.pushScreen) var push
+    @Environment(\.pushScreen) var push
+    @State var isOpenAddCard: Bool = false
+    
     var body: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
@@ -46,7 +41,9 @@ struct AccountView: View {
         .background(Color(.systemGroupedBackground))
         .customNavigationBar("Account") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
-               isNavigateToSetting = true
+               push(AnyView(SettingsView()
+                .environmentObject(authVM)
+                .environmentObject(themeManager)))
             }
         }
         .onAppear {
@@ -62,30 +59,10 @@ struct AccountView: View {
                 cardVM.setUser(userId: userId)
             }
         }
-        .navigationDestination(isPresented: $isNavigateToSetting, destination: {
-            SettingsView()
-                .environmentObject(authVM)
-                .environmentObject(themeManager)
-        })
 //        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
-//            InboxView().environmentObject(inboxVM)
+//
 //        })
-        .navigationDestination(isPresented: $isNavigateToFavorite) {
-            FavoriteView()
-                .environmentObject(favVM)
-        }
-        .navigationDestination(isPresented: $isNavigateToAnnouncements) {
-            AnnouncementsListView()
-        }
-        .navigationDestination(isPresented: $isNavigateToSeeAllCards) {
-            AllCardsView()
-                .environmentObject(cardVM)
-                .environmentObject(authVM)
-        }
-        .navigationDestination(isPresented: $isNavigateToPurchaseCard) {
-            EmptyView()
-        }
-        .sheet(isPresented: $isNavigateToAddCard) {
+        .sheet(isPresented: $isOpenAddCard) {
             CustomNavigationStack {
                 AddCardView()
                     .environmentObject(cardVM)
@@ -176,7 +153,9 @@ struct AccountView: View {
                     }
                     Spacer()
                     Button(action: {
-                        isNavigateToSeeAllCards = true
+                        push(AnyView(AllCardsView()
+                            .environmentObject(cardVM)
+                            .environmentObject(authVM)))
                     }, label: {
                         VStack {
                             ZStack {
@@ -197,7 +176,7 @@ struct AccountView: View {
                 }
                 HStack {
                     Button(action: {
-                        isNavigateToPurchaseCard = true
+                        push(AnyView(EmptyView()))
                     }, label: {
                         VStack {
                             ZStack {
@@ -215,7 +194,7 @@ struct AccountView: View {
                         }
                     })
                     Button(action: {
-                        isNavigateToAddCard = true
+                        isOpenAddCard = true
                     }, label: {
                         VStack {
                             ZStack {
@@ -242,13 +221,14 @@ struct AccountView: View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
 //            RowInSectionView(title: "Inbox", systemImage: "tray.fill",
 //                             badgeCount: inboxVM.displayedAnnouncements.filter { !$0.isRead }.count) {
-//                isNavigateToInbox = true
+//                push(AnyView(InboxView().environmentObject(inboxVM)))
 //            }
 //            DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
-                isNavigateToFavorite = true
+                push(AnyView(FavoriteView()
+                    .environmentObject(favVM)))
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Addresses", systemImage: "location.fill")
@@ -263,7 +243,7 @@ struct AccountView: View {
             RowInSectionView(title: "Stores", systemImage: "building.2.fill")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Announcements", systemImage: "megaphone.fill") {
-                isNavigateToAnnouncements = true
+                push(AnyView(AnnouncementsListView().environmentObject(announcementVM)))
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Rewards", systemImage: "gift.fill")

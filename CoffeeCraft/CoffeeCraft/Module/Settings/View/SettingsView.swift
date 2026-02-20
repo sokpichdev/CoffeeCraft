@@ -10,8 +10,7 @@ struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var isNavigateToAppearance: Bool = false
+    @Environment(\.pushScreen) var push
     var body: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
@@ -27,7 +26,7 @@ struct SettingsView: View {
                 
                 SettingsSection(title: "Preferences", icon: "paintbrush.fill") {
                     RowInSectionView(title: "Appearance", systemImage: "sparkles") {
-                        isNavigateToAppearance = true
+                        push(AnyView(AppearanceSettingsView().environmentObject(themeManager)))
                     }
                     DeviderInSectionView()
                     RowInSectionView(title: "Languages", systemImage: "globe")
@@ -74,9 +73,6 @@ struct SettingsView: View {
             ToolBarButton.back {
                 dismiss()
             }
-        }
-        .navigationDestination(isPresented: $isNavigateToAppearance) {
-            AppearanceSettingsView().environmentObject(themeManager)
         }
     }
 }
