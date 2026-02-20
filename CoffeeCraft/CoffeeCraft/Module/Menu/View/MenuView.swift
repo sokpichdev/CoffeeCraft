@@ -15,7 +15,7 @@ struct MenuView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
-
+    @Environment(\.pushScreen) private var push
     // MARK: - Scroll Sync State
     @State private var selectedSectionID: String?
     @State private var productScrollProxy: ScrollViewProxy?
@@ -72,32 +72,32 @@ struct MenuView: View {
                 .environmentObject(cartManager)
                 .environmentObject(favVM)
         }
-        .navigationDestination(item: $selectedProductToEdit) { product in
-            if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
-                EditProductView(productVM: productVM,
-                                productID: productVM.products[index].id,
-                                productName: productVM.products[index].name,
-                                productDescription: productVM.products[index].description,
-                                productPrice: productVM.products[index].price,
-                                productCategory: productVM.products[index].category,
-                                productImageURL: productVM.products[index].imageURL,
-                                productAvailable: productVM.products[index].available,
-                                productCustomizations: productVM.products[index].customizations ?? [:])
-            } else {
-                EditProductView(productVM: productVM,
-                                productID: "",
-                                productName: "",
-                                productDescription: "",
-                                productPrice: 0.0,
-                                productCategory: selectedSectionID ?? "",
-                                productImageURL: "",
-                                productAvailable: true,
-                                productCustomizations: [:],
-                                isEditing: false)
-            }
+    }
+//    @ViewBuilder
+    private func handleNavigateToEditProduct(sectionId: String, product: Product) -> some View {
+        if let index = productVM.products.firstIndex(where: { $0.id == product.id }) {
+            return EditProductView(productVM: productVM,
+                            productID: productVM.products[index].id,
+                            productName: productVM.products[index].name,
+                            productDescription: productVM.products[index].description,
+                            productPrice: productVM.products[index].price,
+                            productCategory: productVM.products[index].category,
+                            productImageURL: productVM.products[index].imageURL,
+                            productAvailable: productVM.products[index].available,
+                            productCustomizations: productVM.products[index].customizations ?? [:])
+        } else {
+            return EditProductView(productVM: productVM,
+                            productID: "",
+                            productName: "",
+                            productDescription: "",
+                            productPrice: 0.0,
+                            productCategory: sectionId,
+                            productImageURL: "",
+                            productAvailable: true,
+                            productCustomizations: [:],
+                            isEditing: false)
         }
     }
-
     // MARK: - Sidebar
     private var categorySidebar: some View {
         ScrollViewReader { sidebarProxy in
@@ -193,26 +193,21 @@ struct MenuView: View {
                             .id("\(section.id)_\(product.id)")
                             .contextMenu(isManager ? ContextMenu(menuItems: {
                                 Button("Edit", systemImage: "pencil") {
-                                    selectedProductToEdit = product
+                                    push(AnyView(handleNavigateToEditProduct(sectionId: section.id, product: product)))
                                 }
                                 Button("Remove", role: .destructive) {
-                                    Task {
-                                        await productVM.deleteProduct(product)
-                                    }
+                                    Task { await productVM.deleteProduct(product) }
                                 }
                                 Button("Mark as Unavailable", systemImage: "nosign") {
-                                    Task {
-                                        await productVM.markUnavailable(product)
-                                    }
+                                    Task { await productVM.markUnavailable(product) }
                                 }
                             }) : nil)
                     }
                 }
 
                 if isManager {
-                    Button {
-                        selectedSectionID = section.id
-                        selectedProductToEdit = Product.empty(in: section.id)
+                    PushLink {
+                        handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
                     } label: {
                         Label("Add new item", systemImage: "plus.circle.fill")
                             .foregroundColor(.brown)
