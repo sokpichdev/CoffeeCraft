@@ -10,7 +10,8 @@ struct ProfileView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
-    @State private var isEditing = false
+    @State private var selectedTab = 0 //0 = view, 1 = edit
+    
     @State private var name = ""
     @State private var phone = ""
     @State private var gender = ""
@@ -24,120 +25,38 @@ struct ProfileView: View {
     let genderOptions = ["Male", "Female", "Other", "Prefer not to say"]
     let cityOptions: [String] = ["Phnom Penh", "Siem Reap", "Battambang", "Preah Sihanouk", "Kampong Cham",
         "Kandal", "Takeo", "Prey Veng", "Kampot", "Pursat", "Banteay Meanchey",
-        "Kampong Thom", "Kampong Speu", "Koh Kong", "Kratie", "Mondulkiri", "Oddar Meanchey",
-        "Pailin", "Preah Vihear", "Ratanakiri", "Stung Treng", "Svay Rieng", "Tbong Khmum"]
+        "Kampong Thom", "Kampong Speu", "Koh Kong", "Kratie", "Mondulkiri",
+        "Oddar Meanchey", "Pailin", "Preah Vihear", "Ratanakiri", "Stung Treng",
+        "Svay Rieng", "Tbong Khmum"
+    ]
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                profileHeader
-                
-                VStack(spacing: 0) {
-                    RowInProfileView(title: $name,
-                                     isEditing: $isEditing,
-                                     label: "Name",
-                                     systemImage: "person.fill",
-                                     editType: .name) {}
-                    DeviderInSectionView()
-                    RowInProfileView(title: $phone,
-                                     isEditing: $isEditing,
-                                     label: "Phone",
-                                     systemImage: "phone.fill",
-                                     editType: .phone) {}
-                    DeviderInSectionView()
-                    // Email (always read-only)
-                    RowInProfileView(title: .constant(authVM.currentUser?.email ?? "-"),
-                                     isEditing: $isEditing,
-                                     label: "Email",
-                                     systemImage: "envelope.fill",
-                                     editType: .email) {}
-                    DeviderInSectionView()
-
-                    RowInProfileView(title: $gender,
-                                     isEditing: $isEditing,
-                                     previousTitle: authVM.currentUser?.gender ?? "-",
-                                     label: "Gender",
-                                     systemImage: "figure.stand",
-                                     editType: .dropDown) {
-                        Button(action: {
-                            showGenderPicker = true
-                        }, label: {
-                            Text(gender.isEmpty ? "Select" : gender)
-                                .font(.headline)
-                                .foregroundStyle(gender.isEmpty ? .secondary : .primary)
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.headline)
-                                .foregroundColor(Color.brown)
-                        })
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                    DeviderInSectionView()
-                    RowInProfileView(title: .constant("\(dob.formatted(date: .long, time: .omitted))"),
-                                     isEditing: $isEditing,
-                                     previousTitle: "\(authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-")",
-                                     label: "Date of Birth",
-                                     systemImage: "calendar", editType: .date) {
-                        DatePicker("", selection: $dob, displayedComponents: .date)
-                            .labelsHidden()
-                            .datePickerStyle(.compact)
-                    }
-                    DeviderInSectionView()
-                    
-                    // City
-                    RowInProfileView(title: $city,
-                                     isEditing: $isEditing,
-                                     previousTitle: authVM.currentUser?.city ?? "-",
-                                     label: "City / Province",
-                                     systemImage: "mappin.circle.fill",
-                                     editType: .dropDown) {
-                        Button(action: {
-                            showCityPicker = true
-                        }, label: {
-                            Text(city.isEmpty ? "Select" : city)
-                                .font(.headline)
-                                .foregroundStyle(city.isEmpty ? .secondary : .primary)
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.headline)
-                                .foregroundColor(Color.brown)
-                        })
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 20)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color(.secondarySystemGroupedBackground))
-                        .shadow(color: Color.black.opacity(0.06), radius: 10, y: 3)
-                )
+        GeometryReader { geo in
+            HStack(alignment: .top, spacing: 0) {
+                viewTab.frame(width: geo.size.width)
+                editTab.frame(width: geo.size.width)
             }
-            .padding()
+            .offset(x: selectedTab == 0 ? 0 : -geo.size.width)
+            .animation(.spring(response: 0.42, dampingFraction: 0.88), value: selectedTab)
         }
-        .scrollDismissesKeyboard(.immediately)
+        .clipped()
         .background(Color(.systemGroupedBackground))
-        .customNavigationBar(isEditing ? "Editing Profile" : "Profile") {
-            if isEditing {
+        
+        .customNavigationBar(selectedTab == 0 ? "Profile" : "Edit Profile") {
+            if selectedTab == 0 {
+                ToolBarButton.back { dismiss() }
+                ToolBarButton(placement: .topBarTrailing, buttonType: .text("Edit")) {
+                    startEditing()
+                }
+            } else {
                 ToolBarButton(placement: .topBarLeading, buttonType: .text("Cancel")) {
                     cancelEditing()
                 }
-            } else {
-                ToolBarButton.back {
-                    dismiss()
-                }
-            }
-            
-            if isSaving {
-                ToolBarProgress(placement: .topBarTrailing)
-            } else {
-                if isEditing {
+                if isSaving {
+                    ToolBarProgress(placement: .topBarTrailing)
+                } else {
                     ToolBarButton(placement: .topBarTrailing, buttonType: .text("Save")) {
                         saveProfile()
-                    }
-                } else {
-                    ToolBarButton(placement: .topBarTrailing, buttonType: .text("Edit")) {
-                        startEditing()
                     }
                 }
             }
@@ -161,9 +80,120 @@ struct ProfileView: View {
             )
             .presentationDetents([.medium])
         }
+        .onAppear { loadUserData() }
     }
     
-    var profileHeader: some View {
+    private var viewTab: some View {
+        ScrollView {
+            VStack(spacing: 28) {
+                profileHeader
+                infoCard(isEditing: false)
+            }
+            .padding()
+        }
+        .scrollDismissesKeyboard(.immediately)
+    }
+    
+    private var editTab: some View {
+        ScrollView {
+            VStack(spacing: 28) {
+                profileHeader
+                infoCard(isEditing: true)
+            }
+            .padding()
+        }
+        .scrollDismissesKeyboard(.immediately)
+    }
+    
+    @ViewBuilder
+    private func infoCard(isEditing: Bool) -> some View {
+        let isEditingBinding = Binding.constant(isEditing)
+        
+        VStack(spacing: 0) {
+            RowInProfileView(title: $name,
+                             isEditing: isEditingBinding,
+                             label: "Name",
+                             systemImage: "person.fill",
+                             editType: .name) {}
+            DeviderInSectionView()
+            
+            RowInProfileView(title: $phone,
+                             isEditing: isEditingBinding,
+                             label: "Phone",
+                             systemImage: "phone.fill",
+                             editType: .phone) {}
+            DeviderInSectionView()
+            
+            RowInProfileView(title: .constant(authVM.currentUser?.email ?? "-"),
+                             isEditing: isEditingBinding,
+                             label: "Email",
+                             systemImage: "envelope.fill",
+                             editType: .email) {}
+            DeviderInSectionView()
+            
+            RowInProfileView(title: $gender,
+                             isEditing: isEditingBinding,
+                             previousTitle: authVM.currentUser?.gender ?? "-",
+                             label: "Gender",
+                             systemImage: "figure.stand",
+                             editType: .dropDown) {
+                Button {
+                    showGenderPicker = true
+                } label: {
+                    Text(gender.isEmpty ? "Select" : gender)
+                        .font(.headline)
+                        .foregroundStyle(gender.isEmpty ? .secondary : .primary)
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .foregroundColor(.brown)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            DeviderInSectionView()
+            
+            RowInProfileView(
+                title: .constant(dob.formatted(date: .long, time: .omitted)),
+                isEditing: isEditingBinding,
+                previousTitle: authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-",
+                label: "Date of Birth",
+                systemImage: "calendar",
+                editType: .date
+            ) {
+                DatePicker("", selection: $dob, displayedComponents: .date)
+                    .labelsHidden()
+                    .datePickerStyle(.compact)
+            }
+            DeviderInSectionView()
+            
+            RowInProfileView(title: $city,
+                             isEditing: isEditingBinding,
+                             previousTitle: authVM.currentUser?.city ?? "-",
+                             label: "City / Province",
+                             systemImage: "mappin.circle.fill",
+                             editType: .dropDown) {
+                Button {
+                    showCityPicker = true
+                } label: {
+                    Text(city.isEmpty ? "Select" : city)
+                        .font(.headline)
+                        .foregroundStyle(city.isEmpty ? .secondary : .primary)
+                    Image(systemName: "chevron.right")
+                        .font(.headline)
+                        .foregroundColor(.brown)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.secondarySystemGroupedBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 10, y: 3)
+        )
+    }
+    
+    private var profileHeader: some View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
@@ -199,56 +229,42 @@ struct ProfileView: View {
         .padding(.bottom, 8)
     }
     
-    func loadUserData() {
-        if let user = authVM.currentUser {
-            name = user.name
-            phone = user.phoneNumber ?? ""
-            gender = user.gender ?? ""
-            dob = user.dateOfBirth ?? Date()
-            city = user.city ?? ""
-        }
+    private func loadUserData() {
+        guard let user = authVM.currentUser else { return }
+        name = user.name
+        phone = user.phoneNumber ?? ""
+        gender = user.gender ?? ""
+        dob = user.dateOfBirth ?? Date()
+        city = user.city ?? ""
     }
     
-    func startEditing() {
+    private func startEditing() {
         loadUserData()
-        withAnimation(.easeInOut(duration: 0.3)) {
-            isEditing = true
-        }
+        withAnimation { selectedTab = 1 }
     }
     
-    func cancelEditing() {
+    private func cancelEditing() {
         loadUserData()
-        withAnimation(.easeInOut(duration: 0.3)) {
-            isEditing = false
-        }
+        withAnimation { selectedTab = 0 }
     }
     
-    func saveProfile() {
+    private func saveProfile() {
         guard var user = authVM.currentUser else { return }
-
         isSaving = true
-
-        // Update local user model
+        
         user.name = name
         user.phoneNumber = phone
         user.gender = gender
         user.dateOfBirth = dob
         user.city = city
-
+        
         Task {
             let success = await authVM.updateProfile(user: user)
-
             await MainActor.run {
                 isSaving = false
-
+                ToastManager.shared.show(message: "Profile updated successfully", type: .success)
                 if success {
-                    print("✅ Successfully Updated profile")
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isEditing = false
-                    }
-                } else {
-                    // TODO: show error alert / toast
-                    print("❌ Failed to update profile")
+                    withAnimation { selectedTab = 0 }
                 }
             }
         }

@@ -257,8 +257,6 @@ class AuthViewModel: ObservableObject {
             try await fetchUserData(uid: uid)
 
             LoaderManager.shared.hideLoading()
-            AlertManager.shared.showSuccess(message: "Profile updated successfully")
-
             return true
         } catch {
             LoaderManager.shared.hideLoading()
