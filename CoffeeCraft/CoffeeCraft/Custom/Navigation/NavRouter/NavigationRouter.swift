@@ -31,18 +31,30 @@ final class NavigationRouter: ObservableObject {
     // once it installs itself.
     weak var navigationController: UINavigationController?
 
+    // Shared across ALL PushLinks in the tree.
+    var isNavigating = false
+
     func push(_ view: AnyView) {
+        guard !isNavigating else { return }
+        isNavigating = true
+
         guard let nav = navigationController else {
             // Fallback: if UIKit nav isn't wired yet, use SwiftUI path.
             path.append(PushedScreen(view: view))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.isNavigating = false
+            }
             return
         }
-        let host = UIHostingController(rootView: view)
-        host.navigationItem.hidesBackButton = true
         // Re-inject push so deeply nested screens can push further.
-        host.rootView = AnyView(
+        let host = UIHostingController(rootView: AnyView(
             view.environment(\.pushScreen, push)
-        )
+        ))
+        host.navigationItem.hidesBackButton = true
         nav.pushViewController(host, animated: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.isNavigating = false
+        }
     }
 }
