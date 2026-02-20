@@ -31,7 +31,7 @@ import UIKit
 // ============================================================
 
 struct CustomRefreshScrollView<Content: View>: View {
-
+    var showsIndicators: Bool
     // How far the user must pull down (in points) to trigger a refresh.
     var threshold: CGFloat
 
@@ -93,11 +93,13 @@ struct CustomRefreshScrollView<Content: View>: View {
     // --------------------------------------------------------
 
     init(
+        showsIndicators: Bool = false,
         threshold: CGFloat = 120,
         loaderOffset: CGFloat = 0,
         @ViewBuilder _ content: @escaping () -> Content,
         onRefresh: (() async -> Void)? = nil
     ) {
+        self.showsIndicators = showsIndicators
         self.threshold   = threshold
         self.loaderOffset = loaderOffset
         self.onRefresh   = onRefresh
@@ -111,7 +113,7 @@ struct CustomRefreshScrollView<Content: View>: View {
     var body: some View {
         ZStack(alignment: .top) {
 
-            ScrollView {
+            ScrollView(showsIndicators: showsIndicators) {
                 content()
                     // While refreshing, push all content down by `threshold`
                     // to create space for the loader above it.
