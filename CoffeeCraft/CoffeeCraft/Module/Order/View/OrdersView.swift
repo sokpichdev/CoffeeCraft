@@ -9,55 +9,51 @@ import SwiftUI
 struct OrdersView: View {
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
-    @State private var navigationPath = NavigationPath()
+    @Environment(\.pushScreen) private var push   // ← replace navigationPath
     @State private var isPaginating = false
     @State private var pageNum = 1
-    
+
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ZStack {
-                // Adaptive background
-                Color(uiColor: .systemGroupedBackground)
-                    .ignoresSafeArea()
-                
-                if orderVM.orders.isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "cup.and.saucer.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.brown.opacity(0.7))
-                        Text("No Orders Yet")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        Text("Your recent coffee orders will appear here.")
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    CustomRefreshScrollView( {
-                        LazyVStack(spacing: 8) {
-                            ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
-                                PushLink(value: order) { order in
-                                    OrderDetailView(order: order)
-                                } label: {
-                                    OrderCardView(order: order)
-                                        .padding(.horizontal)
-                                }
-                                .onAppear {
-                                    if orderVM.orders.count < orderVM.totalOrdersCount {
-                                        if !orderVM.orders.isEmpty {
-                                            if order.id == orderVM.orders.last?.id, !isPaginating {
-                                                isPaginating = true
-                                                pageNum += 1
-                                                Task {
-                                                    let timer = MinimumLoadingTime(0.5)
-                                                    try? await timer.waitIfNeeded()
-                                                    
-                                                    await MainActor.run {
-                                                        orderVM.fetchOrders(pageNum: pageNum) { success in
-                                                            isPaginating = false
-                                                        }
+        ZStack {
+            Color(uiColor: .systemGroupedBackground)
+                .ignoresSafeArea()
+
+            if orderVM.orders.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.brown.opacity(0.7))
+                    Text("No Orders Yet")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("Your recent coffee orders will appear here.")
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                CustomRefreshScrollView({
+                    LazyVStack(spacing: 8) {
+                        ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
+                            PushLink(value: order) { order in  // ← PushLink replaces Button
+                                OrderDetailView(order: order)
+                            } label: {
+                                OrderCardView(order: order)
+                                    .padding(.horizontal)
+                            }
+                            .onAppear {
+                                if orderVM.orders.count < orderVM.totalOrdersCount {
+                                    if !orderVM.orders.isEmpty {
+                                        if order.id == orderVM.orders.last?.id, !isPaginating {
+                                            isPaginating = true
+                                            pageNum += 1
+                                            Task {
+                                                let timer = MinimumLoadingTime(0.5)
+                                                try? await timer.waitIfNeeded()
+                                                await MainActor.run {
+                                                    orderVM.fetchOrders(pageNum: pageNum) { _ in
+                                                        isPaginating = false
                                                     }
                                                 }
                                             }
@@ -65,56 +61,47 @@ struct OrdersView: View {
                                     }
                                 }
                             }
-                            
-                            if isPaginating {
-                                ProgressView()
-                                    .padding()
-                            }
                         }
-                        .padding(.vertical)
-                        .frame(maxWidth: .infinity)
-                    }, onRefresh: {
-                        pageNum = 1
-                        await withCheckedContinuation { continuation in
-                            orderVM.refreshOrders { _ in
-                                continuation.resume()
-                            }
+
+                        if isPaginating {
+                            ProgressView().padding()
                         }
-                    })
-                }
-            }
-            .customNavigationBar("My Orders")
-            .onAppear {
-                orderVM.fetchOrders(pageNum: 1)
-                handleDeepLink()
-            }
-            .onChange(of: coordinator.selectedOrderId) { oldValue, newValue in
-                handleDeepLink()
+                    }
+                    .padding(.vertical)
+                    .frame(maxWidth: .infinity)
+                }, onRefresh: {
+                    pageNum = 1
+                    await withCheckedContinuation { continuation in
+                        orderVM.refreshOrders { _ in continuation.resume() }
+                    }
+                })
             }
         }
+        .customNavigationBar("My Orders")
+        .onAppear {
+            orderVM.fetchOrders(pageNum: 1)
+            handleDeepLink()
+        }
+        .onChange(of: coordinator.selectedOrderId) { _, _ in
+            handleDeepLink()
+        }
     }
-    
+
     private func handleDeepLink() {
         guard let orderId = coordinator.selectedOrderId else { return }
-        
-        print("🔗 OrdersView: Handling deep link to order: \(orderId)")
-        
-        // Find the order
-        if let order = orderVM.orders.first(where: { $0.id == orderId }) {
-            print("✅ Order found, navigating...")
-            navigationPath.append(order)
-            coordinator.clearNavigation()
+
+        func navigate() {
+            if let order = orderVM.orders.first(where: { $0.id == orderId }) {
+                push(AnyView(OrderDetailView(order: order)))  // ← push instead of navigationPath.append
+                coordinator.clearNavigation()
+            }
+        }
+
+        if orderVM.orders.contains(where: { $0.id == orderId }) {
+            navigate()
         } else {
-            print("⚠️ Order not found yet, waiting for orders to load...")
-            // If orders haven't loaded yet, wait a bit and try again
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                if let order = orderVM.orders.first(where: { $0.id == orderId }) {
-                    navigationPath.append(order)
-                    coordinator.clearNavigation()
-                } else {
-                    print("❌ Order still not found after delay")
-                    coordinator.clearNavigation()
-                }
+                navigate()
             }
         }
     }

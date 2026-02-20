@@ -10,58 +10,49 @@ import FirebaseAuth
 struct AdminOrdersView: View {
     @StateObject var vm = AdminOrdersViewModel()
     @State private var selectedTab: Segment = .activeOrders
-    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ZStack {
-                LinearGradient(colors: [/*Color.coffeeDarkBrown,*/
-                                        Color.coffeeDarkBrown.opacity(0.75),
-                                        Color.coffeeDarkBrown.opacity(0.5),
-                                        Color(.systemBackground)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .cornerRadius(36, corners: [.topLeft, .topRight])
-                .edgesIgnoringSafeArea(.bottom)
-                VStack(spacing: 0) {
-                    // Segmented Picker
-                    CustomSegmentedControl(
-                        selectedSegment: $selectedTab,
-                        segments: [.activeOrders, .myOrders]
-                    ) {}
-                    .padding()
+        ZStack {
+            LinearGradient(
+                colors: [Color.coffeeDarkBrown.opacity(0.75), Color.coffeeDarkBrown.opacity(0.5), Color(.systemBackground)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .cornerRadius(36, corners: [.topLeft, .topRight])
+            .edgesIgnoringSafeArea(.bottom)
 
-                    // Content based on selected tab
-                    if selectedTab == .activeOrders {
-                        ActiveOrdersContent(vm: vm, navigationPath: $navigationPath)
-                            .padding(.horizontal)
-                    } else {
-                        MyOrdersContent(vm: vm, navigationPath: $navigationPath)
-                            .padding(.horizontal)
-                    }
+            VStack(spacing: 0) {
+                CustomSegmentedControl(
+                    selectedSegment: $selectedTab,
+                    segments: [.activeOrders, .myOrders]
+                ) {}
+                .padding()
+
+                if selectedTab == .activeOrders {
+                    ActiveOrdersContent(vm: vm)
+                        .padding(.horizontal)
+                } else {
+                    MyOrdersContent(vm: vm)
+                        .padding(.horizontal)
                 }
             }
-            .navigationDestination(for: Order.self) { order in
-                OrderDetailView(order: order, isActive: selectedTab == .activeOrders ? true : false)
-            }
-            .customNavigationBar("Orders")
         }
+        .customNavigationBar("Orders")
     }
 }
 
 // MARK: - Active Orders Content
 struct ActiveOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
-    @Binding var navigationPath: NavigationPath
+    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
-    
+
     private var filteredOrders: [Order] {
         vm.allOrders
             .filter { $0.status != "Completed" }
             .sorted(by: { $0.timestamp > $1.timestamp })
     }
-    
+
     var body: some View {
         Group {
             if filteredOrders.isEmpty {
@@ -79,26 +70,22 @@ struct ActiveOrdersContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                CustomRefreshScrollView( {
+                CustomRefreshScrollView({
                     LazyVStack(spacing: 8) {
-                        ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { i, order in
-                            Button {
-                                navigationPath.append(order)
+                        ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { _, order in
+                            PushLink {
+                                OrderDetailView(order: order, isActive: true)
                             } label: {
                                 OrderCardView(order: order) {
                                     AnyView(
                                         HStack(spacing: 8) {
                                             Button("Start") {
-                                                vm.updateOrderStatus(order: order, status: "InProgress") { success in
-                                                    
-                                                }
+                                                vm.updateOrderStatus(order: order, status: "InProgress") { _ in }
                                             }
                                             .disabled(order.status != "Pending")
 
                                             Button("Ready") {
-                                                vm.updateOrderStatus(order: order, status: "Ready") { success in
-                                                    
-                                                }
+                                                vm.updateOrderStatus(order: order, status: "Ready") { _ in }
                                             }
                                             .disabled(order.status != "InProgress")
 
@@ -116,7 +103,6 @@ struct ActiveOrdersContent: View {
                                     )
                                 }
                             }
-                            .buttonStyle(.plain)
                             .onAppear {
                                 // Pagination logic
                                 if vm.allOrders.count < vm.totalAllOrdersCount {
@@ -139,8 +125,7 @@ struct ActiveOrdersContent: View {
                                 }
                             }
                         }
-                        
-                        // Loading indicator
+
                         if isPaginating {
                             ProgressView()
                                 .padding()
@@ -157,7 +142,6 @@ struct ActiveOrdersContent: View {
                 })
                 .padding(.bottom)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
-
             }
         }
         .onAppear {
@@ -169,10 +153,10 @@ struct ActiveOrdersContent: View {
 // MARK: - My Orders Content
 struct MyOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
-    @Binding var navigationPath: NavigationPath
+    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
-    
+
     var body: some View {
         Group {
             if vm.myOrders.isEmpty {
@@ -190,15 +174,14 @@ struct MyOrdersContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                CustomRefreshScrollView( {
+                CustomRefreshScrollView({
                     LazyVStack(spacing: 8) {
-                        ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { i, order in
-                            Button {
-                                navigationPath.append(order)
+                        ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { _, order in
+                            PushLink {
+                                OrderDetailView(order: order)
                             } label: {
                                 OrderCardView(order: order)
                             }
-                            .buttonStyle(.plain)
                             .onAppear {
                                 // Pagination logic
                                 if vm.myOrders.count < vm.totalMyOrdersCount {
@@ -221,8 +204,7 @@ struct MyOrdersContent: View {
                                 }
                             }
                         }
-                        
-                        // Loading indicator
+
                         if isPaginating {
                             ProgressView()
                                 .padding()
