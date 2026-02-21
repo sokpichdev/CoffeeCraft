@@ -12,11 +12,11 @@ import FirebaseFirestore
 // Add new cases here as you add new cloud function triggers.
 // ─────────────────────────────────────────────────────────────
 enum NotificationType: String, Codable {
-    case orderStatus   = "order_status"
-    case promotion     = "promotion"
-    case reward        = "reward"
-    case announcement  = "announcement"
-    case unknown       // fallback — never crashes on unrecognised types
+    case orderStatus = "order_status"
+    case promotion = "promotion"
+    case reward = "reward"
+    case announcement = "announcement"
+    case unknown // fallback — never crashes on unrecognised types
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -40,14 +40,14 @@ struct AppNotification: Identifiable, Codable {
     var orderStatusPayload: OrderStatusPayload? {
         guard type == .orderStatus,
               let orderId = payload?["orderId"],
-              let status  = payload?["status"]
+              let status = payload?["status"]
         else { return nil }
         return OrderStatusPayload(orderId: orderId, status: status)
     }
 
     var promotionPayload: PromotionPayload? {
         guard type == .promotion,
-              let code    = payload?["discountCode"],
+              let code = payload?["discountCode"],
               let expires = payload?["expiresAt"]
         else { return nil }
         return PromotionPayload(discountCode: code, expiresAt: expires)
@@ -76,21 +76,15 @@ struct OrderStatusPayload {
 
     var statusIcon: String {
         switch status {
-        case "Preparing":  return "cup.and.saucer.fill"
-        case "Ready":      return "checkmark.seal.fill"
-        case "Completed":  return "bag.fill.badge.checkmark"
-        case "Cancelled":  return "xmark.circle.fill"
-        default:           return "clock.fill"
+        case "Completed": return "takeoutbag.and.cup.and.straw.fill"
+        default: return "clock.fill"
         }
     }
 
     var statusColor: String {   // map in view with Color(payload.statusColor)
         switch status {
-        case "Preparing":  return "orange"
-        case "Ready":      return "green"
-        case "Completed":  return "brown"
-        case "Cancelled":  return "red"
-        default:           return "gray"
+        case "Completed": return "brown"
+        default: return "gray"
         }
     }
 }
