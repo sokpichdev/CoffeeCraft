@@ -11,31 +11,29 @@ struct InboxView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        CustomNavigationStack {
-            ZStack {
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
-
-                Group {
-                    if inboxVM.isLoading {
-                        loadingState
-                    } else if inboxVM.notifications.isEmpty {
-                        emptyState
-                    } else {
-                        notificationList
-                    }
+        ZStack {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+            
+            Group {
+                if inboxVM.isLoading {
+                    loadingState
+                } else if inboxVM.notifications.isEmpty {
+                    emptyState
+                } else {
+                    notificationList
                 }
             }
-            .customNavigationBar("Inbox") {
-                ToolBarButton.back { dismiss() }
-
-                if inboxVM.unreadCount > 0 {
-                    ToolBarButton(
-                        placement: .topBarTrailing,
-                        buttonType: .text("Mark all read")
-                    ) {
-                        Task { await inboxVM.markAllAsRead() }
-                    }
+        }
+        .customNavigationBar("Inbox") {
+            ToolBarButton.back { dismiss() }
+            
+            if inboxVM.unreadCount > 0 {
+                ToolBarButton(
+                    placement: .topBarTrailing,
+                    buttonType: .text("Mark all read")
+                ) {
+                    Task { await inboxVM.markAllAsRead() }
                 }
             }
         }
@@ -43,7 +41,7 @@ struct InboxView: View {
 
     // MARK: - List
     private var notificationList: some View {
-        ScrollView {
+        CustomRefreshScrollView( {
             // Unread count pill
             if inboxVM.unreadCount > 0 {
                 HStack {
@@ -87,7 +85,9 @@ struct InboxView: View {
                 }
             }
             .padding(.vertical, 8)
-        }
+        }, onRefresh: {
+            
+        })
     }
 
     // MARK: - Loading State

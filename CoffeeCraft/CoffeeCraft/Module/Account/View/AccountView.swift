@@ -61,9 +61,6 @@ struct AccountView: View {
                 cardVM.setUser(userId: userId)
             }
         }
-//        .navigationDestination(isPresented: $isNavigateToInbox, destination: {
-//
-//        })
         .sheet(isPresented: $isOpenAddCard) {
             CustomNavigationStack {
                 AddCardView()

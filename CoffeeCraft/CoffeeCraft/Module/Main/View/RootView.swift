@@ -52,6 +52,7 @@ struct RootView: View {
                         case .profile:
                             AccountView()
                                 .environmentObject(favVM)
+                                .environmentObject(announcementVM)
                                 .environmentObject(authVM)
                                 .environmentObject(themeManager)
                                 .environmentObject(cardVM)
