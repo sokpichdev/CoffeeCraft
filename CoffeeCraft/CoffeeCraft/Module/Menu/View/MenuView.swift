@@ -11,7 +11,7 @@ import FirebaseFirestore
 struct MenuView: View {
 
     // MARK: - ViewModels
-    @StateObject private var productVM = ProductViewModel()
+    @EnvironmentObject var productVM: ProductViewModel
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel

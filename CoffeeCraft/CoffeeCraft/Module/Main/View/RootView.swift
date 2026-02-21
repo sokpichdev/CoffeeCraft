@@ -11,9 +11,10 @@ struct RootView: View {
     @EnvironmentObject var session: UserSession
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var themeManager: ThemeManager
-    
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
+    
+    @StateObject var productVM = ProductViewModel()
     @StateObject var cartManager = CartManager()
     @StateObject var cardVM = CardViewModel()
     @StateObject var favVM = FavoriteViewModel()
@@ -42,6 +43,7 @@ struct RootView: View {
                                 .environmentObject(cartManager)
                                 .environmentObject(favVM)
                                 .environmentObject(cardVM)
+                                .environmentObject(productVM)
                         case .orders:
                             OrdersView()
                                 .environmentObject(orderVM)
@@ -64,6 +66,7 @@ struct RootView: View {
                                 .environmentObject(cartManager)
                                 .environmentObject(favVM)
                                 .environmentObject(cardVM)
+                                .environmentObject(productVM)
                         case .orders:
                             AdminOrdersView()
                         case .profile:
