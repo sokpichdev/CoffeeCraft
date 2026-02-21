@@ -16,6 +16,11 @@ class FavoriteViewModel: ObservableObject {
     
     private let db = Firestore.firestore()
 
+    /// Tracks the last key we actually fired a Firestore request for.
+    /// Format: "<productId>|<customizationHash>"
+    /// Any call arriving with the same key is a duplicate and is dropped.
+    private var lastLoadedKey: String? = nil
+
     // MARK: - Helpers
     func currentCustomizationForFavorite(selections: [String: String], selectedExtras: [String]) -> [String: String] {
         var result = selections
@@ -34,7 +39,19 @@ class FavoriteViewModel: ObservableObject {
 
         let customizations = currentCustomizationForFavorite(selections: selections, selectedExtras: selectedExtras)
         let hash = buildCustomizationHash(customizations)
-        AppLog.menu.debug("🔍 loadFavoriteState — productId: \(product.id), hash: \(hash)")
+        let key = "\(product.id)|\(hash)"
+
+        /// SwiftUI can render a view multiple times in a single pass (sheet
+        /// presentation, layout measurement, etc.), causing .task(id:) to fire
+        /// several times with the identical id. Skip the Firestore round-trip
+        /// if nothing has actually changed since the last completed fetch.
+        guard key != lastLoadedKey else {
+//            AppLog.menu.debug("⏭️ loadFavoriteState — duplicate key skipped: \(key)")
+            return
+        }
+        lastLoadedKey = key
+
+//        AppLog.menu.debug("🔍 loadFavoriteState — productId: \(product.id), hash: \(hash)")
 
         let snapshot = try? await db
             .collection("users")
@@ -46,6 +63,13 @@ class FavoriteViewModel: ObservableObject {
 
         isFavorite = !(snapshot?.documents.isEmpty ?? true)
         AppLog.menu.debug("❤️ loadFavoriteState — isFavorite: \(self.isFavorite) for productId: \(product.id)")
+    }
+
+    /// Call this in ProductDetailView's `.onDisappear` so the guard
+    /// doesn't block a legitimate reload the next time the same product opens.
+    func resetFavoriteState() {
+        lastLoadedKey = nil
+        isFavorite = false
     }
     
     // MARK: - Toggle favorite for a product
@@ -78,6 +102,8 @@ class FavoriteViewModel: ObservableObject {
             if let doc = snapshot.documents.first {
                 try await doc.reference.delete()
                 isFavorite = false
+                // Allow re-fetch after a toggle so the state stays in sync.
+                lastLoadedKey = nil
                 AppLog.menu.debug("🗑️ toggleFavorite — removed favorite, docId: \(doc.documentID), productId: \(product.id)")
             } else {
                 let docRef = try await ref.addDocument(data: [
@@ -90,6 +116,8 @@ class FavoriteViewModel: ObservableObject {
                     "createdAt": Date()
                 ])
                 isFavorite = true
+                // Allow re-fetch after a toggle so the state stays in sync.
+                lastLoadedKey = nil
                 AppLog.menu.debug("✅ toggleFavorite — added favorite, docId: \(docRef.documentID), productId: \(product.id)")
             }
         } catch {
