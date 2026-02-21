@@ -58,6 +58,8 @@ struct AppLog {
     //   Date            → formats to readable string e.g. "Jan 1, 2025 at 8:00 AM"
     //   Timestamp       → converts Firebase Timestamp to Date, then formats it
     //   @DocumentID     → unwraps the property wrapper to get the raw String value
+    //   Array           → maps each element through extractValue recursively
+    //   Dictionary      → maps each value through extractValue recursively
     //   Enum            → uses rawValue if RawRepresentable, otherwise String(describing:)
     //   Struct / Class  → recursively extracts all properties into a [String: Any] dict
     //   Everything else → returned as-is (String, Int, Bool, etc.)
@@ -70,6 +72,30 @@ struct AppLog {
                 return extractValue(child.value)
             }
             return "null"
+        }
+
+        // Handle Arrays — map every element through extractValue so nested
+        // structs (e.g. [CartItemData]) become [[String: Any]] instead of
+        // an un-serialisable Swift array, which caused the JSON fallback.
+        if mirror.displayStyle == .collection {
+            return mirror.children.map { extractValue($0.value) }
+        }
+
+        // Handle Dictionaries — convert both keys and values
+        if mirror.displayStyle == .dictionary {
+            var dict: [String: Any] = [:]
+            for child in mirror.children {
+                // Each child is a (key, value) tuple
+                let pair = Mirror(reflecting: child.value)
+                let children = Array(pair.children)
+                if children.count == 2,
+                   let key = children[0].value as? String {
+                    dict[key] = extractValue(children[1].value)
+                } else {
+                    dict[String(describing: child.value)] = "?"
+                }
+            }
+            return dict
         }
 
         // Convert Swift Date to a readable formatted string
