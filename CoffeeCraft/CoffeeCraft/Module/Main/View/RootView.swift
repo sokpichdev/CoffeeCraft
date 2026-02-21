@@ -14,6 +14,7 @@ struct RootView: View {
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
     
+    @StateObject var inboxVM = InboxViewModel()
     @StateObject var productVM = ProductViewModel()
     @StateObject var cartManager = CartManager()
     @StateObject var cardVM = CardViewModel()
@@ -54,6 +55,7 @@ struct RootView: View {
                                 .environmentObject(authVM)
                                 .environmentObject(themeManager)
                                 .environmentObject(cardVM)
+                                .environmentObject(inboxVM)
                         }
                     case .manager:
                         switch selectedTab {
@@ -76,6 +78,7 @@ struct RootView: View {
                                 .environmentObject(authVM)
                                 .environmentObject(themeManager)
                                 .environmentObject(cardVM)
+                                .environmentObject(inboxVM)
                         }
                     case .none:
                         AuthView()
@@ -83,6 +86,9 @@ struct RootView: View {
                     TabBarView(selectedTab: $selectedTab)
                 }
                 .ignoresSafeArea(edges: .bottom)
+                .onAppear {
+                    inboxVM.listen()
+                }
             }
         }
         .onChange(of: coordinator.shouldNavigateToOrders) { _, _ in

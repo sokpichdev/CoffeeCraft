@@ -2,136 +2,196 @@ import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
 import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 
-// Initialize Firebase Admin SDK
 admin.initializeApp();
 
+// ─────────────────────────────────────────────────────────
+// NOTIFICATION TYPE REGISTRY
+// Add new notification types here as the app grows.
+// ─────────────────────────────────────────────────────────
+type NotificationType =
+  | "order_status"
+  | "promotion"
+  | "reward"
+  | "announcement";
+
+interface NotificationDoc {
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: admin.firestore.Timestamp;
+  payload: Record<string, string>;
+}
+
+interface FcmTokenObject {
+  token: string;
+}
+
+// ─────────────────────────────────────────────────────────
+// HELPER: persist notification to Firestore + send FCM
+// Centralise here so every future trigger just calls this.
+// ─────────────────────────────────────────────────────────
 /**
- * Cloud Function: Send notification when order status changes to
- * "Completed"
+ * Saves a notification document to the user's inbox in Firestore
+ * and sends an FCM push to all of the user's devices.
  *
- * Triggers: When any document in the "orders" collection is updated
- * Action: Sends FCM notification to all user devices using userId
+ * @param {string} userId - The Firestore user document ID.
+ * @param {NotificationDoc} notification - The notification to save.
+ * @param {Record<string, string>} fcmData - Extra data for FCM payload.
+ * @return {Promise<void>}
  */
-export const sendOrderCompletedNotification = onDocumentUpdated(
+async function sendAndSaveNotification(
+  userId: string,
+  notification: NotificationDoc,
+  fcmData: Record<string, string>
+): Promise<void> {
+  // 1. Save to Firestore inbox
+  await admin
+    .firestore()
+    .collection("users")
+    .doc(userId)
+    .collection("notifications")
+    .add(notification);
+
+  logger.info(`📥 Notification saved to inbox for user ${userId}`);
+
+  // 2. Fetch FCM tokens
+  const userDoc = await admin
+    .firestore()
+    .collection("users")
+    .doc(userId)
+    .get();
+
+  if (!userDoc.exists) {
+    logger.warn(`User document not found for userId ${userId}`);
+    return;
+  }
+
+  const fcmTokensArray = userDoc.data()?.fcmTokens as
+    | FcmTokenObject[]
+    | undefined;
+
+  if (!fcmTokensArray || !Array.isArray(fcmTokensArray)) {
+    logger.warn(`No fcmTokens array found for user ${userId}`);
+    return;
+  }
+
+  const tokens: string[] = fcmTokensArray
+    .map((obj: FcmTokenObject) => obj.token)
+    .filter((t: string) => t && t.length > 0);
+
+  if (tokens.length === 0) {
+    logger.warn(`No valid tokens for user ${userId}`);
+    return;
+  }
+
+  // 3. Send FCM push
+  const payload: admin.messaging.MulticastMessage = {
+    tokens,
+    notification: {
+      title: notification.title,
+      body: notification.message,
+    },
+    data: {
+      ...fcmData,
+      type: notification.type,
+    },
+    apns: {
+      payload: {
+        aps: {sound: "default", badge: 1},
+      },
+    },
+  };
+
+  const response = await admin.messaging().sendEachForMulticast(payload);
+  logger.info(
+    `📲 FCM sent: ${response.successCount} success, ` +
+    `${response.failureCount} failed`
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// TRIGGER: Order status changed
+// ─────────────────────────────────────────────────────────
+/**
+ * Fires when any order document is updated.
+ * Sends inbox notification + FCM push when status changes.
+ */
+export const onOrderStatusChanged = onDocumentUpdated(
   "orders/{orderId}",
   async (event) => {
     try {
       const orderId = event.params.orderId;
+      if (!event.data) return;
 
-      // Check if data exists
-      if (!event.data) {
-        logger.warn("No data associated with the event");
-        return;
-      }
+      const before = event.data.before.data();
+      const after = event.data.after.data();
+      if (!before || !after) return;
 
-      const beforeData = event.data.before.data();
-      const afterData = event.data.after.data();
+      const beforeStatus: string = before.status;
+      const afterStatus: string = after.status;
 
-      // Check if data exists
-      if (!beforeData || !afterData) {
-        logger.warn(`Missing data for order ${orderId}`);
-        return;
-      }
+      if (beforeStatus === afterStatus) return;
 
-      // Log the status change
-      const beforeStatus = beforeData.status;
-      const afterStatus = afterData.status;
       logger.info(
-        `Order ${orderId} status changed from ` +
-        `"${beforeStatus}" to "${afterStatus}"`
+        `Order ${orderId}: "${beforeStatus}" → "${afterStatus}"`
       );
 
-      // Only send notification if status changed TO "Completed"
-      const wasNotCompleted = beforeData.status !== "Completed";
-      const isNowCompleted = afterData.status === "Completed";
+      const userId: string = after.userId;
+      if (!userId) {
+        logger.warn(`No userId on order ${orderId}`);
+        return;
+      }
 
-      if (wasNotCompleted && isNowCompleted) {
+      // Map status → notification copy.
+      // Add new statuses here without touching anything else.
+      const statusMap: Record<
+        string,
+        {title: string; message: string}
+      > = {
+        Completed: {
+          title: "Order completed ✅",
+          message: `Order #${orderId} has been completed. Enjoy!`,
+        },
+      };
+
+      const copy = statusMap[afterStatus];
+      if (!copy) {
         logger.info(
-          `Order ${orderId} completed! Sending notification...`
-        );
-
-        // Get userId from the order
-        const userId = afterData.userId;
-
-        if (!userId) {
-          logger.warn(`No userId found for order ${orderId}`);
-          return;
-        }
-
-        // Retrieve user document to get fcmTokens array
-        const userDoc = await admin
-          .firestore()
-          .collection("users")
-          .doc(userId)
-          .get();
-
-        if (!userDoc.exists) {
-          logger.warn(`User document not found for userId ${userId}`);
-          return;
-        }
-
-        const userData = userDoc.data();
-        const fcmTokensArray = userData?.fcmTokens;
-
-        if (!fcmTokensArray || !Array.isArray(fcmTokensArray)) {
-          logger.warn(`No fcmTokens array found for user ${userId}`);
-          return;
-        }
-
-        // Extract tokens from the array
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const tokens: string[] = fcmTokensArray
-          .map((tokenObj: any) => tokenObj.token)
-          .filter((token: string) => token && token.length > 0);
-
-        if (tokens.length === 0) {
-          logger.warn(`No valid tokens found for user ${userId}`);
-          return;
-        }
-
-        logger.info(`Found ${tokens.length} token(s) for user ${userId}`);
-
-        // Build notification payload
-        const payload: admin.messaging.MulticastMessage = {
-          tokens: tokens,
-          notification: {
-            title: "Your Order is Ready!",
-            body:
-              `Order #${orderId.substring(0, 6)} is ready for pickup.`,
-          },
-          data: {
-            orderId: orderId,
-            status: "Completed",
-            type: "order_completed",
-          },
-          apns: {
-            payload: {
-              aps: {
-                sound: "default",
-                badge: 1,
-              },
-            },
-          },
-        };
-
-        // Send to all tokens
-        const response =
-          await admin.messaging().sendEachForMulticast(payload);
-        logger.info(
-          `Notification sent: ${response.successCount} successful, ` +
-          `${response.failureCount} failed`
-        );
-
-        return response;
-      } else {
-        logger.info(
-          "Status changed but not to Completed, skipping notification."
+          "No notification configured for status " +
+          `"${afterStatus}", skipping.`
         );
         return;
       }
+
+      const notification: NotificationDoc = {
+        type: "order_status",
+        title: copy.title,
+        message: copy.message,
+        isRead: false,
+        createdAt: admin.firestore.Timestamp.now(),
+        payload: {orderId, status: afterStatus},
+      };
+
+      await sendAndSaveNotification(userId, notification, {
+        orderId,
+        status: afterStatus,
+      });
     } catch (error) {
-      logger.error("Error sending notification:", error);
+      logger.error("Error in onOrderStatusChanged:", error);
       throw error;
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────
+// FUTURE TRIGGERS
+//
+// export const onPromotionCreated = onDocumentCreated(
+//   "promotions/{promoId}",
+//   async (event) => {
+//     // build NotificationDoc with type: "promotion"
+//     // call sendAndSaveNotification for each user
+//   }
+// );
+// ─────────────────────────────────────────────────────────
