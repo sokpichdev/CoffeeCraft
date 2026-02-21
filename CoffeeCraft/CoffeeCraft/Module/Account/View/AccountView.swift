@@ -35,7 +35,10 @@ struct AccountView: View {
             }
             .padding()
         }, onRefresh: {
-            
+            if let userId = UserSession.shared.userId {
+                // Always fetch on appear if user exists
+                cardVM.setUser(userId: userId)
+            }
         })
         .background(Color(.systemGroupedBackground))
         .customNavigationBar("Account") {

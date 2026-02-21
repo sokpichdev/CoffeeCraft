@@ -92,6 +92,7 @@ class CartManager: ObservableObject {
                 let decoded = try itemData.map { try Firestore.Decoder().decode(CartItem.self, from: $0) }
                 DispatchQueue.main.async {
                     self?.items = decoded
+                    AppLog.printList(self?.items ?? [], label: "Fetched Carts")
                 }
             } catch {
                 AppLog.firestore.error("Decoding error: \(error.localizedDescription)")

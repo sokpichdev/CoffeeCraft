@@ -59,6 +59,15 @@ struct ProductDetailView: View {
         return total
     }
 
+    private var customizationHash: String {
+        favVM.buildCustomizationHash(
+            favVM.currentCustomizationForFavorite(
+                selections: selections,
+                selectedExtras: selectedExtras
+            )
+        )
+    }
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             CustomRefreshScrollView( {
@@ -145,14 +154,20 @@ struct ProductDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
-        .onAppear {
-            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+//        .onAppear {
+//            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+//        }
+//        .onChange(of: selections) {
+//            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+//        }
+//        .onChange(of: selectedExtras) {
+//            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+//        }
+        .task(id: customizationHash) {
+            await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras)
         }
-        .onChange(of: selections) {
-            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
-        }
-        .onChange(of: selectedExtras) {
-            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
+        .onDisappear {
+            favVM.resetFavoriteState()
         }
         .ignoresSafeArea(edges: .bottom)
         .customNavigationBar(product.name) {

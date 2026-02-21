@@ -44,7 +44,9 @@ struct CartView: View {
                     .padding()
                     .padding(.bottom, 100) // space for sticky footer
                 }, onRefresh: {
-                    
+                    if let userId = UserSession.shared.userId {
+                        cartManager.loadCartFromFirestore(userId: userId)
+                    }
                 })
                 
                 // MARK: - Checkout Footer
