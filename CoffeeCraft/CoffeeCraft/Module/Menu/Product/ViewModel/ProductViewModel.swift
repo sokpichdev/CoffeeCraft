@@ -47,9 +47,14 @@ class ProductViewModel: ObservableObject {
 
     // MARK: - Listen for real-time updates
     func listenProducts() {
+        guard listener == nil else {
+            AppLog.menu.debug("👂 listenProducts — already active, skipping")
+            return
+        }
+        
         AppLog.menu.debug("👂 Starting real-time listener for products...")
         LoaderManager.shared.showLoading()
-        listener?.remove()
+        
         listener = db.collection("products")
             .order(by: "category")
             .addSnapshotListener { [weak self] snapshot, error in
