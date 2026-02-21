@@ -241,17 +241,25 @@ class AuthViewModel: ObservableObject {
     
     func logout(onResult: @escaping (Bool) -> Void) {
         AppLog.auth.debug("🚪 logout — attempting sign out")
-        
-        do {
-            FCMTokenService.shared.removeFCMToken()
-            try Auth.auth().signOut()
-            UserSession.shared.clearUser()
-            AppLog.auth.debug("✅ logout — sign out successful, user session cleared")
-            onResult(true)
-        } catch let error as NSError {
-            AppLog.auth.error("❌ logout — sign out failed: \(error.localizedDescription)")
-            AlertManager.shared.showError(title: "Error signing out", message: error.localizedDescription)
-            onResult(false)
+
+        Task {
+            // ✅ AWAIT token removal BEFORE signing out.
+            // removeFCMToken() is async — if we don't await it,
+            // Auth.signOut() fires first and the Firestore write
+            // never completes, leaving the old token in the
+            // previous user's document.
+            await FCMTokenService.shared.removeFCMToken()
+
+            do {
+                try Auth.auth().signOut()
+                UserSession.shared.clearUser()
+                AppLog.auth.debug("✅ logout — token removed, sign out successful")
+                onResult(true)
+            } catch let error as NSError {
+                AppLog.auth.error("❌ logout — sign out failed: \(error.localizedDescription)")
+                AlertManager.shared.showError(title: "Error signing out", message: error.localizedDescription)
+                onResult(false)
+            }
         }
     }
     

@@ -13,3 +13,5 @@ enum InboxFilter: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 }
+
+

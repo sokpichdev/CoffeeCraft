@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct AccountView: View {
-//    @StateObject var inboxVM = InboxViewModel()
+    @EnvironmentObject var inboxVM: InboxViewModel
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var announcementVM: AnnouncementViewModel
@@ -221,11 +221,10 @@ struct AccountView: View {
     // MARK: Personal
     var personalSection: some View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
-//            RowInSectionView(title: "Inbox", systemImage: "tray.fill",
-//                             badgeCount: inboxVM.displayedAnnouncements.filter { !$0.isRead }.count) {
-//                push(AnyView(InboxView().environmentObject(inboxVM)))
-//            }
-//            DeviderInSectionView(padding: 44)
+            RowInSectionView(title: "Inbox", systemImage: "tray.fill") {
+                push(AnyView(InboxView().environmentObject(inboxVM)))
+            }
+            DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
