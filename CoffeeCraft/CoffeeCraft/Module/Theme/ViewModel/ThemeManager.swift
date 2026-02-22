@@ -7,6 +7,7 @@
 import SwiftUI
 
 final class ThemeManager: ObservableObject {
+    static let shared = ThemeManager()
     @AppStorage("app_theme") private var storedTheme: String = AppTheme.system.rawValue
 
     @Published var theme: AppTheme = .system

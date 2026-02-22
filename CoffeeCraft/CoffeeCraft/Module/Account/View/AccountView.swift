@@ -12,7 +12,6 @@ struct AccountView: View {
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     @EnvironmentObject var authVM: AuthViewModel
-    @EnvironmentObject var themeManager: ThemeManager
     
     @EnvironmentObject var userSession: UserSession
     @Environment(\.pushScreen) var push
@@ -44,8 +43,7 @@ struct AccountView: View {
         .customNavigationBar("Account") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
                push(AnyView(SettingsView()
-                .environmentObject(authVM)
-                .environmentObject(themeManager)))
+                .environmentObject(authVM)))
             }
         }
         .onAppear {

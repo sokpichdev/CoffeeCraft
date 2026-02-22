@@ -7,7 +7,6 @@
 import SwiftUI
 
 struct AppearanceSettingsView: View {
-    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -17,9 +16,9 @@ struct AppearanceSettingsView: View {
                         RowInSectionView(
                             title: theme.title,
                             systemImage: theme.icon,
-                            trailingSystemImage: themeManager.theme == theme ? "checkmark" : ""
+                            trailingSystemImage: ThemeManager.shared.theme == theme ? "checkmark" : ""
                         ) {
-                            themeManager.setTheme(theme)
+                            ThemeManager.shared.setTheme(theme)
                         }
                         .accentColor(.brown)
                         
@@ -35,7 +34,6 @@ struct AppearanceSettingsView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
-        .navigationBarTitle("Appearance", displayMode: .inline)
         .customNavigationBar("Appearance") {
             ToolBarButton.back {
                 dismiss()
