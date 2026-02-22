@@ -16,7 +16,6 @@ struct CoffeeCraftApp: App {
     @StateObject var authVM = AuthViewModel()
     @StateObject private var orderVM = OrderViewModel()
     @StateObject private var coordinator = NotificationCoordinator.shared
-    @StateObject private var themeManager = ThemeManager()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
@@ -25,8 +24,7 @@ struct CoffeeCraftApp: App {
                 RootView()
                     .environmentObject(session)
                     .environmentObject(authVM)
-                    .preferredColorScheme(themeManager.theme.colorScheme)
-                    .environmentObject(themeManager)
+                    .preferredColorScheme(ThemeManager.shared.theme.colorScheme)
                     .environmentObject(orderVM)
                     .environmentObject(coordinator)
             }

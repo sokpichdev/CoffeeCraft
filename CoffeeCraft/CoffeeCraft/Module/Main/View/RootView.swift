@@ -8,9 +8,9 @@ import SwiftUI
 import FirebaseAuth
 
 struct RootView: View {
+    @EnvironmentObject var networkMonitor: NetworkMonitor
     @EnvironmentObject var session: UserSession
     @EnvironmentObject var authVM: AuthViewModel
-    @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
     
@@ -54,7 +54,6 @@ struct RootView: View {
                                 .environmentObject(favVM)
                                 .environmentObject(announcementVM)
                                 .environmentObject(authVM)
-                                .environmentObject(themeManager)
                                 .environmentObject(cardVM)
                                 .environmentObject(inboxVM)
                         }
@@ -77,7 +76,6 @@ struct RootView: View {
                                 .environmentObject(favVM)
                                 .environmentObject(announcementVM)
                                 .environmentObject(authVM)
-                                .environmentObject(themeManager)
                                 .environmentObject(cardVM)
                                 .environmentObject(inboxVM)
                         }
@@ -94,6 +92,20 @@ struct RootView: View {
         }
         .onChange(of: coordinator.shouldNavigateToOrders) { _, _ in
             selectedTab = .orders
+        }
+        .onChange(of: NetworkMonitor.shared.isConnected) { _, isConnected in
+            guard !AlertManager.shared.showAlert else { return } //Avoid alert spam
+            if !isConnected {
+                AlertManager.shared.showWarning(
+                    title: "No Internet",
+                    message: "You're offline. Some features may not be available."
+                )
+            } else {
+                AlertManager.shared.showSuccess(
+                    title: "Back Online",
+                    message: "Your connection has been restored."
+                )
+            }
         }
     }
 }

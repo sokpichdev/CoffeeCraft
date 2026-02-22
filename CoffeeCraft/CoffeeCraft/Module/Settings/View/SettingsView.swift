@@ -8,7 +8,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushScreen) var push
     var body: some View {
@@ -26,7 +25,7 @@ struct SettingsView: View {
                 
                 SettingsSection(title: "Preferences", icon: "paintbrush.fill") {
                     RowInSectionView(title: "Appearance", systemImage: "sparkles") {
-                        push(AnyView(AppearanceSettingsView().environmentObject(themeManager)))
+                        push(AnyView(AppearanceSettingsView()))
                     }
                     DeviderInSectionView()
                     RowInSectionView(title: "Languages", systemImage: "globe")
