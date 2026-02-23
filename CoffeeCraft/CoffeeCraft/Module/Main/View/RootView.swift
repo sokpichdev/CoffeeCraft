@@ -85,9 +85,9 @@ struct RootView: View {
                     TabBarView(selectedTab: $selectedTab)
                 }
                 .ignoresSafeArea(edges: .bottom)
-                .onAppear {
-                    inboxVM.listen()
-                }
+//                .onAppear {
+//                    inboxVM.setupRealtimeListener()
+//                }
             }
         }
         .onChange(of: coordinator.shouldNavigateToOrders) { _, _ in
