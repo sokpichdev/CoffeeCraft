@@ -41,6 +41,10 @@ struct AllCardsView: View {
                     .frame(height: 100)
             }
             .padding()
+        }, onRefresh: {
+            if let userId = UserSession.shared.userId {
+                cardVM.setUser(userId: userId)
+            }
         })
         .customNavigationBar("My Cards (\(snapshotCards.count))") {
             ToolBarButton.back {
