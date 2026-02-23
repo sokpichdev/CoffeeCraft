@@ -216,7 +216,7 @@ struct AccountView: View {
     // MARK: Personal
     var personalSection: some View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
-            RowInSectionView(title: "Inbox", systemImage: "tray.fill") {
+            RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: inboxVM.unreadCount) {
                 push(AnyView(InboxView().environmentObject(inboxVM)))
             }
             DeviderInSectionView(padding: 44)

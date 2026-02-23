@@ -5,16 +5,14 @@
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
+import UserNotifications
 
 @MainActor
 class InboxViewModel: ObservableObject {
     @Published var notifications: [AppNotification] = []
     @Published var isLoading = false
     @Published var totalNotificationCount = 0
-
-    var unreadCount: Int {
-        notifications.filter { !$0.isRead }.count
-    }
+    @Published var unreadCount = 0  // Firestore-sourced, not derived from loaded pages
 
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
@@ -30,23 +28,31 @@ class InboxViewModel: ObservableObject {
             return
         }
         guard pageNum != 1 || listener == nil else {
-                completion?(true)
-                return
-            }
+            completion?(true)
+            return
+        }
 
         let offset = (pageNum - 1) * pageSize
         AppLog.menu.debug("📋 fetchNotifications — uid: \(userId), page: \(pageNum), offset: \(offset)")
 
-        // Get total count on first page load
+        // On first page: fetch total count + true unread count from Firestore
         if pageNum == 1 {
-            db.collection("users")
-                .document(userId)
-                .collection("notifications")
+            db.collection("users").document(userId).collection("notifications")
                 .getDocuments { [weak self] snapshot, _ in
-                    guard let self else { return }
                     Task { @MainActor in
-                        self.totalNotificationCount = snapshot?.documents.count ?? 0
-                        AppLog.menu.debug("📊 fetchNotifications — totalCount: \(self.totalNotificationCount)")
+                        self?.totalNotificationCount = snapshot?.documents.count ?? 0
+                        AppLog.menu.debug("📊 totalCount: \(self?.totalNotificationCount ?? 0)")
+                    }
+                }
+
+            db.collection("users").document(userId).collection("notifications")
+                .whereField("isRead", isEqualTo: false)
+                .getDocuments { [weak self] snapshot, _ in
+                    Task { @MainActor in
+                        let count = snapshot?.documents.count ?? 0
+                        self?.unreadCount = count
+                        self?.syncAppIconBadge(count)
+                        AppLog.menu.debug("🔴 unreadCount from Firestore: \(count)")
                     }
                 }
         }
@@ -76,10 +82,9 @@ class InboxViewModel: ObservableObject {
                     return
                 }
 
-                // Manual pagination — slice the full result set
                 let endIndex = min(offset + self.pageSize, documents.count)
                 guard offset < documents.count else {
-                    AppLog.menu.debug("📋 fetchNotifications — offset \(offset) beyond docs.count \(documents.count), no more pages")
+                    AppLog.menu.debug("📋 offset \(offset) beyond docs.count \(documents.count), no more pages")
                     completion?(true)
                     return
                 }
@@ -96,7 +101,7 @@ class InboxViewModel: ObservableObject {
                         return !existingIds.contains(id)
                     }
                     self.notifications.append(contentsOf: unique)
-                    AppLog.menu.debug("✅ fetchNotifications — appended \(unique.count) on page \(pageNum), total loaded: \(self.notifications.count)")
+                    AppLog.menu.debug("✅ appended \(unique.count) on page \(pageNum), total loaded: \(self.notifications.count)")
                 }
 
                 // Attach realtime listener on first page only
@@ -138,13 +143,24 @@ class InboxViewModel: ObservableObject {
                            !self.notifications.contains(where: { $0.id == n.id }) {
                             self.notifications.insert(n, at: 0)
                             self.totalNotificationCount += 1
+                            if !n.isRead {
+                                self.unreadCount += 1
+                                self.syncAppIconBadge(self.unreadCount)
+                            }
                             AppLog.menu.debug("➕ Realtime — new notification: \(n.id ?? "nil")")
                         }
 
                     case .modified:
                         if let updated = try? change.document.data(as: AppNotification.self),
                            let index = self.notifications.firstIndex(where: { $0.id == updated.id }) {
+                            let wasUnread = !self.notifications[index].isRead
+                            let isNowRead = updated.isRead
                             self.notifications[index] = updated
+                            // Keep unreadCount in sync when listener picks up a read change
+                            if wasUnread && isNowRead {
+                                self.unreadCount = max(0, self.unreadCount - 1)
+                                self.syncAppIconBadge(self.unreadCount)
+                            }
                             AppLog.menu.debug("✏️ Realtime — updated: \(updated.id ?? "nil"), isRead: \(updated.isRead)")
                         }
 
@@ -162,6 +178,7 @@ class InboxViewModel: ObservableObject {
         listener = nil
         notifications = []
         totalNotificationCount = 0
+        unreadCount = 0
         fetchNotifications(pageNum: 1, completion: completion)
     }
 
@@ -170,6 +187,8 @@ class InboxViewModel: ObservableObject {
         listener?.remove()
         listener = nil
         notifications = []
+        unreadCount = 0
+        syncAppIconBadge(0)
         AppLog.menu.debug("🔕 InboxViewModel — listener removed")
     }
 
@@ -180,6 +199,8 @@ class InboxViewModel: ObservableObject {
 
         // Optimistic local update covers items outside the listener's page-1 window
         applyLocalUpdate(id: id, isRead: true)
+        unreadCount = max(0, unreadCount - 1)
+        syncAppIconBadge(unreadCount)
 
         do {
             try await db.collection("users")
@@ -206,6 +227,8 @@ class InboxViewModel: ObservableObject {
         for i in notifications.indices where !notifications[i].isRead {
             applyLocalUpdate(id: notifications[i].id ?? "", isRead: true)
         }
+        unreadCount = 0
+        syncAppIconBadge(0)
 
         let batch = db.batch()
         for n in unread {
@@ -229,7 +252,11 @@ class InboxViewModel: ObservableObject {
         guard let id = notification.id,
               let userId = Auth.auth().currentUser?.uid else { return }
 
-        // Optimistic removal
+        // Optimistic removal — decrement unread if needed
+        if !notification.isRead {
+            unreadCount = max(0, unreadCount - 1)
+            syncAppIconBadge(unreadCount)
+        }
         notifications.removeAll { $0.id == id }
         totalNotificationCount = max(0, totalNotificationCount - 1)
 
@@ -254,5 +281,15 @@ class InboxViewModel: ObservableObject {
             message: old.message, isRead: isRead,
             createdAt: old.createdAt, payload: old.payload
         )
+    }
+
+    /// Syncs the app icon badge with the current unread count.
+    /// Safe to call from anywhere — silently no-ops if permission not granted.
+    private func syncAppIconBadge(_ count: Int) {
+        UNUserNotificationCenter.current().setBadgeCount(count) { error in
+            if let error {
+                AppLog.menu.error("❌ setBadgeCount failed: \(error.localizedDescription)")
+            }
+        }
     }
 }
