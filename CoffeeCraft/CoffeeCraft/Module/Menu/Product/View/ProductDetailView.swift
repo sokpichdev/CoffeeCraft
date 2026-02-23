@@ -113,8 +113,6 @@ struct ProductDetailView: View {
                     Spacer(minLength: 180)
                 }
                 .padding()
-            }, onRefresh: {
-                
             })
 
             // MARK: - Sticky Footer

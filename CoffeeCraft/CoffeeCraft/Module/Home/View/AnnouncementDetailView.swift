@@ -31,8 +31,6 @@ struct AnnouncementDetailView: View {
                 }
                 .padding(.horizontal)
             }
-        }, onRefresh: {
-            
         })
         .customNavigationBar("Announcement") {
             ToolBarButton.back {
