@@ -25,6 +25,31 @@ interface NotificationDoc {
 
 interface FcmTokenObject {
   token: string;
+  deviceId: string;
+  platform: string;
+  updatedAt: admin.firestore.Timestamp;
+}
+
+// ─────────────────────────────────────────────────────────
+// HELPER: get true unread count from Firestore
+// Always query after saving so the new notification is included.
+// ─────────────────────────────────────────────────────────
+/**
+ * Returns the number of unread notifications for a user.
+ *
+ * @param {string} userId - The Firestore user document ID.
+ * @return {Promise<number>} The unread notification count.
+ */
+async function getUnreadCount(userId: string): Promise<number> {
+  const snapshot = await admin
+    .firestore()
+    .collection("users")
+    .doc(userId)
+    .collection("notifications")
+    .where("isRead", "==", false)
+    .get();
+
+  return snapshot.size;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -45,7 +70,7 @@ async function sendAndSaveNotification(
   notification: NotificationDoc,
   fcmData: Record<string, string>
 ): Promise<void> {
-  // 1. Save to Firestore inbox
+  // 1. Save to Firestore inbox first so it's included in the unread count
   await admin
     .firestore()
     .collection("users")
@@ -55,7 +80,11 @@ async function sendAndSaveNotification(
 
   logger.info(`📥 Notification saved to inbox for user ${userId}`);
 
-  // 2. Fetch FCM tokens
+  // 2. Query real unread count — now includes the notification we just saved
+  const unreadCount = await getUnreadCount(userId);
+  logger.info(`🔴 Unread count for user ${userId}: ${unreadCount}`);
+
+  // 3. Fetch FCM tokens from the array field on the user document
   const userDoc = await admin
     .firestore()
     .collection("users")
@@ -85,7 +114,7 @@ async function sendAndSaveNotification(
     return;
   }
 
-  // 3. Send FCM push
+  // 4. Send FCM push with real unread count as the badge
   const payload: admin.messaging.MulticastMessage = {
     tokens,
     notification: {
@@ -98,7 +127,10 @@ async function sendAndSaveNotification(
     },
     apns: {
       payload: {
-        aps: {sound: "default", badge: 1},
+        aps: {
+          sound: "default",
+          badge: unreadCount, // ← real count, not hardcoded 1
+        },
       },
     },
   };
@@ -195,3 +227,4 @@ export const onOrderStatusChanged = onDocumentUpdated(
 //   }
 // );
 // ─────────────────────────────────────────────────────────
+
