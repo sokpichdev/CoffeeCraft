@@ -85,9 +85,9 @@ struct RootView: View {
                     TabBarView(selectedTab: $selectedTab)
                 }
                 .ignoresSafeArea(edges: .bottom)
-//                .onAppear {
-//                    inboxVM.setupRealtimeListener()
-//                }
+                .onAppear {
+                    inboxVM.fetchNotifications(pageNum: 1)
+                }
             }
         }
         .onChange(of: coordinator.shouldNavigateToOrders) { _, _ in

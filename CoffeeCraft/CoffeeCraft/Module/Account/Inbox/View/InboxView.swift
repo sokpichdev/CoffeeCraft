@@ -40,9 +40,9 @@ struct InboxView: View {
                 }
             }
         }
-        .onAppear {
-            inboxVM.fetchNotifications(pageNum: 1)
-        }
+//        .onAppear {
+//            inboxVM.fetchNotifications(pageNum: 1)
+//        }
     }
 
     // MARK: - List
