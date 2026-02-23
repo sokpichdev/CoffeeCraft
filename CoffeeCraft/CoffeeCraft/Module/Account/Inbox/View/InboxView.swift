@@ -10,11 +10,14 @@ struct InboxView: View {
     @EnvironmentObject var inboxVM: InboxViewModel
     @Environment(\.dismiss) private var dismiss
 
+    @State private var isPaginating = false
+    @State private var pageNum = 1
+
     var body: some View {
         ZStack {
             Color(.systemGroupedBackground)
                 .ignoresSafeArea()
-            
+
             Group {
                 if inboxVM.isLoading {
                     loadingState
@@ -27,7 +30,7 @@ struct InboxView: View {
         }
         .customNavigationBar("Inbox") {
             ToolBarButton.back { dismiss() }
-            
+
             if inboxVM.unreadCount > 0 {
                 ToolBarButton(
                     placement: .topBarTrailing,
@@ -37,11 +40,14 @@ struct InboxView: View {
                 }
             }
         }
+        .onAppear {
+            inboxVM.fetchNotifications(pageNum: 1)
+        }
     }
 
     // MARK: - List
     private var notificationList: some View {
-        CustomRefreshScrollView( {
+        CustomRefreshScrollView({
             // Unread count pill
             if inboxVM.unreadCount > 0 {
                 HStack {
@@ -82,11 +88,41 @@ struct InboxView: View {
                                 .tint(.brown)
                             }
                         }
+                        // ── Pagination trigger ──────────────────────────────
+                        .onAppear {
+                            guard inboxVM.notifications.count < inboxVM.totalNotificationCount,
+                                  notification.id == inboxVM.notifications.last?.id,
+                                  !isPaginating
+                            else { return }
+
+                            isPaginating = true
+                            pageNum += 1
+
+                            Task {
+                                let timer = MinimumLoadingTime(0.5)
+                                try? await timer.waitIfNeeded()
+                                await MainActor.run {
+                                    inboxVM.fetchNotifications(pageNum: pageNum) { _ in
+                                        isPaginating = false
+                                    }
+                                }
+                            }
+                        }
+                }
+
+                if isPaginating {
+                    ProgressView()
+                        .tint(.brown)
+                        .padding()
                 }
             }
             .padding(.vertical, 8)
         }, onRefresh: {
-            
+            pageNum = 1
+            isPaginating = false
+            await withCheckedContinuation { continuation in
+                inboxVM.refreshNotifications { _ in continuation.resume() }
+            }
         })
     }
 
