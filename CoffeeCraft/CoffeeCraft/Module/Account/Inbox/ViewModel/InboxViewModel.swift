@@ -29,6 +29,10 @@ class InboxViewModel: ObservableObject {
             completion?(false)
             return
         }
+        guard pageNum != 1 || listener == nil else {
+                completion?(true)
+                return
+            }
 
         let offset = (pageNum - 1) * pageSize
         AppLog.menu.debug("📋 fetchNotifications — uid: \(userId), page: \(pageNum), offset: \(offset)")
