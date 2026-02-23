@@ -15,22 +15,13 @@ struct OrderStatusNotificationRow: View {
         NotificationRowShell(
             notification: notification,
             icon: payload?.statusIcon ?? "clock.fill",
-            iconColor: statusColor(payload?.status)
+            iconColor: .coffeeCream
         ) {
-            // Order ID — single, top aligned, subtle
-            if let orderId = payload?.orderId {
-                Text(orderId)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            // Title
             Text(notification.title)
                 .font(.subheadline.bold())
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // Message
             Text(notification.message)
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -38,16 +29,4 @@ struct OrderStatusNotificationRow: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-
-    private func statusColor(_ status: String?) -> Color {
-        switch status {
-        case "Preparing":  return .orange
-        case "Ready":      return .green
-        case "Completed":  return .brown
-        case "Cancelled":  return .red
-        default:           return .gray
-        }
-    }
 }
-
- //
