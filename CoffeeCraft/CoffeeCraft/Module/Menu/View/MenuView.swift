@@ -162,7 +162,7 @@ struct MenuView: View {
                 CustomRefreshScrollView( {
                     LazyVStack(alignment: .leading, spacing: 24) {
                         ForEach([4, 3, 5], id: \.self) { itemCount in
-                            menuSectionSkeleton(itemCount: itemCount)
+                           MenuSectionShimmerView(itemCount: itemCount)
                         }
                     }
                     .padding(.bottom, 70)
@@ -191,39 +191,6 @@ struct MenuView: View {
                 .transition(.opacity)
             }
         }
-    }
-
-    private func menuSectionSkeleton(itemCount: Int) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ShimmerView(cornerRadius: 6)
-                .frame(width: 120, height: 23)
-                .padding(.horizontal)
-
-            VStack(spacing: 10) {
-                ForEach(0..<itemCount, id: \.self) { _ in
-                    menuItemRowSkeleton
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-
-    private var menuItemRowSkeleton: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                ShimmerView(cornerRadius: 4)
-                    .frame(width: 130, height: 17)
-                ShimmerView(cornerRadius: 4)
-                    .frame(width: 55, height: 14)
-            }
-            Spacer()
-            ShimmerView(cornerRadius: 10)
-                .frame(width: 60, height: 60)
-        }
-        .padding(8)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 1)
     }
 
     // MARK: - Section View
@@ -331,3 +298,46 @@ struct MenuView: View {
         }
     }
 }
+
+struct MenuSectionShimmerView: View {
+    let itemCount: Int
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ShimmerView(cornerRadius: 6)
+                .frame(width: 120, height: 23)
+                .padding(.horizontal)
+
+            VStack(spacing: 10) {
+                ForEach(0..<itemCount, id: \.self) { _ in
+                    menuItemRowShimmer
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+    
+    private var menuItemRowShimmer: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                ShimmerView(cornerRadius: 4)
+                    .frame(width: 130, height: 17)
+                ShimmerView(cornerRadius: 4)
+                    .frame(width: 55, height: 14)
+            }
+            Spacer()
+            ShimmerView(cornerRadius: 10)
+                .frame(width: 60, height: 60)
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.coffeeCream.opacity(0.4), lineWidth: 1)
+        )
+    }
+}
+
