@@ -76,21 +76,31 @@ struct TimelineRow: View {
         HStack(alignment: .center, spacing: 16) {
 
             ZStack {
-                Circle()
-                    .fill(isCompleted ? Color.coffeeOliveGreen : Color.gray.opacity(0.2))
-                    .frame(width: circleSize, height: circleSize)
+                if isCurrent {
+                    ZStack {
+                        Circle()
+                            .fill(isCompleted ? Color.coffeeOliveGreen : Color.gray.opacity(0.2))
+                            .frame(width: indicatorSize, height: indicatorSize)
+
+                        Circle()
+                            .fill(Color(.secondarySystemGroupedBackground))
+                            .frame(width: indicatorSize - 3, height: indicatorSize - 3)
+                        
+                        Circle()
+                            .fill(isCompleted ? Color.coffeeOliveGreen : Color.gray.opacity(0.2))
+                            .frame(width: indicatorSize - 6, height: indicatorSize - 6)
+                    }
+                } else {
+                    Circle()
+                        .fill(isCompleted ? Color.coffeeOliveGreen : Color.gray.opacity(0.2))
+                        .frame(width: circleSize, height: circleSize)
+                }
 
                 Image(systemName: isCompleted && !isCurrent ? "checkmark" : icon)
                     .font(.system(size: 14, weight: isCompleted ? .bold : .regular))
                     .foregroundColor(isCompleted ? .white : .gray)
-
-                if isCurrent {
-                    Circle()
-                        .stroke(Color.coffeeOliveGreen, lineWidth: 3)
-                        .frame(width: indicatorSize, height: indicatorSize)
-                }
             }
-            .frame(width: indicatorSize, height: indicatorSize)
+            .frame(width: circleSize, height: circleSize)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -113,7 +123,7 @@ struct TimelineRow: View {
                 Rectangle()
                     .fill(isCompleted ? Color.coffeeOliveGreen.opacity(0.3) : Color.gray.opacity(0.2))
                     .frame(width: lineWidth, height: lineHeight)
-                    .padding(.leading, (indicatorSize - lineWidth) / 2)
+                    .padding(.leading, (circleSize - lineWidth) / 2)
             }
         }
     }
