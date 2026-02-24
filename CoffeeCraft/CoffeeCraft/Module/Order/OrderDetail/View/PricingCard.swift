@@ -22,7 +22,7 @@ struct PricingCard: View {
         VStack(spacing: 16) {
             HStack {
                 Text("Payment Summary")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.title3).fontWeight(.bold)
                     .foregroundColor(.primary)
                 
                 Spacer()
@@ -38,14 +38,14 @@ struct PricingCard: View {
                 
                 HStack {
                     Text("Total")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.title3).fontWeight(.bold)
                         .foregroundColor(.primary)
                     
                     Spacer()
                     
                     Text("$\(totalPrice, specifier: "%.2f")")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.coffeeDarkBrown)
+                        .font(.title2).fontWeight(.bold)
+                        .foregroundColor(.primary)
                 }
             }
         }
@@ -66,13 +66,13 @@ struct PriceRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .font(.system(size: 15))
+                .font(.subheadline)
                 .foregroundColor(color)
             
             Spacer()
             
             Text("$\(value, specifier: "%.2f")")
-                .font(.system(size: 15, weight: .medium))
+                .font(.subheadline).fontWeight(.medium)
                 .foregroundColor(color)
         }
     }

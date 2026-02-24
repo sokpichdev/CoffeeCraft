@@ -13,13 +13,13 @@ struct OrderItemsCard: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Items")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.title3).fontWeight(.bold)
                     .foregroundColor(.primary)
                 
                 Spacer()
                 
                 Text("\(items.count) item\(items.count == 1 ? "" : "s")")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.subheadline).fontWeight(.medium)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)

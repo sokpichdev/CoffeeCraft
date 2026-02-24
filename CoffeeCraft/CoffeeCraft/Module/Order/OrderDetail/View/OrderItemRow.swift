@@ -16,17 +16,17 @@ struct OrderItemRow: View {
                 // Item icon/placeholder
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.brown.opacity(0.1))
+                        .fill(Color.coffeeBrown.opacity(0.2))
                         .frame(width: 56, height: 56)
                     
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 24))
-                        .foregroundColor(.coffeeDarkBrown)
+                        .foregroundColor(.coffeeBrown)
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(item.name)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.body).fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
                     // Selections
@@ -53,10 +53,10 @@ struct OrderItemRow: View {
                     if let extras = item.extras, !extras.isEmpty {
                         HStack(spacing: 4) {
                             Text("• Extras:")
-                                .font(.system(size: 13))
+                                .font(.footnote)
                                 .foregroundColor(.secondary)
                             Text(extras.joined(separator: ", "))
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.footnote).fontWeight(.medium)
                                 .foregroundColor(.primary.opacity(0.8))
                         }
                     }
@@ -65,8 +65,8 @@ struct OrderItemRow: View {
                 Spacer()
                 
                 Text("$\(item.price, specifier: "%.2f")")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.coffeeDarkBrown)
+                    .font(.body).fontWeight(.bold)
+                    .foregroundColor(.coffeeCream)
             }
             
             if !isLast {
