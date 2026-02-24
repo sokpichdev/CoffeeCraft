@@ -48,16 +48,14 @@ struct StatusTimelineView: View {
     }
     
     func statusSubtitle(for statusCode: String, index: Int) -> String? {
-        if index == currentStatusIndex {
-            switch statusCode {
-            case "Pending": return "Waiting to be prepared"
-            case "InProgress": return "Barista is working on it"
-            case "Ready": return "Come pick it up!"
-            case "Completed": return "Enjoy your coffee!"
-            default: return nil
-            }
+        guard index == currentStatusIndex else { return nil }
+        switch statusCode {
+        case "Pending": return "Waiting to be prepared"
+        case "InProgress": return "Barista is working on it"
+        case "Ready": return "Come pick it up!"
+        case "Completed": return "Enjoy your coffee!"
+        default: return nil
         }
-        return nil
     }
 }
 
@@ -68,55 +66,55 @@ struct TimelineRow: View {
     let isCompleted: Bool
     let isCurrent: Bool
     let isLast: Bool
-    
+
+    private let indicatorSize: CGFloat = 42
+    private let circleSize: CGFloat = 36
+    private let lineWidth: CGFloat = 2
+    private let lineHeight: CGFloat = 40
+
     var body: some View {
-        HStack(spacing: 16) {
-            // Timeline indicator column
-            VStack(spacing: 0) {
-                ZStack {
+        HStack(alignment: .center, spacing: 16) {
+
+            ZStack {
+                Circle()
+                    .fill(isCompleted ? Color.coffeeOliveGreen : Color.gray.opacity(0.2))
+                    .frame(width: circleSize, height: circleSize)
+
+                Image(systemName: isCompleted && !isCurrent ? "checkmark" : icon)
+                    .font(.system(size: 14, weight: isCompleted ? .bold : .regular))
+                    .foregroundColor(isCompleted ? .white : .gray)
+
+                if isCurrent {
                     Circle()
-                        .fill(isCompleted ? Color.coffeeOliveGreen : Color.gray.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                    
-                    if isCompleted {
-                        Image(systemName: isCurrent ? icon : "checkmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                    } else {
-                        Image(systemName: icon)
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                    }
-                    
-                    if isCurrent {
-                        Circle()
-                            .stroke(Color.coffeeOliveGreen, lineWidth: 3)
-                            .frame(width: 42, height: 42)
-                    }
-                }
-                
-                if !isLast {
-                    Rectangle()
-                        .fill(isCompleted ? Color.coffeeOliveGreen.opacity(0.3) : Color.gray.opacity(0.2))
-                        .frame(width: 2, height: 40)
+                        .stroke(Color.coffeeOliveGreen, lineWidth: 3)
+                        .frame(width: indicatorSize, height: indicatorSize)
                 }
             }
-            
-            // Content
+            .frame(width: indicatorSize, height: indicatorSize)
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 16, weight: isCurrent ? .semibold : .regular))
                     .foregroundColor(isCompleted ? .primary : .secondary)
-                
-                if let subtitle = subtitle {
+
+                if let subtitle {
                     Text(subtitle)
                         .font(.system(size: 13))
                         .foregroundColor(.coffeeOliveGreen)
                         .transition(.opacity)
                 }
             }
-            
+
             Spacer()
+        }
+        .padding(.bottom, isLast ? 0 : lineHeight)
+        .background(alignment: .bottomLeading) {
+            if !isLast {
+                Rectangle()
+                    .fill(isCompleted ? Color.coffeeOliveGreen.opacity(0.3) : Color.gray.opacity(0.2))
+                    .frame(width: lineWidth, height: lineHeight)
+                    .padding(.leading, (indicatorSize - lineWidth) / 2)
+            }
         }
     }
 }
