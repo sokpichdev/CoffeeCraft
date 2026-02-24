@@ -55,7 +55,12 @@ struct ActiveOrdersContent: View {
 
     var body: some View {
         Group {
-            if filteredOrders.isEmpty {
+            if vm.isLoadingAllOrders {
+                ScrollView {
+                    OrderListShimmerView(showAdminActions: true)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+            } else if filteredOrders.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 60))
@@ -104,7 +109,6 @@ struct ActiveOrdersContent: View {
                                 }
                             }
                             .onAppear {
-                                // Pagination logic
                                 if vm.allOrders.count < vm.totalAllOrdersCount {
                                     if !vm.allOrders.isEmpty {
                                         if order.id == vm.allOrders.last?.id, !isPaginating {
@@ -159,7 +163,12 @@ struct MyOrdersContent: View {
 
     var body: some View {
         Group {
-            if vm.myOrders.isEmpty {
+            if vm.isLoadingMyOrders {
+                ScrollView {
+                    OrderListShimmerView(showAdminActions: false)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+            } else if vm.myOrders.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 60))
@@ -183,7 +192,6 @@ struct MyOrdersContent: View {
                                 OrderCardView(order: order)
                             }
                             .onAppear {
-                                // Pagination logic
                                 if vm.myOrders.count < vm.totalMyOrdersCount {
                                     if !vm.myOrders.isEmpty {
                                         if order.id == vm.myOrders.last?.id, !isPaginating {

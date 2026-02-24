@@ -13,6 +13,8 @@ class AdminOrdersViewModel: ObservableObject {
     @Published var myOrders: [Order] = []
     @Published var totalAllOrdersCount = 0
     @Published var totalMyOrdersCount = 0
+    @Published var isLoadingAllOrders = false
+    @Published var isLoadingMyOrders = false
     
     private let db = Firestore.firestore()
     private var allOrdersListener: ListenerRegistration?
@@ -30,6 +32,8 @@ class AdminOrdersViewModel: ObservableObject {
 
         // Get total count first (only on first page)
         if pageNum == 1 {
+            isLoadingAllOrders = true
+
             db.collection("orders")
                 .getDocuments { [weak self] snapshot, error in
                     guard let self = self else { return }
@@ -47,6 +51,10 @@ class AdminOrdersViewModel: ObservableObject {
                 guard let self = self else {
                     completion?(false)
                     return
+                }
+
+                if pageNum == 1 {
+                    self.isLoadingAllOrders = false
                 }
                 
                 if let error = error {
@@ -146,6 +154,8 @@ class AdminOrdersViewModel: ObservableObject {
 
         // Get total count first (only on first page)
         if pageNum == 1 {
+            isLoadingMyOrders = true
+
             db.collection("orders")
                 .whereField("userId", isEqualTo: userId)
                 .getDocuments { [weak self] snapshot, error in
@@ -166,6 +176,10 @@ class AdminOrdersViewModel: ObservableObject {
                     completion?(false)
                     return
                 }
+
+                if pageNum == 1 {
+                    self.isLoadingMyOrders = false
+                }
                 
                 if let error = error {
                     AppLog.order.error("❌ fetchMyOrders — error: \(error.localizedDescription)")
@@ -182,7 +196,6 @@ class AdminOrdersViewModel: ObservableObject {
                     return
                 }
                 
-                // Manual pagination - slice the results
                 let endIndex = min(offset + self.pageSize, docs.count)
                 guard offset < docs.count else {
                     AppLog.order.debug("📋 fetchMyOrders — offset \(offset) beyond docs.count \(docs.count), no more pages")
@@ -195,7 +208,6 @@ class AdminOrdersViewModel: ObservableObject {
                     try? doc.data(as: Order.self)
                 }
                 
-                // Avoid duplicates
                 let existingIds = Set(self.myOrders.compactMap { $0.id })
                 let uniqueNewOrders = newOrders.filter { order in
                     guard let id = order.id else { return false }
@@ -206,7 +218,6 @@ class AdminOrdersViewModel: ObservableObject {
                 AppLog.order.debug("✅ fetchMyOrders — appended \(uniqueNewOrders.count) unique order(s) on page \(pageNum), total loaded: \(self.myOrders.count)")
                 AppLog.printList(uniqueNewOrders, label: "My Orders Page \(pageNum)", logger: AppLog.order)
 
-                // Set up listener for real-time updates only on first page
                 if pageNum == 1 {
                     self.setupMyOrdersListener(userId: userId)
                 }
