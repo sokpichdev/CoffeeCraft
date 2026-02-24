@@ -21,9 +21,14 @@ struct MenuItemRow: View {
             AsyncImageCard(imageURL: item.imageURL, height: 60, width: 60, corner: 10)
         }
         .padding(8)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 1)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.coffeeCream.opacity(0.4), lineWidth: 1)
+        )
     }
 }
 

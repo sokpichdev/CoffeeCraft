@@ -23,7 +23,6 @@ class ProductViewModel: ObservableObject {
     // MARK: - Fetch Once
     func fetchProducts() async {
         isLoading = true
-        LoaderManager.shared.showLoading()
         
         AppLog.menu.debug("📡 Fetching all products...")
         
@@ -36,10 +35,8 @@ class ProductViewModel: ObservableObject {
             AppLog.printList(products, label: "Products", logger: AppLog.menu)
             
             computeSections()
-            LoaderManager.shared.hideLoading()
         } catch {
             AppLog.menu.error("❌ Failed to fetch products: \(error.localizedDescription)")
-            LoaderManager.shared.hideLoading()
             AlertManager.shared.showError(message: error.localizedDescription)
         }
         isLoading = false
@@ -53,7 +50,7 @@ class ProductViewModel: ObservableObject {
         }
         
         AppLog.menu.debug("👂 Starting real-time listener for products...")
-        LoaderManager.shared.showLoading()
+        isLoading = true
         
         listener = db.collection("products")
             .order(by: "category")
@@ -78,7 +75,7 @@ class ProductViewModel: ObservableObject {
                 AppLog.printList(self.products, label: "Products (Live)", logger: AppLog.menu)
                 
                 self.computeSections()
-                LoaderManager.shared.hideLoading()
+                isLoading  = false
             }
     }
 

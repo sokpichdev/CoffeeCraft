@@ -16,6 +16,7 @@ struct MenuView: View {
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @Environment(\.pushScreen) private var push
+
     // MARK: - Scroll Sync State
     @State private var selectedSectionID: String?
     @State private var productScrollProxy: ScrollViewProxy?
@@ -103,41 +104,48 @@ struct MenuView: View {
         ScrollViewReader { sidebarProxy in
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(productVM.sections) { section in
-                        Button {
-                            scrollToSection(section.id)
-                        } label: {
-                            HStack {
-                                Text(section.name)
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundColor(
-                                        selectedSectionID == section.id ? .brown : .primary
-                                    )
-                                    .padding(.vertical, 10)
-                                    .padding(.leading, 8)
-                                Spacer()
-                            }
-                            .background(
-                                Rectangle()
-                                    .fill(
-                                        selectedSectionID == section.id
-                                        ? Color.brown.opacity(0.15)
-                                        : Color.clear
-                                    )
-                            )
-                            .cornerRadius(6)
+                    if productVM.isLoading {
+                        ForEach(0..<6, id: \.self) { _ in
+                            ShimmerView(cornerRadius: 10)
+                                .frame(height: 41)
                         }
-                        .buttonStyle(.plain)
-                        .id("sidebar_\(section.id)")
+                    } else {
+                        ForEach(productVM.sections) { section in
+                            Button {
+                                scrollToSection(section.id)
+                            } label: {
+                                HStack {
+                                    Text(section.name)
+                                        .font(.subheadline).fontWeight(.medium)
+                                        .foregroundColor(
+                                            selectedSectionID == section.id ? .brown : .primary
+                                        )
+                                        .padding(.vertical, 10)
+                                        .padding(.leading, 8)
+                                    Spacer()
+                                }
+                                .frame(minHeight: 40)
+                                .background(
+                                    Rectangle()
+                                        .fill(
+                                            selectedSectionID == section.id
+                                            ? Color.brown.opacity(0.15)
+                                            : Color.clear
+                                        )
+                                )
+                                .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
+                            .id("sidebar_\(section.id)")
+                        }
                     }
                 }
-                .padding(.leading, 5)
+                .padding(.horizontal, 2)
                 .padding(.vertical, 10)
             }
             .frame(width: 120)
             .background(Color(.systemGray6))
             .onChange(of: selectedSectionID) { _, newSection in
-                // Auto-scroll sidebar to keep selected category visible
                 if let newSection = newSection, !isScrollingProgrammatically {
                     withAnimation {
                         sidebarProxy.scrollTo("sidebar_\(newSection)", anchor: .center)
@@ -150,28 +158,72 @@ struct MenuView: View {
     // MARK: - Product List
     private var productList: some View {
         ScrollViewReader { proxy in
-            CustomRefreshScrollView( {
-                LazyVStack(alignment: .leading, spacing: 24) {
-                    ForEach(productVM.sections) { section in
-                        sectionView(section)
-                            .id(section.id)
+            if productVM.isLoading {
+                CustomRefreshScrollView( {
+                    LazyVStack(alignment: .leading, spacing: 24) {
+                        ForEach([4, 3, 5], id: \.self) { itemCount in
+                            menuSectionSkeleton(itemCount: itemCount)
+                        }
                     }
+                    .padding(.bottom, 70)
+                })
+                .transition(.opacity)
+            } else {
+                CustomRefreshScrollView({
+                    LazyVStack(alignment: .leading, spacing: 24) {
+                        ForEach(productVM.sections) { section in
+                            sectionView(section)
+                                .id(section.id)
+                        }
+                    }
+                    .padding(.bottom, 70)
+                }, onRefresh: {
+                    await productVM.refreshProducts()
+                })
+                .onAppear {
+                    productScrollProxy = proxy
                 }
-                .padding(.bottom, 100)
-            }, onRefresh: {
-                await productVM.refreshProducts()
-            })
-            .onAppear {
-                productScrollProxy = proxy
+                .coordinateSpace(name: "scroll")
+                .onPreferenceChange(SectionOffsetKey.self) { values in
+                    guard !isScrollingProgrammatically else { return }
+                    updateVisibleSection(values: values)
+                }
+                .transition(.opacity)
             }
-            .coordinateSpace(name: "scroll")
-            .onPreferenceChange(SectionOffsetKey.self) { values in
-                // Only update from user scrolling
-                guard !isScrollingProgrammatically else { return }
-                updateVisibleSection(values: values)
-            }
-            
         }
+    }
+
+    private func menuSectionSkeleton(itemCount: Int) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ShimmerView(cornerRadius: 6)
+                .frame(width: 120, height: 23)
+                .padding(.horizontal)
+
+            VStack(spacing: 10) {
+                ForEach(0..<itemCount, id: \.self) { _ in
+                    menuItemRowSkeleton
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private var menuItemRowSkeleton: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                ShimmerView(cornerRadius: 4)
+                    .frame(width: 130, height: 17)
+                ShimmerView(cornerRadius: 4)
+                    .frame(width: 55, height: 14)
+            }
+            Spacer()
+            ShimmerView(cornerRadius: 10)
+                .frame(width: 60, height: 60)
+        }
+        .padding(8)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 1)
     }
 
     // MARK: - Section View
@@ -180,7 +232,7 @@ struct MenuView: View {
             Text(section.name)
                 .font(.title3.bold())
                 .padding(.horizontal)
-                .padding(.top, 8)
+                .frame(height: 23)
 
             VStack(spacing: 10) {
                 ForEach(section.items) { product in
