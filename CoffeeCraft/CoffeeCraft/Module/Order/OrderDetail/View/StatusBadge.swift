@@ -16,7 +16,7 @@ struct StatusBadge: View {
                 .frame(width: 8, height: 8)
             
             Text(status == "InProgress" ? "In Progress" : status)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.footnote).fontWeight(.semibold)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -33,8 +33,8 @@ struct StatusBadge: View {
         switch status {
         case "Pending": return .orange
         case "In Progress", "InProgress": return .blue
-        case "Ready": return .green
-        case "Done", "Completed": return .gray
+        case "Ready": return .coffeeOliveGreen
+        case "Done", "Completed": return .brown
         default: return .brown
         }
     }
