@@ -9,7 +9,7 @@ import SwiftUI
 struct OrdersView: View {
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
-    @Environment(\.pushScreen) private var push   // ← replace navigationPath
+    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
 
@@ -18,7 +18,13 @@ struct OrdersView: View {
             Color(uiColor: .systemGroupedBackground)
                 .ignoresSafeArea()
 
-            if orderVM.orders.isEmpty {
+            if orderVM.isLoading {
+                ScrollView {
+                    OrderListShimmerView()
+                        .padding(.horizontal)
+                        .padding(.vertical)
+                }
+            } else if orderVM.orders.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 60))
@@ -36,7 +42,7 @@ struct OrdersView: View {
                 CustomRefreshScrollView({
                     LazyVStack(spacing: 8) {
                         ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
-                            PushLink(value: order) { order in  // ← PushLink replaces Button
+                            PushLink(value: order) { order in
                                 OrderDetailView(order: order)
                             } label: {
                                 OrderCardView(order: order)
@@ -92,7 +98,7 @@ struct OrdersView: View {
 
         func navigate() {
             if let order = orderVM.orders.first(where: { $0.id == orderId }) {
-                push(AnyView(OrderDetailView(order: order)))  // ← push instead of navigationPath.append
+                push(AnyView(OrderDetailView(order: order)))
                 coordinator.clearNavigation()
             }
         }
@@ -119,9 +125,11 @@ struct OrderCardView: View {
                     Text(order.timestamp.formatted(date: .abbreviated, time: .shortened))
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .frame(height: 12)
                     Text("Order #\(order.orderId)")
                         .font(.footnote)
                         .foregroundColor(.gray)
+                        .frame(height: 13)
                 }
 
                 Spacer()
@@ -151,7 +159,7 @@ struct OrderCardView: View {
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                         }
-
+                        .frame(height: 15)
                         // Selections
                         if let selections = item.selections, !selections.isEmpty {
                             VStack(alignment: .leading, spacing: 2) {
@@ -163,6 +171,7 @@ struct OrderCardView: View {
                                         }
                                         .font(.caption)
                                         .foregroundColor(.gray)
+                                        .frame(height: 12)
                                     }
                                 }
                             }
@@ -187,6 +196,7 @@ struct OrderCardView: View {
                                     }
                                 }
                             }
+                            .frame(height: 12)
                         }
                         Divider()
                     }
@@ -196,11 +206,13 @@ struct OrderCardView: View {
             // Footer
             HStack {
                 Text("Total:")
+                    .font(.subheadline)
                     .fontWeight(.medium)
                 Spacer()
                 Text("$\(order.totalPrice, specifier: "%.2f")")
                     .fontWeight(.bold)
             }
+            .frame(height: 15)
             .padding(.top, 4)
 
             // Admin actions (if provided)
