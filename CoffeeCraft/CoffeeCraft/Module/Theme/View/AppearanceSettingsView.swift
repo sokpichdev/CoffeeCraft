@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct AppearanceSettingsView: View {
+    @ObservedObject private var themeManager = ThemeManager.shared
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -16,9 +17,9 @@ struct AppearanceSettingsView: View {
                         RowInSectionView(
                             title: theme.title,
                             systemImage: theme.icon,
-                            trailingSystemImage: ThemeManager.shared.theme == theme ? "checkmark" : ""
+                            trailingSystemImage: themeManager.theme == theme ? "checkmark" : ""
                         ) {
-                            ThemeManager.shared.setTheme(theme)
+                            themeManager.setTheme(theme)
                         }
                         .accentColor(.brown)
                         
