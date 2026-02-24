@@ -12,6 +12,7 @@ import FirebaseAuth
 class OrderViewModel: ObservableObject {
     @Published var orders: [Order] = []
     @Published var totalOrdersCount = 0
+    @Published var isLoading = false
 
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
@@ -34,6 +35,8 @@ class OrderViewModel: ObservableObject {
 
         // Get total count
         if pageNum == 1 {
+            isLoading = true
+
             db.collection("orders")
                 .whereField("userId", isEqualTo: userId)
                 .getDocuments { [weak self] snapshot, error in
@@ -56,6 +59,10 @@ class OrderViewModel: ObservableObject {
                 guard let self = self else {
                     completion?(false)
                     return
+                }
+
+                if pageNum == 1 {
+                    self.isLoading = false
                 }
 
                 if let error = error {
