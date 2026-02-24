@@ -338,6 +338,7 @@ struct MenuSectionShimmerView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.coffeeCream.opacity(0.4), lineWidth: 1)
         )
+        .shadow(color: Color.coffeeCream.opacity(0.4), radius: 1)
     }
 }
 

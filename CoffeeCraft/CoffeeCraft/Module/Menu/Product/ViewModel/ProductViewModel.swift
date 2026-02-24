@@ -35,6 +35,7 @@ class ProductViewModel: ObservableObject {
             AppLog.printList(products, label: "Products", logger: AppLog.menu)
             
             computeSections()
+            try await MinimumLoadingTime(0.2).waitIfNeeded()
         } catch {
             AppLog.menu.error("❌ Failed to fetch products: \(error.localizedDescription)")
             AlertManager.shared.showError(message: error.localizedDescription)
