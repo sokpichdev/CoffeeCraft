@@ -52,7 +52,7 @@ struct PricingCard: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(uiColor: .secondarySystemBackground))
+                .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
         )
     }
