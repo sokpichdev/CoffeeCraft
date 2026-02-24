@@ -45,7 +45,6 @@ struct ActiveOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
-    @State private var pageNum = 1
 
     private var filteredOrders: [Order] {
         vm.allOrders
@@ -113,13 +112,13 @@ struct ActiveOrdersContent: View {
                                     if !vm.allOrders.isEmpty {
                                         if order.id == vm.allOrders.last?.id, !isPaginating {
                                             isPaginating = true
-                                            pageNum += 1
+                                            vm.allOrdersPage += 1
                                             Task {
                                                 let timer = MinimumLoadingTime(0.5)
                                                 try? await timer.waitIfNeeded()
                                                 
                                                 await MainActor.run {
-                                                    vm.fetchAllOrders(pageNum: pageNum) { success in
+                                                    vm.fetchAllOrders(pageNum: vm.allOrdersPage) { success in
                                                         isPaginating = false
                                                     }
                                                 }
@@ -137,7 +136,7 @@ struct ActiveOrdersContent: View {
                     }
                     .padding(.bottom)
                 }, onRefresh: {
-                    pageNum = 1
+                    vm.allOrdersPage = 1
                     await withCheckedContinuation { continuation in
                         vm.refreshAllOrders { _ in
                             continuation.resume()
@@ -159,7 +158,6 @@ struct MyOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
-    @State private var pageNum = 1
 
     var body: some View {
         Group {
@@ -196,13 +194,13 @@ struct MyOrdersContent: View {
                                     if !vm.myOrders.isEmpty {
                                         if order.id == vm.myOrders.last?.id, !isPaginating {
                                             isPaginating = true
-                                            pageNum += 1
+                                            vm.myOrdersPage += 1
                                             Task {
                                                 let timer = MinimumLoadingTime(0.5)
                                                 try? await timer.waitIfNeeded()
                                                 
                                                 await MainActor.run {
-                                                    vm.fetchMyOrders(pageNum: pageNum) { success in
+                                                    vm.fetchMyOrders(pageNum: vm.myOrdersPage) { success in
                                                         isPaginating = false
                                                     }
                                                 }
@@ -220,7 +218,7 @@ struct MyOrdersContent: View {
                     }
                     .padding(.bottom)
                 }, onRefresh: {
-                    pageNum = 1
+                    vm.myOrdersPage = 1
                     await withCheckedContinuation { continuation in
                         vm.refreshMyOrders { _ in
                             continuation.resume()

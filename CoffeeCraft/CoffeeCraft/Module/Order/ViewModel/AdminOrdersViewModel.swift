@@ -16,10 +16,13 @@ class AdminOrdersViewModel: ObservableObject {
     @Published var isLoadingAllOrders = false
     @Published var isLoadingMyOrders = false
     
+    var allOrdersPage = 1  // ← persists across tab switches
+    var myOrdersPage = 1
+    
     private let db = Firestore.firestore()
     private var allOrdersListener: ListenerRegistration?
     private var myOrdersListener: ListenerRegistration?
-    private let pageSize = 5
+    private let pageSize = 10
     
     deinit {
         allOrdersListener?.remove()
@@ -27,6 +30,7 @@ class AdminOrdersViewModel: ObservableObject {
     }
 
     func fetchAllOrders(pageNum: Int, completion: ((Bool) -> Void)? = nil) {
+        guard pageNum > 1 || allOrders.isEmpty else { return }
         let offset = (pageNum - 1) * pageSize
         AppLog.order.debug("📋 fetchAllOrders — page: \(pageNum), offset: \(offset)")
 
@@ -149,6 +153,7 @@ class AdminOrdersViewModel: ObservableObject {
             return
         }
         
+        guard pageNum > 1 || myOrders.isEmpty else { return }
         let offset = (pageNum - 1) * pageSize
         AppLog.order.debug("📋 fetchMyOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
 
