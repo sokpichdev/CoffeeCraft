@@ -22,20 +22,7 @@ struct OrderDetailView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Background gradient matching your app theme
-            LinearGradient(
-                colors: [
-                    Color.coffeeDarkBrown.opacity(0.15),
-                    Color(.systemBackground),
-                    Color(.systemBackground)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            
-            ScrollView(showsIndicators: false) {
+            CustomRefreshScrollView( {
                 VStack(spacing: 0) {
                     // Status Update Animation Overlay
                     if vm.showStatusUpdateAnimation {
@@ -66,19 +53,14 @@ struct OrderDetailView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 20)
                 }
+            })
+            .background(Color(.systemGroupedBackground))
+        .customNavigationBar("Order Detail") {
+            ToolBarButton.back {
+                dismiss()
             }
-        }
-        .navigationTitle("Order #\(vm.order.orderId)")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showReceipt = true
-                } label: {
-                    Image(systemName: "doc.text")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.coffeeDarkBrown)
-                }
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("doc.text")) {
+                showReceipt = true
             }
         }
         .sheet(isPresented: $showReceipt) {

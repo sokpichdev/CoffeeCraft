@@ -14,14 +14,13 @@ struct OrderHeaderCard: View {
     var body: some View {
         VStack(spacing: 20) {
             // Top Row: Order ID & Status Badge
-            HStack {
+            HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Order #\(order.orderId)")
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.title2).fontWeight(.bold)
                         .foregroundColor(.primary)
-                    
                     Text(order.timestamp.formatted(date: .long, time: .shortened))
-                        .font(.system(size: 14))
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 
@@ -40,7 +39,7 @@ struct OrderHeaderCard: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [.coffeeDarkBrown.opacity(0.8), .coffeeDarkBrown],
+                                colors: [.brown.opacity(0.8), .brown],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -48,13 +47,13 @@ struct OrderHeaderCard: View {
                         .frame(width: 48, height: 48)
                     
                     Text(String(userName.prefix(1).uppercased()))
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.title3).fontWeight(.bold)
                         .foregroundColor(.white)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Ordered by")
-                        .font(.system(size: 12))
+                        .font(.caption)
                         .foregroundColor(.secondary)
                         .textCase(.uppercase)
                         .tracking(0.5)
@@ -64,12 +63,12 @@ struct OrderHeaderCard: View {
                             ProgressView()
                                 .scaleEffect(0.8)
                             Text("Loading...")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.callout).fontWeight(.semibold)
                                 .foregroundColor(.secondary)
                         }
                     } else {
                         Text(userName)
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.callout).fontWeight(.semibold)
                             .foregroundColor(.primary)
                             .lineLimit(1)
                     }
@@ -78,19 +77,22 @@ struct OrderHeaderCard: View {
                 Spacer()
                 
                 // User ID badge for admin reference
-                Text("#\(order.userId.prefix(6))")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.secondary.opacity(0.1))
-                    .foregroundColor(.secondary)
-                    .cornerRadius(6)
+                VStack {
+                    Text("#\(order.userId.prefix(6))")
+                        .font(.system(size: 11, weight: .medium))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.secondary.opacity(0.1))
+                        .foregroundColor(.secondary)
+                        .cornerRadius(6)
+                    Spacer()
+                }
             }
         }
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(uiColor: .secondarySystemBackground))
+                .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
         )
     }
