@@ -62,7 +62,9 @@ class OrderViewModel: ObservableObject {
                 }
 
                 if pageNum == 1 {
-                    self.isLoading = false
+                    Task { @MainActor in
+                        self.isLoading = false
+                    }
                 }
 
                 if let error = error {

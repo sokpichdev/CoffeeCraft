@@ -49,7 +49,7 @@ struct AnnouncementsListView: View {
                 }
             }
         }, onRefresh: {
-            try? await announcementVM.fetchAnnouncements()
+            _ = try? await announcementVM.fetchAnnouncements()
         })
         .customNavigationBar("Announcements") {
             ToolBarButton.back {

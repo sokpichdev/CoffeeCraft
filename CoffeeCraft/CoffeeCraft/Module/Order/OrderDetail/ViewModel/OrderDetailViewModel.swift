@@ -65,7 +65,7 @@ class OrderDetailViewModel: ObservableObject {
                     }
                     
                     self.order = updatedOrder
-                    AppLog.order.debug("✅ OrderDetail updated: \(updatedOrder.id ?? "nil") status: \(updatedOrder.status)")
+                    AppLog.order.debug("✅ OrderDetail id: \(updatedOrder.id ?? "nil") status: \(updatedOrder.status)")
                     
                 } catch {
                     AppLog.order.error("❌ Failed to decode order: \(error.localizedDescription)")
@@ -81,19 +81,25 @@ class OrderDetailViewModel: ObservableObject {
             .getDocument { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
-                defer { self.isLoadingUser = false }
-                
-                if let error = error {
-                    AppLog.order.error("❌ Failed to fetch user: \(error.localizedDescription)")
-                    self.userName = "Unknown User"
-                    return
-                }
-                
-                if let data = snapshot?.data(),
-                   let name = data["username"] as? String ?? data["displayName"] as? String ?? data["email"] as? String {
-                    self.userName = name
-                } else {
-                    self.userName = "User #\(userId.prefix(6))"
+                Task { @MainActor in
+                    defer { self.isLoadingUser = false }
+                    
+                    if let error = error {
+                        AppLog.order.error("❌ Failed to fetch user: \(error.localizedDescription)")
+                        self.userName = "Unknown User"
+                        return
+                    }
+                    
+                    if let data = snapshot?.data(),
+                       let name =
+                            (data["username"] as? String) ??
+                            (data["displayName"] as? String) ??
+                            (data["email"] as? String) {
+                        
+                        self.userName = name
+                    } else {
+                        self.userName = "User #\(userId.prefix(6))"
+                    }
                 }
             }
     }
