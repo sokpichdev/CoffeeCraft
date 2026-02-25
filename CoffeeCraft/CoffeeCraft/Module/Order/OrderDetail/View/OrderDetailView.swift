@@ -68,15 +68,6 @@ struct OrderDetailView: View {
                 vm.fetchUserInfo(userId: vm.order.userId)
             }
         }
-        .onChange(of: vm.showStatusUpdateAnimation) { _, newValue in
-            if newValue {
-                ToastManager.shared.showTop(
-                    message: "Order is now \(vm.order.status).",
-                    type: .success,
-                    duration: 3
-                )
-            }
-        }
         .onDisappear {
             vm.stopListening()
         }

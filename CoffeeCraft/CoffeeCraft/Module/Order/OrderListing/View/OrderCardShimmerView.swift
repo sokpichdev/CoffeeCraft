@@ -28,8 +28,8 @@ struct OrderCardShimmerView: View {
             Divider()
 
             // items
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(0..<2, id: \.self) { _ in
+//            VStack(alignment: .leading, spacing: 8) {
+//                ForEach(0..<2, id: \.self) { _ in
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             ShimmerView(cornerRadius: 4)
@@ -38,8 +38,8 @@ struct OrderCardShimmerView: View {
                         }
                         Divider()
                     }
-                }
-            }
+//                }
+//            }
 
             // Footer total row
             HStack {

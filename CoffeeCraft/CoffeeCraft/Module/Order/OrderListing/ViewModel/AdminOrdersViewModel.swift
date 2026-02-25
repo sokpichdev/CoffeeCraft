@@ -71,7 +71,7 @@ class AdminOrdersViewModel: ObservableObject {
             }
 
             allOrders.append(contentsOf: uniqueNewOrders)
-
+            AppLog.printList(uniqueNewOrders, label: "All Orders Page \(pageNum)", logger: AppLog.order)
             if pageNum == 1 {
                 try await MinimumLoadingTime(0.5).waitIfNeeded()
                 isLoadingAllOrders = false
@@ -133,7 +133,7 @@ class AdminOrdersViewModel: ObservableObject {
         guard pageNum > 1 || myOrders.isEmpty else { return }
 
         let offset = (pageNum - 1) * pageSize
-        AppLog.order.debug("📋 fetchMyOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
+//        AppLog.order.debug("📋 fetchMyOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
 
         do {
             if pageNum == 1 {
@@ -174,8 +174,7 @@ class AdminOrdersViewModel: ObservableObject {
             }
 
             myOrders.append(contentsOf: uniqueNewOrders)
-
-            AppLog.order.debug("✅ Appended \(uniqueNewOrders.count) orders")
+            AppLog.printList(uniqueNewOrders, label: "My Orders Page \(pageNum)", logger: AppLog.order)
 
             if pageNum == 1 {
                 try await MinimumLoadingTime(0.5).waitIfNeeded()

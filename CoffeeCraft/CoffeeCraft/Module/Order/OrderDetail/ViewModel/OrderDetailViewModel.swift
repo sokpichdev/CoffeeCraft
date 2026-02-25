@@ -14,7 +14,6 @@ class OrderDetailViewModel: ObservableObject {
     @Published var order: Order
     @Published var userName: String = "Loading..."
     @Published var isLoadingUser = true
-    @Published var showStatusUpdateAnimation = false
     @Published var lastStatusUpdate: String?
     
     private let db = Firestore.firestore()
@@ -52,16 +51,12 @@ class OrderDetailViewModel: ObservableObject {
                     // Check if status changed
                     if updatedOrder.status != self.order.status {
                         self.lastStatusUpdate = updatedOrder.status
-                        self.showStatusUpdateAnimation = true
+                        ToastManager.shared.showTop(message: "Order is now \(order.status).", type: .success)
                         
                         // Haptic feedback
                         let generator = UINotificationFeedbackGenerator()
                         generator.notificationOccurred(.success)
-                        
-                        // Hide animation after delay
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            self.showStatusUpdateAnimation = false
-                        }
+
                     }
                     
                     self.order = updatedOrder
