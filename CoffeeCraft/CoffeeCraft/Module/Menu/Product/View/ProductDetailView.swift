@@ -10,7 +10,7 @@ struct ProductDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var favVM: FavoriteViewModel
     @Environment(\.dismiss) private var dismiss
-    
+    @Environment(\.pushScreen) private var push
     let product: Product
     var cartItem: CartItem? = nil // optional cart item for editing
     var onUpdate: (() -> Void)? = nil
@@ -127,21 +127,25 @@ struct ProductDetailView: View {
                 }
 
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart", bgColors: [Color.brown]) {
-                    if let cartItem = cartItem {
-                        cartManager.updateCartItem(
-                            userId: UserSession.shared.userId ?? "",
-                            item: cartItem,
-                            selections: selections,
-                            extras: selectedExtras
-                        )
-                        onUpdate?()
+                    if UserSession.shared.isLoggedIn {
+                        if let cartItem = cartItem {
+                            cartManager.updateCartItem(
+                                userId: UserSession.shared.userId ?? "",
+                                item: cartItem,
+                                selections: selections,
+                                extras: selectedExtras
+                            )
+                            onUpdate?()
+                        } else {
+                            cartManager.addToCart(
+                                userId: UserSession.shared.userId ?? "",
+                                product: product,
+                                selections: selections,
+                                extras: selectedExtras
+                            )
+                        }
                     } else {
-                        cartManager.addToCart(
-                            userId: UserSession.shared.userId ?? "",
-                            product: product,
-                            selections: selections,
-                            extras: selectedExtras
-                        )
+                        push(AnyView(AuthView().environmentObject(AuthViewModel())))
                     }
                 }
             }
@@ -152,15 +156,6 @@ struct ProductDetailView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
             .shadow(radius: 5)
         }
-//        .onAppear {
-//            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
-//        }
-//        .onChange(of: selections) {
-//            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
-//        }
-//        .onChange(of: selectedExtras) {
-//            Task { await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras) }
-//        }
         .task(id: customizationHash) {
             await favVM.loadFavoriteState(product: product, selections: selections, selectedExtras: selectedExtras)
         }
@@ -180,8 +175,12 @@ struct ProductDetailView: View {
             }
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon(favVM.isFavorite ? "heart.fill" : "heart"),
                           tint: favVM.isFavorite ? .red : .brown) {
-                Task {
-                    await favVM.toggleFavorite(product: product, selections: selections, selectedExtras: selectedExtras)
+                if UserSession.shared.isLoggedIn {
+                    Task {
+                        await favVM.toggleFavorite(product: product, selections: selections, selectedExtras: selectedExtras)
+                    }
+                } else {
+                    push(AnyView(AuthView().environmentObject(AuthViewModel())))
                 }
             }
         }

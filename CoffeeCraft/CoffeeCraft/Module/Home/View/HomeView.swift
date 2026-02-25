@@ -8,7 +8,6 @@ import SwiftUI
 
 // MARK: - HomeView
 struct HomeView: View {
-    @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     @Binding var selectedTab: Tab
     @State private var currentIndex: Int = 0
@@ -36,7 +35,7 @@ struct HomeView: View {
                     HStack(spacing: 20) {
                         PickUpButton(onClick: { selectedTab = .menu })
                         PickUpButton(title: "Delivery") {
-                            LoaderManager.shared.showLoading(autoHide: true, delay: 10)
+                            AlertManager.shared.showWarning(title: "Stay Tuned", message: "This Feature is Coming Soon.")
                         }
                     }
                     .padding(.horizontal)
@@ -63,14 +62,23 @@ struct HomeView: View {
                             VStack {
                                 ForEach(announcementVM.announcements.prefix(3)) { ann in
                                     PushLink {
-                                        AnnouncementDetailView(announcement: ann)
+                                        if UserSession.shared.isLoggedIn {
+                                            AnnouncementDetailView(announcement: ann)
+                                        } else {
+                                            AuthView().environmentObject(AuthViewModel())
+                                        }
                                     } label: {
                                         AnnouncementCardView(announcement: ann)
                                     }
                                 }
                                 
                                 PushLink {
-                                    AnnouncementsListView().environmentObject(announcementVM)
+                                    if UserSession.shared.isLoggedIn {
+                                        AnnouncementsListView().environmentObject(announcementVM)
+                                    } else {
+                                        AuthView()
+                                            .environmentObject(AuthViewModel())
+                                    }
                                 } label: {
                                     HStack {
                                         Text("See All")

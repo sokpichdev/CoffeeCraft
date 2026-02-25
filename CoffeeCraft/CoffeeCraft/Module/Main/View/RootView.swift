@@ -100,7 +100,6 @@ struct RootView: View {
             switch selectedTab {
             case .home:
                 HomeView(selectedTab: $selectedTab)
-                    .environmentObject(authVM)
                     .environmentObject(announcementVM)
             case .menu:
                 MenuView()
@@ -124,7 +123,6 @@ struct RootView: View {
             switch selectedTab {
             case .home:
                 HomeView(selectedTab: $selectedTab)
-                    .environmentObject(authVM)
                     .environmentObject(announcementVM)
             case .menu:
                 MenuView(isManager: true)
