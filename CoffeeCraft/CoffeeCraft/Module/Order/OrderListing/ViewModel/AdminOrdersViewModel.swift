@@ -8,6 +8,7 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 
+@MainActor
 class AdminOrdersViewModel: ObservableObject {
     @Published var allOrders: [Order] = []
     @Published var myOrders: [Order] = []
@@ -29,86 +30,63 @@ class AdminOrdersViewModel: ObservableObject {
         myOrdersListener?.remove()
     }
 
-    func fetchAllOrders(pageNum: Int, completion: ((Bool) -> Void)? = nil) {
+    func fetchAllOrders(pageNum: Int) async {
         guard pageNum > 1 || allOrders.isEmpty else { return }
+
         let offset = (pageNum - 1) * pageSize
-        AppLog.order.debug("📋 fetchAllOrders — page: \(pageNum), offset: \(offset)")
+        AppLog.order.debug("📋 fetchAllOrders — page: \(pageNum)")
 
-        // Get total count first (only on first page)
-        if pageNum == 1 {
-            isLoadingAllOrders = true
+        do {
+            if pageNum == 1 {
+                isLoadingAllOrders = true
 
-            db.collection("orders")
-                .getDocuments { [weak self] snapshot, error in
-                    guard let self = self else { return }
-                    if let count = snapshot?.documents.count {
-                        self.totalAllOrdersCount = count
-                        AppLog.order.debug("📊 fetchAllOrders — totalAllOrdersCount: \(count)")
-                    }
-                }
-        }
-        
-        // Fetch paginated data
-        db.collection("orders")
-            .order(by: "timestamp", descending: true)
-            .getDocuments { [weak self] snapshot, error in
-                guard let self = self else {
-                    completion?(false)
-                    return
-                }
+                let countSnapshot = try await db.collection("orders")
+                    .getDocuments()
 
-                if pageNum == 1 {
-                    self.isLoadingAllOrders = false
-                }
-                
-                if let error = error {
-                    AppLog.order.error("❌ fetchAllOrders — error: \(error.localizedDescription)")
-                    Task { @MainActor in
-                        AlertManager.shared.showError(title: "Error fetching orders", message: error.localizedDescription)
-                    }
-                    completion?(false)
-                    return
-                }
-                
-                guard let docs = snapshot?.documents else {
-                    AppLog.order.warning("⚠️ fetchAllOrders — snapshot has no documents")
-                    completion?(false)
-                    return
-                }
-                
-                // Manual pagination - slice the results
-                let endIndex = min(offset + self.pageSize, docs.count)
-                guard offset < docs.count else {
-                    AppLog.order.debug("📋 fetchAllOrders — offset \(offset) beyond docs.count \(docs.count), no more pages")
-                    completion?(true)
-                    return
-                }
-                
-                let pageDocuments = Array(docs[offset..<endIndex])
-                let newOrders = pageDocuments.compactMap { doc -> Order? in
-                    try? doc.data(as: Order.self)
-                }
-                
-                // Avoid duplicates
-                let existingIds = Set(self.allOrders.compactMap { $0.id })
-                let uniqueNewOrders = newOrders.filter { order in
-                    guard let id = order.id else { return false }
-                    return !existingIds.contains(id)
-                }
-                
-                self.allOrders.append(contentsOf: uniqueNewOrders)
-                AppLog.order.debug("✅ fetchAllOrders — appended \(uniqueNewOrders.count) unique order(s) on page \(pageNum), total loaded: \(self.allOrders.count)")
-                AppLog.printList(uniqueNewOrders, label: "All Orders Page \(pageNum)", logger: AppLog.order)
-
-                // Set up listener for real-time updates only on first page
-                if pageNum == 1 {
-                    self.setupAllOrdersListener()
-                }
-                
-                completion?(true)
+                totalAllOrdersCount = countSnapshot.documents.count
             }
+
+            let snapshot = try await db.collection("orders")
+                .order(by: "timestamp", descending: true)
+                .getDocuments()
+
+            let docs = snapshot.documents
+
+            let endIndex = min(offset + pageSize, docs.count)
+            guard offset < docs.count else {
+                isLoadingAllOrders = false
+                return
+            }
+
+            let pageDocuments = Array(docs[offset..<endIndex])
+
+            let newOrders = pageDocuments.compactMap {
+                try? $0.data(as: Order.self)
+            }
+
+            let existingIds = Set(allOrders.compactMap { $0.id })
+            let uniqueNewOrders = newOrders.filter {
+                guard let id = $0.id else { return false }
+                return !existingIds.contains(id)
+            }
+
+            allOrders.append(contentsOf: uniqueNewOrders)
+
+            if pageNum == 1 {
+                try await MinimumLoadingTime(0.5).waitIfNeeded()
+                isLoadingAllOrders = false
+                setupAllOrdersListener()
+            }
+
+        } catch {
+            isLoadingAllOrders = false
+            AppLog.order.error("❌ fetchAllOrders error: \(error.localizedDescription)")
+            AlertManager.shared.showError(
+                title: "Error fetching orders",
+                message: error.localizedDescription
+            )
+        }
     }
-    
     private func setupAllOrdersListener() {
         allOrdersListener?.remove()
         AppLog.order.debug("🔌 setupAllOrdersListener — attaching real-time listener")
@@ -146,89 +124,73 @@ class AdminOrdersViewModel: ObservableObject {
             }
     }
     
-    func fetchMyOrders(pageNum: Int, completion: ((Bool) -> Void)? = nil) {
+    func fetchMyOrders(pageNum: Int) async {
         guard let userId = Auth.auth().currentUser?.uid else {
-            AppLog.order.warning("⚠️ fetchMyOrders — no authenticated user, skipping")
-            completion?(false)
+            AppLog.order.warning("⚠️ fetchMyOrders — no authenticated user")
             return
         }
-        
+
         guard pageNum > 1 || myOrders.isEmpty else { return }
+
         let offset = (pageNum - 1) * pageSize
         AppLog.order.debug("📋 fetchMyOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
 
-        // Get total count first (only on first page)
-        if pageNum == 1 {
-            isLoadingMyOrders = true
-
-            db.collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .getDocuments { [weak self] snapshot, error in
-                    guard let self = self else { return }
-                    if let count = snapshot?.documents.count {
-                        self.totalMyOrdersCount = count
-                        AppLog.order.debug("📊 fetchMyOrders — totalMyOrdersCount: \(count)")
-                    }
-                }
-        }
-        
-        // Fetch paginated data
-        db.collection("orders")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
-            .getDocuments { [weak self] snapshot, error in
-                guard let self = self else {
-                    completion?(false)
-                    return
-                }
-
-                if pageNum == 1 {
-                    self.isLoadingMyOrders = false
-                }
+        do {
+            if pageNum == 1 {
+                isLoadingMyOrders = true
                 
-                if let error = error {
-                    AppLog.order.error("❌ fetchMyOrders — error: \(error.localizedDescription)")
-                    Task { @MainActor in
-                        AlertManager.shared.showError(title: "Error fetching my orders", message: error.localizedDescription)
-                    }
-                    completion?(false)
-                    return
-                }
+                let countSnapshot = try await db.collection("orders")
+                    .whereField("userId", isEqualTo: userId)
+                    .getDocuments()
                 
-                guard let docs = snapshot?.documents else {
-                    AppLog.order.warning("⚠️ fetchMyOrders — snapshot has no documents")
-                    completion?(false)
-                    return
-                }
-                
-                let endIndex = min(offset + self.pageSize, docs.count)
-                guard offset < docs.count else {
-                    AppLog.order.debug("📋 fetchMyOrders — offset \(offset) beyond docs.count \(docs.count), no more pages")
-                    completion?(true)
-                    return
-                }
-                
-                let pageDocuments = Array(docs[offset..<endIndex])
-                let newOrders = pageDocuments.compactMap { doc -> Order? in
-                    try? doc.data(as: Order.self)
-                }
-                
-                let existingIds = Set(self.myOrders.compactMap { $0.id })
-                let uniqueNewOrders = newOrders.filter { order in
-                    guard let id = order.id else { return false }
-                    return !existingIds.contains(id)
-                }
-                
-                self.myOrders.append(contentsOf: uniqueNewOrders)
-                AppLog.order.debug("✅ fetchMyOrders — appended \(uniqueNewOrders.count) unique order(s) on page \(pageNum), total loaded: \(self.myOrders.count)")
-                AppLog.printList(uniqueNewOrders, label: "My Orders Page \(pageNum)", logger: AppLog.order)
-
-                if pageNum == 1 {
-                    self.setupMyOrdersListener(userId: userId)
-                }
-                
-                completion?(true)
+                totalMyOrdersCount = countSnapshot.documents.count
+                AppLog.order.debug("📊 totalMyOrdersCount: \(self.totalMyOrdersCount)")
             }
+
+            let snapshot = try await db.collection("orders")
+                .whereField("userId", isEqualTo: userId)
+                .order(by: "timestamp", descending: true)
+                .getDocuments()
+
+            let docs = snapshot.documents
+            
+            let endIndex = min(offset + pageSize, docs.count)
+            guard offset < docs.count else {
+                AppLog.order.debug("📋 No more pages")
+                isLoadingMyOrders = false
+                return
+            }
+
+            let pageDocuments = Array(docs[offset..<endIndex])
+
+            let newOrders = pageDocuments.compactMap {
+                try? $0.data(as: Order.self)
+            }
+
+            let existingIds = Set(myOrders.compactMap { $0.id })
+            let uniqueNewOrders = newOrders.filter {
+                guard let id = $0.id else { return false }
+                return !existingIds.contains(id)
+            }
+
+            myOrders.append(contentsOf: uniqueNewOrders)
+
+            AppLog.order.debug("✅ Appended \(uniqueNewOrders.count) orders")
+
+            if pageNum == 1 {
+                try await MinimumLoadingTime(0.5).waitIfNeeded()
+                isLoadingMyOrders = false
+                setupMyOrdersListener(userId: userId)
+            }
+
+        } catch {
+            isLoadingMyOrders = false
+            AppLog.order.error("❌ fetchMyOrders error: \(error.localizedDescription)")
+            AlertManager.shared.showError(
+                title: "Error fetching my orders",
+                message: error.localizedDescription
+            )
+        }
     }
     
     private func setupMyOrdersListener(userId: String) {
@@ -269,61 +231,43 @@ class AdminOrdersViewModel: ObservableObject {
             }
     }
     
-    func refreshAllOrders(completion: ((Bool) -> Void)? = nil) {
-        AppLog.order.debug("🔄 refreshAllOrders — clearing and re-fetching from page 1")
-        allOrdersListener?.remove()
-        allOrders = []
-        totalAllOrdersCount = 0
-        fetchAllOrders(pageNum: 1, completion: completion)
-    }
-    
-    func refreshMyOrders(completion: ((Bool) -> Void)? = nil) {
-        AppLog.order.debug("🔄 refreshMyOrders — clearing and re-fetching from page 1")
+    func refreshMyOrders() async {
+        AppLog.order.debug("🔄 refreshMyOrders")
         myOrdersListener?.remove()
         myOrders = []
         totalMyOrdersCount = 0
-        fetchMyOrders(pageNum: 1, completion: completion)
+        await fetchMyOrders(pageNum: 1)
     }
 
-    @MainActor
-    func updateOrderStatus(
-        order: Order,
-        status: String,
-        completion: @escaping (Bool) -> Void
-    ) {
-        guard let orderId = order.id else {
-            AppLog.order.warning("⚠️ updateOrderStatus — order has no id, skipping")
-            completion(false)
-            return
+    func refreshAllOrders() async {
+        AppLog.order.debug("🔄 refreshAllOrders")
+        allOrdersListener?.remove()
+        allOrders = []
+        totalAllOrdersCount = 0
+        await fetchAllOrders(pageNum: 1)
+    }
+
+    func updateOrderStatus(order: Order, status: String) async -> Bool {
+        guard let orderId = order.id else { return false }
+
+        do {
+            try await db.collection("orders")
+                .document(orderId)
+                .updateData(["status": status])
+
+            applyLocalStatusChange(orderId: orderId, status: status)
+            return true
+
+        } catch {
+            AppLog.order.error("❌ updateOrderStatus error: \(error.localizedDescription)")
+        AlertManager.shared.showError(
+                title: "Error updating status",
+                message: error.localizedDescription
+            )
+            return false
         }
-
-        AppLog.order.debug("✏️ updateOrderStatus — orderId: \(orderId), newStatus: \(status)")
-
-        db.collection("orders")
-            .document(orderId)
-            .updateData(["status": status]) { [weak self] error in
-                if let error = error {
-                    AppLog.order.error("❌ updateOrderStatus — failed for orderId: \(orderId): \(error.localizedDescription)")
-                    Task { @MainActor in
-                        AlertManager.shared.showError(
-                            title: "Error updating status",
-                            message: error.localizedDescription
-                        )
-                    }
-                    completion(false)
-                    return
-                }
-
-                AppLog.order.debug("✅ updateOrderStatus — orderId: \(orderId) updated to: \(status)")
-
-                Task { @MainActor in
-                    self?.applyLocalStatusChange(orderId: orderId, status: status)
-                    completion(true)
-                }
-            }
     }
 
-    @MainActor
     func applyLocalStatusChange(orderId: String, status: String) {
         // Update in allOrders
         if let index = allOrders.firstIndex(where: { $0.id == orderId }) {

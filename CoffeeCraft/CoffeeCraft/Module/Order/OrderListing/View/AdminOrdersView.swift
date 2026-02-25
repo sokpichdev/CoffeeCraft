@@ -84,17 +84,22 @@ struct ActiveOrdersContent: View {
                                     AnyView(
                                         HStack(spacing: 8) {
                                             Button("Start") {
-                                                vm.updateOrderStatus(order: order, status: "InProgress") { _ in }
+                                                Task {
+                                                    let _ = await vm.updateOrderStatus(order: order, status: "InProgress")
+                                                }
                                             }
                                             .disabled(order.status != "Pending")
 
                                             Button("Ready") {
-                                                vm.updateOrderStatus(order: order, status: "Ready") { _ in }
+                                                Task {
+                                                    let _ = await vm.updateOrderStatus(order: order, status: "Ready")
+                                                }
                                             }
                                             .disabled(order.status != "InProgress")
 
                                             Button("Complete") {
-                                                vm.updateOrderStatus(order: order, status: "Completed") { success in
+                                                Task {
+                                                    let success = await vm.updateOrderStatus(order: order, status: "Completed")
                                                     if success {
                                                         ToastManager.shared.show(message: "Order Completed", type: .success)
                                                     }
@@ -108,23 +113,19 @@ struct ActiveOrdersContent: View {
                                 }
                             }
                             .onAppear {
-                                if vm.allOrders.count < vm.totalAllOrdersCount {
-                                    if !vm.allOrders.isEmpty {
-                                        if order.id == vm.allOrders.last?.id, !isPaginating {
-                                            isPaginating = true
-                                            vm.allOrdersPage += 1
-                                            Task {
-                                                let timer = MinimumLoadingTime(0.5)
-                                                try? await timer.waitIfNeeded()
-                                                
-                                                await MainActor.run {
-                                                    vm.fetchAllOrders(pageNum: vm.allOrdersPage) { success in
-                                                        isPaginating = false
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                guard vm.allOrders.count < vm.totalAllOrdersCount else { return }
+                                guard order.id == vm.allOrders.last?.id else { return }
+                                guard !isPaginating else { return }
+
+                                isPaginating = true
+                                vm.allOrdersPage += 1
+
+                                Task {
+                                    let timer = MinimumLoadingTime(0.5)
+                                    try? await timer.waitIfNeeded()
+
+                                    await vm.fetchAllOrders(pageNum: vm.allOrdersPage)
+                                    isPaginating = false
                                 }
                             }
                         }
@@ -137,18 +138,14 @@ struct ActiveOrdersContent: View {
                     .padding(.bottom)
                 }, onRefresh: {
                     vm.allOrdersPage = 1
-                    await withCheckedContinuation { continuation in
-                        vm.refreshAllOrders { _ in
-                            continuation.resume()
-                        }
-                    }
+                    await vm.refreshAllOrders()
                 })
                 .padding(.bottom)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
-        .onAppear {
-            vm.fetchAllOrders(pageNum: 1)
+        .task {
+            await vm.fetchAllOrders(pageNum: 1)
         }
     }
 }
@@ -188,25 +185,22 @@ struct MyOrdersContent: View {
                                 OrderDetailView(order: order)
                             } label: {
                                 OrderCardView(order: order)
+//                                Text("Hi")
                             }
                             .onAppear {
-                                if vm.myOrders.count < vm.totalMyOrdersCount {
-                                    if !vm.myOrders.isEmpty {
-                                        if order.id == vm.myOrders.last?.id, !isPaginating {
-                                            isPaginating = true
-                                            vm.myOrdersPage += 1
-                                            Task {
-                                                let timer = MinimumLoadingTime(0.5)
-                                                try? await timer.waitIfNeeded()
-                                                
-                                                await MainActor.run {
-                                                    vm.fetchMyOrders(pageNum: vm.myOrdersPage) { success in
-                                                        isPaginating = false
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                guard vm.myOrders.count < vm.totalMyOrdersCount else { return }
+                                guard order.id == vm.myOrders.last?.id else { return }
+                                guard !isPaginating else { return }
+                                
+                                isPaginating = true
+                                vm.myOrdersPage += 1
+                                
+                                Task {
+                                    let timer = MinimumLoadingTime(0.5)
+                                    try? await timer.waitIfNeeded()
+                                    
+                                    await vm.fetchMyOrders(pageNum: vm.myOrdersPage)
+                                    isPaginating = false
                                 }
                             }
                         }
@@ -219,18 +213,14 @@ struct MyOrdersContent: View {
                     .padding(.bottom)
                 }, onRefresh: {
                     vm.myOrdersPage = 1
-                    await withCheckedContinuation { continuation in
-                        vm.refreshMyOrders { _ in
-                            continuation.resume()
-                        }
-                    }
+                    await vm.refreshMyOrders()
                 })
                 .padding(.bottom)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
-        .onAppear {
-            vm.fetchMyOrders(pageNum: 1)
+        .task {
+            await vm.fetchMyOrders(pageNum: 1)
         }
     }
 }

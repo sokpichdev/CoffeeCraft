@@ -48,49 +48,12 @@ struct OrderCardView: View {
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                             Spacer()
-                            Text("$\(item.price, specifier: "%.2f")")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
+//                            Text("$\(item.price, specifier: "%.2f")")
+//                                .font(.subheadline)
+//                                .fontWeight(.semibold)
+//                                .foregroundColor(.secondary)
                         }
                         .frame(height: 15)
-                        // Selections
-                        if let selections = item.selections, !selections.isEmpty {
-                            VStack(alignment: .leading, spacing: 2) {
-                                ForEach(selections.keys.sorted(), id: \.self) { key in
-                                    if let value = selections[key] {
-                                        HStack(spacing: 8) {
-                                            Text("\(key):")
-                                            Text(value)
-                                        }
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                        .frame(height: 12)
-                                    }
-                                }
-                            }
-                        }
-
-                        // Extras
-                        if let extras = item.extras, !extras.isEmpty {
-                            HStack(spacing: 8) {
-                                Text("Extras:")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                ForEach(extras, id: \.self) { extra in
-                                    HStack(spacing: 0) {
-                                        Text(extra)
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
-                                        if extra != extras.last {
-                                            Text(",")
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                }
-                            }
-                            .frame(height: 12)
-                        }
                         Divider()
                     }
                 }

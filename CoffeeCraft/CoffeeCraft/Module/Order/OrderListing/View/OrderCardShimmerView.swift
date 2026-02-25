@@ -35,14 +35,6 @@ struct OrderCardShimmerView: View {
                             ShimmerView(cornerRadius: 4)
                                 .frame(width: 120, height: 15)
                             Spacer()
-                            ShimmerView(cornerRadius: 4)
-                                .frame(width: 48, height: 15)
-                        }
-                        VStack(spacing: 2) {
-                            ShimmerView(cornerRadius: 4)
-                                .frame(width: 90, height: 12)
-                            ShimmerView(cornerRadius: 4)
-                                .frame(width: 90, height: 12)
                         }
                         Divider()
                     }
