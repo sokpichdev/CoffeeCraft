@@ -94,35 +94,61 @@ class OrderViewModel: ObservableObject {
         listener?.remove()
         AppLog.order.debug("🔌 setupRealtimeListener — attaching listener for uid: \(userId)")
 
+        var isInitialSnapshot = true
+
         listener = db.collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
 
                 if let error = error {
                     AppLog.order.error("❌ setupRealtimeListener — error: \(error.localizedDescription)")
-                    AlertManager.shared.showError(title: "Realtime listener error", message: error.localizedDescription)
+                    Task { @MainActor in
+                        AlertManager.shared.showError(title: "Realtime listener error", message: error.localizedDescription)
+                    }
                     return
                 }
 
                 guard let changes = snapshot?.documentChanges else { return }
 
-                for change in changes {
-                    if change.type == .added {
-                        if let newOrder = try? change.document.data(as: Order.self) {
-                            if !self.orders.contains(where: { $0.id == newOrder.id }) {
-                                self.orders.insert(newOrder, at: 0)
-                                self.totalOrdersCount += 1
-                                AppLog.order.debug("➕ setupRealtimeListener — new order inserted: \(newOrder.id ?? "nil"), total: \(self.totalOrdersCount)")
+                // Skip .added on first snapshot — already loaded via getDocuments()
+                // Only process .modified in case something changed during fetch
+                if isInitialSnapshot {
+                    isInitialSnapshot = false
+                    let modifiedOrders = changes
+                        .filter { $0.type == .modified }
+                        .compactMap { try? $0.document.data(as: Order.self) }
+                    Task { @MainActor in
+                        for updatedOrder in modifiedOrders {
+                            if let index = self.orders.firstIndex(where: { $0.id == updatedOrder.id }) {
+                                self.orders[index] = updatedOrder
+                                AppLog.order.debug("✏️ setupRealtimeListener (initial) — updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
                             }
                         }
-                    } else if change.type == .modified {
-                        if let updatedOrder = try? change.document.data(as: Order.self),
-                           let index = self.orders.firstIndex(where: { $0.id == updatedOrder.id }) {
+                    }
+                    return
+                }
+
+                let addedOrders = changes
+                    .filter { $0.type == .added }
+                    .compactMap { try? $0.document.data(as: Order.self) }
+                let modifiedOrders = changes
+                    .filter { $0.type == .modified }
+                    .compactMap { try? $0.document.data(as: Order.self) }
+
+                Task { @MainActor in
+                    for newOrder in addedOrders {
+                        if !self.orders.contains(where: { $0.id == newOrder.id }) {
+                            self.orders.insert(newOrder, at: 0)
+                            self.totalOrdersCount += 1
+                            AppLog.order.debug("➕ setupRealtimeListener — inserted: \(newOrder.id ?? "nil"), total: \(self.totalOrdersCount)")
+                        }
+                    }
+                    for updatedOrder in modifiedOrders {
+                        if let index = self.orders.firstIndex(where: { $0.id == updatedOrder.id }) {
                             self.orders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupRealtimeListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
+                            AppLog.order.debug("✏️ setupRealtimeListener — updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
                         }
                     }
                 }

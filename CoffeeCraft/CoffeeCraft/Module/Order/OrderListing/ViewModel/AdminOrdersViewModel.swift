@@ -90,10 +90,11 @@ class AdminOrdersViewModel: ObservableObject {
     private func setupAllOrdersListener() {
         allOrdersListener?.remove()
         AppLog.order.debug("🔌 setupAllOrdersListener — attaching real-time listener")
-        
+
+        var isInitialSnapshot = true
+
         allOrdersListener = db.collection("orders")
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
 
@@ -103,7 +104,19 @@ class AdminOrdersViewModel: ObservableObject {
                 }
 
                 guard let changes = snapshot?.documentChanges else { return }
-                
+
+                if isInitialSnapshot {
+                    isInitialSnapshot = false
+                    for change in changes where change.type == .modified {
+                        if let updatedOrder = try? change.document.data(as: Order.self),
+                           let index = self.allOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
+                            self.allOrders[index] = updatedOrder
+                            AppLog.order.debug("✏️ setupAllOrdersListener (initial) — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
+                        }
+                    }
+                    return
+                }
+
                 for change in changes {
                     if change.type == .added {
                         if let newOrder = try? change.document.data(as: Order.self) {
@@ -195,11 +208,12 @@ class AdminOrdersViewModel: ObservableObject {
     private func setupMyOrdersListener(userId: String) {
         myOrdersListener?.remove()
         AppLog.order.debug("🔌 setupMyOrdersListener — attaching real-time listener for uid: \(userId)")
-        
+
+        var isInitialSnapshot = true
+
         myOrdersListener = db.collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
 
@@ -209,7 +223,19 @@ class AdminOrdersViewModel: ObservableObject {
                 }
 
                 guard let changes = snapshot?.documentChanges else { return }
-                
+
+                if isInitialSnapshot {
+                    isInitialSnapshot = false
+                    for change in changes where change.type == .modified {
+                        if let updatedOrder = try? change.document.data(as: Order.self),
+                           let index = self.myOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
+                            self.myOrders[index] = updatedOrder
+                            AppLog.order.debug("✏️ setupMyOrdersListener (initial) — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
+                        }
+                    }
+                    return
+                }
+
                 for change in changes {
                     if change.type == .added {
                         if let newOrder = try? change.document.data(as: Order.self) {
