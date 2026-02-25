@@ -87,7 +87,9 @@ struct RootView: View {
                 .environmentObject(cardVM)
                 .environmentObject(productVM)
         case .orders, .profile:
-            LoginPromptView(showAuthSheet: $showAuthSheet)
+            LoginPromptView {
+                showAuthSheet = true
+            }
         }
     }
 
@@ -141,7 +143,9 @@ struct RootView: View {
                     .environmentObject(inboxVM)
             }
         case .none:
-            LoginPromptView(showAuthSheet: $showAuthSheet)
+            LoginPromptView {
+                showAuthSheet = true
+            }
         }
     }
 
@@ -152,35 +156,5 @@ struct RootView: View {
         } else {
             selectedTab = tab
         }
-    }
-}
-
-struct LoginPromptView: View {
-    @Binding var showAuthSheet: Bool
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Spacer()
-
-            Image(systemName: "cup.and.saucer.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.brown)
-
-            Text("Sign in to continue")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            Text("Create an account or log in to place orders, track your history, and earn rewards.")
-                .font(.title)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            CustomCoffeeButton(title: "Sign In / Create Account") {
-                showAuthSheet = true
-            }
-            Spacer()
-        }
-        .padding(.horizontal)
     }
 }
