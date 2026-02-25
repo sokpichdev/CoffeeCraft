@@ -109,7 +109,7 @@ struct TimelineRow: View {
 
                 if let subtitle {
                     Text(subtitle)
-                        .font(.system(size: 13))
+                        .font(.footnote).bold()
                         .foregroundColor(.coffeeOliveGreen)
                         .transition(.opacity)
                 }

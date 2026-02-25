@@ -22,39 +22,33 @@ struct OrderDetailView: View {
     }
     
     var body: some View {
-            CustomRefreshScrollView( {
-                VStack(spacing: 0) {
-                    // Status Update Animation Overlay
-                    if vm.showStatusUpdateAnimation {
-                        StatusUpdateBanner(status: vm.lastStatusUpdate ?? vm.order.status)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    }
+        CustomRefreshScrollView( {
+            VStack(spacing: 0) {
+                VStack(spacing: 24) {
+                    // Header Card with Order Info & User
+                    OrderHeaderCard(
+                        order: vm.order,
+                        userName: vm.userName,
+                        isLoadingUser: vm.isLoadingUser
+                    )
                     
-                    VStack(spacing: 24) {
-                        // Header Card with Order Info & User
-                        OrderHeaderCard(
-                            order: vm.order,
-                            userName: vm.userName,
-                            isLoadingUser: vm.isLoadingUser
-                        )
-                        
-                        // Live Status Timeline
-                        StatusTimelineView(status: vm.order.status)
-                        
-                        // Order Items Card
-                        OrderItemsCard(items: vm.order.items)
-                        
-                        // Pricing Breakdown
-                        PricingCard(totalPrice: vm.order.totalPrice, items: vm.order.items)
-                        
-                        // Action Buttons
-                        ActionButtonsSection(order: vm.order, isActive: isActive)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 20)
+                    // Live Status Timeline
+                    StatusTimelineView(status: vm.order.status)
+                    
+                    // Order Items Card
+                    OrderItemsCard(items: vm.order.items)
+                    
+                    // Pricing Breakdown
+                    PricingCard(totalPrice: vm.order.totalPrice, items: vm.order.items)
+                    
+                    // Action Buttons
+                    ActionButtonsSection(order: vm.order, isActive: isActive)
                 }
-            })
-            .background(Color(.systemGroupedBackground))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 20)
+            }
+        })
+        .background(Color(.systemGroupedBackground))
         .customNavigationBar("Order Detail") {
             ToolBarButton.back {
                 dismiss()
@@ -72,6 +66,15 @@ struct OrderDetailView: View {
             }
             if !vm.order.userId.isEmpty {
                 vm.fetchUserInfo(userId: vm.order.userId)
+            }
+        }
+        .onChange(of: vm.showStatusUpdateAnimation) { _, newValue in
+            if newValue {
+                ToastManager.shared.showTop(
+                    message: "Order is now \(vm.order.status).",
+                    type: .success,
+                    duration: 3
+                )
             }
         }
         .onDisappear {
