@@ -38,20 +38,18 @@ extension Color {
 extension Color {
     static let primaryTextColor = Color.black
     static let placeHolderColor = Color.gray
-    
-    static var coffeeBrown: Color { Color(red: 0.45, green: 0.29, blue: 0.20) }
-    static var coffeeLight: Color { Color(red: 0.62, green: 0.42, blue: 0.31) }
-    static var coffeeCream: Color { Color(red: 0.85, green: 0.75, blue: 0.65) }
 }
-
-extension Color {
-    static var coffeeDarkBrown: Color { Color(hex: "#4B2E2A") }
-    static var coffeeWarmBrown: Color { Color(hex: "#6F4E37") }
-    static var coffeeOliveGreen: Color { Color(hex: "#7A8F3A") }
-}
-
-extension Color {
-    static let leafGreen = Color(hex: "#6B8E23") // success
-    static let warningAmber = Color(hex: "#C97C5D") // warning
-    static let errorRed = Color(hex: "#9E3A2F") // error
-}
+/*
+ coffeeDarkBrown = #4B2E2A
+ coffeeWarmBrown = #6F4E37
+ coffeeOliveGreen = #7A8F3A
+ 
+ leafGreen = #6B8E23
+ warningAmber = #C97C5D
+ errorRed = #9E3A2F"
+ 
+ coffeeBrown = #734A33
+ coffeeLight = #9E6B4F
+ coffeeCream = #D9BFA6
+ 
+ */
