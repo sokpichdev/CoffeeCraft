@@ -23,7 +23,11 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
     }
     
     static func == (lhs: Order, rhs: Order) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id &&
+        lhs.status == rhs.status &&
+        lhs.totalPrice == rhs.totalPrice &&
+        lhs.orderId == rhs.orderId &&
+        lhs.items == rhs.items
     }
 }
 
@@ -42,6 +46,9 @@ struct CartItemData: Identifiable, Codable, Hashable {
     }
     
     static func == (lhs: CartItemData, rhs: CartItemData) -> Bool {
-        lhs.name == rhs.name && lhs.price == rhs.price
+        lhs.name == rhs.name &&
+        lhs.price == rhs.price &&
+        lhs.selections == rhs.selections &&
+        lhs.extras == rhs.extras
     }
 }
