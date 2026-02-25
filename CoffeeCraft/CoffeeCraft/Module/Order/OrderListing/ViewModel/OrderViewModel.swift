@@ -22,103 +22,74 @@ class OrderViewModel: ObservableObject {
         listener?.remove()
     }
 
-    @MainActor
-    func fetchOrders(pageNum: Int, completion: ((Bool) -> Void)? = nil) {
+    func fetchOrders(pageNum: Int) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             AppLog.order.warning("⚠️ fetchOrders — no authenticated user, skipping")
-            completion?(false)
             return
         }
+
+        guard pageNum > 1 || orders.isEmpty else { return }
 
         let offset = (pageNum - 1) * pageSize
         AppLog.order.debug("📋 fetchOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
 
-        // Get total count
-        if pageNum == 1 {
-            isLoading = true
+        do {
+            if pageNum == 1 {
+                isLoading = true
 
-            db.collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .getDocuments { [weak self] snapshot, error in
-                    guard let self = self else { return }
-                    if let count = snapshot?.documents.count {
-                        Task { @MainActor in
-                            self.totalOrdersCount = count
-                            AppLog.order.debug("📊 fetchOrders — totalOrdersCount: \(count)")
-                        }
-                    }
-                }
-        }
+                let countSnapshot = try await db.collection("orders")
+                    .whereField("userId", isEqualTo: userId)
+                    .getDocuments()
 
-        listener?.remove()
-
-        db.collection("orders")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
-            .getDocuments { [weak self] snapshot, error in
-                guard let self = self else {
-                    completion?(false)
-                    return
-                }
-
-                if pageNum == 1 {
-                    Task { @MainActor in
-                        self.isLoading = false
-                    }
-                }
-
-                if let error = error {
-                    AppLog.order.error("❌ fetchOrders — error: \(error.localizedDescription)")
-                    Task { @MainActor in
-                        AlertManager.shared.showError(message: error.localizedDescription)
-                    }
-                    completion?(false)
-                    return
-                }
-
-                guard let documents = snapshot?.documents else {
-                    AppLog.order.warning("⚠️ fetchOrders — snapshot has no documents")
-                    completion?(false)
-                    return
-                }
-
-                // Manual pagination - slice the results
-                let endIndex = min(offset + self.pageSize, documents.count)
-                guard offset < documents.count else {
-                    AppLog.order.debug("📋 fetchOrders — offset \(offset) beyond docs.count \(documents.count), no more pages")
-                    completion?(true)
-                    return
-                }
-
-                let pageDocuments = Array(documents[offset..<endIndex])
-                let newOrders = pageDocuments.compactMap { doc -> Order? in
-                    try? doc.data(as: Order.self)
-                }
-
-                // Avoid duplicates
-                Task { @MainActor in
-                    let existingIds = Set(self.orders.compactMap { $0.id })
-                    let uniqueNewOrders = newOrders.filter { order in
-                        guard let id = order.id else { return false }
-                        return !existingIds.contains(id)
-                    }
-                    self.orders.append(contentsOf: uniqueNewOrders)
-                    AppLog.order.debug("✅ fetchOrders — appended \(uniqueNewOrders.count) unique order(s) on page \(pageNum), total loaded: \(self.orders.count)")
-                    AppLog.printList(uniqueNewOrders, label: "Orders Page \(pageNum)", logger: AppLog.order)
-                }
-
-                // Set up real-time listener for new orders only on first page
-                if pageNum == 1 {
-                    Task { @MainActor in
-                        self.setupRealtimeListener(userId: userId)
-                    }
-                }
-
-                completion?(true)
+                totalOrdersCount = countSnapshot.documents.count
+                AppLog.order.debug("📊 fetchOrders — totalOrdersCount: \(self.totalOrdersCount)")
             }
+
+            let snapshot = try await db.collection("orders")
+                .whereField("userId", isEqualTo: userId)
+                .order(by: "timestamp", descending: true)
+                .getDocuments()
+
+            let docs = snapshot.documents
+
+            let endIndex = min(offset + pageSize, docs.count)
+            guard offset < docs.count else {
+                AppLog.order.debug("📋 fetchOrders — offset \(offset) beyond docs.count \(docs.count), no more pages")
+                isLoading = false
+                return
+            }
+
+            let pageDocuments = Array(docs[offset..<endIndex])
+            let newOrders = pageDocuments.compactMap {
+                try? $0.data(as: Order.self)
+            }
+
+            let existingIds = Set(orders.compactMap { $0.id })
+            let uniqueNewOrders = newOrders.filter {
+                guard let id = $0.id else { return false }
+                return !existingIds.contains(id)
+            }
+
+            orders.append(contentsOf: uniqueNewOrders)
+            AppLog.order.debug("✅ fetchOrders — appended \(uniqueNewOrders.count) unique order(s) on page \(pageNum), total loaded: \(self.orders.count)")
+            AppLog.printList(uniqueNewOrders, label: "Orders Page \(pageNum)", logger: AppLog.order)
+
+            if pageNum == 1 {
+                try await MinimumLoadingTime(0.5).waitIfNeeded()
+                isLoading = false
+                setupRealtimeListener(userId: userId)
+            }
+
+        } catch {
+            isLoading = false
+            AppLog.order.error("❌ fetchOrders error: \(error.localizedDescription)")
+            AlertManager.shared.showError(
+                title: "Error fetching orders",
+                message: error.localizedDescription
+            )
+        }
     }
 
-    @MainActor
     private func setupRealtimeListener(userId: String) {
         listener?.remove()
         AppLog.order.debug("🔌 setupRealtimeListener — attaching listener for uid: \(userId)")
@@ -157,18 +128,12 @@ class OrderViewModel: ObservableObject {
                 }
             }
     }
-    
-    func refreshOrders(completion: ((Bool) -> Void)? = nil) {
+
+    func refreshOrders() async {
         AppLog.order.debug("🔄 refreshOrders — clearing and re-fetching from page 1")
         listener?.remove()
         orders = []
         totalOrdersCount = 0
-        fetchOrders(pageNum: 1, completion: completion)
-    }
-    
-    // Keep this for backward compatibility
-    func listenToUserOrders() {
-        AppLog.order.debug("🔁 listenToUserOrders — delegating to fetchOrders page 1")
-        fetchOrders(pageNum: 1)
+        await fetchOrders(pageNum: 1)
     }
 }

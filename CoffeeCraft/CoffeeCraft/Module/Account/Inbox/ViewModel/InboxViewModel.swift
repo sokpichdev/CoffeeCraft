@@ -130,7 +130,6 @@ class InboxViewModel: ObservableObject {
 
                 if let error {
                     AppLog.menu.error("❌ setupRealtimeListener — error: \(error.localizedDescription)")
-                    AlertManager.shared.showError(title: "Realtime listener error", message: error.localizedDescription)
                     return
                 }
 

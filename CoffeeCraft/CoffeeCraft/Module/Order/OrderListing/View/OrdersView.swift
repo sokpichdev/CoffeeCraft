@@ -50,19 +50,14 @@ struct OrdersView: View {
                             }
                             .onAppear {
                                 if orderVM.orders.count < orderVM.totalOrdersCount {
-                                    if !orderVM.orders.isEmpty {
-                                        if order.id == orderVM.orders.last?.id, !isPaginating {
-                                            isPaginating = true
-                                            pageNum += 1
-                                            Task {
-                                                let timer = MinimumLoadingTime(0.5)
-                                                try? await timer.waitIfNeeded()
-                                                await MainActor.run {
-                                                    orderVM.fetchOrders(pageNum: pageNum) { _ in
-                                                        isPaginating = false
-                                                    }
-                                                }
-                                            }
+                                    if order.id == orderVM.orders.last?.id, !isPaginating {
+                                        isPaginating = true
+                                        pageNum += 1
+                                        Task {
+                                            let timer = MinimumLoadingTime(0.5)
+                                            try? await timer.waitIfNeeded()
+                                            await orderVM.fetchOrders(pageNum: pageNum)
+                                            isPaginating = false
                                         }
                                     }
                                 }
@@ -77,15 +72,13 @@ struct OrdersView: View {
                     .frame(maxWidth: .infinity)
                 }, onRefresh: {
                     pageNum = 1
-                    await withCheckedContinuation { continuation in
-                        orderVM.refreshOrders { _ in continuation.resume() }
-                    }
+                    await orderVM.refreshOrders()
                 })
             }
         }
         .customNavigationBar("My Orders")
         .onAppear {
-            orderVM.fetchOrders(pageNum: 1)
+            Task { await orderVM.fetchOrders(pageNum: 1) }
             handleDeepLink()
         }
         .onChange(of: coordinator.selectedOrderId) { _, _ in
