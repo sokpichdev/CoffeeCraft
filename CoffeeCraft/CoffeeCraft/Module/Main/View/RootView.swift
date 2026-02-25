@@ -21,91 +21,166 @@ struct RootView: View {
     @StateObject var favVM = FavoriteViewModel()
     @StateObject var announcementVM = AnnouncementViewModel()
     @State private var selectedTab: Tab = .home
-    
+    @State private var showAuthSheet = false
+
+    // Convenience: is the user a guest?
+    private var isGuest: Bool {
+        UserSession.shared.currentUser == nil
+    }
+
     var body: some View {
         Group {
-            if UserSession.shared.currentUser == nil {
-                AuthView()
-            } else if authVM.isLoading {
+            if authVM.isLoading {
                 CoffeeLoaderView()
             } else {
                 VStack(spacing: 0) {
-                    // MARK: - Main Content
-                    // Show the selected tab's root view
-                    switch UserSession.shared.currentUser?.role {
-                    case .customer:
-                        switch selectedTab {
-                        case .home:
-                            HomeView(selectedTab: $selectedTab)
-                                .environmentObject(authVM)
-                                .environmentObject(announcementVM)
-                        case .menu:
-                            MenuView()
-                                .environmentObject(cartManager)
-                                .environmentObject(favVM)
-                                .environmentObject(cardVM)
-                                .environmentObject(productVM)
-                        case .orders:
-                            OrdersView()
-                                .environmentObject(orderVM)
-                                .environmentObject(coordinator)
-                        case .profile:
-                            AccountView()
-                                .environmentObject(favVM)
-                                .environmentObject(announcementVM)
-                                .environmentObject(authVM)
-                                .environmentObject(cardVM)
-                                .environmentObject(inboxVM)
-                        }
-                    case .manager:
-                        switch selectedTab {
-                        case .home:
-                            HomeView(selectedTab: $selectedTab)
-                                .environmentObject(authVM)
-                                .environmentObject(announcementVM)
-                        case .menu:
-                            MenuView(isManager: true)
-                                .environmentObject(cartManager)
-                                .environmentObject(favVM)
-                                .environmentObject(cardVM)
-                                .environmentObject(productVM)
-                        case .orders:
-                            AdminOrdersView()
-                        case .profile:
-                            AccountView()
-                                .environmentObject(favVM)
-                                .environmentObject(announcementVM)
-                                .environmentObject(authVM)
-                                .environmentObject(cardVM)
-                                .environmentObject(inboxVM)
-                        }
-                    case .none:
-                        AuthView()
-                    }
+                    mainContent
                     TabBarView(selectedTab: $selectedTab)
                 }
                 .ignoresSafeArea(edges: .bottom)
+                .sheet(isPresented: $showAuthSheet) {
+                    AuthView()
+                        .environmentObject(authVM)
+                }
                 .onAppear {
-                    inboxVM.fetchNotifications(pageNum: 1)
+                    if !isGuest {
+                        inboxVM.fetchNotifications(pageNum: 1)
+                    }
                 }
             }
         }
         .onChange(of: coordinator.shouldNavigateToOrders) { _, _ in
-            selectedTab = .orders
+            handleTabChange(to: .orders)
         }
         .onChange(of: NetworkMonitor.shared.isConnected) { _, isConnected in
-            guard !AlertManager.shared.showAlert else { return } //Avoid alert spam
+            guard !AlertManager.shared.showAlert else { return }
             if !isConnected {
-                AlertManager.shared.showWarning(
-                    title: "No Internet",
-                    message: "You're offline. Some features may not be available."
-                )
+                AlertManager.shared.showWarning(title: "No Internet", message: "You're offline. Some features may not be available.")
             } else {
-                AlertManager.shared.showSuccess(
-                    title: "Back Online",
-                    message: "Your connection has been restored."
-                )
+                AlertManager.shared.showSuccess(title: "Back Online", message: "Your connection has been restored.")
             }
         }
+    }
+
+    // MARK: - Main Content
+
+    @ViewBuilder
+    private var mainContent: some View {
+        if isGuest {
+            guestContent
+        } else {
+            authenticatedContent
+        }
+    }
+
+    @ViewBuilder
+    private var guestContent: some View {
+        switch selectedTab {
+        case .home:
+            HomeView(selectedTab: $selectedTab)
+                .environmentObject(authVM)
+                .environmentObject(announcementVM)
+        case .menu:
+            MenuView()
+                .environmentObject(cartManager)
+                .environmentObject(favVM)
+                .environmentObject(cardVM)
+                .environmentObject(productVM)
+        case .orders, .profile:
+            LoginPromptView(showAuthSheet: $showAuthSheet)
+        }
+    }
+
+    @ViewBuilder
+    private var authenticatedContent: some View {
+        switch UserSession.shared.currentUser?.role {
+        case .customer:
+            switch selectedTab {
+            case .home:
+                HomeView(selectedTab: $selectedTab)
+                    .environmentObject(authVM)
+                    .environmentObject(announcementVM)
+            case .menu:
+                MenuView()
+                    .environmentObject(cartManager)
+                    .environmentObject(favVM)
+                    .environmentObject(cardVM)
+                    .environmentObject(productVM)
+            case .orders:
+                OrdersView()
+                    .environmentObject(orderVM)
+                    .environmentObject(coordinator)
+            case .profile:
+                AccountView()
+                    .environmentObject(favVM)
+                    .environmentObject(announcementVM)
+                    .environmentObject(authVM)
+                    .environmentObject(cardVM)
+                    .environmentObject(inboxVM)
+            }
+        case .manager:
+            switch selectedTab {
+            case .home:
+                HomeView(selectedTab: $selectedTab)
+                    .environmentObject(authVM)
+                    .environmentObject(announcementVM)
+            case .menu:
+                MenuView(isManager: true)
+                    .environmentObject(cartManager)
+                    .environmentObject(favVM)
+                    .environmentObject(cardVM)
+                    .environmentObject(productVM)
+            case .orders:
+                AdminOrdersView()
+            case .profile:
+                AccountView()
+                    .environmentObject(favVM)
+                    .environmentObject(announcementVM)
+                    .environmentObject(authVM)
+                    .environmentObject(cardVM)
+                    .environmentObject(inboxVM)
+            }
+        case .none:
+            LoginPromptView(showAuthSheet: $showAuthSheet)
+        }
+    }
+
+    // MARK: - Tab Change Handler
+    private func handleTabChange(to tab: Tab) {
+        if isGuest && (tab == .orders || tab == .profile) {
+            showAuthSheet = true
+        } else {
+            selectedTab = tab
+        }
+    }
+}
+
+struct LoginPromptView: View {
+    @Binding var showAuthSheet: Bool
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Image(systemName: "cup.and.saucer.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.brown)
+
+            Text("Sign in to continue")
+                .font(.title3)
+                .fontWeight(.semibold)
+
+            Text("Create an account or log in to place orders, track your history, and earn rewards.")
+                .font(.title)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            CustomCoffeeButton(title: "Sign In / Create Account") {
+                showAuthSheet = true
+            }
+            Spacer()
+        }
+        .padding(.horizontal)
     }
 }
