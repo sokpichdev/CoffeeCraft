@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct Order: Identifiable, Codable, Hashable {
+struct Order: Identifiable, Codable, Hashable, Equatable {
     @DocumentID var id: String?
     var orderId: Int
     var userId: String
