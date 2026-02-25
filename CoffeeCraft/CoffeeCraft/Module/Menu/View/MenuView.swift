@@ -59,7 +59,11 @@ struct MenuView: View {
         }
         .customNavigationBar("Menu") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("magnifyingglass")) {
-                showSearchSheet = true
+                if UserSession.shared.isLoggedIn {
+                    showSearchSheet = true
+                } else {
+                    push(AnyView(AuthView().environmentObject(AuthViewModel())))
+                }
             }
         }
         .fullScreenCover(isPresented: $showCartSheet) {
