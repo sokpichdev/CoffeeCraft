@@ -61,7 +61,7 @@ class OrderDetailViewModel: ObservableObject {
                     
                     self.order = updatedOrder
                     AppLog.order.debug("✅ OrderDetail id: \(updatedOrder.id ?? "nil") status: \(updatedOrder.status)")
-                    
+                    AppLog.printItem(updatedOrder, label: "OrderDetail id: \(updatedOrder.id ?? "nil")")
                 } catch {
                     AppLog.order.error("❌ Failed to decode order: \(error.localizedDescription)")
                 }

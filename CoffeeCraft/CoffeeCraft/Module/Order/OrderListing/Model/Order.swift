@@ -35,6 +35,7 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
 struct CartItemData: Identifiable, Codable, Hashable {
     var id: String { "\(name)-\(price)-\(Date().timeIntervalSince1970)" }
     var name: String
+    var imageURL: String
     var selections: [String: String]?
     var extras: [String]?
     var price: Double
@@ -48,6 +49,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
     static func == (lhs: CartItemData, rhs: CartItemData) -> Bool {
         lhs.name == rhs.name &&
         lhs.price == rhs.price &&
+        lhs.imageURL == rhs.imageURL &&
         lhs.selections == rhs.selections &&
         lhs.extras == rhs.extras
     }

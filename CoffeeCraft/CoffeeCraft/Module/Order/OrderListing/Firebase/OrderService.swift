@@ -80,7 +80,8 @@ class OrderService: ObservableObject {
                     "items": cartItems.map { item in
                         var dict: [String: Any] = [
                             "name": item.product.name,
-                            "price": item.totalPrice
+                            "price": item.totalPrice,
+                            "imageURL": item.product.imageURL
                         ]
                         if !item.selections.isEmpty { dict["selections"] = item.selections }
                         if !item.extras.isEmpty { dict["extras"] = item.extras }
@@ -96,7 +97,7 @@ class OrderService: ObservableObject {
                     .setData(orderData)
 
                 AppLog.order.info("✅ Order saved successfully: #\(orderNumber)")
-
+                AppLog.printItem(orderData, label: "Order #\(orderNumber) Info", logger: AppLog.order)
                 try await MinimumLoadingTime(2.0).waitIfNeeded()
                 LoaderManager.shared.hideLoading()
 
