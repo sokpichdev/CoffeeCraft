@@ -14,7 +14,7 @@ class LoaderManager: ObservableObject {
     
     private init() {}
 
-    func showLoading(autoHide: Bool = false, delay: Double = 30) {
+    func showLoading(autoHide: Bool = true, delay: Double = 30) {
         isLoading = true
         
         if autoHide {
