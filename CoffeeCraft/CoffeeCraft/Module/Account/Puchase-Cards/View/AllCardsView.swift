@@ -155,26 +155,34 @@ struct AllCardsView: View {
             }
 //            isNavigateToCreateOwnCard = true
         } label: {
-            VStack(spacing: 16) {
-                Image(systemName: "creditcard")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.secondary)
-                    .opacity(0.6)
-
-                Text("Create your own card")
-                    .font(.title2)
-                    .foregroundColor(.primary)
-            }
-            .frame(width: cardWidth, height: cardWidth / (16 / 9))
-            .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .strokeBorder(
-                        style: StrokeStyle(lineWidth: 2, dash: [8])
-                    )
-                    .foregroundColor(.coffeeBrown.opacity(0.4))
-            )
-            .contentShape(Rectangle())
+            CardEmptyView()
         }
         .buttonStyle(.plain)
+    }
+}
+
+struct CardEmptyView: View {
+    var title: String = "Create your own card"
+    var cardWidth: CGFloat = UIScreen.main.bounds.width - 32
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "creditcard")
+                .font(.system(size: 60))
+                .foregroundStyle(.secondary)
+                .opacity(0.6)
+
+            Text(title)
+                .font(.title2)
+                .foregroundColor(.primary)
+        }
+        .frame(width: cardWidth, height: cardWidth / (16 / 9))
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(
+                    style: StrokeStyle(lineWidth: 2, dash: [8])
+                )
+                .foregroundColor(.coffeeBrown.opacity(0.4))
+        )
+        .contentShape(Rectangle())
     }
 }
