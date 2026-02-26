@@ -44,8 +44,12 @@ struct CartItemData: Identifiable, Codable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
         hasher.combine(price)
+        hasher.combine(imageURL)
+        hasher.combine(selections)
+        hasher.combine(extras)
     }
     
+    // This defines how two objects are considered equal
     static func == (lhs: CartItemData, rhs: CartItemData) -> Bool {
         lhs.name == rhs.name &&
         lhs.price == rhs.price &&
