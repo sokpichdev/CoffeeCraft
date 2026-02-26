@@ -9,9 +9,7 @@ import SwiftUI
 struct ForgotPasswordView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) var dismiss
-    @State private var isLoading = false
-    @State private var showAlert = false
-    @State private var alertMessage = ""
+    @State private var isSending = false
     
     var body: some View {
         NavigationView {
@@ -34,36 +32,21 @@ struct ForgotPasswordView: View {
                                      onTextChange: { _ in authVM.validateEmail() })
                     .padding(.horizontal)
 
-                    Button {
+                    CustomCoffeeButton(title: "Send Reset Link", isDisabled: isSending || authVM.email.isEmpty) {
                         Task {
-                            isLoading = true
+                            isSending = true
+                            LoaderManager.shared.showLoading()
                             do {
                                 try await authVM.sendPasswordReset(email: authVM.email)
-                                alertMessage = "Password reset link sent to \(authVM.email)."
-                                showAlert = true
+                                LoaderManager.shared.hideLoading()
+                                AlertManager.shared.showSuccess(message: "Password reset link sent to \(authVM.email).")
                             } catch {
-                                alertMessage = "Error: \(error.localizedDescription)"
-                                showAlert = true
+                                LoaderManager.shared.hideLoading()
+                                AlertManager.shared.showError(title: "Error", message: error.localizedDescription)
                             }
-                            isLoading = false
+                            isSending = false
                         }
-                    } label: {
-                        HStack {
-                            if isLoading {
-                                ProgressView().tint(.white)
-                            } else {
-                                Text("Send Reset Link").fontWeight(.semibold)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.brown.gradient)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
                     }
-                    .padding(.horizontal)
-                    .disabled(isLoading || authVM.email.isEmpty)
                 }
                 .padding(.top, 40)
             }
@@ -76,15 +59,6 @@ struct ForgotPasswordView: View {
                 ToolBarButton(placement: .topBarLeading, buttonType: .text("Close")) {
                     dismiss()
                 }
-            }
-            .alert("Password Reset", isPresented: $showAlert) {
-                Button("OK") {
-                    if alertMessage.contains("sent to") {
-                        dismiss()
-                    }
-                }
-            } message: {
-                Text(alertMessage)
             }
         }
     }

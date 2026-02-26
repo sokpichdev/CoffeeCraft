@@ -156,7 +156,7 @@ class AuthViewModel: ObservableObject {
         completion: @escaping (Result<User, Error>) -> Void
     ) async {
         AppLog.auth.debug("📝 signUp — attempting for email: \(email), role: \(role.rawValue)")
-        
+        LoaderManager.shared.showLoading(autoHide: true)
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             let uid = result.user.uid
@@ -177,14 +177,17 @@ class AuthViewModel: ObservableObject {
             AppLog.printItem(user, label: "Signed Up User", logger: AppLog.auth)
             
             completion(.success(user))
-            
+            LoaderManager.shared.hideLoading()
+            ToastManager.shared.show(message: "Signed Up Successfully", type: .success)
         } catch {
             AppLog.auth.error("❌ signUp — failed for email: \(email): \(error.localizedDescription)")
+            LoaderManager.shared.hideLoading()
+            AlertManager.shared.showError(title: "Sign Up Error", message: error.localizedDescription)
             completion(.failure(error))
         }
     }
     
-    func login(email: String, password: String) async {
+    func login(email: String, password: String) async -> Bool {
         AppLog.auth.debug("🔐 login — attempting for email: \(email)")
         
         do {
@@ -204,6 +207,7 @@ class AuthViewModel: ObservableObject {
 
             AppLog.auth.debug("✅ login — fully completed for uid: \(result.user.uid)")
             AlertManager.shared.showSuccess(message: "Logged in successfully")
+            return true
         } catch {
             AppLog.auth.error("❌ login — failed for email: \(email): \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
@@ -212,6 +216,7 @@ class AuthViewModel: ObservableObject {
                 title: "Login Error",
                 message: error.localizedDescription
             )
+            return false
         }
     }
 

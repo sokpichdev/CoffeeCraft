@@ -9,73 +9,121 @@ import SwiftUI
 struct LoginView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @State private var showForgotPassword = false
+    @State private var appeared = false
+    @Environment(\.dismiss) private var dismiss
+    private var isDisabled: Bool {
+        authVM.isLoading || authVM.email.isEmpty || authVM.password.isEmpty
+    }
 
     var body: some View {
-        VStack(spacing: 16) {
-            CustomTextField1(
-                text: $authVM.email,
-                placeHolder: "Email Address",
-                keyboardType: .emailAddress,
-                fieldType: .email,
-                isAutoCorrect: false,
-                isStarMark: true,
-                leadingIcon: .username,
-                trailingView: EmptyView(),
-                isValidate: $authVM.emailValidation.isValid,
-                validateText: authVM.emailValidation.message,
-                isAutoCapitalize: .none,
-                onTextChange: { _ in authVM.validateEmail() }
-            )
-            
-            CustomTextField1(
-                text: $authVM.password,
-                placeHolder: "Password",
-                fieldType: .password,
-                isAutoCorrect: false,
-                isStarMark: true,
-                leadingIcon: .lock,
-                trailingView: EmptyView(),
-                isValidate: $authVM.passwordValidation.isValid,
-                validateText: authVM.passwordValidation.message,
-                isAutoCapitalize: .none,
-                onTextChange: { _ in authVM.validatePassword() }
-            )
-            
+        VStack(spacing: 20) {
+
+            // MARK: - Fields
+            VStack(spacing: 12) {
+                CustomTextField1(
+                    text: $authVM.email,
+                    placeHolder: "Email Address",
+                    keyboardType: .emailAddress,
+                    fieldType: .email,
+                    isAutoCorrect: false,
+                    isStarMark: true,
+                    leadingIcon: .username,
+                    trailingView: EmptyView(),
+                    isValidate: $authVM.emailValidation.isValid,
+                    validateText: authVM.emailValidation.message,
+                    isAutoCapitalize: .none,
+                    onTextChange: { _ in authVM.validateEmail() }
+                )
+
+                CustomTextField1(
+                    text: $authVM.password,
+                    placeHolder: "Password",
+                    fieldType: .password,
+                    isAutoCorrect: false,
+                    isStarMark: true,
+                    leadingIcon: .lock,
+                    trailingView: EmptyView(),
+                    isValidate: $authVM.passwordValidation.isValid,
+                    validateText: authVM.passwordValidation.message,
+                    isAutoCapitalize: .none,
+                    onTextChange: { _ in authVM.validatePassword() }
+                )
+            }
+
+            // MARK: - Forgot Password
             HStack {
                 Spacer()
-                Button("Forgot Password?") {
+                Button {
                     showForgotPassword = true
+                } label: {
+                    Text("Forgot Password?")
+                        .font(.footnote)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.brown)
                 }
-                .font(.callout)
-                .foregroundStyle(Color.white)
             }
-            .padding(.top, 4)
-            
-            Button {
+            CustomCoffeeButton(title: "Log In", isDisabled: isDisabled) {
                 if authVM.validateLoginForm() {
                     Task {
-                        await authVM.login(email: authVM.email, password: authVM.password)
+                        let success = await authVM.login(email: authVM.email, password: authVM.password)
+                        if success {
+                            dismiss()
+                        }
                     }
                 }
-            } label: {
-                HStack {
-                    Text("Login").fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.brown.gradient)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .shadow(color: .brown.opacity(0.4), radius: 6, y: 4)
             }
-            .disabled(authVM.isLoading || authVM.email.isEmpty || authVM.password.isEmpty)
+
+            // MARK: - Divider
+            HStack(spacing: 10) {
+                Rectangle()
+                    .fill(Color(.separator).opacity(0.5))
+                    .frame(height: 1)
+                Text("or")
+                    .font(.caption)
+                    .foregroundStyle(Color(.tertiaryLabel))
+                    .fixedSize()
+                Rectangle()
+                    .fill(Color(.separator).opacity(0.5))
+                    .frame(height: 1)
+            }
+
+//            HStack(spacing: 10) {
+//                socialButton(icon: "apple.logo", label: "Apple")
+//                socialButton(icon: "globe", label: "Google")
+//            }
         }
-        .padding(24)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 8)
+        .padding(20)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(color: Color(.label).opacity(0.06), radius: 12, y: 4)
+        .offset(y: appeared ? 0 : 20)
+        .opacity(appeared ? 1 : 0)
+        .onAppear { appeared = true }
         .sheet(isPresented: $showForgotPassword) {
             ForgotPasswordView()
                 .environmentObject(authVM)
+        }
+    }
+
+    @ViewBuilder
+    private func socialButton(icon: String, label: String) -> some View {
+        Button {
+            // TODO: social sign-in
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .medium))
+                Text(label)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            .foregroundStyle(Color(.label))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
+            )
         }
     }
 }
