@@ -82,12 +82,6 @@ struct AllCardsView: View {
             // Re-apply access filter when active card changes
             snapshotCards = cardVM.cards.filter { $0.hasAccessForCurrentUser }
         }
-        // Hide shimmer and swap in real cards once refreshing finishes.
-        .onChange(of: cardVM.isRefreshing) { _, refreshing in
-            if !refreshing {
-                snapshotCards = cardVM.accessibleCards
-            }
-        }
         .onAppear {
             snapshotCards = cardVM.accessibleCards
         }

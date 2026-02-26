@@ -46,8 +46,7 @@ struct AccountView: View {
             }
         }
         .onAppear {
-            if let userId = UserSession.shared.userId {
-                // Always fetch on appear if user exists
+            if let userId = UserSession.shared.userId, cardVM.cards.isEmpty {
                 cardVM.setUser(userId: userId)
             }
         }
