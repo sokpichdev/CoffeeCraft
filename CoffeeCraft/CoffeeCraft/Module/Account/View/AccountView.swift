@@ -35,8 +35,7 @@ struct AccountView: View {
             .padding()
         }, onRefresh: {
             if let userId = UserSession.shared.userId {
-                // Always fetch on appear if user exists
-                cardVM.setUser(userId: userId)
+                cardVM.setUser(userId: userId, isRefresh: true)
             }
         })
         .background(Color(.systemGroupedBackground))
@@ -140,24 +139,20 @@ struct AccountView: View {
             
             VStack(alignment: .center) {
                 HStack(spacing: 0) {
+                    let cardWidth = (UIScreen.main.bounds.width * 0.8) - 32
                     if userSession.isLoggedIn {
-                        if cardVM.isLoading && cardVM.activeCard == nil {
-                            // Loading state
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 200)
+                        if cardVM.isRefreshing || (cardVM.isLoading && cardVM.activeCard == nil) {
+                            ShimmerView(cornerRadius: 10)
+                                .frame(width: cardWidth, height: cardWidth / (16 / 9))
                         } else if let activeCard = cardVM.activeCard {
                             // Single LoyaltyCard
-                            FlippableCardView(
-                                card: activeCard,  // Updated parameter
-                                width: (UIScreen.main.bounds.width * 0.8) - 32
-                            )
+                            FlippableCardView(card: activeCard, width: cardWidth)
                         }
                     } else {
                         PushLink {
                             AuthView().environmentObject(authVM)
                         } label: {
-                            CardEmptyView(title: "Log in to see your cards", cardWidth: (UIScreen.main.bounds.width * 0.8) - 32)
+                            CardEmptyView(title: "Log in to see your cards", cardWidth: cardWidth)
                         }
                     }
                     Spacer()

@@ -177,7 +177,7 @@ struct CardEmptyView: View {
         }
         .frame(width: cardWidth, height: cardWidth / (16 / 9))
         .background(
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 10)
                 .strokeBorder(
                     style: StrokeStyle(lineWidth: 2, dash: [8])
                 )
