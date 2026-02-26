@@ -42,7 +42,11 @@ struct OrderDetailView: View {
                     PricingCard(totalPrice: vm.order.totalPrice, items: vm.order.items)
                     
                     // Action Buttons
-                    ActionButtonsSection(order: vm.order, isActive: isActive)
+                    ActionButtonsSection(order: vm.order, isActive: isActive, isUpdating: vm.isUpdatingStatus) { newStatus in
+                        Task {
+                            await vm.updateOrderStatus(to: newStatus)
+                        }
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 20)
