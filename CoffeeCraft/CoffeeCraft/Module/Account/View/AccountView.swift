@@ -96,8 +96,12 @@ struct AccountView: View {
                     .foregroundStyle(.primary)
                 
                 PushLink {
-                    ProfileView()
-                        .environmentObject(authVM)
+                    if userSession.isLoggedIn {
+                        ProfileView()
+                            .environmentObject(authVM)
+                    } else {
+                        AuthView().environmentObject(authVM)
+                    }
                 } label: {
                     HStack(spacing: 6) {
                         Text("View Profile")
@@ -149,11 +153,15 @@ struct AccountView: View {
                         )
                     }
                     Spacer()
-                    Button(action: {
-                        push(AnyView(AllCardsView()
-                            .environmentObject(cardVM)
-                            .environmentObject(authVM)))
-                    }, label: {
+                    PushLink {
+                        if userSession.isLoggedIn {
+                            AllCardsView()
+                                .environmentObject(cardVM)
+                                .environmentObject(authVM)
+                        } else {
+                            AuthView().environmentObject(authVM)
+                        }
+                    } label: {
                         VStack {
                             ZStack {
                                 Circle()
@@ -169,11 +177,15 @@ struct AccountView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.primary)
                         }
-                    })
+                    }
                 }
                 HStack {
                     Button(action: {
-                        push(AnyView(EmptyView()))
+                        if userSession.isLoggedIn {
+                            AlertManager.shared.showWarning(title: "Coming Soon", message: "This Feature will be coming soon.")
+                        } else {
+                            push(AnyView(AuthView().environmentObject(authVM)))
+                        }
                     }, label: {
                         VStack {
                             ZStack {
@@ -191,7 +203,11 @@ struct AccountView: View {
                         }
                     })
                     Button(action: {
-                        isOpenAddCard = true
+                        if userSession.isLoggedIn {
+                            isOpenAddCard = true
+                        } else {
+                            push(AnyView(AuthView().environmentObject(authVM)))
+                        }
                     }, label: {
                         VStack {
                             ZStack {
@@ -217,14 +233,22 @@ struct AccountView: View {
     var personalSection: some View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
             RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: inboxVM.unreadCount) {
-                push(AnyView(InboxView().environmentObject(inboxVM)))
+                if userSession.isLoggedIn {
+                    push(AnyView(InboxView().environmentObject(inboxVM)))
+                } else {
+                    push(AnyView(AuthView().environmentObject(authVM)))
+                }
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
-                push(AnyView(FavoriteView()
-                    .environmentObject(favVM)))
+                if userSession.isLoggedIn {
+                    push(AnyView(FavoriteView()
+                        .environmentObject(favVM)))
+                } else {
+                    push(AnyView(AuthView().environmentObject(authVM)))
+                }
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Addresses", systemImage: "location.fill")
@@ -239,7 +263,11 @@ struct AccountView: View {
             RowInSectionView(title: "Stores", systemImage: "building.2.fill")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Announcements", systemImage: "megaphone.fill") {
-                push(AnyView(AnnouncementsListView().environmentObject(announcementVM)))
+                if userSession.isLoggedIn {
+                    push(AnyView(AnnouncementsListView().environmentObject(announcementVM)))
+                } else {
+                    push(AnyView(AuthView().environmentObject(authVM)))
+                }
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Rewards", systemImage: "gift.fill")
