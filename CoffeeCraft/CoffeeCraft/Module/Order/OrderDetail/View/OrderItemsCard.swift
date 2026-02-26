@@ -50,16 +50,7 @@ struct OrderItemRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
-                // Item icon/placeholder
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.coffeeBrown.opacity(0.2))
-                        .frame(width: 56, height: 56)
-                    
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.coffeeBrown)
-                }
+                AsyncImageCard(imageURL: item.imageURL, height: 56, width: 56, corner: 12)
                 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(item.name)
