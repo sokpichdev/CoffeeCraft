@@ -79,7 +79,7 @@ struct OrderItemRow: View {
                     
                     // Extras
                     if let extras = item.extras, !extras.isEmpty {
-                        HStack(spacing: 4) {
+                        HStack(alignment: .top, spacing: 4) {
                             Text("• Extras:")
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
