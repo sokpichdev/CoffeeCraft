@@ -14,6 +14,7 @@ class CardViewModel: ObservableObject {
     @Published var activeCardNumber: String = ""
     @Published var isActiveCardFetched: Bool = false
     @Published var isLoading = false
+    @Published var isRefreshing = false
     @Published var alert: AlertModel?
 
     private let db = Firestore.firestore()
@@ -29,10 +30,15 @@ class CardViewModel: ObservableObject {
         cards.filter { $0.hasAccessForCurrentUser }
     }
     
-    func setUser(userId: String) {
+    func setUser(userId: String, isRefresh: Bool = false) {
         currentUserId = userId
         LoyaltyCard.currentUserId = userId
-        AppLog.firestore.debug("👤 User set — uid: \(userId)")
+        AppLog.firestore.debug("👤 User set — uid: \(userId), isRefresh: \(isRefresh)")
+
+        if isRefresh {
+            isRefreshing = true
+        }
+
         setupListeners()
     }
     
@@ -40,6 +46,7 @@ class CardViewModel: ObservableObject {
         self.isActiveCardFetched = false
         guard let userId = currentUserId else {
             AppLog.firestore.warning("⚠️ setupListeners — no currentUserId, skipping")
+            isRefreshing = false
             return
         }
         
@@ -53,11 +60,13 @@ class CardViewModel: ObservableObject {
                 
                 if let error = error {
                     AppLog.firestore.error("❌ User document listener error: \(error.localizedDescription)")
+                    self.isRefreshing = false
                     return
                 }
                 
                 guard let data = snapshot?.data() else {
                     AppLog.firestore.warning("⚠️ User document snapshot has no data")
+                    self.isRefreshing = false
                     return
                 }
                 
@@ -77,7 +86,10 @@ class CardViewModel: ObservableObject {
                     AppLog.firestore.debug("📋 accessibleCards from user doc: \(accessibleCardNumbers)")
                     Task {
                         await self.fetchAccessibleCards(accessibleCardNumbers)
+                        self.isRefreshing = false
                     }
+                } else {
+                    self.isRefreshing = false
                 }
             }
         
@@ -99,7 +111,6 @@ class CardViewModel: ObservableObject {
             }
     }
 
-    // Fetch all cards from accessibleCards array
     private func fetchAccessibleCards(_ cardNumbers: [String]) async {
         AppLog.firestore.debug("🔍 Fetching \(cardNumbers.count) accessible card(s): \(cardNumbers)")
         
@@ -131,7 +142,7 @@ class CardViewModel: ObservableObject {
         
         AppLog.printList(finalCards, label: "Accessible Cards", logger: AppLog.firestore)
         
-        if failedCardNumbers.count > 0 {
+        if !failedCardNumbers.isEmpty {
             AppLog.firestore.error("❌ Failed card numbers: \(failedCardNumbers.joined(separator: ", "))")
             if let _ = UserSession.shared.currentUser {
                 AlertManager.shared.showError(message: "Failed to fetch cards: \(failedCardNumbers.joined(separator: ", "))")
@@ -155,7 +166,6 @@ class CardViewModel: ObservableObject {
             throw CardError.invalidCardNumber
         }
         
-        // Validate access
         if card.ownerId == userId {
             AppLog.firestore.debug("✅ addCard — owner access granted for: \(cleanCardNumber)")
         } else if card.sharedWith.contains(userId) {
@@ -170,7 +180,6 @@ class CardViewModel: ObservableObject {
         ])
         
         AppLog.firestore.debug("✅ Card added to accessibleCards: \(cleanCardNumber)")
-        
         await fetchSharedCards()
     }
     
@@ -201,7 +210,6 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    // input email return id
     func findUserId(byEmail email: String) async throws -> String? {
         AppLog.firestore.debug("🔍 findUserId — looking up email: \(email.lowercased())")
         
