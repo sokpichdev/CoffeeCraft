@@ -1,6 +1,7 @@
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
-import {onDocumentUpdated} from "firebase-functions/v2/firestore";
+import {onDocumentUpdated, onDocumentCreated}
+  from "firebase-functions/v2/firestore";
 import {sendAndSaveNotification} from "../lib/notifications";
 import {NotificationDoc} from "../lib/types";
 
@@ -9,7 +10,7 @@ import {NotificationDoc} from "../lib/types";
 // ─────────────────────────────────────────────────────────
 /**
  * Fires when any order document is updated.
- * Sends inbox notification + FCM push when status changes.
+ * Sends inbox notification + FCM push to the customer when status changes.
  */
 export const onOrderStatusChanged = onDocumentUpdated(
   "orders/{orderId}",
@@ -73,6 +74,88 @@ export const onOrderStatusChanged = onDocumentUpdated(
       });
     } catch (error) {
       logger.error("Error in onOrderStatusChanged:", error);
+      throw error;
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────
+// TRIGGER: New order placed
+// ─────────────────────────────────────────────────────────
+/**
+ * Fires when a new order document is created.
+ * Sends inbox notification + FCM push to all managers.
+ */
+export const onOrderPlaced = onDocumentCreated(
+  "orders/{orderId}",
+  async (event) => {
+    try {
+      const orderId = event.params.orderId;
+      const data = event.data?.data();
+
+      if (!data) {
+        logger.warn(`onOrderPlaced: no data for order ${orderId}`);
+        return;
+      }
+
+      const totalPrice: number = data.totalPrice ?? 0;
+      const itemCount: number = Array.isArray(data.items) ?
+        data.items.length : 0;
+      const orderNumber: number = data.orderId ?? orderId;
+
+      logger.info(
+        `New order placed: #${orderNumber}, ` +
+        `total: $${totalPrice.toFixed(2)}, items: ${itemCount}`
+      );
+
+      // 1. Fetch all managers
+      const managersSnapshot = await admin
+        .firestore()
+        .collection("users")
+        .where("role", "==", "manager")
+        .get();
+
+      if (managersSnapshot.empty) {
+        logger.warn("No managers found to notify.");
+        return;
+      }
+
+      logger.info(`📋 Found ${managersSnapshot.size} manager(s) to notify`);
+
+      // 2. Build the notification once — same content for every manager
+      const notification: NotificationDoc = {
+        type: "order_status",
+        title: "New Order Received ☕️",
+        message:
+        `A customer just placed order #${orderNumber} ` +
+        `with ${itemCount} item(s). Total: $${totalPrice.toFixed(2)}`,
+        isRead: false,
+        createdAt: admin.firestore.Timestamp.now(),
+        payload: {
+          orderId: String(orderId),
+          orderNumber: String(orderNumber),
+          totalPrice: String(totalPrice),
+          itemCount: String(itemCount),
+        },
+      };
+
+      const fcmData: Record<string, string> = {
+        orderId: String(orderId),
+        orderNumber: String(orderNumber),
+        totalPrice: String(totalPrice),
+        itemCount: String(itemCount),
+      };
+
+      // 3. Notify all managers in parallel
+      const notifyTasks = managersSnapshot.docs.map((managerDoc) =>
+        sendAndSaveNotification(managerDoc.id, notification, fcmData)
+      );
+
+      await Promise.all(notifyTasks);
+
+      logger.info(`✅ All managers notified for order #${orderNumber}`);
+    } catch (error) {
+      logger.error("Error in onOrderPlaced:", error);
       throw error;
     }
   }
