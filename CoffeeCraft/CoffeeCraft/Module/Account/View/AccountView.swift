@@ -140,17 +140,25 @@ struct AccountView: View {
             
             VStack(alignment: .center) {
                 HStack(spacing: 0) {
-                    if cardVM.isLoading && cardVM.activeCard == nil {
-                        // Loading state
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 200)
-                    } else if let activeCard = cardVM.activeCard {
-                        // Single LoyaltyCard
-                        FlippableCardView(
-                            card: activeCard,  // Updated parameter
-                            width: (UIScreen.main.bounds.width * 0.8) - 32
-                        )
+                    if userSession.isLoggedIn {
+                        if cardVM.isLoading && cardVM.activeCard == nil {
+                            // Loading state
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                        } else if let activeCard = cardVM.activeCard {
+                            // Single LoyaltyCard
+                            FlippableCardView(
+                                card: activeCard,  // Updated parameter
+                                width: (UIScreen.main.bounds.width * 0.8) - 32
+                            )
+                        }
+                    } else {
+                        PushLink {
+                            AuthView().environmentObject(authVM)
+                        } label: {
+                            CardEmptyView(title: "Log in to see your cards", cardWidth: (UIScreen.main.bounds.width * 0.8) - 32)
+                        }
                     }
                     Spacer()
                     PushLink {

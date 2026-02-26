@@ -25,9 +25,7 @@ struct CoffeeAlertView: View {
                     dismissAlert()
                 }
             
-            // Alert content
             VStack(spacing: 20) {
-                // Animated icon
                 ZStack {
                     Circle()
                         .fill(alertModel.type.color.opacity(0.15))
@@ -40,7 +38,6 @@ struct CoffeeAlertView: View {
                 }
                 .frame(height: 80)
                 
-                // Title
                 if alertModel.title != "" {
                     Text(alertModel.title)
                         .font(.title3)
@@ -48,7 +45,6 @@ struct CoffeeAlertView: View {
                         .foregroundColor(.primary)
                 }
                 
-                // Message
                 if alertModel.message != "" {
                     Text(alertModel.message)
                         .font(.subheadline)
@@ -57,7 +53,6 @@ struct CoffeeAlertView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 
-                // Action buttons
                 if alertModel.hasTwoButtons {
                     twoButtonLayout
                 } else {
