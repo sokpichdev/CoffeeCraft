@@ -14,6 +14,7 @@ class OrderDetailViewModel: ObservableObject {
     @Published var order: Order
     @Published var userName: String = "Loading..."
     @Published var isLoadingUser = true
+    @Published var isUpdatingStatus = false
     @Published var lastStatusUpdate: String?
     
     private let db = Firestore.firestore()
@@ -51,12 +52,11 @@ class OrderDetailViewModel: ObservableObject {
                     // Check if status changed
                     if updatedOrder.status != self.order.status {
                         self.lastStatusUpdate = updatedOrder.status
-                        ToastManager.shared.showTop(message: "Order is now \(order.status).", type: .success)
+                        ToastManager.shared.showTop(message: "Order is now \(updatedOrder.status).", type: .success)
                         
                         // Haptic feedback
                         let generator = UINotificationFeedbackGenerator()
                         generator.notificationOccurred(.success)
-
                     }
                     
                     self.order = updatedOrder
@@ -93,6 +93,28 @@ class OrderDetailViewModel: ObservableObject {
                     }
                 }
             }
+    }
+    
+    func updateOrderStatus(to status: String) async {
+        guard let orderId = order.id else { return }
+        
+        isUpdatingStatus = true
+        defer { isUpdatingStatus = false }
+        
+        do {
+            try await db.collection("orders")
+                .document(orderId)
+                .updateData(["status": status])
+            
+            AppLog.order.debug("✅ updateOrderStatus — \(orderId) → \(status)")
+            // The real-time listener will pick up the change and update `order` automatically
+        } catch {
+            AppLog.order.error("❌ updateOrderStatus error: \(error.localizedDescription)")
+            AlertManager.shared.showError(
+                title: "Error updating status",
+                message: error.localizedDescription
+            )
+        }
     }
     
     func stopListening() {
