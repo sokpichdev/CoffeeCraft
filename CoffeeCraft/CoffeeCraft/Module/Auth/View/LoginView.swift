@@ -8,7 +8,8 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var showForgotPassword = false
+    var onForgotPassword: () -> Void
+
     @State private var appeared = false
     @Environment(\.dismiss) private var dismiss
     private var isDisabled: Bool {
@@ -54,7 +55,7 @@ struct LoginView: View {
             HStack {
                 Spacer()
                 Button {
-                    showForgotPassword = true
+                    onForgotPassword()
                 } label: {
                     Text("Forgot Password?")
                         .font(.footnote)
@@ -98,10 +99,6 @@ struct LoginView: View {
         .offset(y: appeared ? 0 : 20)
         .opacity(appeared ? 1 : 0)
         .onAppear { appeared = true }
-        .sheet(isPresented: $showForgotPassword) {
-            ForgotPasswordView()
-                .environmentObject(authVM)
-        }
     }
 
     @ViewBuilder
