@@ -13,7 +13,6 @@ struct AllCardsView: View {
     
     @State private var isNavigateToPurchaseCard = false
     @State private var isNavigateToAddOtherCard = false
-//    @State private var isNavigateToCreateOwnCard = false
 
     @State private var showingShareSheet = false
     @State private var selectedCardForSharing: LoyaltyCard?
@@ -21,20 +20,23 @@ struct AllCardsView: View {
     @State private var snapshotCards: [LoyaltyCard] = []
     
     private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
+
+    private var isShowingShimmer: Bool {
+        (cardVM.isLoading && snapshotCards.isEmpty) || cardVM.isRefreshing
+    }
     
     var body: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 24) {
-                if cardVM.isLoading && snapshotCards.isEmpty {
-                    ProgressView()
-                        .frame(height: 300)
+                if isShowingShimmer {
+                    CardsShimmerView(width: cardWidth)
                 } else if snapshotCards.isEmpty {
-                    ownCardEmptyView
+                    ownCardEmpty
                 } else {
-                    // prevents refresh during swipe
                     ForEach(snapshotCards) { card in
                         cardRow(card: card)
                     }
+                    .transition(.opacity)
                 }
                 
                 Spacer()
@@ -43,7 +45,7 @@ struct AllCardsView: View {
             .padding()
         }, onRefresh: {
             if let userId = UserSession.shared.userId {
-                cardVM.setUser(userId: userId)
+                cardVM.setUser(userId: userId, isRefresh: true)
             }
         })
         .customNavigationBar("My Cards (\(snapshotCards.count))") {
@@ -80,6 +82,12 @@ struct AllCardsView: View {
             // Re-apply access filter when active card changes
             snapshotCards = cardVM.cards.filter { $0.hasAccessForCurrentUser }
         }
+        // Hide shimmer and swap in real cards once refreshing finishes.
+        .onChange(of: cardVM.isRefreshing) { _, refreshing in
+            if !refreshing {
+                snapshotCards = cardVM.accessibleCards
+            }
+        }
         .onAppear {
             snapshotCards = cardVM.accessibleCards
         }
@@ -100,22 +108,20 @@ struct AllCardsView: View {
                     if card.isOwnedByCurrentUser {
                         StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.coffeeLight)
                     } else {
-                        StatusBadgeView(icon: "person.2.fill",text: "Shared", textColor: .black, bgColor: Color.coffeeCream)
+                        StatusBadgeView(icon: "person.2.fill", text: "Shared", textColor: .black, bgColor: Color.coffeeCream)
                     }
-                    
                     Spacer()
                 }
                 .padding(.horizontal, 8)
                 .padding(.bottom, 8)
             }
 
-            FlippableCardView(card: card,  width: cardWidth)
+            FlippableCardView(card: card, width: cardWidth)
             
             // buttons
             HStack(spacing: 12) {
-                // Activate Button
                 if !card.isActiveForCurrentUser {
-                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle", bgColors: [Color.coffeeBrown, Color.coffeeLight]){
+                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle", bgColors: [Color.coffeeBrown, Color.coffeeLight]) {
                         Task {
                             try await cardVM.setActiveCard(card)
                         }
@@ -146,14 +152,13 @@ struct AllCardsView: View {
         )
     }
     
-    private var ownCardEmptyView: some View {
+    private var ownCardEmpty: some View {
         Button {
             if let userId = UserSession.shared.userId, let userName = UserSession.shared.userName {
                 Task {
                     try await cardVM.createInitialCard(userId: userId, userName: userName)
                 }
             }
-//            isNavigateToCreateOwnCard = true
         } label: {
             CardEmptyView()
         }
@@ -184,5 +189,39 @@ struct CardEmptyView: View {
                 .foregroundColor(.coffeeBrown.opacity(0.4))
         )
         .contentShape(Rectangle())
+    }
+}
+
+struct CardsShimmerView: View {
+    var width: CGFloat = UIScreen.main.bounds.width - 32
+    var body: some View {
+        ForEach(0..<2) { _ in
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    ShimmerView()
+                        .frame(width: 70, height: 30)
+                        .clipShape(Capsule())
+                    ShimmerView()
+                        .frame(width: 70, height: 30)
+                        .clipShape(Capsule())
+                    Spacer()
+                }
+                .padding(.horizontal, 8)
+                .padding(.bottom, 8)
+                
+                ShimmerView(cornerRadius: 16)
+                    .frame(width: width, height: width / (16 / 9))
+                
+                ShimmerView()
+                    .frame(width: width, height: 50)
+                    .clipShape(Capsule())
+                    .padding(.top, 12)
+            }
+            .padding(8)
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.coffeeBrown.opacity(0.06))
+            )
+        }
     }
 }
