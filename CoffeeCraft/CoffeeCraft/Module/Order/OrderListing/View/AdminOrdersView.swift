@@ -77,10 +77,9 @@ struct ActiveOrdersContent: View {
                 CustomRefreshScrollView({
                     LazyVStack(spacing: 8) {
                         ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { _, order in
-                            PushLink {
-                                OrderDetailView(order: order, isActive: true)
-                            } label: {
-                                OrderCardView(order: order) {
+                            OrderCardView(
+                                order: order,
+                                adminActions: {
                                     AnyView(
                                         HStack(spacing: 8) {
                                             Button("Start") {
@@ -89,14 +88,14 @@ struct ActiveOrdersContent: View {
                                                 }
                                             }
                                             .disabled(order.status != "Pending")
-
+                                            
                                             Button("Ready") {
                                                 Task {
                                                     let _ = await vm.updateOrderStatus(order: order, status: "Ready")
                                                 }
                                             }
                                             .disabled(order.status != "InProgress")
-
+                                            
                                             Button("Complete") {
                                                 Task {
                                                     let success = await vm.updateOrderStatus(order: order, status: "Completed")
@@ -107,11 +106,13 @@ struct ActiveOrdersContent: View {
                                             }
                                             .disabled(order.status != "Ready")
                                         }
-                                        .buttonStyle(.borderedProminent)
-                                        .tint(.brown)
-                                    )
+                                            .buttonStyle(.borderedProminent)
+                                            .tint(.brown)
+                                    )},
+                                onNavigate: {
+                                    push(AnyView(OrderDetailView(order: order)))
                                 }
-                            }
+                            )
                             .onAppear {
                                 guard vm.allOrders.count < vm.totalAllOrdersCount else { return }
                                 guard order.id == vm.allOrders.last?.id else { return }
@@ -181,12 +182,12 @@ struct MyOrdersContent: View {
                 CustomRefreshScrollView({
                     LazyVStack(spacing: 8) {
                         ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { _, order in
-                            PushLink {
-                                OrderDetailView(order: order)
-                            } label: {
-                                OrderCardView(order: order)
-//                                Text("Hi")
-                            }
+                            OrderCardView(
+                                order: order,
+                                onNavigate: {
+                                    push(AnyView(OrderDetailView(order: order)))
+                                }
+                            )
                             .onAppear {
                                 guard vm.myOrders.count < vm.totalMyOrdersCount else { return }
                                 guard order.id == vm.myOrders.last?.id else { return }

@@ -42,12 +42,12 @@ struct OrdersView: View {
                 CustomRefreshScrollView({
                     LazyVStack(spacing: 8) {
                         ForEach(Array(orderVM.orders.enumerated()), id: \.element.id) { _, order in
-                            PushLink(value: order) { order in
-                                OrderDetailView(order: order)
-                            } label: {
-                                OrderCardView(order: order)
-                                    .padding(.horizontal)
-                            }
+                            OrderCardView(
+                                order: order,
+                                onNavigate: {
+                                    push(AnyView(OrderDetailView(order: order)))
+                                }
+                            ).padding(.horizontal)
                             .onAppear {
                                 if orderVM.orders.count < orderVM.totalOrdersCount {
                                     if order.id == orderVM.orders.last?.id, !isPaginating {
