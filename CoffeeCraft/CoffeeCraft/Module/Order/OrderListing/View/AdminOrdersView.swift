@@ -110,7 +110,7 @@ struct ActiveOrdersContent: View {
                                             .tint(.brown)
                                     )},
                                 onNavigate: {
-                                    push(AnyView(OrderDetailView(order: order)))
+                                    push(AnyView(OrderDetailView(order: order, isActive: true)))
                                 }
                             )
                             .onAppear {
