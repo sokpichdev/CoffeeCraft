@@ -12,12 +12,12 @@ struct OrderCardView: View {
     var onNavigate: (() -> Void)? = nil
     
     @State private var isExpanded: Bool = false
+    @Namespace private var animationNamespace
     
     // Pre-compute values to avoid recalculation during body
     private let itemCount: Int
     private let formattedOrderNumber: String
     private let statusColorValue: Color
-    private let statusIcon: String
     
     init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil) {
         self.order = order
@@ -28,13 +28,15 @@ struct OrderCardView: View {
         self.itemCount = order.items.count
         self.formattedOrderNumber = String(format: "%04d", order.orderId)
         self.statusColorValue = OrderCardView.computeStatusColor(order.status)
-        self.statusIcon = OrderCardView.computeStatusIcon(order.status)
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerSection
+            
+            // Preview section with animated transition
             itemsPreviewSection
+            
             if isExpanded {
                 detailedItemsSection
                     .transition(.opacity.animation(.easeInOut(duration: 0.2)))
@@ -44,10 +46,8 @@ struct OrderCardView: View {
             footerSection
             
             if adminActions != nil {
-                Divider()
-                    .padding(.horizontal)
-                adminActions?()
-                    .padding()
+                Divider().padding(.horizontal)
+                adminActions?().padding()
             }
         }
         .background(
@@ -83,10 +83,7 @@ struct OrderCardView: View {
         .padding()
         .background(
             LinearGradient(
-                colors: [
-                    statusColorValue.opacity(0.15),
-                    Color.clear
-                ],
+                colors: [statusColorValue.opacity(0.15), Color.clear],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -95,31 +92,39 @@ struct OrderCardView: View {
     
     private var itemsPreviewSection: some View {
         HStack(spacing: 12) {
-            // Leftmost (index 0) is behind, rightmost is in front
+            // Stacked thumbnails area - shows either stack or expands into spacer
             ZStack(alignment: .leading) {
-                ForEach(Array(order.items.prefix(3).enumerated()), id: \.offset) { index, item in
-                    CachedThumbnail(url: item.imageURL)
+                if !isExpanded {
+                    // Show stacked thumbnails when collapsed
+                    ForEach(Array(order.items.prefix(3).enumerated()), id: \.offset) { index, item in
+                        FlyingThumbnail(
+                            url: item.imageURL,
+                            index: index,
+                            namespace: animationNamespace
+                        )
                         .offset(x: CGFloat(index * 20))
                         .zIndex(Double(index))
-                }
-                
-                if itemCount > 3 {
-                    Text("+\(itemCount - 3)")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                        .background(Circle().fill(Color.coffeeBrown))
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                        .offset(x: CGFloat(min(itemCount, 3)) * 20)
-                        .zIndex(3) // Highest zIndex to appear on top of all
+                    }
+                    
+                    if itemCount > 3 {
+                        Text("+\(itemCount - 3)")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(width: 32, height: 32)
+                            .background(Circle().fill(Color.coffeeBrown))
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                            .offset(x: CGFloat(min(itemCount, 3)) * 20)
+                            .zIndex(3)
+                    }
                 }
             }
+            .opacity(isExpanded ? 0 : 1)
             
             Spacer()
             
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                     isExpanded.toggle()
                 }
             } label: {
@@ -131,7 +136,6 @@ struct OrderCardView: View {
                     Image(systemName: "chevron.down")
                         .font(.system(size: 12, weight: .semibold))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
                 }
                 .foregroundColor(.coffeeBrown)
                 .padding(.horizontal, 12)
@@ -146,7 +150,7 @@ struct OrderCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(order.items.enumerated()), id: \.offset) { index, item in
                 HStack(alignment: .top, spacing: 12) {
-                    CachedThumbnail(url: item.imageURL, size: 44, cornerRadius: 8)
+                    FlyingThumbnail(url: item.imageURL, index: index, namespace: animationNamespace, size: 44,cornerRadius: 8)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.name)
@@ -207,7 +211,6 @@ struct OrderCardView: View {
         .padding()
     }
     
-    // MARK: - Static Methods (avoid recreating closures)
     private static func computeStatusColor(_ status: String) -> Color {
         switch status {
         case "Pending": return .orange
@@ -217,19 +220,31 @@ struct OrderCardView: View {
         default: return .coffeeBrown
         }
     }
+}
+
+// MARK: - Flying Thumbnail with Matched Geometry
+struct FlyingThumbnail: View {
+    let url: String
+    let index: Int
+    var namespace: Namespace.ID
     
-    private static func computeStatusIcon(_ status: String) -> String {
-        switch status {
-        case "Pending": return "clock.fill"
-        case "In Progress", "InProgress": return "hammer.fill"
-        case "Ready": return "bell.fill"
-        case "Done", "Completed": return "checkmark.circle.fill"
-        default: return "cup.and.saucer.fill"
-        }
+    var size: CGFloat = 32
+    var cornerRadius: CGFloat = 16
+    
+    private var geometryId: String { "thumbnail-\(url)-\(index)" }
+    
+    var body: some View {
+        CachedThumbnail(url: url, size: size, cornerRadius: cornerRadius)
+            .matchedGeometryEffect(
+                id: geometryId,
+                in: namespace,
+                properties: .frame,
+                anchor: .center,
+                isSource: true
+            )
     }
 }
 
-// MARK: - Optimized Thumbnail Component
 struct CachedThumbnail: View {
     let url: String
     var size: CGFloat = 32
