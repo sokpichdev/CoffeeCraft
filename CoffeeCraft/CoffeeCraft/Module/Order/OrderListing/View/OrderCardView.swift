@@ -18,6 +18,7 @@ struct OrderCardView: View {
     private let itemCount: Int
     private let formattedOrderNumber: String
     private let statusColorValue: Color
+    private let overflowCount: Int
     
     init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil) {
         self.order = order
@@ -28,18 +29,16 @@ struct OrderCardView: View {
         self.itemCount = order.items.count
         self.formattedOrderNumber = String(format: "%04d", order.orderId)
         self.statusColorValue = OrderCardView.computeStatusColor(order.status)
+        self.overflowCount = max(0, order.items.count - 3)
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerSection
-            
-            // Preview section with animated transition
             itemsPreviewSection
             
             if isExpanded {
                 detailedItemsSection
-                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
             }
             
             Divider().padding(.horizontal)
@@ -106,16 +105,23 @@ struct OrderCardView: View {
                         .zIndex(Double(index))
                     }
                     
-                    if itemCount > 3 {
-                        Text("+\(itemCount - 3)")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .frame(width: 32, height: 32)
-                            .background(Circle().fill(Color.coffeeBrown))
-                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                            .offset(x: CGFloat(min(itemCount, 3)) * 20)
-                            .zIndex(3)
+                    // Overflow items stacked at badge position (invisible but for matched geometry)
+                    if overflowCount > 0 {
+                        ForEach(Array(order.items.dropFirst(3).enumerated()), id: \.offset) { index, item in
+                            FlyingThumbnail(
+                                url: item.imageURL,
+                                index: index + 3, // Real index
+                                namespace: animationNamespace
+                            )
+                            .offset(x: 60, y: CGFloat(index * 2)) // Slight offset to prevent z-fighting
+                            .zIndex(Double(3 + index))
+                            .opacity(0) // Invisible in preview
+                        }
+                        
+                        // Count badge on top
+                        OverflowBadge(count: overflowCount)
+                            .offset(x: 60)
+                            .zIndex(100)
                     }
                 }
             }
@@ -124,7 +130,7 @@ struct OrderCardView: View {
             Spacer()
             
             Button {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                     isExpanded.toggle()
                 }
             } label: {
@@ -149,42 +155,13 @@ struct OrderCardView: View {
     private var detailedItemsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(order.items.enumerated()), id: \.offset) { index, item in
-                HStack(alignment: .top, spacing: 12) {
-                    FlyingThumbnail(url: item.imageURL, index: index, namespace: animationNamespace, size: 44,cornerRadius: 8)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(item.name)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .lineLimit(1)
-                        
-                        if let selections = item.selections, !selections.isEmpty {
-                            Text(selections.map { $0.value }.joined(separator: " • "))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
-                        
-                        if let extras = item.extras, !extras.isEmpty {
-                            Text(extras.joined(separator: ", "))
-                                .font(.caption2)
-                                .foregroundColor(.coffeeBrown.opacity(0.8))
-                                .lineLimit(1)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    Text("$\(item.price, specifier: "%.2f")")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                
-                if index < order.items.count - 1 {
-                    Divider().padding(.horizontal)
-                }
+                DetailItemRow(
+                    item: item,
+                    index: index,
+                    isExpanded: isExpanded,
+                    namespace: animationNamespace,
+                    totalItems: itemCount
+                )
             }
         }
         .background(Color.gray.opacity(0.03))
@@ -222,7 +199,77 @@ struct OrderCardView: View {
     }
 }
 
-// MARK: - Flying Thumbnail with Matched Geometry
+// MARK: - Detail Item Row (all items use matched geometry)
+struct DetailItemRow: View {
+    let item: CartItemData
+    let index: Int
+    let isExpanded: Bool
+    var namespace: Namespace.ID
+    let totalItems: Int
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // ALL items use matched geometry - same animation for everyone
+            FlyingThumbnail(
+                url: item.imageURL,
+                index: index,
+                namespace: namespace,
+                size: 44,
+                cornerRadius: 8
+            )
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.name)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .lineLimit(1)
+                
+                if let selections = item.selections, !selections.isEmpty {
+                    Text(selections.map { $0.value }.joined(separator: " • "))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                
+                if let extras = item.extras, !extras.isEmpty {
+                    Text(extras.joined(separator: ", "))
+                        .font(.caption2)
+                        .foregroundColor(.coffeeBrown.opacity(0.8))
+                        .lineLimit(1)
+                }
+            }
+            
+            Spacer()
+            
+            Text("$\(item.price, specifier: "%.2f")")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        
+        if index < totalItems - 1 {
+            Divider().padding(.horizontal)
+        }
+    }
+}
+
+// MARK: - Overflow Badge
+struct OverflowBadge: View {
+    let count: Int
+    
+    var body: some View {
+        Text("+\(count)")
+            .font(.caption2)
+            .fontWeight(.bold)
+            .foregroundColor(.white)
+            .frame(width: 32, height: 32)
+            .background(Circle().fill(Color.coffeeBrown))
+            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+    }
+}
+
+// MARK: - Flying Thumbnail (unified for all items)
 struct FlyingThumbnail: View {
     let url: String
     let index: Int
