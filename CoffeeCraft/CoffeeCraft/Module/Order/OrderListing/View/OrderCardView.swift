@@ -11,6 +11,9 @@ struct OrderCardView: View {
     var adminActions: (() -> AnyView)? = nil
     var onNavigate: (() -> Void)? = nil
     
+    /// Number of items to show in the preview stack before the +N badge
+    private let previewDisplayCount: Int = 5
+    
     @State private var isExpanded: Bool = false
     @Namespace private var animationNamespace
     
@@ -29,7 +32,10 @@ struct OrderCardView: View {
         self.itemCount = order.items.count
         self.formattedOrderNumber = String(format: "%04d", order.orderId)
         self.statusColorValue = OrderCardView.computeStatusColor(order.status)
-        self.overflowCount = max(0, order.items.count - 3)
+        
+        // Calculate based on previewDisplayCount
+        let previewCount = 5 // Must match previewDisplayCount above
+        self.overflowCount = max(0, order.items.count - previewCount)
     }
     
     var body: some View {
@@ -94,8 +100,8 @@ struct OrderCardView: View {
             // Stacked thumbnails area - shows either stack or expands into spacer
             ZStack(alignment: .leading) {
                 if !isExpanded {
-                    // Show stacked thumbnails when collapsed
-                    ForEach(Array(order.items.prefix(3).enumerated()), id: \.offset) { index, item in
+                    // Visible preview items (first N items)
+                    ForEach(Array(order.items.prefix(previewDisplayCount).enumerated()), id: \.offset) { index, item in
                         FlyingThumbnail(
                             url: item.imageURL,
                             index: index,
@@ -107,20 +113,25 @@ struct OrderCardView: View {
                     
                     // Overflow items stacked at badge position (invisible but for matched geometry)
                     if overflowCount > 0 {
-                        ForEach(Array(order.items.dropFirst(3).enumerated()), id: \.offset) { index, item in
+                        let overflowItems = Array(order.items.dropFirst(previewDisplayCount).enumerated())
+                        ForEach(overflowItems, id: \.offset) { index, item in
+                            let actualIndex = index + previewDisplayCount
                             FlyingThumbnail(
                                 url: item.imageURL,
-                                index: index + 3, // Real index
+                                index: actualIndex,
                                 namespace: animationNamespace
                             )
-                            .offset(x: 60, y: CGFloat(index * 2)) // Slight offset to prevent z-fighting
-                            .zIndex(Double(3 + index))
-                            .opacity(0) // Invisible in preview
+                            .offset(
+                                x: CGFloat(previewDisplayCount - 1) * 20, // Position at last visible item
+                                y: CGFloat(index * 2) // Slight vertical offset to prevent z-fighting
+                            )
+                            .zIndex(Double(previewDisplayCount + index))
+                            .opacity(0) // Invisible but participates in animation
                         }
                         
                         // Count badge on top
                         OverflowBadge(count: overflowCount)
-                            .offset(x: 60)
+                            .offset(x: CGFloat(previewDisplayCount - 1) * 20)
                             .zIndex(100)
                     }
                 }
@@ -130,7 +141,7 @@ struct OrderCardView: View {
             Spacer()
             
             Button {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                withAnimation(.easeInOut(duration: 0.3)) {
                     isExpanded.toggle()
                 }
             } label: {
