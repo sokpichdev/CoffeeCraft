@@ -13,8 +13,23 @@ struct OrderCardView: View {
     
     @State private var isExpanded: Bool = false
     
-    private var itemCount: Int { order.items.count }
-    private var formattedOrderNumber: String { String(format: "%04d", order.orderId) }
+    // Pre-compute values to avoid recalculation during body
+    private let itemCount: Int
+    private let formattedOrderNumber: String
+    private let statusColorValue: Color
+    private let statusIcon: String
+    
+    init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil) {
+        self.order = order
+        self.adminActions = adminActions
+        self.onNavigate = onNavigate
+        
+        // Pre-compute expensive operations
+        self.itemCount = order.items.count
+        self.formattedOrderNumber = String(format: "%04d", order.orderId)
+        self.statusColorValue = OrderCardView.computeStatusColor(order.status)
+        self.statusIcon = OrderCardView.computeStatusIcon(order.status)
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -22,19 +37,16 @@ struct OrderCardView: View {
             itemsPreviewSection
             if isExpanded {
                 detailedItemsSection
-                    .transition(.asymmetric(
-                        insertion: .opacity.combined(with: .move(edge: .top)),
-                        removal: .opacity
-                    ))
+                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
             }
             
             Divider().padding(.horizontal)
             footerSection
             
-            if let adminActions = adminActions {
+            if adminActions != nil {
                 Divider()
                     .padding(.horizontal)
-                adminActions()
+                adminActions?()
                     .padding()
             }
         }
@@ -42,19 +54,22 @@ struct OrderCardView: View {
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(uiColor: .tertiarySystemBackground))
         )
-        .shadow(color: Color.primary.opacity(0.05), radius: 6, x: 0, y: 3)
-        .contentShape(Rectangle()) // Main tap navigates to detail
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .contentShape(Rectangle())
         .onTapGesture {
             onNavigate?()
         }
+        // Prevent animation from affecting scroll performance
+        .drawingGroup(opaque: false)
     }
     
     private var headerSection: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Order #\(formattedOrderNumber)")
-                    .font(.callout).fontWeight(.bold).fontDesign(.rounded)
-                    .foregroundColor(.primary)
+                    .font(.callout)
+                    .fontWeight(.bold)
+                    .fontDesign(.rounded)
                 
                 Text(order.timestamp.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption)
@@ -69,7 +84,7 @@ struct OrderCardView: View {
         .background(
             LinearGradient(
                 colors: [
-                    statusColor(order.status).opacity(0.15),
+                    statusColorValue.opacity(0.15),
                     Color.clear
                 ],
                 startPoint: .topLeading,
@@ -78,18 +93,14 @@ struct OrderCardView: View {
         )
     }
     
-    // MARK: - Items Preview Section
     private var itemsPreviewSection: some View {
         HStack(spacing: 12) {
-            // Item Thumbnails Stack
-            HStack(spacing: -8) {
-                ForEach(Array(order.items.prefix(3).enumerated()), id: \.element.id) { index, item in
-                    AsyncImageCard(imageURL: item.imageURL, isFill: true, height: 32, width: 32, corner: 16)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white, lineWidth: 2)
-                    )
-                    .clipShape(Circle())
+            // Leftmost (index 0) is behind, rightmost is in front
+            ZStack(alignment: .leading) {
+                ForEach(Array(order.items.prefix(3).enumerated()), id: \.offset) { index, item in
+                    CachedThumbnail(url: item.imageURL)
+                        .offset(x: CGFloat(index * 20))
+                        .zIndex(Double(index))
                 }
                 
                 if itemCount > 3 {
@@ -98,21 +109,17 @@ struct OrderCardView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .frame(width: 32, height: 32)
-                        .background(
-                            Circle()
-                                .fill(Color.coffeeBrown)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(Color.white, lineWidth: 2)
-                        )
+                        .background(Circle().fill(Color.coffeeBrown))
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .offset(x: CGFloat(min(itemCount, 3)) * 20)
+                        .zIndex(3) // Highest zIndex to appear on top of all
                 }
             }
             
             Spacer()
             
             Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                withAnimation(.easeInOut(duration: 0.2)) {
                     isExpanded.toggle()
                 }
             } label: {
@@ -124,73 +131,61 @@ struct OrderCardView: View {
                     Image(systemName: "chevron.down")
                         .font(.system(size: 12, weight: .semibold))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
                 }
                 .foregroundColor(.coffeeBrown)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(
-                    Capsule()
-                        .fill(Color.coffeeBrown.opacity(0.1))
-                )
+                .background(Capsule().fill(Color.coffeeBrown.opacity(0.1)))
             }
             .buttonStyle(.plain)
         }
         .padding()
     }
-    
-    // MARK: - Detailed Items Section (Expandable)
     private var detailedItemsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(order.items.enumerated()), id: \.element.id) { index, item in
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .top, spacing: 12) {
-                        AsyncImageCard(imageURL: item.imageURL, height: 44, width: 44, corner: 8)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(item.name)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .lineLimit(1)
-                            
-                            // Selections
-                            if let selections = item.selections, !selections.isEmpty {
-                                Text(selections.map { "\($0.value)" }.joined(separator: " • "))
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
-                            }
-                            
-                            // Extras
-                            if let extras = item.extras, !extras.isEmpty {
-                                Text(extras.joined(separator: ", "))
-                                    .font(.caption2)
-                                    .foregroundColor(.coffeeBrown.opacity(0.8))
-                                    .lineLimit(1)
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        Text("$\(item.price, specifier: "%.2f")")
+            ForEach(Array(order.items.enumerated()), id: \.offset) { index, item in
+                HStack(alignment: .top, spacing: 12) {
+                    CachedThumbnail(url: item.imageURL, size: 44, cornerRadius: 8)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.name)
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                        
+                        if let selections = item.selections, !selections.isEmpty {
+                            Text(selections.map { $0.value }.joined(separator: " • "))
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
+                        
+                        if let extras = item.extras, !extras.isEmpty {
+                            Text(extras.joined(separator: ", "))
+                                .font(.caption2)
+                                .foregroundColor(.coffeeBrown.opacity(0.8))
+                                .lineLimit(1)
+                        }
                     }
                     
-                    if index < order.items.count - 1 {
-                        Divider()
-                            .padding(.vertical, 8)
-                    }
+                    Spacer()
+                    
+                    Text("$\(item.price, specifier: "%.2f")")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                 }
                 .padding(.horizontal)
-                .padding(.vertical, 4)
+                .padding(.vertical, 8)
+                
+                if index < order.items.count - 1 {
+                    Divider().padding(.horizontal)
+                }
             }
         }
-        .padding(.vertical, 8)
         .background(Color.gray.opacity(0.03))
     }
     
-    // MARK: - Footer Section
     private var footerSection: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
@@ -212,34 +207,48 @@ struct OrderCardView: View {
         .padding()
     }
     
-    // MARK: - Helper Methods
-    func statusColor(_ status: String) -> Color {
+    // MARK: - Static Methods (avoid recreating closures)
+    private static func computeStatusColor(_ status: String) -> Color {
         switch status {
-        case "Pending":
-            return .orange
-        case "In Progress", "InProgress":
-            return .blue
-        case "Ready":
-            return .coffeeOliveGreen
-        case "Done", "Completed":
-            return .coffeeBrown
-        default:
-            return .coffeeBrown
+        case "Pending": return .orange
+        case "In Progress", "InProgress": return .blue
+        case "Ready": return .coffeeOliveGreen
+        case "Done", "Completed": return .coffeeBrown
+        default: return .coffeeBrown
         }
     }
     
-    func iconForStatus(_ status: String) -> String {
+    private static func computeStatusIcon(_ status: String) -> String {
         switch status {
-        case "Pending":
-            return "clock.fill"
-        case "In Progress", "InProgress":
-            return "hammer.fill"
-        case "Ready":
-            return "bell.fill"
-        case "Done", "Completed":
-            return "checkmark.circle.fill"
-        default:
-            return "cup.and.saucer.fill"
+        case "Pending": return "clock.fill"
+        case "In Progress", "InProgress": return "hammer.fill"
+        case "Ready": return "bell.fill"
+        case "Done", "Completed": return "checkmark.circle.fill"
+        default: return "cup.and.saucer.fill"
         }
+    }
+}
+
+// MARK: - Optimized Thumbnail Component
+struct CachedThumbnail: View {
+    let url: String
+    var size: CGFloat = 32
+    var cornerRadius: CGFloat = 16
+    
+    var body: some View {
+        AsyncImageCard(
+            imageURL: url,
+            isFill: true,
+            height: size,
+            width: size,
+            corner: cornerRadius
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(Color.white, lineWidth: 2)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        // Prevent image loading from blocking main thread
+        .id(url)
     }
 }
