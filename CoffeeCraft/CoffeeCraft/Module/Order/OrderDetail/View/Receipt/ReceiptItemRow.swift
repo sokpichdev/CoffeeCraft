@@ -20,20 +20,37 @@ struct ReceiptItemRow: View {
                         .font(.subheadline).fontDesign(.serif)
                         .foregroundColor(Color.coffeeDarkBrown)
 
-                    if let selections = item.selections {
-                        let parts = selections.map { "\($0.key): \($0.value)" }.joined(separator: " · ")
-                        Text(parts)
-                            .font(.caption2).fontDesign(.monospaced)
-                            .foregroundColor(.secondary)
+                    if let selections = item.selections, !selections.isEmpty {
+                        VStack(alignment: .leading, spacing: 2) {
+                            ForEach(selections.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                                HStack(alignment: .top, spacing: 4) {
+                                    Text("\(key):")
+                                        .font(.caption2)
+                                        .fontWeight(.semibold)
+                                        .fontDesign(.monospaced)
+                                        .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
+
+                                    Text(value)
+                                        .font(.caption2)
+                                        .fontDesign(.monospaced)
+                                        .foregroundColor(Color.coffeeDarkBrown.opacity(0.7))
+                                }
+                            }
+                        }
                     }
 
                     if let extras = item.extras, !extras.isEmpty {
-                            Text("Extras: ")
-                                .font(.caption).fontDesign(.monospaced)
-                                .foregroundColor(.secondary) +
-                            Text(extras.joined(separator: " · "))
-                                .font(.caption2).fontDesign(.monospaced)
-                                .foregroundColor(Color.coffeeDarkBrown.opacity(0.6))
+                        HStack(alignment: .top, spacing: 4) {
+                            Text("Extras:")
+                                .font(.caption2)
+                                .fontDesign(.monospaced)
+                                .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
+
+                            Text(extras.joined(separator: ", "))
+                                .font(.caption2)
+                                .fontDesign(.monospaced)
+                                .foregroundColor(Color.coffeeDarkBrown.opacity(0.7))
+                        }
                     }
                 }
                 Spacer()
