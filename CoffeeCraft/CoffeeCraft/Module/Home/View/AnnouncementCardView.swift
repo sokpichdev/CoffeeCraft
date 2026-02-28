@@ -8,16 +8,24 @@ import SwiftUI
 
 struct AnnouncementCardView: View {
     let announcement: Announcement
-    
+
+    private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
+    private var cardImageHeight: CGFloat { cardWidth * 9 / 16 }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            AsyncImageCard(imageURL: announcement.imageName ?? "", height: 200, width: UIScreen.main.bounds.width - 32, corner: 0)
-            
+            AsyncImageCard(
+                imageURL: announcement.imageName ?? "",
+                height: cardImageHeight,
+                width: cardWidth,
+                corner: 0
+            )
+
             VStack(alignment: .leading, spacing: 5) {
                 Text(announcement.title ?? "")
                     .font(.headline)
                     .foregroundColor(.primary)
-                
+
                 Text(announcement.description ?? "")
                     .font(.subheadline)
                     .foregroundColor(.gray)
@@ -34,13 +42,17 @@ struct AnnouncementCardView: View {
 }
 
 struct AnnouncementCardShimmerView: View {
-    
+
+    private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
+    private var cardImageHeight: CGFloat { cardWidth * 9 / 16 }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ShimmerView(cornerRadius: 0).frame(width: UIScreen.main.bounds.width - 32, height: 200)
+            ShimmerView(cornerRadius: 0)
+                .frame(width: cardWidth, height: cardImageHeight)
+
             VStack(alignment: .leading, spacing: 5) {
-                ShimmerView().frame(width: UIScreen.main.bounds.width * 0.4, height: 17)
-                
+                ShimmerView().frame(width: cardWidth * 0.4, height: 17)
                 ShimmerView().frame(height: 15)
             }
             .padding(.horizontal, 5)

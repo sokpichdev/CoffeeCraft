@@ -19,83 +19,22 @@ struct HomeView: View {
     }
     var body: some View {
         CustomRefreshScrollView(loaderOffset: 20, {
-            VStack(alignment: .leading, spacing: 10) {
-                if announcementVM.isLoading {
-                    ShimmerView(cornerRadius: 0).frame(height: 250)
-                } else {
-                    headerBannerView
-                }
-                VStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 0) {
 
-                    Text("Good Morning, \(UserSession.shared.userName ?? "User")! ☀️")
-                        .font(.app(.LibreBaskerville, weight: .bold, size: 22))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
+                bannerSection
+                    .padding(.bottom, 20)
 
-                    HStack(spacing: 20) {
-                        PickUpButton(onClick: { selectedTab = .menu })
-                        PickUpButton(title: "Delivery") {
-                            AlertManager.shared.showWarning(title: "Stay Tuned", message: "This Feature is Coming Soon.")
-                        }
-                    }
+                greetingCard
                     .padding(.horizontal)
+                    .padding(.bottom, 20)
 
-                    VStack(spacing: 6) {
-                        HStack {
-                            Text("Announcements").font(.headline)
-                            Spacer()
-                        }
-                        
-                        if announcementVM.isLoading {
-                            VStack {
-                                ForEach(0..<3) { _ in
-                                    AnnouncementCardShimmerView()
-                                }
-                            }
-                        } else if announcementVM.announcements.isEmpty {
-                            Text("No announcements yet")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 40)
-                        } else {
-                            VStack {
-                                ForEach(announcementVM.announcements.prefix(3)) { ann in
-                                    PushLink {
-                                        if UserSession.shared.isLoggedIn {
-                                            AnnouncementDetailView(announcement: ann)
-                                        } else {
-                                            AuthView().environmentObject(AuthViewModel())
-                                        }
-                                    } label: {
-                                        AnnouncementCardView(announcement: ann)
-                                    }
-                                }
-                                
-                                PushLink {
-                                    if UserSession.shared.isLoggedIn {
-                                        AnnouncementsListView().environmentObject(announcementVM)
-                                    } else {
-                                        AuthView()
-                                            .environmentObject(AuthViewModel())
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text("See All")
-                                            .font(.headline)
-                                        Image(systemName: "arrow.right")
-                                            .font(.headline)
-                                            .foregroundColor(Color.brown)
-                                    }
-                                    .contentShape(Rectangle()) // ← fixes Spacer hit-test transparency
-                                }
-                            }
-                        }
-                    }
+                quickOrderSection
                     .padding(.horizontal)
-                }
-                
-                Spacer(minLength: 30)
+                    .padding(.bottom, 24)
+
+                announcementsSection
+                    .padding(.horizontal)
+                    .padding(.bottom, 30)
             }
         }, onRefresh: {
             Task {
@@ -103,6 +42,7 @@ struct HomeView: View {
             }
         })
         .edgesIgnoringSafeArea(.top)
+        .background(Color(.systemGroupedBackground))
         .onAppear {
             if !announcementVM.isAnnouncementsFetched {
                 Task {
@@ -111,71 +51,241 @@ struct HomeView: View {
             }
         }
     }
-    
-    var headerBannerView: some View {
+
+    private var bannerSection: some View {
         Group {
-            let height: CGFloat = 250
-            
-            if bannerImages.count > 0 {
-                InfiniteCarousel(
-                    items: bannerImages,
-                    height: height,
-                    width: UIScreen.main.bounds.width,
-                    currentIndex: $currentIndex
-                ) { urlString in
-                    AsyncImageCard(
-                        imageURL: urlString,
-                        height: height,
-                        width: UIScreen.main.bounds.width,
-                        corner: 0
-                    )
-                }
-                .overlay(
-                    PageIndicator(count: bannerImages.count, currentIndex: currentIndex)
-                        .padding(.bottom, 15),
-                    alignment: .bottom
-                )
-                .frame(height: height)
-                .clipped()
-            } else {
+            let height: CGFloat = UIScreen.main.bounds.width * 9 / 16
+
+            if announcementVM.isLoading {
+                ShimmerView(cornerRadius: 0).frame(height: height)
+            } else if bannerImages.isEmpty {
                 ZStack {
-                    Color.coffeeBrown.opacity(0.1)
-                    
-                    VStack(spacing: 12) {
+                    Color.coffeeBrown.opacity(0.08)
+                    VStack(spacing: 10) {
                         Image(systemName: "photo.on.rectangle.angled")
-                            .font(.system(size: 50))
-                            .foregroundColor(.coffeeBrown.opacity(0.5))
-                        
+                            .font(.system(size: 44))
+                            .foregroundColor(Color.coffeeBrown.opacity(0.4))
                         Text("No Banners Available")
-                            .font(.headline)
-                            .foregroundColor(.coffeeBrown.opacity(0.7))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(Color.coffeeBrown.opacity(0.6))
                     }
                 }
                 .frame(height: height)
                 .frame(maxWidth: .infinity)
-                .clipped()
+            } else {
+                ZStack(alignment: .bottom) {
+                    InfiniteCarousel(
+                        items: bannerImages,
+                        height: height,
+                        width: UIScreen.main.bounds.width,
+                        currentIndex: $currentIndex
+                    ) { urlString in
+                        AsyncImageCard(
+                            imageURL: urlString,
+                            height: height,
+                            width: UIScreen.main.bounds.width,
+                            corner: 0
+                        )
+                    }
+                    .frame(height: height)
+                    .clipped()
+
+                    PageIndicator(count: bannerImages.count, currentIndex: currentIndex)
+                        .padding(.bottom, 18)
+                }
+                .frame(height: height)
             }
         }
-        .frame(height: 250)
+    }
+    
+    private var greetingCard: some View {
+        HStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(greetingText)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text(UserSession.shared.userName ?? "Coffee Lover")
+                    .font(.title3).fontWeight(.bold).fontDesign(.serif)
+                    .foregroundColor(Color.coffeeBrown)
+            }
+            Spacer()
+        }
+    }
+
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "Good morning ☀️ Your brew awaits"
+        case 12..<17: return "Good afternoon ☁️ Take a coffee break"
+        case 17..<21: return "Good evening 🌙 Wind down with a cup"
+        default: return "Hello! 🌙 Late night coffee?"
+        }
+    }
+
+    private var quickOrderSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Order", icon: "cart.fill")
+
+            HStack(spacing: 14) {
+                CozyOrderButton(
+                    title: "Pickup",
+                    subtitle: "Ready in minutes",
+                    icon: "bag.fill"
+                ) {
+                    selectedTab = .menu
+                }
+
+                CozyOrderButton(
+                    title: "Delivery",
+                    subtitle: "Coming Soon",
+                    icon: "bicycle",
+                    isDisabled: true
+                ) {
+                    AlertManager.shared.showWarning(
+                        title: "Stay Tuned",
+                        message: "This Feature is Coming Soon."
+                    )
+                }
+            }
+        }
+    }
+
+    private var announcementsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Announcements", icon: "megaphone.fill")
+
+            if announcementVM.isLoading {
+                ForEach(0..<3) { _ in
+                    AnnouncementCardShimmerView()
+                }
+            } else if announcementVM.announcements.isEmpty {
+                Text("No announcements yet — check back soon!")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+            } else {
+                ForEach(announcementVM.announcements.prefix(3)) { ann in
+                    PushLink {
+                        if UserSession.shared.isLoggedIn {
+                            AnnouncementDetailView(announcement: ann)
+                        } else {
+                            AuthView().environmentObject(AuthViewModel())
+                        }
+                    } label: {
+                        AnnouncementCardView(announcement: ann)
+                    }
+                }
+
+                PushLink {
+                    if UserSession.shared.isLoggedIn {
+                        AnnouncementsListView().environmentObject(announcementVM)
+                    } else {
+                        AuthView().environmentObject(AuthViewModel())
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("See All")
+                            .font(.subheadline.weight(.semibold))
+                        Image(systemName: "arrow.right")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundColor(Color.coffeeBrown)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.coffeeBrown.opacity(0.1))
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.coffeeBrown.opacity(0.25), lineWidth: 1)
+                    )
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                }
+            }
+        }
     }
 }
-struct PickUpButton: View {
-    var title: String = "Pickup"
-    var onClick: (() -> Void)?
-    
+
+struct SectionHeader: View {
+    let title: String
+    let icon: String
+
     var body: some View {
-        Button(action: {
-            onClick?()
-        }, label: {
+        HStack(spacing: 7) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Color.coffeeBrown)
             Text(title)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity)
-                .frame(height: 80)
-                .background(Color.brown)
-                .cornerRadius(15)
-        })
-        .foregroundColor(.white)
-        .contentShape(Rectangle())
+                .font(.system(size: 16, weight: .semibold, design: .serif))
+                .foregroundColor(Color.coffeeBrown)
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Cozy Order Button
+struct CozyOrderButton: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+    var isDisabled: Bool = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(isDisabled ? 0.4 : 0.25))
+                        .frame(width: 48, height: 48)
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(isDisabled ? Color.white.opacity(0.5) : .white)
+                }
+
+                Text(title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(isDisabled ? Color.white.opacity(0.5) : .white)
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(isDisabled ? Color.white.opacity(0.4) : Color.white.opacity(0.8))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.coffeeBrown, Color.coffeeBrown.opacity(0.78)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .shadow(
+                color: Color.coffeeBrown.opacity(isDisabled ? 0.05 : 0.3),
+                radius: 8, x: 0, y: 4
+            )
+            .overlay(
+                Group {
+                    if isDisabled {
+                        Text("Coming Soon")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(Color.coffeeBrown)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(Color.white.opacity(0.85)))
+                            .padding(10)
+                    }
+                },
+                alignment: .topTrailing
+            )
+        }
         .buttonStyle(PlainButtonStyle())
     }
 }
@@ -185,28 +295,32 @@ struct PageIndicator: View {
     let currentIndex: Int
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             ForEach(0..<count, id: \.self) { index in
                 Capsule()
-                    .fill(index == currentIndex ? Color.brown : Color.white.opacity(0.8))
-                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                    .fill(index == currentIndex ? Color.coffeeBrown : Color.white.opacity(0.75))
+                    .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
                     .frame(
-                        width: index == currentIndex ? 18 : 8,
-                        height: 8
+                        width: index == currentIndex ? 20 : 7,
+                        height: 7
                     )
                     .animation(.easeInOut(duration: 0.25), value: currentIndex)
             }
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 7)
+        .background(Capsule().fill(Color.black.opacity(0.12)))
     }
 }
 
+// MARK: - Sticky Banner Extension (kept for future use)
 extension HomeView {
     var headerBannerStickyView: some View {
         GeometryReader { geo in
             let minY = geo.frame(in: .global).minY
-            let baseHeight: CGFloat = 250
+            let baseHeight: CGFloat = 260
             let dynamicHeight = baseHeight + (minY > 0 ? minY : 0)
-            
+
             if bannerImages.count > 0 {
                 InfiniteCarousel(
                     items: bannerImages,
@@ -229,16 +343,14 @@ extension HomeView {
                 .offset(y: minY > 0 ? -minY : 0)
             } else {
                 ZStack {
-                    Color.coffeeBrown.opacity(0.1)
-                    
-                    VStack(spacing: 12) {
+                    Color.coffeeBrown.opacity(0.08)
+                    VStack(spacing: 10) {
                         Image(systemName: "photo.on.rectangle.angled")
-                            .font(.system(size: 50))
-                            .foregroundColor(.coffeeBrown.opacity(0.5))
-                        
+                            .font(.system(size: 44))
+                            .foregroundColor(Color.coffeeBrown.opacity(0.4))
                         Text("No Banners Available")
-                            .font(.headline)
-                            .foregroundColor(.coffeeBrown.opacity(0.7))
+                            .font(.subheadline)
+                            .foregroundColor(Color.coffeeBrown.opacity(0.6))
                     }
                 }
                 .frame(height: dynamicHeight)
@@ -246,6 +358,6 @@ extension HomeView {
                 .offset(y: minY > 0 ? -minY : 0)
             }
         }
-        .frame(height: 250)
+        .frame(height: 260)
     }
 }
