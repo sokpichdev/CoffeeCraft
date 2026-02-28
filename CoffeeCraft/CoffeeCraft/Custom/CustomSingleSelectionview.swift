@@ -12,6 +12,13 @@ struct CustomSingleSelectionview: View {
     let options: [String: Double]
     @Binding var selected: String
 
+    /// If the group contains at least one free option, the user must always
+    /// have something selected — deselect is not allowed.
+    /// If all options are paid, the user can opt out entirely.
+    private var hasIncludedOption: Bool {
+        options.values.contains(where: { $0 == 0.0 })
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
@@ -24,7 +31,13 @@ struct CustomSingleSelectionview: View {
                     let isSelected = selected == option
 
                     Button {
-                        selected = option
+                        if isSelected && !hasIncludedOption {
+                            // All options are paid — allow opting out
+                            selected = ""
+                        } else {
+                            // Group has a free option — must always have a selection
+                            selected = option
+                        }
                     } label: {
                         VStack(spacing: 3) {
                             Text(option)
