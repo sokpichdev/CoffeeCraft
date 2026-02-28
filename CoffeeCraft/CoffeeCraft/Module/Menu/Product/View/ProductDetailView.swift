@@ -18,24 +18,24 @@ struct ProductDetailView: View {
     @State private var selectedExtras: [String]
     @State private var selections: [String: String] = [:]
     @State private var quantity: Int = 1
-
+    
     init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil) {
         self.product = product
         self.cartItem = cartItem
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
     }
-
+    
     private func bindingFor(_ category: String) -> Binding<String> {
         Binding<String>(
             get: { selections[category] ?? "" },
             set: { selections[category] = $0 }
         )
     }
-
+    
     // MARK: - Subtotal calculation
     private var subtotal: Double {
         var total = product.price
-
+        
         if let customizations = product.customizations {
             for (category, options) in customizations {
                 guard category.lowercased() != "extras" else { continue }
@@ -44,7 +44,7 @@ struct ProductDetailView: View {
                     total += price
                 }
             }
-
+            
             // multiple-selection extras
             if let extrasDict = customizations["Extras"] {
                 for extra in selectedExtras {
@@ -52,10 +52,10 @@ struct ProductDetailView: View {
                 }
             }
         }
-
+        
         return total * Double(quantity)
     }
-
+    
     private var customizationHash: String {
         favVM.buildCustomizationHash(
             favVM.currentCustomizationForFavorite(
@@ -71,26 +71,26 @@ struct ProductDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     stickyHeroImage
                     VStack(alignment: .leading, spacing: 20) {
-
+                        
                         VStack(alignment: .leading, spacing: 6) {
                             Text(product.name)
                                 .font(.system(size: 24, weight: .bold, design: .serif))
                                 .foregroundColor(Color.brown)
-
+                            
                             Text(product.description)
                                 .font(.body)
                                 .foregroundColor(.secondary)
                                 .lineSpacing(3)
                         }
-
+                        
                         Rectangle()
                             .fill(Color.brown.opacity(0.1))
                             .frame(height: 1)
-
+                        
                         if let customizations = product.customizations, !customizations.isEmpty {
                             ForEach(Array(customizations.keys.sorted()), id: \.self) { category in
                                 let options = customizations[category] ?? [:]
-
+                                
                                 if category == "Extras" {
                                     CustomMultipleSelectionView(
                                         title: category,
@@ -105,7 +105,7 @@ struct ProductDetailView: View {
                                         selected: bindingFor(category)
                                     )
                                 }
-
+                                
                                 Rectangle()
                                     .fill(Color.brown.opacity(0.07))
                                     .frame(height: 1)
@@ -115,13 +115,13 @@ struct ProductDetailView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
-
+                        
                         Spacer(minLength: 200)
                     }
                     .padding(20)
                 }
             })
-
+            
             stickyFooter
         }
         .task(id: customizationHash) {
@@ -162,12 +162,12 @@ struct ProductDetailView: View {
     }
     
     private var heroImageHeight: CGFloat { UIScreen.main.bounds.width * 9 / 16 }
-
+    
     private var stickyHeroImage: some View {
         GeometryReader { geo in
             let minY = geo.frame(in: .global).minY
             let stretchHeight = heroImageHeight + (minY > 0 ? minY : 0)
-
+            
             ZStack(alignment: .bottom) {
                 AsyncImageCard(
                     imageURL: product.imageURL,
@@ -176,7 +176,7 @@ struct ProductDetailView: View {
                     corner: 0
                 )
                 .clipped()
-
+                
                 // Base price pill on the image
                 Text("from $\(product.price, specifier: "%.2f")")
                     .font(.system(size: 13, weight: .semibold))
@@ -222,7 +222,8 @@ struct ProductDetailView: View {
                         Image(systemName: "minus")
                             .font(.headline.weight(.semibold))
                             .foregroundColor(quantity > 1 ? Color.brown : Color.brown.opacity(0.25))
-                            .frame(width: 36, height: 36)
+                            .frame(width: 44, height: 44) // ← 44pt tap target
+                            .contentShape(Rectangle()) // ← full area tappable
                     }
                     .buttonStyle(PlainButtonStyle())
 
@@ -240,14 +241,14 @@ struct ProductDetailView: View {
                         Image(systemName: "plus")
                             .font(.headline.weight(.semibold))
                             .foregroundColor(Color.brown)
-                            .frame(width: 36, height: 36)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
                 .background(Capsule().fill(Color.brown.opacity(0.07)))
                 .overlay(Capsule().stroke(Color.brown.opacity(0.18), lineWidth: 1))
 
-                
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart") {
                     if UserSession.shared.isLoggedIn {
                         if let cartItem = cartItem {
@@ -276,4 +277,5 @@ struct ProductDetailView: View {
         .background(.ultraThinMaterial)
         .cornerRadius(20, corners: [.topLeft, .topRight])
         .shadow(radius: 5)
-    }}
+    }
+}

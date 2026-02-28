@@ -35,7 +35,7 @@ struct CustomCoffeeButton: View {
                     Spacer()
                 }
             }
-            .font(.headline.weight(.semibold))
+            .font(.headline).fontWeight(.semibold)
             .foregroundStyle(!isDisabled ? foregroundColor : .primary)
             .frame(maxWidth: maxWidth)
             .padding(.vertical, verticalPadding)
