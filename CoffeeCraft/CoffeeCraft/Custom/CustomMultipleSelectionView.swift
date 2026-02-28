@@ -17,65 +17,60 @@ struct CustomMultipleSelectionView: View {
                 .font(.system(size: 15, weight: .semibold, design: .serif))
                 .foregroundColor(Color.brown)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(options.keys.sorted(), id: \.self) { option in
-                        let price = options[option] ?? 0
-                        let isSelected = selected.contains(option)
+            ChipFlowLayout(horizontalSpacing: 8, verticalSpacing: 10) {
+                ForEach(options.keys.sorted(), id: \.self) { option in
+                    let price = options[option] ?? 0
+                    let isSelected = selected.contains(option)
 
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.18)) {
-                                if isSelected {
-                                    selected.removeAll { $0 == option }
-                                } else {
-                                    selected.append(option)
-                                }
-                            }
-                        } label: {
-                            VStack(spacing: 3) {
-                                HStack(spacing: 5) {
-                                    if isSelected {
-                                        Image(systemName: "checkmark")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundColor(.white)
-                                            .transition(.scale.combined(with: .opacity))
-                                    }
-                                    Text(option)
-                                        .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                                        .foregroundColor(isSelected ? .white : Color.brown)
-                                }
-                                .padding(.vertical, 9)
-                                .padding(.horizontal, 18)
-                                .background(
-                                    Capsule()
-                                        .fill(isSelected
-                                              ? Color.brown
-                                              : Color.brown.opacity(0.08))
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.brown.opacity(isSelected ? 0 : 0.2), lineWidth: 1)
-                                )
-                                .shadow(
-                                    color: isSelected ? Color.brown.opacity(0.3) : .clear,
-                                    radius: 6, x: 0, y: 3
-                                )
-
-                                if price > 0 {
-                                    Text("+$\(price, specifier: "%.2f")")
-                                        .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(isSelected ? Color.brown : .secondary)
-                                } else {
-                                    Text("Free")
-                                        .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.secondary.opacity(0.6))
-                                }
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            if isSelected {
+                                selected.removeAll { $0 == option }
+                            } else {
+                                selected.append(option)
                             }
                         }
-                        .buttonStyle(PlainButtonStyle())
+                    } label: {
+                        VStack(spacing: 3) {
+                            HStack(spacing: 5) {
+                                if isSelected {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .transition(.scale.combined(with: .opacity))
+                                }
+                                Text(option)
+                                    .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
+                                    .foregroundColor(isSelected ? .white : Color.brown)
+                            }
+                            .padding(.vertical, 9)
+                            .padding(.horizontal, 18)
+                            .background(
+                                Capsule()
+                                    .fill(isSelected ? Color.brown : Color.brown.opacity(0.08))
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.brown.opacity(isSelected ? 0 : 0.2), lineWidth: 1)
+                            )
+                            .shadow(
+                                color: isSelected ? Color.brown.opacity(0.3) : .clear,
+                                radius: 6, x: 0, y: 3
+                            )
+
+                            if price > 0 {
+                                Text("+$\(price, specifier: "%.2f")")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(isSelected ? Color.brown : .secondary)
+                            } else {
+                                Text("Free")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.secondary.opacity(0.6))
+                            }
+                        }
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .padding(.vertical, 4)
             }
         }
     }
