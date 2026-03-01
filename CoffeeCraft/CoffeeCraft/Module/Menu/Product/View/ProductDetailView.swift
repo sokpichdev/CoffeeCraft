@@ -14,17 +14,24 @@ struct ProductDetailView: View {
     let product: Product
     var cartItem: CartItem? = nil // optional cart item for editing
     var onUpdate: (() -> Void)? = nil
-    
+    var allProducts: [Product] = []
+
     @State private var selectedExtras: [String]
     @State private var selections: [String: String] = [:]
     @State private var quantity: Int = 1
-    
-    init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil) {
+
+    init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil, allProducts: [Product] = []) {
         self.product = product
         self.cartItem = cartItem
+        self.onUpdate = onUpdate
+        self.allProducts = allProducts
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
     }
-    
+
+    private var relatedProducts: [Product] {
+        allProducts.filter { $0.category == product.category && $0.id != product.id }
+    }
+
     private func bindingFor(_ category: String) -> Binding<String> {
         Binding<String>(
             get: { selections[category] ?? "" },
@@ -70,9 +77,8 @@ struct ProductDetailView: View {
             CustomRefreshScrollView({
                 VStack(alignment: .leading, spacing: 0) {
                     stickyHeroImage
-                    VStack(alignment: .leading, spacing: 20) {
-                        
-                        VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Text(product.name)
                                 .font(.system(size: 24, weight: .bold, design: .serif))
                                 .foregroundColor(Color.brown)
@@ -82,43 +88,54 @@ struct ProductDetailView: View {
                                 .foregroundColor(.secondary)
                                 .lineSpacing(3)
                         }
+                        .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
                         
                         Rectangle()
-                            .fill(Color.brown.opacity(0.1))
+                            .fill(Color.brown.opacity(0.2))
                             .frame(height: 1)
+                            .padding(.horizontal)
                         
                         if let customizations = product.customizations, !customizations.isEmpty {
                             ForEach(Array(customizations.keys.sorted()), id: \.self) { category in
                                 let options = customizations[category] ?? [:]
                                 
-                                if category == "Extras" {
-                                    CustomMultipleSelectionView(
-                                        title: category,
-                                        options: options,
-                                        selected: $selectedExtras
-                                    )
-                                } else {
-                                    CustomSingleSelectionview(
-                                        title: category,
-                                        sizePrice: product.price,
-                                        options: options,
-                                        selected: bindingFor(category)
-                                    )
+                                Group {
+                                    if category == "Extras" {
+                                        CustomMultipleSelectionView(
+                                            title: category,
+                                            options: options,
+                                            selected: $selectedExtras
+                                        )
+                                    } else {
+                                        CustomSingleSelectionview(
+                                            title: category,
+                                            sizePrice: product.price,
+                                            options: options,
+                                            selected: bindingFor(category)
+                                        )
+                                    }
                                 }
-                                
+                                .padding(.top)
                                 Rectangle()
-                                    .fill(Color.brown.opacity(0.07))
+                                    .fill(Color.brown.opacity(0.2))
                                     .frame(height: 1)
                             }
+                            .padding(.horizontal)
                         } else {
                             Text("No customization available.")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                        }
+
+                        // MARK: - Related Products Section
+                        if !relatedProducts.isEmpty {
+                            relatedProductsSection
+                                .padding(.top)
                         }
                         
-                        Spacer(minLength: 200)
+                        Spacer(minLength: 120)
                     }
-                    .padding(20)
                 }
             })
             
@@ -160,7 +177,37 @@ struct ProductDetailView: View {
             }
         }
     }
-    
+
+    private var relatedProductsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("More in \(product.category)")
+                .font(.system(size: 17, weight: .semibold, design: .serif))
+                .foregroundColor(Color.brown)
+                .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(relatedProducts) { related in
+                        MenuItemRow(item: related)
+                            .frame(width: UIScreen.main.bounds.width * 0.72)
+                            .onTapGesture {
+                                push(
+                                    AnyView(
+                                        ProductDetailView(product: related, allProducts: allProducts)
+                                            .environmentObject(cartManager)
+                                            .environmentObject(favVM)
+                                    )
+                                )
+                            }
+                    }
+                }
+                .padding(.vertical, 4)  // prevents shadow clipping
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    // MARK: - Hero Image
     private var heroImageHeight: CGFloat { UIScreen.main.bounds.width * 9 / 16 }
     
     private var stickyHeroImage: some View {
