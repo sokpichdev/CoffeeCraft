@@ -208,8 +208,7 @@ struct MenuView: View {
             VStack(spacing: 10) {
                 ForEach(section.items) { product in
                     PushLink(value: product) { product in
-                        ProductDetailView(product: product)
-                            .environmentObject(cartManager)
+                        ProductDetailView(product: product, allProducts: productVM.products)                            .environmentObject(cartManager)
                             .environmentObject(favVM)
                     } label: {
                         MenuItemRow(item: product)
