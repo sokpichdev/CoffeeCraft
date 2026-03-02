@@ -9,7 +9,11 @@ import SwiftUI
 struct OrderItemsCard: View {
     let items: [CartItemData]
     
+    
     var body: some View {
+        let totalQty = items.reduce(0) {
+            $0 + ($1.quantity ?? 1)
+        }
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Items")
@@ -18,7 +22,7 @@ struct OrderItemsCard: View {
                 
                 Spacer()
                 
-                Text("\(items.count) item\(items.count == 1 ? "" : "s")")
+                Text("\(totalQty) item\(items.count == 1 ? "" : "s")")
                     .font(.subheadline).fontWeight(.medium)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 12)
@@ -53,9 +57,16 @@ struct OrderItemRow: View {
                 AsyncImageCard(imageURL: item.imageURL, height: 56, width: 56, corner: 12)
                 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(item.name)
-                        .font(.body).fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                    HStack(spacing: 4) {
+                        if let qty = item.quantity, qty > 1 {
+                            Text("×\(qty)")
+                                .font(.body).fontWeight(.semibold)
+                                .foregroundColor(.brown)
+                        }
+                        Text(item.name)
+                            .font(.body).fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                    }
                     
                     // Selections
                     if let selections = item.selections, !selections.isEmpty {

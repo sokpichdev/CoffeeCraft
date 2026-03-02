@@ -12,6 +12,7 @@ struct CartItem: Identifiable, Codable {
     let product: Product
     let selections: [String: String]
     let extras: [String]
+    var quantity: Int = 1
     
     var totalPrice: Double {
         var price = product.price
@@ -34,6 +35,6 @@ struct CartItem: Identifiable, Codable {
                 }
             }
         }
-        return price
+        return price * Double(quantity)
     }
 }

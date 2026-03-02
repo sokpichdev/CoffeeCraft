@@ -100,7 +100,8 @@ export const onOrderPlaced = onDocumentCreated(
 
       const totalPrice: number = data.totalPrice ?? 0;
       const itemCount: number = Array.isArray(data.items) ?
-        data.items.length : 0;
+        (data.items as { quantity?: number }[])
+          .reduce((sum, item) => sum + (item.quantity ?? 1), 0) : 0;
       const orderNumber: number = data.orderId ?? orderId;
 
       logger.info(

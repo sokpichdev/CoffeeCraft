@@ -16,11 +16,13 @@ class CartManager: ObservableObject {
     func addToCart(userId: String,
                    product: Product,
                    selections: [String: String],
-                   extras: [String]) {
+                   extras: [String],
+                   quantity: Int) {
         let item = CartItem(id: UUID(),
                             product: product,
                             selections: selections,
-                            extras: extras)
+                            extras: extras,
+        quantity: quantity)
         items.append(item)
         saveCartToFirestore(userId: userId) {
             ToastManager.shared.show(message: "Your cart was added successfully ☕️", type: .success)
@@ -38,13 +40,14 @@ class CartManager: ObservableObject {
         items.removeAll()
         saveCartToFirestore(userId: userId) {}
     }
-    func updateCartItem(userId: String, item: CartItem, selections: [String: String], extras: [String]) {
+    func updateCartItem(userId: String, item: CartItem, selections: [String: String], extras: [String], quantity: Int) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index] = CartItem(
                 id: item.id,
                 product: item.product,
                 selections: selections,
-                extras: extras)
+                extras: extras,
+            quantity: quantity)
             
             // Use completion handler
             saveCartToFirestore(userId: userId) {

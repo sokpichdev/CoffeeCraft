@@ -88,11 +88,12 @@ struct OrderCardView: View {
         .padding()
         .background(
             LinearGradient(
-                colors: [statusColorValue.opacity(0.15), Color.clear],
+                colors: [statusColorValue.opacity(0.2), Color.clear],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
+        .cornerRadius(24, corners: [.topLeft, .topRight])
     }
     
     private var itemsPreviewSection: some View {
@@ -154,7 +155,7 @@ struct OrderCardView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
-                .foregroundColor(.coffeeBrown)
+                .foregroundColor(.brown)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Capsule().fill(Color.coffeeBrown.opacity(0.1)))
@@ -187,14 +188,14 @@ struct OrderCardView: View {
                 
                 Text("$\(order.totalPrice, specifier: "%.2f")")
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
-                    .foregroundColor(.coffeeBrown)
+                    .foregroundColor(.brown)
             }
             
             Spacer()
             
             Image(systemName: "chevron.right")
-                .font(.subheadline)
-                .foregroundColor(.coffeeBrown)
+                .font(.headline)
+                .foregroundColor(.brown)
         }
         .padding()
     }
@@ -204,8 +205,8 @@ struct OrderCardView: View {
         case "Pending": return .orange
         case "In Progress", "InProgress": return .blue
         case "Ready": return .coffeeOliveGreen
-        case "Done", "Completed": return .coffeeBrown
-        default: return .coffeeBrown
+        case "Done", "Completed": return .brown
+        default: return .brown
         }
     }
 }
@@ -230,10 +231,18 @@ struct DetailItemRow: View {
             )
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.name)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    if let qty = item.quantity, qty > 1 {
+                        Text("×\(qty)")
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.brown)
+                    }
+                    Text(item.name)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
+                }
                 
                 if let selections = item.selections, !selections.isEmpty {
                     Text(selections.map { $0.value }.joined(separator: " • "))

@@ -39,6 +39,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
     var selections: [String: String]?
     var extras: [String]?
     var price: Double
+    var quantity: Int?
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {
@@ -47,6 +48,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
         hasher.combine(imageURL)
         hasher.combine(selections)
         hasher.combine(extras)
+        hasher.combine(quantity)
     }
     
     // This defines how two objects are considered equal
@@ -55,6 +57,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
         lhs.price == rhs.price &&
         lhs.imageURL == rhs.imageURL &&
         lhs.selections == rhs.selections &&
-        lhs.extras == rhs.extras
+        lhs.extras == rhs.extras &&
+        lhs.quantity == rhs.quantity
     }
 }

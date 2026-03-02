@@ -13,8 +13,17 @@ struct CardItemView: View {
             AsyncImageCard(imageURL: item.product.imageURL, height: 60, width: 60, corner: 10)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.product.name)
-                    .font(.headline)
+                HStack(spacing: 4) {
+                    if item.quantity > 1 {
+                        Text("×\(item.quantity)")
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.coffeeBrown)
+                    }
+                    Text(item.product.name)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                }
 
                 if !item.selections.isEmpty {
                     ForEach(item.selections.keys.sorted(), id: \.self) { key in
@@ -33,12 +42,21 @@ struct CardItemView: View {
                 }
             }
             Spacer()
-            Text(String(format: "$%.2f", item.totalPrice))
-                .font(.subheadline)
-                .bold()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(String(format: "$%.2f", item.totalPrice))
+                    .font(.subheadline.bold())
+
+                // Show unit price if qty > 1
+                if item.quantity > 1 {
+                    Text(String(format: "$%.2f ea", item.totalPrice / Double(item.quantity))) /// ea = each
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
         .padding()
-        .background(.ultraThinMaterial)
+        .background(Color(.tertiarySystemBackground))
         .cornerRadius(14)
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
     }

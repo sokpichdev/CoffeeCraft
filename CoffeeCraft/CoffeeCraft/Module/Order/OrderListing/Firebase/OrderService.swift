@@ -81,7 +81,8 @@ class OrderService: ObservableObject {
                         var dict: [String: Any] = [
                             "name": item.product.name,
                             "price": item.totalPrice,
-                            "imageURL": item.product.imageURL
+                            "imageURL": item.product.imageURL,
+                            "quantity": item.quantity
                         ]
                         if !item.selections.isEmpty { dict["selections"] = item.selections }
                         if !item.extras.isEmpty { dict["extras"] = item.extras }
