@@ -3,3 +3,4 @@
 
 # macOS junk
 .DS_Store
+*.xcuserstate
