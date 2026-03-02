@@ -79,15 +79,17 @@ struct OrderHeaderCard: View {
                 Spacer()
                 
                 // User ID badge for admin reference
-                VStack {
-                    Text("#\(String(describing: order.userId?.prefix(6)))")
-                        .font(.system(size: 11, weight: .medium))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.secondary.opacity(0.1))
-                        .foregroundColor(.secondary)
-                        .cornerRadius(6)
-                    Spacer()
+                if let userId = order.userId {
+                    VStack {
+                        Text("#\(String(describing: userId.prefix(6)))")
+                            .font(.system(size: 11, weight: .medium))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.secondary.opacity(0.1))
+                            .foregroundColor(.secondary)
+                            .cornerRadius(6)
+                        Spacer()
+                    }
                 }
             }
         }
