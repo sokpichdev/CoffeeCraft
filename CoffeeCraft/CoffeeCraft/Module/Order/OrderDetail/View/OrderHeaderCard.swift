@@ -109,6 +109,7 @@ struct StatusBadge: View {
             
             Text(status == "InProgress" ? "In Progress" : status)
                 .font(.footnote).fontWeight(.semibold)
+                .frame(height: 15)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)

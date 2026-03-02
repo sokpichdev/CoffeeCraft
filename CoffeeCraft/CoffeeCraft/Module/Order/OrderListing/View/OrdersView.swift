@@ -12,13 +12,13 @@ struct OrdersView: View {
     @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
-
+    @State private var showShimmer: Bool = false
     var body: some View {
         ZStack {
             Color(uiColor: .systemGroupedBackground)
                 .ignoresSafeArea()
 
-            if orderVM.isLoading {
+            if orderVM.isLoading || showShimmer {
                 ScrollView {
                     OrderListShimmerView()
                         .padding(.horizontal)
@@ -76,7 +76,11 @@ struct OrdersView: View {
                 })
             }
         }
-        .customNavigationBar("My Orders")
+        .customNavigationBar("My Orders") {
+            ToolBarButton(placement: .topBarTrailing, buttonType: .text("Shimmer")) {
+                showShimmer.toggle()
+            }
+        }
         .onAppear {
             Task { await orderVM.fetchOrders(pageNum: 1) }
             handleDeepLink()

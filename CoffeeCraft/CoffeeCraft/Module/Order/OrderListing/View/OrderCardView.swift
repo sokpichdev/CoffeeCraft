@@ -75,10 +75,12 @@ struct OrderCardView: View {
                     .font(.callout)
                     .fontWeight(.bold)
                     .fontDesign(.rounded)
+                    .frame(height: 16)
                 
                 Text(order.timestamp.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .frame(height: 12)
             }
             
             Spacer()
@@ -106,7 +108,8 @@ struct OrderCardView: View {
                         FlyingThumbnail(
                             url: item.imageURL,
                             index: index,
-                            namespace: animationNamespace
+                            namespace: animationNamespace,
+                            isCircle: true
                         )
                         .offset(x: CGFloat(index * 20))
                         .zIndex(Double(index))
@@ -120,7 +123,8 @@ struct OrderCardView: View {
                             FlyingThumbnail(
                                 url: item.imageURL,
                                 index: actualIndex,
-                                namespace: animationNamespace
+                                namespace: animationNamespace,
+                                isCircle: true
                             )
                             .offset(
                                 x: CGFloat(previewDisplayCount - 1) * 20, // Position at last visible item
@@ -197,6 +201,7 @@ struct OrderCardView: View {
                 .font(.headline)
                 .foregroundColor(.brown)
         }
+        .frame(height: 32)
         .padding()
     }
     
@@ -297,11 +302,11 @@ struct FlyingThumbnail: View {
     
     var size: CGFloat = 32
     var cornerRadius: CGFloat = 16
-    
+    var isCircle: Bool = false
     private var geometryId: String { "thumbnail-\(url)-\(index)" }
     
     var body: some View {
-        CachedThumbnail(url: url, size: size, cornerRadius: cornerRadius)
+        CachedThumbnail(url: url, size: size, cornerRadius: cornerRadius, isCircle: isCircle)
             .matchedGeometryEffect(
                 id: geometryId,
                 in: namespace,
@@ -316,6 +321,7 @@ struct CachedThumbnail: View {
     let url: String
     var size: CGFloat = 32
     var cornerRadius: CGFloat = 16
+    var isCircle: Bool = false
     
     var body: some View {
         AsyncImageCard(
@@ -326,11 +332,15 @@ struct CachedThumbnail: View {
             corner: cornerRadius
         )
         .overlay(
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(Color.white, lineWidth: 2)
+            Group {
+                if isCircle {
+                    Circle().stroke(Color.white, lineWidth: 2)
+                } else {
+                    RoundedRectangle(cornerRadius: cornerRadius).stroke(Color.white, lineWidth: 2)
+                }
+            }
         )
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        // Prevent image loading from blocking main thread
+        .clipShape(isCircle ? AnyShape(Circle()) : AnyShape(RoundedRectangle(cornerRadius: cornerRadius)))
         .id(url)
     }
 }
