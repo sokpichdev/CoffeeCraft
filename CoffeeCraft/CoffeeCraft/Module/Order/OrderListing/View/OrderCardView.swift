@@ -18,24 +18,18 @@ struct OrderCardView: View {
     @Namespace private var animationNamespace
     
     // Pre-compute values to avoid recalculation during body
-    private let itemCount: Int
     private let formattedOrderNumber: String
     private let statusColorValue: Color
-    private let overflowCount: Int
-    
+    private var items: [CartItemData] { (order.items ?? []).compactMap { $0 } }
+    private var itemCount: Int { items.count }
+    private var overflowCount: Int { max(0, items.count - previewDisplayCount) }
+
     init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil) {
         self.order = order
         self.adminActions = adminActions
         self.onNavigate = onNavigate
-        
-        // Pre-compute expensive operations
-        self.itemCount = order.items.count
-        self.formattedOrderNumber = String(format: "%04d", order.orderId)
-        self.statusColorValue = OrderCardView.computeStatusColor(order.status)
-        
-        // Calculate based on previewDisplayCount
-        let previewCount = 5 // Must match previewDisplayCount above
-        self.overflowCount = max(0, order.items.count - previewCount)
+        self.formattedOrderNumber = String(format: "%04d", order.orderId ?? 0)
+        self.statusColorValue = OrderCardView.computeStatusColor(order.status ?? "")
     }
     
     var body: some View {
@@ -77,15 +71,17 @@ struct OrderCardView: View {
                     .fontDesign(.rounded)
                     .frame(height: 16)
                 
-                Text(order.timestamp.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .frame(height: 12)
+                if let date = order.timestamp {
+                    Text(date.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .frame(height: 12)
+                }
             }
             
             Spacer()
             
-            StatusBadge(status: order.status)
+            StatusBadge(status: order.status ?? "")
         }
         .padding()
         .background(
@@ -104,9 +100,9 @@ struct OrderCardView: View {
             ZStack(alignment: .leading) {
                 if !isExpanded {
                     // Visible preview items (first N items)
-                    ForEach(Array(order.items.prefix(previewDisplayCount).enumerated()), id: \.offset) { index, item in
+                    ForEach(Array(items.prefix(previewDisplayCount).enumerated()), id: \.offset) { index, item in
                         FlyingThumbnail(
-                            url: item.imageURL,
+                            url: item.imageURL ?? "",
                             index: index,
                             namespace: animationNamespace,
                             isCircle: true
@@ -117,11 +113,11 @@ struct OrderCardView: View {
                     
                     // Overflow items stacked at badge position (invisible but for matched geometry)
                     if overflowCount > 0 {
-                        let overflowItems = Array(order.items.dropFirst(previewDisplayCount).enumerated())
+                        let overflowItems = Array(items.dropFirst(previewDisplayCount).enumerated())
                         ForEach(overflowItems, id: \.offset) { index, item in
                             let actualIndex = index + previewDisplayCount
                             FlyingThumbnail(
-                                url: item.imageURL,
+                                url: item.imageURL ?? "",
                                 index: actualIndex,
                                 namespace: animationNamespace,
                                 isCircle: true
@@ -168,9 +164,10 @@ struct OrderCardView: View {
         }
         .padding()
     }
+    
     private var detailedItemsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(order.items.enumerated()), id: \.offset) { index, item in
+            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                 DetailItemRow(
                     item: item,
                     index: index,
@@ -190,7 +187,7 @@ struct OrderCardView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
-                Text("$\(order.totalPrice, specifier: "%.2f")")
+                Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
                     .foregroundColor(.brown)
             }
@@ -228,7 +225,7 @@ struct DetailItemRow: View {
         HStack(alignment: .top, spacing: 12) {
             // ALL items use matched geometry - same animation for everyone
             FlyingThumbnail(
-                url: item.imageURL,
+                url: item.imageURL ?? "",
                 index: index,
                 namespace: namespace,
                 size: 44,
@@ -243,7 +240,7 @@ struct DetailItemRow: View {
                             .fontWeight(.bold)
                             .foregroundColor(.brown)
                     }
-                    Text(item.name)
+                    Text(item.name ?? "")
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .lineLimit(1)
@@ -266,7 +263,7 @@ struct DetailItemRow: View {
             
             Spacer()
             
-            Text("$\(item.price, specifier: "%.2f")")
+            Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                 .font(.subheadline)
                 .fontWeight(.semibold)
         }

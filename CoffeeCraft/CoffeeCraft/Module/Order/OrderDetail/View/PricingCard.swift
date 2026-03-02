@@ -11,7 +11,7 @@ struct PricingCard: View {
     let items: [CartItemData]
     
     var subtotal: Double {
-        items.reduce(0) { $0 + $1.price }
+        items.reduce(0) { $0 + ($1.price ?? 0.0) }
     }
     
     var tax: Double {

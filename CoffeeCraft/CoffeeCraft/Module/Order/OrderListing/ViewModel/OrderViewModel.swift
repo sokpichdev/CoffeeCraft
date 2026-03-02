@@ -122,7 +122,7 @@ class OrderViewModel: ObservableObject {
                         if let updatedOrder = try? change.document.data(as: Order.self),
                            let index = self.orders.firstIndex(where: { $0.id == updatedOrder.id }) {
                             self.orders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupRealtimeListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
+                            AppLog.order.debug("✏️ setupRealtimeListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
                         }
                     }
                 }

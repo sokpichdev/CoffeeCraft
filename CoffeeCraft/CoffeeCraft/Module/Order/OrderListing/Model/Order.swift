@@ -10,12 +10,12 @@ import FirebaseFirestore
 
 struct Order: Identifiable, Codable, Hashable, Equatable {
     @DocumentID var id: String?
-    var orderId: Int
-    var userId: String
-    var items: [CartItemData]
-    var totalPrice: Double
-    var status: String
-    var timestamp: Date
+    var orderId: Int?
+    var userId: String?
+    var items: [CartItemData?]?
+    var totalPrice: Double?
+    var status: String?
+    var timestamp: Date?
     
     // Hashable conformance
     func hash(into hasher: inout Hasher) {
@@ -33,12 +33,12 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
 
 // Simpler model just for decoding item info
 struct CartItemData: Identifiable, Codable, Hashable {
-    var id: String { "\(name)-\(price)-\(Date().timeIntervalSince1970)" }
-    var name: String
-    var imageURL: String
+    var id: String { "\(name ?? "unknown")-\(price ?? 0.0)" }
+    var name: String?
+    var imageURL: String?
     var selections: [String: String]?
     var extras: [String]?
-    var price: Double
+    var price: Double?
     var quantity: Int?
     
     // Hashable conformance
