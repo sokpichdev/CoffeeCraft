@@ -127,9 +127,10 @@ export const onOrderPlaced = onDocumentCreated(
       const notification: NotificationDoc = {
         type: "order_status",
         title: "New Order Received ☕️",
-        message:
-        `A customer just placed order #${orderNumber} ` +
-        `with ${itemCount} item(s). Total: $${totalPrice.toFixed(2)}`,
+        message: `🧾 Order #${orderNumber}\n` +
+          `☕️ ${itemCount} ${itemCount === 1 ? "item" : "items"}\n` +
+          `💵 $${totalPrice.toFixed(2)}`,
+
         isRead: false,
         createdAt: admin.firestore.Timestamp.now(),
         payload: {
