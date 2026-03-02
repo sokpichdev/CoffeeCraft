@@ -102,6 +102,7 @@ class InboxViewModel: ObservableObject {
                     }
                     self.notifications.append(contentsOf: unique)
                     AppLog.menu.debug("✅ appended \(unique.count) on page \(pageNum), total loaded: \(self.notifications.count)")
+                    AppLog.printList(self.notifications, label: "Notifications")
                 }
 
                 // Attach realtime listener on first page only
@@ -268,6 +269,16 @@ class InboxViewModel: ObservableObject {
             AppLog.menu.debug("🗑️ Deleted notification: \(id)")
         } catch {
             AppLog.menu.error("❌ Failed to delete notification: \(error.localizedDescription)")
+        }
+    }
+    // MARK: - Fetch Order
+    func fetchOrder(orderId: String) async -> Order? {
+        do {
+            let snapshot = try await db.collection("orders").document(orderId).getDocument()
+            return try snapshot.data(as: Order.self)
+        } catch {
+            AlertManager.shared.showError(message: error.localizedDescription)
+            return nil
         }
     }
 

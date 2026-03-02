@@ -9,7 +9,7 @@ import SwiftUI
 struct InboxView: View {
     @EnvironmentObject var inboxVM: InboxViewModel
     @Environment(\.dismiss) private var dismiss
-
+    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
 
@@ -69,7 +69,15 @@ struct InboxView: View {
                     NotificationRow(notification: notification)
                         .padding(.horizontal, 16)
                         .onTapGesture {
-                            Task { await inboxVM.markAsRead(notification) }
+                            Task {
+                                if notification.type == .orderStatus,
+                                   let orderId = notification.payload?["orderId"] {
+                                    if let order = await inboxVM.fetchOrder(orderId: orderId) {
+                                        push(AnyView(OrderDetailView(order: order)))
+                                    }
+                                }
+                                await inboxVM.markAsRead(notification)
+                            }
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
