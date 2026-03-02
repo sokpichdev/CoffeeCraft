@@ -64,7 +64,7 @@ struct OrderReceiptView: View {
         .frame(width: 380)
         .background(Color(.systemGroupedBackground))
         
-        exportContent.exportToPDF(filename: "CoffeeCraft_Receipt_\(order.orderId)") { url in
+        exportContent.exportToPDF(filename: "CoffeeCraft_Receipt_\(String(describing: order.orderId))") { url in
             isExporting = false
             if let url = url {
                 pdfURL = url
