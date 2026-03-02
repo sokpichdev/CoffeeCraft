@@ -33,13 +33,13 @@ struct OrderDetailView: View {
                     )
                     
                     // Live Status Timeline
-                    StatusTimelineView(status: vm.order.status)
+                    StatusTimelineView(status: vm.order.status ?? "")
                     
                     // Order Items Card
-                    OrderItemsCard(items: vm.order.items)
+                    OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
                     
                     // Pricing Breakdown
-                    PricingCard(totalPrice: vm.order.totalPrice, items: vm.order.items)
+                    PricingCard(totalPrice: vm.order.totalPrice ?? 0.0, items: vm.order.items as? [CartItemData] ?? [])
                     
                     // Action Buttons
                     ActionButtonsSection(order: vm.order, isActive: isActive, isUpdating: vm.isUpdatingStatus) { newStatus in
@@ -68,8 +68,8 @@ struct OrderDetailView: View {
             if let orderId = vm.order.id {
                 vm.startListening(orderId: orderId)
             }
-            if !vm.order.userId.isEmpty {
-                vm.fetchUserInfo(userId: vm.order.userId)
+            if let userId = vm.order.userId, !userId.isEmpty {
+                vm.fetchUserInfo(userId: userId)
             }
         }
         .onDisappear {

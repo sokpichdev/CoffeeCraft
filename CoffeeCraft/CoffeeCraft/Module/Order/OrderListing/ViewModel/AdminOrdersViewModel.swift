@@ -117,7 +117,7 @@ class AdminOrdersViewModel: ObservableObject {
                         if let updatedOrder = try? change.document.data(as: Order.self),
                            let index = self.allOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
                             self.allOrders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupAllOrdersListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
+                            AppLog.order.debug("✏️ setupAllOrdersListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
                         }
                     }
                 }
@@ -223,7 +223,7 @@ class AdminOrdersViewModel: ObservableObject {
                         if let updatedOrder = try? change.document.data(as: Order.self),
                            let index = self.myOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
                             self.myOrders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupMyOrdersListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status)")
+                            AppLog.order.debug("✏️ setupMyOrdersListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
                         }
                     }
                 }

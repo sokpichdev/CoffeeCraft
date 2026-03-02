@@ -17,7 +17,7 @@ struct ReceiptItemRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(item.name)
+                    Text(item.name ?? "")
                         .font(.subheadline).fontDesign(.serif)
                         .foregroundColor(Color.coffeeDarkBrown)
                     
@@ -30,7 +30,7 @@ struct ReceiptItemRow: View {
                     }
                 }
                 Spacer()
-                Text("$\(item.price, specifier: "%.2f")")
+                Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                     .font(.subheadline).fontWeight(.medium).fontDesign(.monospaced)
                     .foregroundColor(Color.coffeeDarkBrown)
             }

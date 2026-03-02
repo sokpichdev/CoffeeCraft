@@ -52,7 +52,7 @@ class OrderDetailViewModel: ObservableObject {
                     // Check if status changed
                     if updatedOrder.status != self.order.status {
                         self.lastStatusUpdate = updatedOrder.status
-                        ToastManager.shared.showTop(message: "Order is now \(updatedOrder.status).", type: .success)
+                        ToastManager.shared.showTop(message: "Order is now \(updatedOrder.status ?? "").", type: .success)
                         
                         // Haptic feedback
                         let generator = UINotificationFeedbackGenerator()
@@ -60,7 +60,7 @@ class OrderDetailViewModel: ObservableObject {
                     }
                     
                     self.order = updatedOrder
-                    AppLog.order.debug("✅ OrderDetail id: \(updatedOrder.id ?? "nil") status: \(updatedOrder.status)")
+                    AppLog.order.debug("✅ OrderDetail id: \(updatedOrder.id ?? "nil") status: \(updatedOrder.status ?? "")")
                     AppLog.printItem(updatedOrder, label: "OrderDetail id: \(updatedOrder.id ?? "nil")")
                 } catch {
                     AppLog.order.error("❌ Failed to decode order: \(error.localizedDescription)")

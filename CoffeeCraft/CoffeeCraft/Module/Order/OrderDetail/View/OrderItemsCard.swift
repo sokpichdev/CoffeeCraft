@@ -63,7 +63,7 @@ struct OrderItemRow: View {
                                 .font(.body).fontWeight(.semibold)
                                 .foregroundColor(.brown)
                         }
-                        Text(item.name)
+                        Text(item.name ?? "")
                             .font(.body).fontWeight(.semibold)
                             .foregroundColor(.primary)
                     }
@@ -103,7 +103,7 @@ struct OrderItemRow: View {
                 
                 Spacer()
                 
-                Text("$\(item.price, specifier: "%.2f")")
+                Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                     .font(.body).fontWeight(.bold)
                     .foregroundColor(.coffeeCream)
             }

@@ -49,7 +49,9 @@ struct ActiveOrdersContent: View {
     private var filteredOrders: [Order] {
         vm.allOrders
             .filter { $0.status != "Completed" }
-            .sorted(by: { $0.timestamp > $1.timestamp })
+            .sorted(by: {
+                ($0.timestamp ?? .distantPast) > ($1.timestamp ?? .distantPast)
+            })
     }
 
     var body: some View {

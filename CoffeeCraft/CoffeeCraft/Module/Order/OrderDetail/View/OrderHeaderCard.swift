@@ -16,17 +16,19 @@ struct OrderHeaderCard: View {
             // Top Row: Order ID & Status Badge
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Order #\(order.orderId)")
+                    Text("Order #\(order.orderId ?? 0)")
                         .font(.title2).fontWeight(.bold)
                         .foregroundColor(.primary)
-                    Text(order.timestamp.formatted(date: .long, time: .shortened))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                    if let date = order.timestamp {
+                        Text(date.formatted(date: .long, time: .shortened))
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
                 
-                StatusBadge(status: order.status)
+                StatusBadge(status: order.status ?? "")
             }
             
             Divider()
@@ -78,7 +80,7 @@ struct OrderHeaderCard: View {
                 
                 // User ID badge for admin reference
                 VStack {
-                    Text("#\(order.userId.prefix(6))")
+                    Text("#\(String(describing: order.userId?.prefix(6)))")
                         .font(.system(size: 11, weight: .medium))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)

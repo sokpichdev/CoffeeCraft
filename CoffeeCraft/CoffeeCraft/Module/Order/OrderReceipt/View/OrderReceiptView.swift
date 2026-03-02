@@ -188,9 +188,11 @@ struct MetaSection: View {
     
     var body: some View {
         VStack(spacing: 10) {
-            MetaRow(label: "ORDER", value: "#\(order.orderId)", mono: true)
-            MetaRow(label: "DATE", value: order.timestamp.formatted(.dateTime.month(.abbreviated).day().year()))
-            MetaRow(label: "TIME", value: order.timestamp.formatted(.dateTime.hour().minute()))
+            MetaRow(label: "ORDER", value: "#\(order.orderId ?? 0)", mono: true)
+            if let dateTime = order.timestamp {
+                MetaRow(label: "DATE", value: dateTime.formatted(.dateTime.month(.abbreviated).day().year()))
+                MetaRow(label: "TIME", value: dateTime.formatted(.dateTime.hour().minute()))
+            }
             MetaRow(label: "CUSTOMER", value: userName)
         }
     }
@@ -224,6 +226,11 @@ struct ItemsSection: View {
     let order: Order
     let animated: Bool
     
+    // Unwrap the optional array and strip nil elements in one step
+    private var items: [CartItemData] {
+        (order.items ?? []).compactMap { $0 }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("ITEMS")
@@ -231,14 +238,14 @@ struct ItemsSection: View {
                 .tracking(3)
                 .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
             
-            ForEach(Array(order.items.enumerated()), id: \.element.id) { index, item in
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 ReceiptItemRow(
                     item: item,
                     animationDelay: animated ? Double(index) * 0.08 + 0.4 : 0,
                     animated: animated
                 )
                 
-                if index < order.items.count - 1 {
+                if index < items.count - 1 {
                     Rectangle()
                         .fill(Color.coffeeDarkBrown.opacity(0.07))
                         .frame(height: 1)
@@ -258,7 +265,7 @@ struct TotalSection: View {
                 .font(.system(size: 13, weight: .heavy, design: .monospaced))
                 .tracking(2)
             Spacer()
-            Text("$\(order.totalPrice, specifier: "%.2f")")
+            Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                 .font(.system(size: 22, weight: .bold, design: .monospaced))
         }
         .foregroundColor(Color.coffeeDarkBrown)
