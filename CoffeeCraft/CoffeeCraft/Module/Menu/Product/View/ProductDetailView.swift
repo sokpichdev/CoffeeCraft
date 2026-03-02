@@ -15,23 +15,24 @@ struct ProductDetailView: View {
     var cartItem: CartItem? = nil // optional cart item for editing
     var onUpdate: (() -> Void)? = nil
     var allProducts: [Product] = []
-
+    
     @State private var selectedExtras: [String]
     @State private var selections: [String: String] = [:]
     @State private var quantity: Int = 1
-
+    
     init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil, allProducts: [Product] = []) {
         self.product = product
         self.cartItem = cartItem
         self.onUpdate = onUpdate
         self.allProducts = allProducts
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
+        _quantity = State(initialValue: cartItem?.quantity ?? 1)
     }
-
+    
     private var relatedProducts: [Product] {
         allProducts.filter { $0.category == product.category && $0.id != product.id }
     }
-
+    
     private func bindingFor(_ category: String) -> Binding<String> {
         Binding<String>(
             get: { selections[category] ?? "" },
@@ -127,7 +128,7 @@ struct ProductDetailView: View {
                                 .foregroundColor(.secondary)
                                 .padding(.horizontal)
                         }
-
+                        
                         // MARK: - Related Products Section
                         if !relatedProducts.isEmpty {
                             relatedProductsSection
@@ -177,14 +178,14 @@ struct ProductDetailView: View {
             }
         }
     }
-
+    
     private var relatedProductsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("More in \(product.category)")
                 .font(.system(size: 17, weight: .semibold, design: .serif))
                 .foregroundColor(Color.brown)
                 .padding(.horizontal)
-
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(relatedProducts) { related in
@@ -206,7 +207,7 @@ struct ProductDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Hero Image
     private var heroImageHeight: CGFloat { UIScreen.main.bounds.width * 9 / 16 }
     
@@ -242,26 +243,11 @@ struct ProductDetailView: View {
         }
         .frame(height: heroImageHeight)
     }
-
+    
     private var stickyFooter: some View {
-        VStack(spacing: 12) {
-
-            HStack(alignment: .center) {
-                Text("Subtotal")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                Text(String(format: "$%.2f", subtotal))
-                    .font(.system(size: 22, weight: .bold, design: .serif))
-                    .foregroundColor(Color.brown)
-                    .contentTransition(.numericText())
-                    .animation(.easeInOut(duration: 0.2), value: subtotal)
-            }
-
+        StickyFooterView(label: "Subtotal", amount: subtotal) {
             HStack(spacing: 12) {
-
+                // Quantity stepper
                 HStack(spacing: 0) {
                     Button {
                         if quantity > 1 { quantity -= 1 }
@@ -269,11 +255,11 @@ struct ProductDetailView: View {
                         Image(systemName: "minus")
                             .font(.headline.weight(.semibold))
                             .foregroundColor(quantity > 1 ? Color.brown : Color.brown.opacity(0.25))
-                            .frame(width: 44, height: 44) // ← 44pt tap target
-                            .contentShape(Rectangle()) // ← full area tappable
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
-
+                    
                     Text("\(quantity)")
                         .font(.headline.weight(.semibold))
                         .foregroundColor(Color.brown)
@@ -281,7 +267,7 @@ struct ProductDetailView: View {
                         .contentTransition(.numericText())
                         .animation(.easeInOut(duration: 0.15), value: quantity)
                         .multilineTextAlignment(.center)
-
+                    
                     Button {
                         quantity += 1
                     } label: {
@@ -295,7 +281,7 @@ struct ProductDetailView: View {
                 }
                 .background(Capsule().fill(Color.brown.opacity(0.07)))
                 .overlay(Capsule().stroke(Color.brown.opacity(0.18), lineWidth: 1))
-
+                
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart") {
                     if UserSession.shared.isLoggedIn {
                         if let cartItem = cartItem {
@@ -303,7 +289,8 @@ struct ProductDetailView: View {
                                 userId: UserSession.shared.userId ?? "",
                                 item: cartItem,
                                 selections: selections,
-                                extras: selectedExtras
+                                extras: selectedExtras,
+                                quantity: quantity
                             )
                             onUpdate?()
                         } else {
@@ -311,7 +298,8 @@ struct ProductDetailView: View {
                                 userId: UserSession.shared.userId ?? "",
                                 product: product,
                                 selections: selections,
-                                extras: selectedExtras // TODO: add qty
+                                extras: selectedExtras,
+                                quantity: quantity
                             )
                         }
                     } else {
@@ -319,6 +307,38 @@ struct ProductDetailView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+//
+//  StickyFooterView.swift
+//  CoffeeCraft
+//
+import SwiftUI
+
+struct StickyFooterView<Actions: View>: View {
+    let label: String
+    let amount: Double
+    @ViewBuilder let actions: () -> Actions
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .center) {
+                Text(label)
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                Text(String(format: "$%.2f", amount))
+                    .font(.system(size: 22, weight: .bold, design: .serif))
+                    .foregroundColor(Color.brown)
+                    .contentTransition(.numericText())
+                    .animation(.easeInOut(duration: 0.2), value: amount)
+            }
+
+            actions()
         }
         .padding(EdgeInsets(top: 16, leading: 16, bottom: 24, trailing: 16))
         .background(.ultraThinMaterial)

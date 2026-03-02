@@ -107,7 +107,7 @@ struct HomeView: View {
 
                 Text(UserSession.shared.userName ?? "Coffee Lover")
                     .font(.title3).fontWeight(.bold).fontDesign(.serif)
-                    .foregroundColor(Color.coffeeBrown)
+                    .foregroundColor(Color.brown)
             }
             Spacer()
         }
@@ -191,16 +191,16 @@ struct HomeView: View {
                         Image(systemName: "arrow.right")
                             .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundColor(Color.coffeeBrown)
+                    .foregroundColor(Color.brown)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
                     .background(
                         Capsule()
-                            .fill(Color.coffeeBrown.opacity(0.1))
+                            .fill(Color.brown.opacity(0.1))
                     )
                     .overlay(
                         Capsule()
-                            .stroke(Color.coffeeBrown.opacity(0.25), lineWidth: 1)
+                            .stroke(Color.brown.opacity(0.25), lineWidth: 1)
                     )
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
@@ -218,10 +218,10 @@ struct SectionHeader: View {
         HStack(spacing: 7) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color.coffeeBrown)
+                .foregroundColor(Color.brown)
             Text(title)
                 .font(.system(size: 16, weight: .semibold, design: .serif))
-                .foregroundColor(Color.coffeeBrown)
+                .foregroundColor(Color.primary)
             Spacer()
         }
     }
