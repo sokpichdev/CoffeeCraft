@@ -16,21 +16,25 @@ struct AsyncImageCard: View {
     var corner: CGFloat = 15
     
     @State private var isURLValid: Bool = false
-    
+    private var iconSize: CGFloat { height * 0.35 }
+    private var textSize: CGFloat { height * 0.12 }
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: corner)
                 .fill(Color.gray.opacity(0.2))
             
             if !isURLValid || (imageURL ?? "").isEmpty {
-                VStack(spacing: 8) {
+                VStack(spacing: height * 0.05) {
                     Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 50))
+                        .font(.system(size: iconSize))
                         .foregroundColor(.gray)
+                    
                     Text(placeholderText)
-                        .font(.caption)
+                        .font(.system(size: textSize))
                         .foregroundColor(.gray)
+                        .minimumScaleFactor(0.7)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             
             if let urlString = imageURL, let url = URL(string: urlString), !urlString.isEmpty {

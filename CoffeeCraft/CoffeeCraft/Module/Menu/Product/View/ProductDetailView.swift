@@ -134,7 +134,7 @@ struct ProductDetailView: View {
                                 .padding(.top)
                         }
                         
-                        Spacer(minLength: 120)
+                        Spacer(minLength: 180)
                     }
                 }
             })
