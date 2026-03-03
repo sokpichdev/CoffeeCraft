@@ -15,6 +15,7 @@ class OrderDetailViewModel: ObservableObject {
     @Published var userName: String = "Loading..."
     @Published var isLoadingUser = true
     @Published var isUpdatingStatus = false
+    @Published var isCancelling = false
     @Published var lastStatusUpdate: String?
     
     private let db = Firestore.firestore()
@@ -24,11 +25,81 @@ class OrderDetailViewModel: ObservableObject {
     init(order: Order) {
         self.order = order
     }
-    
-    deinit {
-        orderListener?.remove()
+
+    deinit { orderListener?.remove() }
+
+    /// Cancels a Pending order and refunds CC if it was wallet-paid.
+    /// Guard: only callable when status == "Pending" — enforced in UI and here.
+    func cancelOrder() async {
+        guard let orderId = order.id else { return }
+        guard order.status == "Pending" else {
+            AlertManager.shared.showError(message: "Only Pending orders can be cancelled.")
+            return
+        }
+
+        isCancelling = true
+        defer { isCancelling = false }
+
+        AppLog.order.info("Cancelling order \(orderId) — payment: \(self.order.paymentMethod ?? "cash")")
+
+        do {
+            // Step 1: Mark order Cancelled in Firestore
+            try await db.collection("orders")
+                .document(orderId)
+                .updateData(["status": "Cancelled"])
+
+            AppLog.order.debug("Order \(orderId) marked Cancelled")
+
+            // Step 2: Refund wallet if this was wallet-paid
+            if order.wasWalletPayment,
+               let userId = order.userId,
+               let amount = order.walletAmountPaid,
+               amount > 0 {
+
+                AppLog.order.info("Issuing refund: +\(Int(amount)) CC for orderId: \(orderId)")
+
+                try await WalletService.shared.refund(
+                    userId: userId,
+                    amount: amount,
+                    orderId: orderId
+                )
+
+                ToastManager.shared.showTop(
+                    message: "Order cancelled · +\(Int(amount)) CC refunded to wallet",
+                    type: .success
+                )
+            } else {
+                // Cash order — just confirm cancellation
+                ToastManager.shared.showTop(message: "Order cancelled", type: .success)
+            }
+
+            // Real-time listener picks up the status change automatically
+        } catch {
+            AppLog.order.error("cancelOrder failed: \(error.localizedDescription)")
+            AlertManager.shared.showError(
+                title: "Cancellation failed",
+                message: error.localizedDescription
+            )
+        }
     }
-    
+
+    // MARK: - Computed Helpers
+
+    /// True only when the logged-in user owns this Pending order.
+    /// Drives the Cancel button visibility in ActionButtonsSection.
+    var canCancel: Bool {
+        order.status == "Pending" &&
+        order.userId == UserSession.shared.userId
+    }
+
+    /// Label shown in the Cancel confirmation dialog.
+    var cancelConfirmationMessage: String {
+        if order.wasWalletPayment, let amount = order.walletAmountPaid {
+            return "This will cancel your order and refund \(Int(amount)) CC to your wallet."
+        }
+        return "Are you sure you want to cancel this order?"
+    }
+
     func startListening(orderId: String) {
         guard !hasAppeared else { return }
         hasAppeared = true
@@ -37,83 +108,56 @@ class OrderDetailViewModel: ObservableObject {
         orderListener = db.collection("orders")
             .document(orderId)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    AppLog.order.error("❌ OrderDetail listener error: \(error.localizedDescription)")
+                guard let self else { return }
+                if let error {
+                    AppLog.order.error("OrderDetail listener error: \(error.localizedDescription)")
                     return
                 }
-                
-                guard let snapshot = snapshot else { return }
-                
+                guard let snapshot else { return }
                 do {
                     let updatedOrder = try snapshot.data(as: Order.self)
-                    
-                    // Check if status changed
                     if updatedOrder.status != self.order.status {
                         self.lastStatusUpdate = updatedOrder.status
-                        ToastManager.shared.showTop(message: "Order is now \(updatedOrder.status ?? "").", type: .success)
-                        
-                        // Haptic feedback
-                        let generator = UINotificationFeedbackGenerator()
-                        generator.notificationOccurred(.success)
+                        let haptic = UINotificationFeedbackGenerator()
+                        haptic.notificationOccurred(.success)
                     }
-                    
                     self.order = updatedOrder
-                    AppLog.order.debug("✅ OrderDetail id: \(updatedOrder.id ?? "nil") status: \(updatedOrder.status ?? "")")
-                    AppLog.printItem(updatedOrder, label: "OrderDetail id: \(updatedOrder.id ?? "nil")")
                 } catch {
-                    AppLog.order.error("❌ Failed to decode order: \(error.localizedDescription)")
+                    AppLog.order.error("Failed to decode order: \(error.localizedDescription)")
                 }
             }
     }
     
     func fetchUserInfo(userId: String) {
         isLoadingUser = true
-        
-        db.collection("users")
-            .document(userId)
-            .getDocument { [weak self] snapshot, error in
-                guard let self = self else { return }
-                
-                Task { @MainActor in
-                    defer { self.isLoadingUser = false }
-                    
-                    if let error = error {
-                        AppLog.order.error("❌ Failed to fetch user: \(error.localizedDescription)")
-                        self.userName = "Unknown User"
-                        return
-                    }
-                    
-                    if let data = snapshot?.data(),
-                       let name = (data["name"] as? String) {
-                        self.userName = name
-                    } else {
-                        self.userName = "User #\(userId.prefix(6))"
-                    }
+        db.collection("users").document(userId).getDocument { [weak self] snapshot, error in
+            guard let self else { return }
+            Task { @MainActor in
+                defer { self.isLoadingUser = false }
+                if let error {
+                    AppLog.order.error("Failed to fetch user: \(error.localizedDescription)")
+                    self.userName = "Unknown User"
+                    return
+                }
+                if let name = snapshot?.data()?["name"] as? String {
+                    self.userName = name
+                } else {
+                    self.userName = "User #\(userId.prefix(6))"
                 }
             }
+        }
     }
     
     func updateOrderStatus(to status: String) async {
         guard let orderId = order.id else { return }
-        
         isUpdatingStatus = true
         defer { isUpdatingStatus = false }
-        
         do {
-            try await db.collection("orders")
-                .document(orderId)
-                .updateData(["status": status])
-            
-            AppLog.order.debug("✅ updateOrderStatus — \(orderId) → \(status)")
-            // The real-time listener will pick up the change and update `order` automatically
+            try await db.collection("orders").document(orderId).updateData(["status": status])
+            AppLog.order.debug("updateOrderStatus — \(orderId) → \(status)")
         } catch {
-            AppLog.order.error("❌ updateOrderStatus error: \(error.localizedDescription)")
-            AlertManager.shared.showError(
-                title: "Error updating status",
-                message: error.localizedDescription
-            )
+            AppLog.order.error("updateOrderStatus error: \(error.localizedDescription)")
+            AlertManager.shared.showError(title: "Error updating status", message: error.localizedDescription)
         }
     }
     

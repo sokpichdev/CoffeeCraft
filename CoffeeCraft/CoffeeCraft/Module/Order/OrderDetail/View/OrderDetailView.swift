@@ -33,18 +33,23 @@ struct OrderDetailView: View {
                     
                     OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
                     
-                    PricingCard(totalPrice: vm.order.totalPrice ?? 0.0, items: vm.order.items as? [CartItemData] ?? [])
+                    PricingCard(
+                        totalPrice: vm.order.totalPrice ?? 0.0,
+                        items: vm.order.items as? [CartItemData] ?? [],
+                        paymentMethod: vm.order.paymentMethod,
+                        walletAmountPaid: vm.order.walletAmountPaid
+                    )
 
                     ActionButtonsSection(
                         order: vm.order,
                         isActive: isActive,
                         isUpdating: vm.isUpdatingStatus,
+                        isCancelling: vm.isCancelling,
                         onUpdateStatus: { newStatus in
                             Task { await vm.updateOrderStatus(to: newStatus) }
                         },
-                        onReorder: {
-                            handleReorder()
-                        }
+                        onReorder: { handleReorder() },
+                        onCancel: { confirmCancel() }
                     )
                 }
                 .padding(.horizontal, 16)
@@ -76,6 +81,15 @@ struct OrderDetailView: View {
         }
     }
     
+    // MARK: - Cancel (Phase 5)
+    private func confirmCancel() {
+        AlertManager.shared.showDestructive(
+            title: "Cancel Order?",
+            message: vm.cancelConfirmationMessage,
+            destructiveTitle: "Yes, Cancel"
+        ) { Task { await vm.cancelOrder() } }
+    }
+
     private func handleReorder() {
         guard let items = vm.order.items as? [CartItemData] else { return }
         
