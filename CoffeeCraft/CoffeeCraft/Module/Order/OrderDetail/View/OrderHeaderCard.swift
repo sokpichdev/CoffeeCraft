@@ -108,7 +108,7 @@ struct StatusBadge: View {
     var body: some View {
         HStack(spacing: 6) {
             Circle()
-                .fill(statusColor(status))
+                .fill(statusColor(status).opacity(0.2))
                 .frame(width: 8, height: 8)
             
             Text(status == "InProgress" ? "In Progress" : status)

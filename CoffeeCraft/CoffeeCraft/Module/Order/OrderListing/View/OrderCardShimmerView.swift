@@ -47,7 +47,7 @@ struct OrderCardShimmerView: View {
 
             HStack(spacing: 6) {
                 Circle()
-                    .fill(Color.brown)
+                    .fill(Color.brown.opacity(0.2))
                     .frame(width: 8, height: 8)
                 ShimmerView().frame(width: 50, height: 15)
             }
