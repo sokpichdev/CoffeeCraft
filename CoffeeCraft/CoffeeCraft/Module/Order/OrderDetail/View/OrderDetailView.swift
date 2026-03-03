@@ -13,6 +13,7 @@ struct OrderDetailView: View {
     
     @StateObject private var vm: OrderDetailViewModel
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var cartManager: CartManager
     @State private var showReceipt = false
     
     init(order: Order, isActive: Bool = false) {
@@ -25,23 +26,15 @@ struct OrderDetailView: View {
         CustomRefreshScrollView( {
             VStack(spacing: 0) {
                 VStack(spacing: 24) {
-                    // Header Card with Order Info & User
-                    OrderHeaderCard(
-                        order: vm.order,
-                        userName: vm.userName,
-                        isLoadingUser: vm.isLoadingUser
-                    )
-                    
-                    // Live Status Timeline
+                    OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
                     StatusTimelineView(status: vm.order.status ?? "")
-                    
-                    // Order Items Card
                     OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
-                    
-                    // Pricing Breakdown
                     PricingCard(totalPrice: vm.order.totalPrice ?? 0.0, items: vm.order.items as? [CartItemData] ?? [])
-                    
-                    // Action Buttons
+                    if isOrderCompleted {
+                        ReorderButtonSection {
+                            handleReorder()
+                        }
+                    }
                     ActionButtonsSection(order: vm.order, isActive: isActive, isUpdating: vm.isUpdatingStatus) { newStatus in
                         Task {
                             await vm.updateOrderStatus(to: newStatus)
@@ -75,5 +68,58 @@ struct OrderDetailView: View {
         .onDisappear {
             vm.stopListening()
         }
+    }
+    
+    private var isOrderCompleted: Bool {
+        let status = vm.order.status?.lowercased() ?? ""
+        return status == "completed" || status == "done"
+    }
+    
+    private func handleReorder() {
+        guard let items = vm.order.items as? [CartItemData] else { return }
+        
+        // Check if any duplicates exist
+        let hasDuplicates = ReorderManager.shared.hasDuplicates(
+            orderItems: items,
+            currentCart: cartManager.items
+        )
+        
+        if hasDuplicates {
+            // Show confirmation that some items will be merged
+            let duplicateNames = ReorderManager.shared.getDuplicateNames(
+                orderItems: items,
+                currentCart: cartManager.items
+            )
+            let itemList = duplicateNames.joined(separator: ", ")
+            
+            AlertManager.shared.showConfirmation(
+                title: "Items Already in Cart",
+                message: "\(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart with the same options. Quantities will be combined.",
+                confirmTitle: "Add to Cart",
+                cancelTitle: "Cancel"
+            ) {
+                executeReorder()
+            }
+        } else {
+            // No duplicates, add directly
+            executeReorder()
+        }
+    }
+    
+    private func executeReorder() {
+        Task {
+            await ReorderManager.shared.executeReorder(
+                order: vm.order,
+                cartManager: cartManager,
+                productLookup: lookupProduct
+            )
+        }
+    }
+    
+    private func lookupProduct(byName name: String) async -> Product? {
+        // TODO: Implement product lookup from your product catalog
+        // Fetch from Firestore or search in local cache
+        // Return nil to create placeholder product
+        return nil
     }
 }
