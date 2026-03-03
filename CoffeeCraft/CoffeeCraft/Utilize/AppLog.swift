@@ -48,6 +48,7 @@ struct AppLog {
     static let profile   = Logger(subsystem: subsystem, category: "Profile")    // User profile data
     static let menu      = Logger(subsystem: subsystem, category: "Menu")       // Coffee menu items
     static let order     = Logger(subsystem: subsystem, category: "Order")      // User orders
+    static let wallet    = Logger(subsystem: subsystem, category: "Wallet")
 
     // MARK: - extractValue
     // Recursively walks through any Swift value using Mirror (Swift's reflection API)
