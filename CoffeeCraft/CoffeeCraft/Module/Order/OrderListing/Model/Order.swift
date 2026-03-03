@@ -34,6 +34,7 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
 // Simpler model just for decoding item info
 struct CartItemData: Identifiable, Codable, Hashable {
     var id: String { "\(name ?? "unknown")-\(price ?? 0.0)" }
+    var productId: String?  // Product reference for re-ordering
     var name: String?
     var imageURL: String?
     var selections: [String: String]?
@@ -49,6 +50,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
         hasher.combine(selections)
         hasher.combine(extras)
         hasher.combine(quantity)
+        hasher.combine(productId)
     }
     
     // This defines how two objects are considered equal
@@ -58,15 +60,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
         lhs.imageURL == rhs.imageURL &&
         lhs.selections == rhs.selections &&
         lhs.extras == rhs.extras &&
-        lhs.quantity == rhs.quantity
-    }
-    func toCartItem(using product: Product) -> CartItem {
-        CartItem(
-            id: UUID(),
-            product: product,
-            selections: selections ?? [:],
-            extras: extras ?? [],
-            quantity: quantity ?? 1
-        )
+        lhs.quantity == rhs.quantity &&
+        lhs.productId == rhs.productId
     }
 }

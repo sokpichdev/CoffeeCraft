@@ -27,14 +27,19 @@ struct OrderDetailView: View {
             VStack(spacing: 0) {
                 VStack(spacing: 24) {
                     OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
-                    StatusTimelineView(status: vm.order.status ?? "")
-                    OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
-                    PricingCard(totalPrice: vm.order.totalPrice ?? 0.0, items: vm.order.items as? [CartItemData] ?? [])
+                    
                     if isOrderCompleted {
                         ReorderButtonSection {
                             handleReorder()
                         }
                     }
+                    
+                    StatusTimelineView(status: vm.order.status ?? "")
+                    
+                    OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
+                    
+                    PricingCard(totalPrice: vm.order.totalPrice ?? 0.0, items: vm.order.items as? [CartItemData] ?? [])
+                    
                     ActionButtonsSection(order: vm.order, isActive: isActive, isUpdating: vm.isUpdatingStatus) { newStatus in
                         Task {
                             await vm.updateOrderStatus(to: newStatus)
@@ -110,16 +115,8 @@ struct OrderDetailView: View {
         Task {
             await ReorderManager.shared.executeReorder(
                 order: vm.order,
-                cartManager: cartManager,
-                productLookup: lookupProduct
+                cartManager: cartManager
             )
         }
-    }
-    
-    private func lookupProduct(byName name: String) async -> Product? {
-        // TODO: Implement product lookup from your product catalog
-        // Fetch from Firestore or search in local cache
-        // Return nil to create placeholder product
-        return nil
     }
 }

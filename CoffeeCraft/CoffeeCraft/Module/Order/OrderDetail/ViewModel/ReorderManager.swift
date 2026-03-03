@@ -8,110 +8,167 @@
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
+
 @MainActor
 class ReorderManager: ObservableObject {
     static let shared = ReorderManager()
-    
+    private let db = Firestore.firestore()
+
     private init() {}
-    
-    /// Analyzes order items against current cart
-    /// Returns: items to merge (existing + new qty) and items to add fresh
-    func analyzeItems(orderItems: [CartItemData], currentCart: [CartItem] ) -> (toMerge: [(existing: CartItem, additionalQty: Int)],
-                                                                                toAdd: [CartItemData]) {
-        var toMerge: [(existing: CartItem, additionalQty: Int)] = []
-        var toAdd: [CartItemData] = []
-        
-        for orderItem in orderItems {
-            if let existingItem = findExactMatch(orderItem, in: currentCart) {
-                // Exact duplicate found - will merge quantities
-                toMerge.append((existingItem, orderItem.quantity ?? 1))
-            } else {
-                // New item or different options - add as separate
-                toAdd.append(orderItem)
-            }
+
+    // MARK: - Product Fetching
+
+    /// Fetches a live product by ID (preferred) then falls back to name search.
+    func fetchProduct(byId id: String?, byName name: String) async -> Product? {
+        if let id, !id.isEmpty, let product = await fetchProductById(id) {
+            return product
         }
-        
-        return (toMerge, toAdd)
+        return await fetchProductByName(name)
     }
-    
-    /// Check if any items will be merged (for showing confirmation)
+
+    private func fetchProductById(_ id: String) async -> Product? {
+        do {
+            let doc = try await db.collection("products").document(id).getDocument()
+            return doc.exists ? parseProduct(doc) : nil
+        } catch {
+            AppLog.order.warning("⚠️ fetchProductById failed for '\(id)': \(error)")
+            return nil
+        }
+    }
+
+    private func fetchProductByName(_ name: String) async -> Product? {
+        guard !name.isEmpty else { return nil }
+        do {
+            let snapshot = try await db.collection("products")
+                .whereField("name", isEqualTo: name)
+                .limit(to: 1)
+                .getDocuments()
+            return snapshot.documents.first.map { parseProduct($0) }
+        } catch {
+            AppLog.order.error("❌ fetchProductByName failed for '\(name)': \(error)")
+            return nil
+        }
+    }
+
+    /// Unified parser — works for both QueryDocumentSnapshot and DocumentSnapshot
+    /// since both conform to DocumentSnapshot in Firebase SDK.
+    private func parseProduct(_ snapshot: DocumentSnapshot) -> Product {
+        let data = snapshot.data() ?? [:]
+        return Product(
+            id: snapshot.documentID,
+            name: data["name"] as? String ?? "",
+            description: data["description"] as? String ?? "",
+            price: data["price"] as? Double ?? 0.0,
+            imageURL: data["imageURL"] as? String ?? "",
+            category: data["category"] as? String ?? "Others",
+            available: data["available"] as? Bool ?? true,
+            customizations: data["customizations"] as? [String: [String: Double]] ?? [:]
+        )
+    }
+
+    // MARK: - Duplicate Helpers
+
     func hasDuplicates(orderItems: [CartItemData], currentCart: [CartItem]) -> Bool {
         orderItems.contains { findExactMatch($0, in: currentCart) != nil }
     }
-    
-    /// Get names of items that will be merged
+
     func getDuplicateNames(orderItems: [CartItemData], currentCart: [CartItem]) -> [String] {
-        orderItems.compactMap { item in
-            findExactMatch(item, in: currentCart) != nil ? item.name : nil
-        }
+        orderItems.compactMap { findExactMatch($0, in: currentCart) != nil ? $0.name : nil }
     }
-    
+
+    func analyzeItems(orderItems: [CartItemData], currentCart: [CartItem]) -> (toMerge: [(existing: CartItem, additionalQty: Int)], toAdd: [CartItemData]) {
+        var toMerge: [(existing: CartItem, additionalQty: Int)] = []
+        var toAdd:   [CartItemData] = []
+
+        for orderItem in orderItems {
+            if let match = findExactMatch(orderItem, in: currentCart) {
+                toMerge.append((match, orderItem.quantity ?? 1))
+            } else {
+                toAdd.append(orderItem)
+            }
+        }
+        return (toMerge, toAdd)
+    }
+
     private func findExactMatch(_ orderItem: CartItemData, in cart: [CartItem]) -> CartItem? {
-        cart.first { cartItem in
-            // Exact match: same product name + same selections + same extras
-            cartItem.product.name == orderItem.name &&
-            cartItem.selections == orderItem.selections &&
-            Set(cartItem.extras) == Set(orderItem.extras ?? [])
+        cart.first {
+            $0.product.name == orderItem.name &&
+            $0.selections == (orderItem.selections ?? [:]) &&
+            Set($0.extras) == Set(orderItem.extras ?? [])
         }
     }
-    
-    /// Execute reorder - always merges exact duplicates
-    func executeReorder(order: Order, cartManager: CartManager, productLookup: (String) async -> Product?) async {
+
+    // MARK: - Execute Reorder
+
+    /// Fetches all required products concurrently, then writes the entire cart in
+    /// one Firestore call via CartManager.batchReorder.
+    func executeReorder(order: Order, cartManager: CartManager) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             AlertManager.shared.showError(message: "User not logged in")
             return
         }
-        
-        guard let items = order.items as? [CartItemData] else { return }
-        
-        let (toMerge, toAdd) = analyzeItems(orderItems: items, currentCart: cartManager.items)
-        
-        // 1. Merge exact duplicates (increase quantity)
-        for (existingItem, additionalQty) in toMerge {
-            let newQuantity = existingItem.quantity + additionalQty
-            cartManager.updateCartItem(
-                userId: userId,
-                item: existingItem,
-                selections: existingItem.selections,
-                extras: existingItem.extras,
-                quantity: newQuantity
-            )
-        }
-        
-        // 2. Add new items (or items with different options)
-        for item in toAdd {
-            let product = await productLookup(item.name ?? "") ?? createProduct(from: item)
-            
-            cartManager.addToCart(
-                userId: userId,
-                product: product,
-                selections: item.selections ?? [:],
-                extras: item.extras ?? [],
-                quantity: item.quantity ?? 1
-            )
-        }
-        
-        // Show success message
-        let totalItems = toMerge.count + toAdd.count
-        let mergedCount = toMerge.count
-        
-        if mergedCount > 0 {
-            ToastManager.shared.show(message: "Added \(totalItems) items. \(mergedCount) merged with existing. ☕️", type: .success)
-        } else {
-            ToastManager.shared.show(message: "Added \(totalItems) items to cart ☕️", type: .success)
-        }
-    }
-    
-    private func createProduct(from item: CartItemData) -> Product {
-        Product(
-            id: UUID().uuidString,
-            name: item.name ?? "Unknown Item",
-            description: "",
-            price: item.price ?? 0.0,
-            imageURL: item.imageURL ?? "",
-            category: "Re-order",
-            available: true,
-            customizations: [:]
+
+        let orderItems = (order.items ?? []).compactMap { $0 }
+        guard !orderItems.isEmpty else { return }
+
+        let (toMerge, toAdd) = analyzeItems(
+            orderItems: orderItems,
+            currentCart: cartManager.items
         )
+
+        // Fetch all new products concurrently — no serial await chain
+        var productsByKey: [String: Product] = [:]
+        await withTaskGroup(of: (String, Product?).self) { group in
+            for item in toAdd {
+                let key = item.productId ?? item.name ?? UUID().uuidString
+                group.addTask { [weak self] in
+                    guard let self else { return (key, nil) }
+                    let product = await self.fetchProduct(byId: item.productId, byName: item.name ?? "")
+                    return (key, product)
+                }
+            }
+            for await (key, product) in group {
+                productsByKey[key] = product
+            }
+        }
+
+        // Split results: found vs not found
+        var additions: [(product: Product, selections: [String: String], extras: [String], quantity: Int)] = []
+        var notFoundNames: [String] = []
+
+        for item in toAdd {
+            let key = item.productId ?? item.name ?? ""
+            if let product = productsByKey[key] {
+                additions.append((
+                    product: product,
+                    selections: item.selections ?? [:],
+                    extras: item.extras ?? [],
+                    quantity: item.quantity ?? 1
+                ))
+            } else {
+                notFoundNames.append(item.name ?? "Unknown")
+                AppLog.order.error("❌ Reorder: product not found — '\(item.name ?? "unknown")'")
+            }
+        }
+
+        // Warn about unavailable items (non-blocking)
+        if !notFoundNames.isEmpty {
+            let names = notFoundNames.joined(separator: ", ")
+            AlertManager.shared.showError(title: "Some items unavailable", message: "\(names) could not be found and \(notFoundNames.count == 1 ? "was" : "were") skipped.")
+        }
+
+        guard !additions.isEmpty || !toMerge.isEmpty else { return }
+
+        // Single Firestore write for all changes
+        cartManager.batchReorder(userId: userId, merges: toMerge,additions: additions) {
+            let newCount = additions.count
+            let mergedCount = toMerge.count
+
+            var parts: [String] = []
+            if newCount > 0 { parts.append("\(newCount) new \(newCount == 1 ? "item" : "items") added") }
+            if mergedCount > 0 { parts.append("\(mergedCount) \(mergedCount == 1 ? "item" : "items") merged") }
+
+            ToastManager.shared.show(message: parts.joined(separator: ", ") + " ☕️", type: .success)
+        }
     }
 }
