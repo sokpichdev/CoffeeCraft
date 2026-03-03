@@ -51,13 +51,6 @@ struct OrderCardView: View {
             Divider().padding(.horizontal)
             footerSection
             
-            if isCompleted {
-                Divider().padding(.horizontal)
-                CustomCoffeeButton(title: "Re-order", buttonImage: "arrow.counterclockwise", foregroundColor: .brown, bgColors: [.brown.opacity(0.1)], verticalPadding: 8, ) {
-                    onReorder?()
-                }
-            }
-            
             if adminActions != nil {
                 Divider().padding(.horizontal)
                 adminActions?().padding()
@@ -195,24 +188,42 @@ struct OrderCardView: View {
     }
     
     private var footerSection: some View {
-        HStack {
+        HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Total Amount")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
                     .foregroundColor(.brown)
             }
-            
+
             Spacer()
-            
-            Image(systemName: "chevron.right")
-                .font(.headline)
-                .foregroundColor(.brown)
+
+            if isCompleted {
+                Button {
+                    onReorder?()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 11, weight: .bold))
+                        Text("Reorder")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(Color.coffeeOliveGreen))
+                }
+                .buttonStyle(.plain)
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.headline).fontWeight(.semibold)
+                    .foregroundColor(.brown.opacity(0.4))
+            }
         }
-        .frame(height: 32)
         .padding()
     }
     
