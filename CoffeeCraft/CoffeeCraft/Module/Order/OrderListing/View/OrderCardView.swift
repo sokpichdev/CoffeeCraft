@@ -10,6 +10,7 @@ struct OrderCardView: View {
     let order: Order
     var adminActions: (() -> AnyView)? = nil
     var onNavigate: (() -> Void)? = nil
+    var onReorder: (() -> Void)? = nil
     
     /// Number of items to show in the preview stack before the +N badge
     private let previewDisplayCount: Int = 5
@@ -23,11 +24,17 @@ struct OrderCardView: View {
     private var items: [CartItemData] { (order.items ?? []).compactMap { $0 } }
     private var itemCount: Int { items.count }
     private var overflowCount: Int { max(0, items.count - previewDisplayCount) }
+    
+    private var isCompleted: Bool {
+        let status = order.status?.lowercased() ?? ""
+        return status == "completed" || status == "done"
+    }
 
-    init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil) {
+    init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil, onReorder: (() -> Void)? = nil) {
         self.order = order
         self.adminActions = adminActions
         self.onNavigate = onNavigate
+        self.onReorder = onReorder
         self.formattedOrderNumber = String(format: "%04d", order.orderId ?? 0)
         self.statusColorValue = OrderCardView.computeStatusColor(order.status ?? "")
     }
@@ -43,6 +50,13 @@ struct OrderCardView: View {
             
             Divider().padding(.horizontal)
             footerSection
+            
+            if isCompleted {
+                Divider().padding(.horizontal)
+                CustomCoffeeButton(title: "Re-order", buttonImage: "arrow.counterclockwise", foregroundColor: .brown, bgColors: [.brown.opacity(0.1)], verticalPadding: 8, ) {
+                    onReorder?()
+                }
+            }
             
             if adminActions != nil {
                 Divider().padding(.horizontal)

@@ -54,6 +54,7 @@ struct RootView: View {
                             } else {
                                 OrdersView()
                                     .environmentObject(orderVM)
+                                    .environmentObject(cartManager)
                                     .environmentObject(coordinator)
                             }
                         case .profile:

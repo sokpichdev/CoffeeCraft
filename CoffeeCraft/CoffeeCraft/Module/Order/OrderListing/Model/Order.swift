@@ -60,4 +60,13 @@ struct CartItemData: Identifiable, Codable, Hashable {
         lhs.extras == rhs.extras &&
         lhs.quantity == rhs.quantity
     }
+    func toCartItem(using product: Product) -> CartItem {
+        CartItem(
+            id: UUID(),
+            product: product,
+            selections: selections ?? [:],
+            extras: extras ?? [],
+            quantity: quantity ?? 1
+        )
+    }
 }

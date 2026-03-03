@@ -9,9 +9,11 @@ import SwiftUI
 struct OrdersView: View {
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
+    @EnvironmentObject var cartManager: CartManager
     @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
+    
     var body: some View {
         ZStack {
             Color(uiColor: .systemGroupedBackground)
@@ -44,7 +46,10 @@ struct OrdersView: View {
                             OrderCardView(
                                 order: order,
                                 onNavigate: {
-                                    push(AnyView(OrderDetailView(order: order)))
+                                    push(AnyView(OrderDetailView(order: order).environmentObject(cartManager)))
+                                },
+                                onReorder: {
+                                    handleReorder(for: order)
                                 }
                             ).padding(.horizontal)
                             .onAppear {
@@ -90,7 +95,7 @@ struct OrdersView: View {
 
         func navigate() {
             if let order = orderVM.orders.first(where: { $0.id == orderId }) {
-                push(AnyView(OrderDetailView(order: order)))
+                push(AnyView(OrderDetailView(order: order).environmentObject(cartManager)))
                 coordinator.clearNavigation()
             }
         }
@@ -102,5 +107,48 @@ struct OrdersView: View {
                 navigate()
             }
         }
+    }
+    
+    private func handleReorder(for order: Order) {
+        guard let items = order.items as? [CartItemData] else { return }
+        
+        let hasDuplicates = ReorderManager.shared.hasDuplicates(
+            orderItems: items,
+            currentCart: cartManager.items
+        )
+        
+        if hasDuplicates {
+            let duplicateNames = ReorderManager.shared.getDuplicateNames(
+                orderItems: items,
+                currentCart: cartManager.items
+            )
+            let itemList = duplicateNames.joined(separator: ", ")
+            
+            AlertManager.shared.showConfirmation(
+                title: "Items Already in Cart",
+                message: "\(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart with the same options. Quantities will be combined.",
+                confirmTitle: "Add to Cart",
+                cancelTitle: "Cancel"
+            ) {
+                executeReorder(for: order)
+            }
+        } else {
+            executeReorder(for: order)
+        }
+    }
+    
+    private func executeReorder(for order: Order) {
+        Task {
+            await ReorderManager.shared.executeReorder(
+                order: order,
+                cartManager: cartManager,
+                productLookup: lookupProduct
+            )
+        }
+    }
+    
+    private func lookupProduct(byName name: String) async -> Product? {
+        // TODO: Implement product lookup from your product catalog
+        return nil
     }
 }
