@@ -60,24 +60,24 @@
 - ⭐ Change password  __________ (done)
 - ⭐ Logout __________ (done)
 **Nice-to-have**
-- Order history shortcut  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
+- Order history shortcut __________ (done)
 - Saved addresses  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- Saved payment method (if any)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- App settings (language, dark mode)  __________ (done)
-
+- Saved payment method (if any) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
+- App settings (dark mode) __________ (done)
+- App settings (language)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 ---
 
 ### ⭐ 3. Order Enhancements
 Make ordering more realistic.
 - Order detail screen  __________ (done)
-- Reorder button (order again)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
+- Reorder button (order again)  __________ (done)
 - Cancel order (only if status = Pending)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 
 ---
 
 ### ⭐ 4. Notifications (Big value 🚀)
 Firebase + push notifications 👌
-- ⭐ Order status updates  
+- ⭐ Order status updates  __________ (done)
 - Promotions / discounts  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
 - Admin → notify customer when order is ready  __________ (done)
 
@@ -128,10 +128,10 @@ These make app “real business ready”.
 
 ### ⭐ 9. UX & Polish (Often overlooked)
 Small things that matter a lot.
-- Loading skeletons _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (in progress)
-- Empty states (Home / Orders / Cart)  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (in progress)
-- Error handling (network fail) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (not yet)
-- Pull-to-refresh _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (done)
+- Loading skeletons __________ (done) // will improve while on going
+- Empty states (Home / Orders / Cart)  __________ (done) // will improve while on going
+- Error handling (network fail) __________ (done) // will improve while on going
+- Pull-to-refresh __________ (done)
 - Dark mode __________ (done)
 
 ---
