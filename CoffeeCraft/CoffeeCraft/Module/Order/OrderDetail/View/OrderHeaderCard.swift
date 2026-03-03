@@ -132,6 +132,7 @@ struct StatusBadge: View {
         case "In Progress", "InProgress": return .blue
         case "Ready": return .coffeeOliveGreen
         case "Done", "Completed": return .brown
+        case "Cancelled": return .errorRed   // Phase 5
         default: return .brown
         }
     }
