@@ -4,6 +4,7 @@
 //
 //  Created by Sok Pich on 2/6/26.
 //
+// The user's mental flow when opening an order detail is: who / when → what happened → what did I get → how much → now what?
 
 import SwiftUI
 
@@ -28,23 +29,23 @@ struct OrderDetailView: View {
                 VStack(spacing: 24) {
                     OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
                     
-                    if isOrderCompleted {
-                        ReorderButtonSection {
-                            handleReorder()
-                        }
-                    }
-                    
                     StatusTimelineView(status: vm.order.status ?? "")
                     
                     OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
                     
                     PricingCard(totalPrice: vm.order.totalPrice ?? 0.0, items: vm.order.items as? [CartItemData] ?? [])
-                    
-                    ActionButtonsSection(order: vm.order, isActive: isActive, isUpdating: vm.isUpdatingStatus) { newStatus in
-                        Task {
-                            await vm.updateOrderStatus(to: newStatus)
+
+                    ActionButtonsSection(
+                        order: vm.order,
+                        isActive: isActive,
+                        isUpdating: vm.isUpdatingStatus,
+                        onUpdateStatus: { newStatus in
+                            Task { await vm.updateOrderStatus(to: newStatus) }
+                        },
+                        onReorder: {
+                            handleReorder()
                         }
-                    }
+                    )
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 20)
@@ -73,11 +74,6 @@ struct OrderDetailView: View {
         .onDisappear {
             vm.stopListening()
         }
-    }
-    
-    private var isOrderCompleted: Bool {
-        let status = vm.order.status?.lowercased() ?? ""
-        return status == "completed" || status == "done"
     }
     
     private func handleReorder() {
