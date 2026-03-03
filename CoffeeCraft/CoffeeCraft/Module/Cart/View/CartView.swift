@@ -10,16 +10,17 @@ struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
-    @State private var editingItem: CartItem? = nil
-    
     @Environment(\.dismiss) private var dismiss
 
-    @StateObject var orderService = OrderService()
+    @State private var editingItem: CartItem? = nil
+
+    @StateObject private var orderService = OrderService()
+    @StateObject private var productVM = ProductViewModel()
 
     var body: some View {
         CustomNavigationStack {
             ZStack(alignment: .bottom) {
-               CustomRefreshScrollView( {
+                CustomRefreshScrollView({
                     VStack(spacing: 12) {
                         ForEach(cartManager.items) { item in
                             Button {
@@ -46,11 +47,19 @@ struct CartView: View {
                         cartManager.loadCartFromFirestore(userId: userId)
                     }
                 })
-                
+
                 // MARK: - Checkout Footer
                 StickyFooterView(label: "Total", amount: cartManager.total) {
-                    CustomCoffeeButton(title: "Checkout", bgColors: [Color.brown], isDisabled: cartManager.items.isEmpty) {
-                        AlertManager.shared.showConfirmation(title: "Confirm Order", message: "the order total is \(String(format: "$%.2f", cartManager.total))", confirmTitle: "Place") {
+                    CustomCoffeeButton(
+                        title: "Checkout",
+                        bgColors: [Color.brown],
+                        isDisabled: cartManager.items.isEmpty
+                    ) {
+                        AlertManager.shared.showConfirmation(
+                            title: "Confirm Order",
+                            message: "the order total is \(String(format: "$%.2f", cartManager.total))",
+                            confirmTitle: "Place"
+                        ) {
                             orderService.placeOrder(
                                 cartItems: cartManager.items,
                                 total: cartManager.total
@@ -74,12 +83,15 @@ struct CartView: View {
             }
             .background(Color(.systemGroupedBackground))
             .ignoresSafeArea(edges: .bottom)
+            // Directly use ProductDetailView — selections/extras/quantity are now correctly
+            // restored from cartItem in ProductDetailView's init, so no wrapper needed.
             .sheet(item: $editingItem) { item in
                 CustomNavigationStack {
                     ProductDetailView(
                         product: item.product,
                         cartItem: item,
-                        onUpdate: { editingItem = nil }
+                        onUpdate: { editingItem = nil },
+                        allProducts: productVM.products
                     )
                     .environmentObject(cartManager)
                     .environmentObject(favVM)
@@ -89,6 +101,9 @@ struct CartView: View {
                 ToolBarButton.back {
                     dismiss()
                 }
+            }
+            .task {
+                await productVM.fetchProducts()
             }
         }
     }

@@ -17,15 +17,19 @@ struct ProductDetailView: View {
     var allProducts: [Product] = []
     
     @State private var selectedExtras: [String]
-    @State private var selections: [String: String] = [:]
-    @State private var quantity: Int = 1
-    
+    @State private var selections: [String: String] // now initialized from cartItem
+    @State private var quantity: Int
+
     init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil, allProducts: [Product] = []) {
         self.product = product
         self.cartItem = cartItem
         self.onUpdate = onUpdate
         self.allProducts = allProducts
+        // Restore ALL three pieces of state from the existing cart item when editing.
+        // Previously only extras & quantity were restored — leaving selections empty —
+        // which caused wrong option display and incorrect price in the edit sheet.
         _selectedExtras = State(initialValue: cartItem?.extras ?? [])
+        _selections = State(initialValue: cartItem?.selections ?? [:])
         _quantity = State(initialValue: cartItem?.quantity ?? 1)
     }
     
@@ -231,10 +235,7 @@ struct ProductDetailView: View {
                     .foregroundColor(Color.brown)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(Color.parchment.opacity(0.92))
-                    )
+                    .background(Capsule().fill(Color.parchment.opacity(0.92)))
                     .shadow(color: Color.brown.opacity(0.15), radius: 6, x: 0, y: 2)
                     .padding(.bottom, 16)
             }

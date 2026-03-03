@@ -141,14 +141,8 @@ struct OrdersView: View {
         Task {
             await ReorderManager.shared.executeReorder(
                 order: order,
-                cartManager: cartManager,
-                productLookup: lookupProduct
+                cartManager: cartManager
             )
         }
-    }
-    
-    private func lookupProduct(byName name: String) async -> Product? {
-        // TODO: Implement product lookup from your product catalog
-        return nil
     }
 }

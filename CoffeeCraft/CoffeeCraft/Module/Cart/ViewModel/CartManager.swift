@@ -22,7 +22,7 @@ class CartManager: ObservableObject {
                             product: product,
                             selections: selections,
                             extras: extras,
-        quantity: quantity)
+                            quantity: quantity)
         items.append(item)
         saveCartToFirestore(userId: userId) {
             ToastManager.shared.show(message: "Your cart was added successfully ☕️", type: .success)
@@ -47,7 +47,7 @@ class CartManager: ObservableObject {
                 product: item.product,
                 selections: selections,
                 extras: extras,
-            quantity: quantity)
+                quantity: quantity)
             
             // Use completion handler
             saveCartToFirestore(userId: userId) {
@@ -113,5 +113,46 @@ class CartManager: ObservableObject {
         
         let decoded = try itemData.map { try Firestore.Decoder().decode(CartItem.self, from: $0) }
         self.items = decoded
+    }
+}
+
+// MARK: - Reorder Support
+extension CartManager {
+
+    /// Applies all reorder mutations — merges and additions — in memory, then performs
+    /// a single Firestore write. Use this instead of calling updateCartItem/addToCart
+    /// in a loop, which would trigger N separate writes and N individual toasts.
+    func batchReorder(
+        userId: String,
+        merges: [(existing: CartItem, additionalQty: Int)],
+        additions: [(product: Product, selections: [String: String], extras: [String], quantity: Int)],
+        completion: (() -> Void)? = nil
+    ) {
+        // 1. Merge in memory: bump quantity on existing items
+        for (existingItem, additionalQty) in merges {
+            if let idx = items.firstIndex(where: { $0.id == existingItem.id }) {
+                items[idx] = CartItem(
+                    id: items[idx].id,
+                    product: items[idx].product,
+                    selections: items[idx].selections,
+                    extras: items[idx].extras,
+                    quantity: items[idx].quantity + additionalQty
+                )
+            }
+        }
+
+        // 2. Append new items in memory
+        for (product, selections, extras, quantity) in additions {
+            items.append(CartItem(
+                id: UUID(),
+                product: product,
+                selections: selections,
+                extras: extras,
+                quantity: quantity
+            ))
+        }
+
+        // 3. One write for everything
+        saveCartToFirestore(userId: userId, completion: completion)
     }
 }

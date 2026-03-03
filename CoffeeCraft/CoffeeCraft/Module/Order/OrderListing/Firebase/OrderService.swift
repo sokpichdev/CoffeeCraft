@@ -79,6 +79,7 @@ class OrderService: ObservableObject {
                     "status": "Pending",
                     "items": cartItems.map { item in
                         var dict: [String: Any] = [
+                            "productId": item.product.id,
                             "name": item.product.name,
                             "price": item.totalPrice,
                             "imageURL": item.product.imageURL,
