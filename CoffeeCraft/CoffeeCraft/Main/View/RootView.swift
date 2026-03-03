@@ -51,6 +51,7 @@ struct RootView: View {
                         case .orders:
                             if UserSession.shared.currentUser?.role == .manager {
                                 AdminOrdersView()
+                                    .environmentObject(cartManager)
                             } else {
                                 OrdersView()
                                     .environmentObject(orderVM)
