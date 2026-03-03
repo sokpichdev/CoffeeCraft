@@ -42,12 +42,14 @@ struct RootView: View {
                                     .environmentObject(favVM)
                                     .environmentObject(cardVM)
                                     .environmentObject(productVM)
+                                    .environmentObject(walletVM)
                             } else {
                                 MenuView()
                                     .environmentObject(cartManager)
                                     .environmentObject(favVM)
                                     .environmentObject(cardVM)
                                     .environmentObject(productVM)
+                                    .environmentObject(walletVM)
                             }
                         case .orders:
                             if UserSession.shared.currentUser?.role == .manager {
@@ -74,6 +76,14 @@ struct RootView: View {
                 .onAppear {
                     if UserSession.shared.currentUser != nil {
                         inboxVM.fetchNotifications(pageNum: 1)
+                    }
+                    if let userId = UserSession.shared.userId {
+                        walletVM.setup(userId: userId)
+                    }
+                }
+                .onChange(of: UserSession.shared.currentUser) { _, newUser in
+                    if let userId = newUser?.id {
+                        walletVM.setup(userId: userId)
                     }
                 }
             }
