@@ -30,6 +30,13 @@ struct AccountView: View {
 //                        await CustomizationSeeder.seedCustomizations()
 //                    }
 //                }
+                Button("top Up") {
+                    Task {
+                        try await WalletService.shared.topUp(userId: "vKqYgoK3xUNnfXmtlnovWylo9a13", amount: 100)
+                        let wallet = try await WalletService.shared.fetchWallet(userId: "vKqYgoK3xUNnfXmtlnovWylo9a13")
+                        print(wallet?.formattedBalance ?? "nil") // → "100 CC"
+                    }
+                }
                 footerSection
             }
             .padding()
