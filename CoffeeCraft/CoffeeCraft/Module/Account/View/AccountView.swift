@@ -12,7 +12,8 @@ struct AccountView: View {
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     @EnvironmentObject var authVM: AuthViewModel
-    
+    @EnvironmentObject var walletVM: WalletViewModel
+
     @EnvironmentObject var userSession: UserSession
     @Environment(\.pushScreen) var push
     @State var isOpenAddCard: Bool = false
@@ -21,6 +22,7 @@ struct AccountView: View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
                 profileSection
+                walletSection
                 myCardSection
                 personalSection
                 shortcutsSection
@@ -53,8 +55,11 @@ struct AccountView: View {
             }
         }
         .onAppear {
-            if let userId = UserSession.shared.userId, cardVM.cards.isEmpty {
-                cardVM.setUser(userId: userId)
+            if let userId = UserSession.shared.userId {
+                walletVM.setup(userId: userId)
+                if cardVM.cards.isEmpty {
+                    cardVM.setUser(userId: userId)
+                }
             }
         }
         .onChange(of: UserSession.shared.currentUser) { oldValue, newValue in
@@ -127,6 +132,15 @@ struct AccountView: View {
                 .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
         )
+    }
+    
+    // MARK: Wallet
+    var walletSection: some View {
+        SettingsSection(title: "My Wallet", icon: "creditcard.fill") {
+            RowInSectionView(label: walletVM.formattedBalance, title: "CoffeeCoins", systemImage: "creditcard.fill") {
+                push(AnyView(WalletView()))
+            }
+        }
     }
     
     // MARK: My Cards

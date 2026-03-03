@@ -45,6 +45,12 @@ struct SettingsView: View {
                     RowInSectionView(title: "Write a Review", systemImage: "star.fill")
                 }
                 
+                SettingsSection(title: "Testing Feature", icon: "flask.fill") {
+                    RowInSectionView(title: "Wallet Phase 1 Test", systemImage: "flask.fill") {
+                        push(AnyView(WalletTestView()))
+                    }
+                }
+                
                 if UserSession.shared.isLoggedIn {
                     CustomCoffeeButton(title: "Logout", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.errorRed, Color.errorRed.opacity(0.85)], contentPlacement: .leading) {
                         AlertManager.shared.showDestructive(

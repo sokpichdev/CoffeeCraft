@@ -17,6 +17,7 @@ struct CoffeeCraftApp: App {
     @StateObject private var orderVM = OrderViewModel()
     @StateObject private var coordinator = NotificationCoordinator.shared
     @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var walletVM = WalletViewModel()
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
@@ -29,6 +30,7 @@ struct CoffeeCraftApp: App {
                     .preferredColorScheme(themeManager.theme.colorScheme)
                     .environmentObject(orderVM)
                     .environmentObject(coordinator)
+                    .environmentObject(walletVM)
             }
         }
     }

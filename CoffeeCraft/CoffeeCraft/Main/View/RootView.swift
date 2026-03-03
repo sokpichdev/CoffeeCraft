@@ -13,7 +13,8 @@ struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
-    
+    @EnvironmentObject var walletVM: WalletViewModel
+
     @StateObject var inboxVM = InboxViewModel()
     @StateObject var productVM = ProductViewModel()
     @StateObject var cartManager = CartManager()
@@ -65,6 +66,7 @@ struct RootView: View {
                                 .environmentObject(authVM)
                                 .environmentObject(cardVM)
                                 .environmentObject(inboxVM)
+                                .environmentObject(walletVM)
                         }
                     TabBarView(selectedTab: $selectedTab)
                 }
