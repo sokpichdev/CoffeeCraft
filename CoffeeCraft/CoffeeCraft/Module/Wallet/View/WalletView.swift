@@ -6,14 +6,6 @@
 //
 import SwiftUI
 
-// MARK: - WalletView
-// Main wallet screen. Entry point from AccountView.
-// Shows the balance card, top-up button, and transaction history.
-//
-// NAVIGATION: AccountView -> push(AnyView(WalletView()))
-// ENV OBJECTS: WalletViewModel injected as @StateObject here
-//              (not via EnvironmentObject — wallet is self-contained)
-
 struct WalletView: View {
 
     @Environment(\.dismiss) private var dismiss
@@ -24,7 +16,6 @@ struct WalletView: View {
         CustomRefreshScrollView({
             VStack(spacing: 20) {
 
-                // Balance hero card
                 WalletBalanceCard(
                     wallet: vm.wallet,
                     isLoading: vm.isLoading
@@ -32,7 +23,6 @@ struct WalletView: View {
                     showTopUp = true
                 }
 
-                // Transaction history
                 TransactionHistoryView(
                     transactions: vm.transactions,
                     isLoading: vm.isLoading
@@ -50,8 +40,7 @@ struct WalletView: View {
             ToolBarButton.back { dismiss() }
         }
         .sheet(isPresented: $showTopUp) {
-            // TopUpView — built in Phase 3
-            ComingSoonView()
+            TopUpView(walletVM: vm)
         }
         .onAppear {
             guard let userId = UserSession.shared.userId else { return }
