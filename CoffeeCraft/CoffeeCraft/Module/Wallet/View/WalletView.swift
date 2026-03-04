@@ -42,7 +42,7 @@ struct WalletView: View {
                     )
                 }
 
-                TransactionHistoryView(
+                FilteredTransactionView(
                     transactions: vm.transactions,
                     isLoading: vm.isLoading
                 )
