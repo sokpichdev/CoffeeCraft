@@ -262,19 +262,83 @@ class CardViewModel: ObservableObject {
         AppLog.firestore.debug("✅ shareCard — card \(card.cardNumber) successfully shared with userId: \(userId)")
     }
     
+    // MARK: - Loyalty Reward Constants
+    // Every `rewardMilestone` points earned → `rewardCC` CoffeeCoins added to wallet.
+    // Uses integer-division milestone detection so it works correctly across multiple
+    // orders and shared cards without ever double-awarding the same milestone.
+    //   e.g. 9 → 10 pts: (9/10=0) < (10/10=1) ✓ milestone
+    //        10 → 11 pts: (10/10=1) == (11/10=1) ✗ no milestone
+    //        19 → 20 pts: (19/10=1) < (20/10=2) ✓ milestone
+    private static let rewardMilestone = 10
+    private static let rewardCC        = 20.0
+
     func addPoints(to card: LoyaltyCard, amount: Int) async throws {
         guard card.hasAccessForCurrentUser else {
             AppLog.firestore.error("❌ addPoints — access denied for card: \(card.cardNumber)")
             throw CardError.noAccess
         }
-        
+
         AppLog.firestore.debug("⭐️ addPoints — adding \(amount) point(s) to card: \(card.cardNumber)")
-        
-        try await db.collection("loyalty_cards").document(card.id ?? "").updateData([
-            "points": FieldValue.increment(Int64(amount))
-        ])
-        
-        AppLog.firestore.debug("✅ addPoints — \(amount) point(s) added to card: \(card.cardNumber)")
+
+        let cardRef = db.collection("loyalty_cards").document(card.id ?? "")
+
+        // Use a transaction so we atomically read pointsBefore, write pointsAfter,
+        // and detect a milestone crossing — safe even on shared cards with concurrent writers.
+        let result = try await db.runTransaction { transaction, errorPointer -> Any? in
+            do {
+                let snapshot    = try transaction.getDocument(cardRef)
+                let before      = snapshot.data()?["points"] as? Int ?? 0
+                let after       = before + amount
+                transaction.updateData(["points": after], forDocument: cardRef)
+                // Return [before, after] so the caller can detect milestone crossings
+                return [before, after] as NSArray
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+        }
+
+        guard let arr = result as? [Int], arr.count == 2 else {
+            AppLog.firestore.error("❌ addPoints — transaction returned unexpected result")
+            return
+        }
+
+        let pointsBefore = arr[0]
+        let pointsAfter  = arr[1]
+
+        AppLog.firestore.debug("✅ addPoints — card: \(card.cardNumber), \(pointsBefore) → \(pointsAfter) pts")
+
+        // MARK: - Milestone check
+        let milestonesBefore = pointsBefore / Self.rewardMilestone
+        let milestonesAfter  = pointsAfter  / Self.rewardMilestone
+        let newMilestones    = milestonesAfter - milestonesBefore
+
+        guard newMilestones > 0, let userId = currentUserId else { return }
+
+        AppLog.firestore.info("🎉 addPoints — \(newMilestones) milestone(s) crossed at \(pointsAfter) pts for uid: \(userId)")
+
+        for i in 0..<newMilestones {
+            // Calculate which milestone number was just hit (e.g. "10th point", "20th point")
+            let milestoneNumber = (milestonesBefore + 1 + i) * Self.rewardMilestone
+            let reason = "Loyalty milestone – \(milestoneNumber) pts"
+
+            do {
+                try await WalletService.shared.addReward(
+                    userId: userId,
+                    amount: Self.rewardCC,
+                    reason: reason
+                )
+                AppLog.firestore.info("✅ Reward granted: +\(Int(Self.rewardCC)) CC — \(reason)")
+            } catch {
+                AppLog.firestore.error("❌ addReward failed for \(reason): \(error.localizedDescription)")
+            }
+        }
+
+        let totalCC = newMilestones * Int(Self.rewardCC)
+        ToastManager.shared.show(
+            message: "🎉 +\(totalCC) CC loyalty reward!",
+            type: .success
+        )
     }
     
     func createInitialCard(userId: String, userName: String) async throws {
