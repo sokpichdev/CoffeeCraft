@@ -31,7 +31,7 @@ struct WalletBalanceCard: View {
                 VStack(spacing: 16) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("CoffeeCoins Balance")
+                            Text("Wallet Balance")
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundStyle(Color.white.opacity(0.75))
@@ -39,7 +39,7 @@ struct WalletBalanceCard: View {
                                 ShimmerView(cornerRadius: 8)
                                     .frame(width: 140, height: 44)
                             } else {
-                                Text(wallet?.formattedBalance ?? "0 CC")
+                                Text(wallet?.formattedBalance ?? "$0")
                                     .font(.system(size: 42, weight: .bold, design: .rounded))
                                     .foregroundStyle(.white)
                                     .contentTransition(.numericText())
@@ -53,11 +53,11 @@ struct WalletBalanceCard: View {
                     }
                     if let wallet {
                         HStack(spacing: 0) {
-                            statItem(label: "Topped Up", value: "\(Int(wallet.totalTopUp)) CC")
+                            statItem(label: "Topped Up", value: wallet.totalTopUp.currencyFormatted)
                             Divider()
                                 .frame(height: 28)
                                 .overlay(Color.white.opacity(0.2))
-                            statItem(label: "Spent", value: "\(Int(wallet.totalSpent)) CC")
+                            statItem(label: "Spent", value: wallet.totalSpent.currencyFormatted)
                         }
                         .padding(.vertical, 10)
                         .padding(.horizontal, 12)

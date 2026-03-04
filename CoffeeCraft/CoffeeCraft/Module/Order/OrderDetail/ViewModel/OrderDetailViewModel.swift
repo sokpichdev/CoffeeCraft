@@ -28,7 +28,7 @@ class OrderDetailViewModel: ObservableObject {
 
     deinit { orderListener?.remove() }
 
-    /// Cancels a Pending order and refunds CC if it was wallet-paid.
+    /// Cancels a Pending order and refunds wallet balance if it was wallet-paid.
     /// Guard: only callable when status == "Pending" — enforced in UI and here.
     func cancelOrder() async {
         guard let orderId = order.id else { return }
@@ -56,7 +56,7 @@ class OrderDetailViewModel: ObservableObject {
                let amount = order.walletAmountPaid,
                amount > 0 {
 
-                AppLog.order.info("Issuing refund: +\(Int(amount)) CC for orderId: \(orderId)")
+                AppLog.order.info("Issuing refund: +\(amount.currencyFormatted) for orderId: \(orderId)")
 
                 try await WalletService.shared.refund(
                     userId: userId,
@@ -65,7 +65,7 @@ class OrderDetailViewModel: ObservableObject {
                 )
 
                 ToastManager.shared.showTop(
-                    message: "Order cancelled · +\(Int(amount)) CC refunded to wallet",
+                    message: "Order cancelled · +\(amount.currencyFormatted) refunded to wallet",
                     type: .success
                 )
             } else {
@@ -95,7 +95,7 @@ class OrderDetailViewModel: ObservableObject {
     /// Label shown in the Cancel confirmation dialog.
     var cancelConfirmationMessage: String {
         if order.wasWalletPayment, let amount = order.walletAmountPaid {
-            return "This will cancel your order and refund \(Int(amount)) CC to your wallet."
+            return "This will cancel your order and refund \(amount.currencyFormatted) to your wallet."
         }
         return "Are you sure you want to cancel this order?"
     }

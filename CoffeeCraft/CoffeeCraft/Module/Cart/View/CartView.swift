@@ -136,7 +136,7 @@ struct CartView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text("Insufficient balance")
                     .font(.caption.weight(.semibold)).foregroundStyle(Color.errorRed)
-                Text("Need \(Int(cartManager.total)) CC · have \(walletVM.formattedBalance)")
+                Text("Need \(cartManager.total.currencyFormatted) · have \(walletVM.formattedBalance)")
                     .font(.caption2).foregroundStyle(.secondary)
             }
             Spacer()
@@ -156,7 +156,7 @@ struct CartView: View {
 
     private func confirmAndPlaceOrder() {
         let message = cartManager.paymentMethod == .wallet
-            ? "\(Int(cartManager.total)) CC will be deducted from your wallet"
+            ? "\(cartManager.total.currencyFormatted) will be deducted from your wallet"
             : String(format: "Total: $%.2f — pay at the counter", cartManager.total)
 
         AlertManager.shared.showConfirmation(

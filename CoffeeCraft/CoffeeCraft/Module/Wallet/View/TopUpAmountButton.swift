@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - TopUpAmountButton
 // Selectable chip used inside TopUpView's amount grid.
-// Shows the CC amount, an optional badge ("Popular", "Best Value"),
+// Shows the $ amount, an optional badge ("Popular", "Best Value"),
 // and a highlighted selected state.
 
 struct TopUpAmountButton: View {
@@ -27,7 +27,7 @@ struct TopUpAmountButton: View {
                         .font(.title2)
                         .foregroundStyle(isSelected ? .white : Color.coffeeBrown)
 
-                    Text("\(Int(amount)) CC")
+                    Text(amount.currencyFormatted)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundStyle(isSelected ? .white : .primary)

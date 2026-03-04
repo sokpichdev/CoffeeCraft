@@ -20,10 +20,10 @@ import SwiftUI
 // Stored in Firestore as a raw String value.
 
 enum WalletTransactionType: String, Codable, CaseIterable {
-    case topup   = "topup"    // User manually added CC
-    case payment = "payment"  // CC deducted when order was placed
-    case refund  = "refund"   // CC returned when order was cancelled
-    case reward  = "reward"   // Bonus CC from loyalty milestone
+    case topup   = "topup"    // User manually added $
+    case payment = "payment"  // $ deducted when order was placed
+    case refund  = "refund"   // $ returned when order was cancelled
+    case reward  = "reward"   // Bonus $ from loyalty milestone
 
     // MARK: Display
 
@@ -94,13 +94,13 @@ struct WalletTransaction: Identifiable, Codable {
 
     // MARK: - Computed Helpers
 
-    /// True if this transaction added CC to the wallet
+    /// True if this transaction added $ to the wallet
     var isCredit: Bool { amount > 0 }
 
-    /// Formatted amount with sign — e.g. "+100 CC" or "-12 CC"
+    /// Formatted amount with sign — e.g. "+$10" or "-$12.5"
     var formattedAmount: String {
         let sign = isCredit ? "+" : ""
-        return "\(sign)\(Int(amount)) CC"
+        return "\(sign)\(amount.currencyFormatted)"
     }
 
     /// Short timestamp label — e.g. "Jan 5, 2:30 PM"

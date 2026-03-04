@@ -51,11 +51,11 @@ struct PricingCard: View {
         HStack(spacing: 8) {
             Image(systemName: isWallet ? "creditcard.fill" : "banknote")
                 .font(.caption).foregroundStyle(isWallet ? Color.coffeeBrown : Color.secondary)
-            Text(isWallet ? "Paid with CoffeeCoins" : "Pay at Counter")
+            Text(isWallet ? "Paid with Wallet" : "Pay at Counter")
                 .font(.caption).foregroundStyle(.secondary)
             Spacer()
             if isWallet, let amount = walletAmountPaid {
-                Text("\(Int(amount)) CC").font(.caption.weight(.bold)).foregroundStyle(Color.coffeeBrown)
+                Text(amount.currencyFormatted).font(.caption.weight(.bold)).foregroundStyle(Color.coffeeBrown)
             }
         }
         .padding(.top, 2)
