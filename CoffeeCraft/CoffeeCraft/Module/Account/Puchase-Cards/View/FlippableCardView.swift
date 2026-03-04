@@ -228,7 +228,7 @@ struct FlippableCardView: View {
                                                     .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
                                                     .frame(width: width * 0.06, height: width * 0.06)
                                                 
-                                                if index < card.points {
+                                                if index < (card.points % 10) {
                                                     Image(systemName: "cup.and.saucer.fill")
                                                         .resizable()
                                                         .scaledToFit()
@@ -241,7 +241,7 @@ struct FlippableCardView: View {
                                 }
                             }
                             
-                            Text("\(10 - card.points) more for a FREE drink!")
+                            Text("\(10 - (card.points % 10)) more for a FREE drink!")
                                 .font(.system(size: width * 0.028, weight: .medium))
                                 .foregroundStyle(Color.orange)
                         }
