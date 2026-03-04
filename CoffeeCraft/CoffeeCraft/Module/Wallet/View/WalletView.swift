@@ -24,22 +24,7 @@ struct WalletView: View {
                 }
 
                 if let error = vm.errorMessage {
-                    HStack(spacing: 10) {
-                        Image(systemName: "wifi.exclamationmark")
-                            .foregroundStyle(Color.errorRed)
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(Color.errorRed)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(Color.errorRed.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.errorRed.opacity(0.25), lineWidth: 1)
-                    )
+                    errorBanner(message: error)
                 }
 
                 FilteredTransactionView(
@@ -49,12 +34,13 @@ struct WalletView: View {
 
                 Spacer().frame(height: 40)
             }
-            .padding()
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
 
         }, onRefresh: {
             await vm.refresh()
         })
-        .background(Color(.systemGroupedBackground))
+        .background(Color(hex: "#F5EDE4"))   // warm cream background
         .customNavigationBar("My Wallet") {
             ToolBarButton.back { dismiss() }
         }
@@ -65,5 +51,40 @@ struct WalletView: View {
             guard let userId = UserSession.shared.userId else { return }
             vm.setup(userId: userId)
         }
+    }
+
+    func errorBanner(message: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color(hex: "#C0392B"))
+
+            Text(message)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Color(hex: "#C0392B"))
+
+            Spacer()
+
+            Button {
+                Task { await vm.refresh() }
+            } label: {
+                Text("Retry")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color(hex: "#C0392B"))
+                    .clipShape(Capsule())
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color(hex: "#C0392B").opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color(hex: "#C0392B").opacity(0.2), lineWidth: 1)
+        )
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 }

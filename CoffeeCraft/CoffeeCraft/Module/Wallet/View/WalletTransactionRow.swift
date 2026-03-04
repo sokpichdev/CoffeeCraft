@@ -18,37 +18,48 @@ struct WalletTransactionRow: View {
     var body: some View {
         HStack(spacing: 14) {
 
-            // Icon
+            //icon badge
             ZStack {
-                Circle()
-                    .fill(transaction.type.color.opacity(0.15))
-                    .frame(width: 40, height: 40)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(transaction.type.color.opacity(0.12))
+                    .frame(width: 44, height: 44)
+
                 Image(systemName: transaction.type.icon)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(transaction.type.color)
             }
 
-            // Label + date
+            // label + date
             VStack(alignment: .leading, spacing: 3) {
                 Text(transaction.description)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(hex: "#1C1208"))
                     .lineLimit(1)
 
                 Text(transaction.formattedDate)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color(hex: "#9C836A"))
             }
 
             Spacer()
 
-            // Amount
-            Text(transaction.formattedAmount)
-                .font(.subheadline)
-                .fontWeight(.bold)
-                .foregroundStyle(transaction.isCredit ? Color.leafGreen : Color.errorRed)
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(transaction.formattedAmount)
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(transaction.isCredit ? Color(hex: "#3A8C5C") : Color(hex: "#C0392B"))
+
+                // Type
+                Text(transaction.type.rawValue.capitalized)
+                    .font(.system(size: 9, weight: .semibold))
+                    .tracking(0.5)
+                    .foregroundStyle(transaction.type.color.opacity(0.8))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(transaction.type.color.opacity(0.1))
+                    .clipShape(Capsule())
+            }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
     }
 }
