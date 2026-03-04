@@ -18,7 +18,8 @@ struct WalletView: View {
 
                 WalletBalanceCard(
                     wallet: vm.wallet,
-                    isLoading: vm.isLoading
+                    isLoading: vm.isLoading,
+                    cardWidth: UIScreen.main.bounds.width - 32
                 ) {
                     showTopUp = true
                 }
@@ -34,7 +35,7 @@ struct WalletView: View {
 
                 Spacer().frame(height: 40)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal)
             .padding(.top, 8)
 
         }, onRefresh: {
