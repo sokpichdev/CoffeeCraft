@@ -4,160 +4,418 @@
 //
 //  Created by Sok Pich on 03/03/2026.
 //
+//  3-step top-up sheet:
+//    Step 1 — Amount  : preset USD amounts or custom keyboard input
+//    Step 2 — Bank    : static list of payment methods
+//    Step 3 — Checkout: confirmation + one-tap pay → WalletService.topUp()
+//
+//  Conversion rate: 1 USD = 10 CC  (CC_PER_USD constant below)
 
 import SwiftUI
 
+// MARK: - Constants
+private let CC_PER_USD: Double = 10
+
+// MARK: - Bank Option
+struct BankOption: Identifiable {
+    let id: String
+    let name: String
+    let icon: String
+    let color: Color
+    let description: String
+}
+
+private let bankOptions: [BankOption] = [
+    BankOption(id: "aba",      name: "ABA Bank",      icon: "building.columns.fill", color: .blue,                   description: "Scan & Pay via ABA Mobile"),
+    BankOption(id: "vattanac", name: "Vattanac Bank", icon: "building.columns.fill", color: Color(hex: "1A56DB"),    description: "Scan & Pay via Vattanac Mobile"),
+    BankOption(id: "acleda",   name: "ACLEDA Bank",   icon: "building.columns.fill", color: .orange,                 description: "Scan & Pay via ACLEDA Unity"),
+    BankOption(id: "wing",     name: "Wing Bank",     icon: "w.circle.fill",         color: .green,                  description: "Scan & Pay via Wing Mobile"),
+]
+
+// MARK: - TopUpView (sheet root)
 struct TopUpView: View {
 
     @ObservedObject var walletVM: WalletViewModel
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedAmount: Double? = nil
-    @State private var isLoading: Bool = false
-
-    private let presetAmounts: [(amount: Double, badge: String?)] = [
-        (50,  nil),
-        (100, nil),
-        (200, "Popular"),
-        (500, "Best Value"),
-    ]
+    @State private var path          = NavigationPath()
+    @State private var selectedUSD:  Double?    = nil
+    @State private var customInput:  String     = ""
+    @State private var selectedBank: BankOption? = nil
 
     var body: some View {
-        VStack(spacing: 0) {
-            Capsule()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 40, height: 5)
-                .padding(.top, 12)
-                .padding(.bottom, 24)
-
-            ScrollView {
-                VStack(spacing: 28) {
-                    headerSection
-                    amountGrid
-                    summaryCard
-                    confirmButton
-                    Spacer().frame(height: 20)
+        NavigationStack(path: $path) {
+            TopUpAmountStep(
+                walletVM:    walletVM,
+                selectedUSD: $selectedUSD,
+                customInput: $customInput,
+                onContinue:  { path.append("bank") }
+            )
+            .navigationDestination(for: String.self) { step in
+                switch step {
+                case "bank":
+                    TopUpBankStep(selectedBank: $selectedBank, onContinue: { path.append("checkout") })
+                case "checkout":
+                    if let bank = selectedBank, let usd = resolvedUSD {
+                        TopUpCheckoutStep(
+                            walletVM:  walletVM,
+                            bank:      bank,
+                            usdAmount: usd,
+                            ccAmount:  usd * CC_PER_USD,
+                            onSuccess: { dismiss() }
+                        )
+                    }
+                default:
+                    EmptyView()
                 }
-                .padding(.horizontal, 20)
             }
         }
-        .background(Color(.systemGroupedBackground))
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.hidden)
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
-    // MARK: - Header
+    private var resolvedUSD: Double? {
+        if let s = selectedUSD { return s }
+        if let v = Double(customInput), v > 0 { return v }
+        return nil
+    }
+}
 
-    private var headerSection: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(Color.coffeeBrown.opacity(0.12))
-                    .frame(width: 64, height: 64)
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 32))
+// MARK: - Step 1: Amount
+private struct TopUpAmountStep: View {
+
+    @ObservedObject var walletVM: WalletViewModel
+    @Binding var selectedUSD: Double?
+    @Binding var customInput: String
+    let onContinue: () -> Void
+
+    @FocusState private var keyboardFocused: Bool
+
+    private let presets: [(usd: Double, badge: String?)] = [
+        (2, nil), (5, nil), (10, "Popular"), (20, "Best Value"),
+    ]
+
+    private var resolvedUSD: Double? {
+        if let s = selectedUSD { return s }
+        if let v = Double(customInput), v > 0 { return v }
+        return nil
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 28) {
+
+                // ── Header ────────────────────────────────────────────────
+                VStack(spacing: 8) {
+                    ZStack {
+                        Circle().fill(Color.coffeeBrown.opacity(0.1)).frame(width: 64, height: 64)
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 32)).foregroundStyle(Color.coffeeBrown)
+                    }
+                    Text("Top Up Wallet").font(.title2).fontWeight(.bold)
+                    Text("Choose an amount to add CoffeeCoins")
+                        .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+
+                    HStack(spacing: 5) {
+                        Image(systemName: "creditcard.fill").font(.caption)
+                        Text("Balance: \(walletVM.formattedBalance)").font(.caption).fontWeight(.medium)
+                    }
                     .foregroundStyle(Color.coffeeBrown)
-            }
+                    .padding(.horizontal, 14).padding(.vertical, 6)
+                    .background(Color.coffeeBrown.opacity(0.1)).clipShape(Capsule())
+                }
+                .padding(.top, 8)
 
-            Text("Top Up Wallet")
-                .font(.title2).fontWeight(.bold).foregroundStyle(.primary)
-
-            Text("Select an amount to add to your CoffeeCoins balance")
-                .font(.subheadline).foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            HStack(spacing: 6) {
-                Image(systemName: "creditcard.fill").font(.caption)
-                Text("Current balance: \(walletVM.formattedBalance)")
-                    .font(.caption).fontWeight(.medium)
-            }
-            .foregroundStyle(Color.coffeeBrown)
-            .padding(.horizontal, 14).padding(.vertical, 6)
-            .background(Color.coffeeBrown.opacity(0.1))
-            .clipShape(Capsule())
-        }
-    }
-
-    // MARK: - Amount Grid
-
-    private var amountGrid: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Choose Amount")
-                .font(.subheadline).fontWeight(.semibold).foregroundStyle(.primary)
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(presetAmounts, id: \.amount) { option in
-                    TopUpAmountButton(
-                        amount: option.amount,
-                        badge: option.badge,
-                        isSelected: selectedAmount == option.amount
-                    ) {
-                        withAnimation(.spring(duration: 0.25)) {
-                            selectedAmount = option.amount
+                // ── Preset grid ───────────────────────────────────────────
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Choose Amount").font(.subheadline).fontWeight(.semibold)
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        ForEach(presets, id: \.usd) { option in
+                            PresetAmountButton(
+                                usd:        option.usd,
+                                cc:         option.usd * CC_PER_USD,
+                                badge:      option.badge,
+                                isSelected: selectedUSD == option.usd && customInput.isEmpty
+                            ) {
+                                selectedUSD     = option.usd
+                                customInput     = ""
+                                keyboardFocused = false
+                            }
                         }
                     }
                 }
+
+                // ── Custom keyboard input ─────────────────────────────────
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Or enter amount (USD)").font(.subheadline).fontWeight(.semibold)
+                    HStack(spacing: 10) {
+                        Text("$").font(.title3).fontWeight(.bold).foregroundStyle(Color.coffeeBrown)
+                        TextField("0.00", text: $customInput)
+                            .keyboardType(.decimalPad)
+                            .focused($keyboardFocused)
+                            .font(.title3).fontWeight(.semibold)
+                            .onChange(of: customInput) { _, _ in selectedUSD = nil }
+                        if !customInput.isEmpty {
+                            Text("= \(Int((Double(customInput) ?? 0) * CC_PER_USD)) CC")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 14)
+                    .background(RoundedRectangle(cornerRadius: 14)
+                        .fill(Color(.secondarySystemGroupedBackground)))
+                    .overlay(RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(
+                            keyboardFocused ? Color.coffeeBrown : Color.coffeeBrown.opacity(0.2),
+                            lineWidth: keyboardFocused ? 2 : 1
+                        ))
+                }
+
+                // ── Summary card ──────────────────────────────────────────
+                if let usd = resolvedUSD, usd > 0 {
+                    VStack(spacing: 0) {
+                        summaryRow(label: "You pay",     value: String(format: "$%.2f USD", usd))
+                        Divider().padding(.horizontal, 16)
+                        summaryRow(label: "You receive", value: "+\(Int(usd * CC_PER_USD)) CC", highlight: true)
+                        Divider().padding(.horizontal, 16)
+                        summaryRow(
+                            label: "New balance",
+                            value: "\(Int((walletVM.wallet?.balance ?? 0) + usd * CC_PER_USD)) CC"
+                        )
+                    }
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
+                // ── Continue ──────────────────────────────────────────────
+                CustomCoffeeButton(
+                    title:       "Continue",
+                    buttonImage: "arrow.right.circle.fill",
+                    bgColors:    [Color.coffeeBrown, Color.coffeeLight],
+                    isDisabled:  resolvedUSD == nil || (resolvedUSD ?? 0) <= 0
+                ) {
+                    keyboardFocused = false
+                    onContinue()
+                }
+
+                Spacer().frame(height: 20)
             }
+            .padding(.horizontal, 20)
+            .animation(.spring(duration: 0.3), value: resolvedUSD != nil)
         }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Top Up")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - Summary Card
-
-    @ViewBuilder
-    private var summaryCard: some View {
-        if let amount = selectedAmount {
-            VStack(spacing: 0) {
-                summaryRow(label: "Adding", value: "+\(Int(amount)) CC", valueColor: .leafGreen)
-                Divider().padding(.horizontal, 16)
-                summaryRow(
-                    label: "New balance",
-                    value: "\(Int((walletVM.wallet?.balance ?? 0) + amount)) CC",
-                    valueColor: Color.coffeeBrown
-                )
-            }
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .transition(.opacity.combined(with: .move(edge: .top)))
-        }
-    }
-
-    private func summaryRow(label: String, value: String, valueColor: Color) -> some View {
+    private func summaryRow(label: String, value: String, highlight: Bool = false) -> some View {
         HStack {
             Text(label).font(.subheadline).foregroundStyle(.secondary)
             Spacer()
-            Text(value).font(.subheadline).fontWeight(.bold).foregroundStyle(valueColor)
+            Text(value).font(.subheadline).fontWeight(.bold)
+                .foregroundStyle(highlight ? Color.leafGreen : Color.coffeeBrown)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 14)
+    }
+}
+
+// MARK: - Preset Amount Button
+private struct PresetAmountButton: View {
+    let usd: Double; let cc: Double; let badge: String?
+    let isSelected: Bool; let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 4) {
+                    Text(String(format: "$%.0f", usd))
+                        .font(.title2).fontWeight(.bold)
+                        .foregroundStyle(isSelected ? .white : .primary)
+                    Text("\(Int(cc)) CC")
+                        .font(.caption).fontWeight(.medium)
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : .secondary)
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 20)
+                .background(RoundedRectangle(cornerRadius: 16).fill(
+                    isSelected
+                        ? AnyShapeStyle(LinearGradient(colors: [Color.coffeeBrown, Color.coffeeLight], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
+                ))
+                .overlay(RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(isSelected ? Color.coffeeBrown : Color.coffeeBrown.opacity(0.15), lineWidth: isSelected ? 2 : 1))
+                .shadow(color: isSelected ? Color.coffeeBrown.opacity(0.35) : .clear, radius: 8, y: 4)
+
+                if let badge {
+                    Text(badge).font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
+                        .padding(.horizontal, 6).padding(.vertical, 3)
+                        .background(Capsule().fill(Color.errorRed))
+                        .offset(x: -8, y: 8)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .animation(.spring(duration: 0.25), value: isSelected)
+    }
+}
+
+// MARK: - Step 2: Bank Selection
+private struct TopUpBankStep: View {
+    @Binding var selectedBank: BankOption?
+    let onContinue: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 12) {
+                    ForEach(bankOptions) { bank in
+                        BankRow(bank: bank, isSelected: selectedBank?.id == bank.id) {
+                            selectedBank = bank
+                        }
+                    }
+                }
+                .padding(20)
+            }
+            VStack(spacing: 0) {
+                Divider()
+                CustomCoffeeButton(
+                    title: "Continue", buttonImage: "arrow.right.circle.fill",
+                    bgColors: [Color.coffeeBrown, Color.coffeeLight],
+                    isDisabled: selectedBank == nil
+                ) { onContinue() }
+                .padding(20)
+            }
+            .background(Color(.systemGroupedBackground))
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Payment Method")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct BankRow: View {
+    let bank: BankOption; let isSelected: Bool; let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12).fill(bank.color.opacity(0.12)).frame(width: 48, height: 48)
+                    Image(systemName: bank.icon).font(.system(size: 20, weight: .semibold)).foregroundStyle(bank.color)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(bank.name).font(.subheadline).fontWeight(.semibold).foregroundStyle(.primary)
+                    Text(bank.description).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                ZStack {
+                    Circle().strokeBorder(isSelected ? Color.coffeeBrown : Color.secondary.opacity(0.3), lineWidth: 2).frame(width: 22, height: 22)
+                    if isSelected { Circle().fill(Color.coffeeBrown).frame(width: 12, height: 12) }
+                }
+            }
+            .padding(16)
+            .background(RoundedRectangle(cornerRadius: 16)
+                .fill(isSelected ? Color.coffeeBrown.opacity(0.06) : Color(.secondarySystemGroupedBackground)))
+            .overlay(RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(isSelected ? Color.coffeeBrown.opacity(0.4) : Color.clear, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .animation(.spring(duration: 0.2), value: isSelected)
+    }
+}
+
+// MARK: - Step 3: Checkout
+private struct TopUpCheckoutStep: View {
+    @ObservedObject var walletVM: WalletViewModel
+    let bank: BankOption; let usdAmount: Double; let ccAmount: Double
+    let onSuccess: () -> Void
+
+    @State private var isLoading = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 24) {
+
+                    // ── Bank card ─────────────────────────────────────────
+                    VStack(spacing: 0) {
+                        ZStack {
+                            LinearGradient(colors: [bank.color, bank.color.opacity(0.75)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            VStack(spacing: 6) {
+                                Image(systemName: bank.icon).font(.system(size: 28, weight: .semibold)).foregroundStyle(.white)
+                                Text(bank.name).font(.title3).fontWeight(.bold).foregroundStyle(.white)
+                            }
+                        }
+                        .frame(height: 100)
+                        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
+
+                        VStack(spacing: 0) {
+                            checkoutRow(label: "Recipient",   value: "CoffeeCraft Wallet")
+                            Divider().padding(.horizontal, 16)
+                            checkoutRow(label: "Amount",      value: String(format: "$%.2f USD", usdAmount))
+                            Divider().padding(.horizontal, 16)
+                            checkoutRow(label: "You receive", value: "+\(Int(ccAmount)) CC", highlight: true)
+                            Divider().padding(.horizontal, 16)
+                            checkoutRow(label: "Method",      value: bank.name)
+                        }
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
+                    }
+                    .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
+
+                    // ── Info note ─────────────────────────────────────────
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle.fill").foregroundStyle(Color.coffeeBrown)
+                        Text("CoffeeCoins will be credited instantly after payment is confirmed.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    .padding(14)
+                    .background(Color.coffeeBrown.opacity(0.07))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(20)
+            }
+
+            // ── Pay button pinned ─────────────────────────────────────────
+            VStack(spacing: 0) {
+                Divider()
+                CustomCoffeeButton(
+                    title:       isLoading ? "Processing..." : "Pay \(String(format: "$%.2f", usdAmount))",
+                    buttonImage: isLoading ? "" : "checkmark.circle.fill",
+                    bgColors:    [Color.coffeeBrown, Color.coffeeLight],
+                    isDisabled:  isLoading
+                ) { Task { await pay() } }
+                .padding(20)
+            }
+            .background(Color(.systemGroupedBackground))
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Checkout")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func checkoutRow(label: String, value: String, highlight: Bool = false) -> some View {
+        HStack {
+            Text(label).font(.subheadline).foregroundStyle(.secondary)
+            Spacer()
+            Text(value).font(.subheadline).fontWeight(.bold)
+                .foregroundStyle(highlight ? Color.leafGreen : .primary)
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
     }
 
-    // MARK: - Confirm Button
-
-    private var confirmButton: some View {
-        CustomCoffeeButton(
-            title: isLoading ? "Processing..." : "Confirm Top-Up",
-            buttonImage: isLoading ? "" : "checkmark.circle.fill",
-            bgColors: [Color.coffeeBrown, Color.coffeeLight],
-            isDisabled: selectedAmount == nil || isLoading
-        ) {
-            guard let amount = selectedAmount else { return }
-            Task { await topUp(amount: amount) }
-        }
-    }
-
-    // MARK: - Action
-
     @MainActor
-    private func topUp(amount: Double) async {
+    private func pay() async {
         guard let userId = UserSession.shared.userId else {
             AlertManager.shared.showError(message: WalletError.userNotAuthenticated.localizedDescription)
             return
         }
         isLoading = true
         do {
-            try await WalletService.shared.topUp(userId: userId, amount: amount)
+            try await WalletService.shared.topUp(userId: userId, amount: ccAmount)
             await walletVM.loadTransactions(userId: userId)
-            ToastManager.shared.show(message: "+\(Int(amount)) CC added to your wallet", type: .success)
-            dismiss()
+            ToastManager.shared.show(message: "+\(Int(ccAmount)) CC added to your wallet", type: .success)
+            onSuccess()
         } catch {
             AlertManager.shared.showError(message: error.localizedDescription)
         }

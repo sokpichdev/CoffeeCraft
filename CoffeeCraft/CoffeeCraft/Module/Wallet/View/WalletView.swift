@@ -23,6 +23,25 @@ struct WalletView: View {
                     showTopUp = true
                 }
 
+                if let error = vm.errorMessage {
+                    HStack(spacing: 10) {
+                        Image(systemName: "wifi.exclamationmark")
+                            .foregroundStyle(Color.errorRed)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(Color.errorRed)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.errorRed.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(Color.errorRed.opacity(0.25), lineWidth: 1)
+                    )
+                }
+
                 TransactionHistoryView(
                     transactions: vm.transactions,
                     isLoading: vm.isLoading

@@ -35,6 +35,8 @@ struct RootView: View {
                         case .home:
                             HomeView(selectedTab: $selectedTab)
                                 .environmentObject(announcementVM)
+                                .environmentObject(walletVM)
+                                .environmentObject(cardVM)
                         case .menu:
                             if UserSession.shared.currentUser?.role == .manager {
                                 MenuView(isManager: true)
@@ -79,6 +81,7 @@ struct RootView: View {
                     }
                     if let userId = UserSession.shared.userId {
                         walletVM.setup(userId: userId)
+                        cardVM.setUser(userId: userId)
                     }
                 }
                 .onChange(of: UserSession.shared.currentUser) { _, newUser in

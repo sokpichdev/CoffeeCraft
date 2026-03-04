@@ -9,8 +9,11 @@ import SwiftUI
 // MARK: - HomeView
 struct HomeView: View {
     @EnvironmentObject var announcementVM: AnnouncementViewModel
+    @EnvironmentObject var walletVM: WalletViewModel
+    @EnvironmentObject var cardVM: CardViewModel
     @Binding var selectedTab: Tab
     @State private var currentIndex: Int = 0
+    @State private var showTopUp: Bool = false
     private var bannerImages: [String] {
         announcementVM.announcements
             .prefix(4)
@@ -43,6 +46,9 @@ struct HomeView: View {
         })
         .edgesIgnoringSafeArea(.top)
         .background(Color(.systemGroupedBackground))
+        .sheet(isPresented: $showTopUp) {
+            TopUpView(walletVM: walletVM)
+        }
         .onAppear {
             if !announcementVM.isAnnouncementsFetched {
                 Task {
@@ -99,18 +105,92 @@ struct HomeView: View {
     }
     
     private var greetingCard: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(greetingText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Text(UserSession.shared.userName ?? "Coffee Lover")
-                    .font(.title3).fontWeight(.bold).fontDesign(.serif)
-                    .foregroundColor(Color.brown)
+        VStack(spacing: 12) {
+            // Name + greeting row
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(greetingText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(UserSession.shared.userName ?? "Coffee Lover")
+                        .font(.title3).fontWeight(.bold).fontDesign(.serif)
+                        .foregroundColor(Color.brown)
+                }
+                Spacer()
             }
-            Spacer()
+
+            // Balance + Points + Top Up row
+            if UserSession.shared.isLoggedIn {
+                HStack(spacing: 10) {
+
+                    // CC Balance pill
+                    HStack(spacing: 5) {
+                        Image(systemName: "creditcard.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                        if walletVM.isLoading && walletVM.wallet == nil {
+                            ShimmerView(cornerRadius: 6)
+                                .frame(width: 48, height: 14)
+                        } else {
+                            Text(walletVM.formattedBalance)
+                                .font(.system(size: 13, weight: .bold))
+                                .contentTransition(.numericText())
+                                .animation(.spring(duration: 0.4), value: walletVM.wallet?.balance)
+                        }
+                    }
+                    .foregroundStyle(Color.coffeeBrown)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Color.coffeeBrown.opacity(0.1))
+                    .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(Color.coffeeBrown.opacity(0.2), lineWidth: 1))
+
+                    // Points pill
+                    HStack(spacing: 5) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text("\(cardVM.activeCard?.points ?? 0) pts")
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                    .foregroundStyle(Color.orange)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Color.orange.opacity(0.1))
+                    .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(Color.orange.opacity(0.2), lineWidth: 1))
+
+                    Spacer()
+
+                    // Top Up button
+                    Button {
+                        showTopUp = true
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Top Up")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.coffeeBrown, Color.coffeeLight],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(Capsule())
+                        .shadow(color: Color.coffeeBrown.opacity(0.3), radius: 6, y: 3)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 3)
     }
 
     private var greetingText: String {
