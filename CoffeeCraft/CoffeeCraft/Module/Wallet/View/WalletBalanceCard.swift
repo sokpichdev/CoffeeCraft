@@ -66,9 +66,9 @@ struct WalletBalanceCard: View {
             .fill(
                 LinearGradient(
                     colors: [
-                        Color(hex: "#1C0A00"),
-                        Color(hex: "#3B1A08"),
-                        Color(hex: "#6F3A1F")
+                        Color.coffeeDarkBrown,
+                        Color.accentPrimary.opacity(0.85),
+                        Color.accentPrimary
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -88,7 +88,7 @@ struct WalletBalanceCard: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
-                    .foregroundStyle(Color(hex: "#D4956A").opacity(0.055))
+                    .foregroundStyle(Color.caramelGold.opacity(0.055))
                     .offset(x: 110, y: -90)
 
                 // Small ring
@@ -136,12 +136,12 @@ struct WalletBalanceCard: View {
     private func miniStatPill(wallet: Wallet) -> some View {
         HStack(spacing: 0) {
             miniStat(icon: "arrow.down", label: "Topped Up",
-                     value: wallet.totalTopUp.currencyFormatted, color: Color(hex: "#7EC8A4"))
+                     value: wallet.totalTopUp.currencyFormatted, color: Color.semanticSuccess)
             Rectangle()
                 .fill(Color.white.opacity(0.12))
                 .frame(width: 1, height: 26)
             miniStat(icon: "arrow.up", label: "Spent",
-                     value: wallet.totalSpent.currencyFormatted, color: Color(hex: "#E07070"))
+                     value: wallet.totalSpent.currencyFormatted, color: Color.semanticError)
         }
         .padding(.vertical, 9)
         .padding(.horizontal, 12)
@@ -191,7 +191,7 @@ struct WalletBalanceCard: View {
                 HStack(spacing: 6) {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Color(hex: "#D4956A"))
+                        .foregroundStyle(Color.caramelGold)
                     Text("Quick Top-Up")
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.white.opacity(0.5))
@@ -206,18 +206,18 @@ struct WalletBalanceCard: View {
                     Text("Add Funds")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                 }
-                .foregroundStyle(Color(hex: "#1C0A00"))
+                .foregroundStyle(Color.coffeeDarkBrown)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
                     LinearGradient(
-                        colors: [Color(hex: "#E8C49A"), Color(hex: "#D4956A")],
+                        colors: [Color.caramelGold.opacity(0.85), Color.caramelGold],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
                 .clipShape(Capsule())
-                .shadow(color: Color(hex: "#D4956A").opacity(0.5), radius: 5, x: 0, y: 2)
+                .shadow(color: Color.caramelGold.opacity(0.5), radius: 5, x: 0, y: 2)
                 .scaleEffect(buttonPressed ? 0.93 : 1.0)
             }
             .padding(.horizontal, horizontalPad)

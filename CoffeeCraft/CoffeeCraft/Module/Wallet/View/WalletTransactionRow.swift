@@ -33,12 +33,12 @@ struct WalletTransactionRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(transaction.description)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#1C1208"))
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
 
                 Text(transaction.formattedDate)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Color(hex: "#9C836A"))
+                    .foregroundStyle(Color.textMuted)
             }
 
             Spacer()
@@ -46,7 +46,7 @@ struct WalletTransactionRow: View {
             VStack(alignment: .trailing, spacing: 3) {
                 Text(transaction.formattedAmount)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(transaction.isCredit ? Color(hex: "#3A8C5C") : Color(hex: "#C0392B"))
+                    .foregroundStyle(transaction.isCredit ? Color.semanticSuccess : Color.semanticError)
 
                 // Type
                 Text(transaction.type.rawValue.capitalized)
