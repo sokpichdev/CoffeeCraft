@@ -15,18 +15,17 @@ import SwiftUI
 struct FilteredTransactionView: View {
     let transactions: [WalletTransaction]
     let isLoading: Bool
-    
-    // MARK: - Filter State
-    
+
     @State private var selectedFilter: TransactionFilter = .all
-    
+    @State private var appear = false
+
     enum TransactionFilter: String, CaseIterable {
         case all = "All"
         case topup = "Top-Up"
         case payment = "Payment"
         case refund = "Refund"
         case reward = "Reward"
-        
+
         var transactionType: WalletTransactionType? {
             switch self {
             case .all: return nil
@@ -36,84 +35,79 @@ struct FilteredTransactionView: View {
             case .reward: return .reward
             }
         }
-    }
-    
-    // MARK: - Filtered Data
-    
-    var filteredTransactions: [WalletTransaction] {
-        guard let type = selectedFilter.transactionType else {
-            return transactions
+
+        var icon: String {
+            switch self {
+            case .all: return "square.grid.2x2"
+            case .topup: return "arrow.down.circle"
+            case .payment: return "cart"
+            case .refund: return "arrow.uturn.left.circle"
+            case .reward: return "star"
+            }
         }
+    }
+
+    var filteredTransactions: [WalletTransaction] {
+        guard let type = selectedFilter.transactionType else { return transactions }
         return transactions.filter { $0.type == type }
     }
-    
-    // MARK: - Stats
-    
-    var totalCredits: Double {
-        filteredTransactions.filter { $0.isCredit }.reduce(0) { $0 + $1.amount }
+
+    var netTotal: Double {
+        filteredTransactions.reduce(0) { $0 + $1.amount }
     }
-    
-    var totalDebits: Double {
-        filteredTransactions.filter { !$0.isCredit }.reduce(0) { $0 + abs($1.amount) }
-    }
-    
-    // MARK: - Body
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
+
+            sectionHeader
             
-            // Header with count
-            headerSection
+            filterRow
             
-            // Filter Picker
-            filterPicker
-            
-            // Stats Summary (only show when not loading and has data)
             if !isLoading && !filteredTransactions.isEmpty {
-                statsSection
+                netTotalBanner
+                    .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
             }
             
-            // Content
             contentSection
-            
-            Spacer().frame(height: 20)
+
+            Spacer().frame(height: 16)
+        }
+        .opacity(appear ? 1 : 0)
+        .offset(y: appear ? 0 : 10)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4).delay(0.2)) { appear = true }
         }
     }
-    
-    // MARK: - Header
-    
-    private var headerSection: some View {
-        HStack {
-            Label("Transaction History", systemImage: "list.bullet.rectangle")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
-            
+
+    var sectionHeader: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("Transactions")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(Color(hex: "#1C1208"))
+
             Spacer()
-            
-            if !isLoading {
-                Text("\(filteredTransactions.count) of \(transactions.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+
+            if !isLoading && !transactions.isEmpty {
+                Text("\(filteredTransactions.count) record\(filteredTransactions.count == 1 ? "" : "s")")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Color(hex: "#9C836A"))
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: filteredTransactions.count)
             }
         }
         .padding(.horizontal, 4)
     }
-    
-    // MARK: - Filter Picker
-    
-    private var filterPicker: some View {
+
+    var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(TransactionFilter.allCases, id: \.self) { filter in
-                    FilterChip(
-                        title: filter.rawValue,
+                    CoffeeFilterChip(
+                        filter: filter,
                         isSelected: selectedFilter == filter,
                         count: countForFilter(filter)
                     ) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             selectedFilter = filter
                         }
                     }
@@ -122,117 +116,145 @@ struct FilteredTransactionView: View {
             .padding(.horizontal, 4)
         }
     }
-    
-    private func countForFilter(_ filter: TransactionFilter) -> Int {
+
+    func countForFilter(_ filter: TransactionFilter) -> Int {
         guard let type = filter.transactionType else { return transactions.count }
         return transactions.filter { $0.type == type }.count
     }
-    
-    // MARK: - Stats Section
-    
-    private var statsSection: some View {
-        HStack(spacing: 12) {
-            StatCard(
-                title: "In",
-                amount: totalCredits,
-                color: Color("leafGreen"),
-                icon: "arrow.down"
-            )
-            
-            StatCard(
-                title: "Out",
-                amount: totalDebits,
-                color: Color("errorRed"),
-                icon: "arrow.up"
-            )
+
+    var netTotalBanner: some View {
+        let isPositive = netTotal >= 0
+        let color: Color = isPositive ? Color(hex: "#3A8C5C") : Color(hex: "#C0392B")
+
+        return HStack(spacing: 6) {
+            Image(systemName: isPositive ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                .font(.system(size: 13))
+                .foregroundStyle(color)
+
+            Text(selectedFilter == .all ? "Net balance change" : "\(selectedFilter.rawValue) total")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color(hex: "#9C836A"))
+
+            Spacer()
+
+            Text((isPositive ? "+" : "") + netTotal.currencyFormatted)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(color)
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(color.opacity(0.07))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(color.opacity(0.15), lineWidth: 1)
+        )
         .padding(.horizontal, 4)
     }
-    
-    // MARK: - Content
-    
+
     @ViewBuilder
-    private var contentSection: some View {
+    var contentSection: some View {
         if isLoading && transactions.isEmpty {
-            shimmerRows
+            shimmerList
         } else if filteredTransactions.isEmpty {
             emptyState
         } else {
             transactionList
         }
     }
-    
-    private var transactionList: some View {
+
+    var transactionList: some View {
         VStack(spacing: 0) {
-            ForEach(filteredTransactions) { tx in
+            ForEach(Array(filteredTransactions.enumerated()), id: \.element.id) { index, tx in
                 WalletTransactionRow(transaction: tx)
                     .padding(.horizontal, 16)
-                    .transition(.opacity.combined(with: .move(edge: .trailing)))
-                
+                    .transition(
+                        .asymmetric(
+                            insertion: .opacity.combined(with: .offset(x: -8)),
+                            removal: .opacity
+                        )
+                    )
+
                 if tx.id != filteredTransactions.last?.id {
-                    Divider()
-                        .padding(.leading, 70)
+                    Rectangle()
+                        .fill(Color(hex: "#E8D8CC"))
+                        .frame(height: 0.75)
+                        .padding(.leading, 74)
                 }
             }
         }
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .animation(.easeInOut(duration: 0.25), value: filteredTransactions.map(\.id))
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
+        .animation(.easeInOut(duration: 0.28), value: filteredTransactions.map(\.id))
     }
-    
-    // MARK: - Shimmer
-    
-    private var shimmerRows: some View {
+
+    var shimmerList: some View {
         VStack(spacing: 0) {
-            ForEach(0..<4, id: \.self) { _ in
+            ForEach(0..<5, id: \.self) { i in
                 HStack(spacing: 14) {
-                    ShimmerView(cornerRadius: 20)
-                        .frame(width: 40, height: 40)
+                    ShimmerView(cornerRadius: 12)
+                        .frame(width: 44, height: 44)
+
                     VStack(alignment: .leading, spacing: 6) {
                         ShimmerView(cornerRadius: 4)
-                            .frame(width: 140, height: 14)
+                            .frame(width: CGFloat.random(in: 110...160), height: 13)
                         ShimmerView(cornerRadius: 4)
-                            .frame(width: 90, height: 11)
+                            .frame(width: 80, height: 10)
                     }
+
                     Spacer()
+
                     ShimmerView(cornerRadius: 4)
-                        .frame(width: 60, height: 14)
+                        .frame(width: 55, height: 13)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                Divider().padding(.leading, 70)
+                .padding(.vertical, 12)
+
+                if i < 4 {
+                    Rectangle()
+                        .fill(Color(hex: "#E8D8CC"))
+                        .frame(height: 0.75)
+                        .padding(.leading, 74)
+                }
             }
         }
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
     }
     
-    // MARK: - Empty State
-    
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: iconForEmptyState)
-                .font(.system(size: 44))
-                .foregroundStyle(Color.coffeeBrown.opacity(0.3))
-                .symbolRenderingMode(.hierarchical)
-            
-            Text(emptyStateTitle)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.primary)
-            
-            Text(emptyStateMessage)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+    var emptyState: some View {
+        VStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "#F5EDE4"))
+                    .frame(width: 72, height: 72)
+                Image(systemName: iconForEmpty)
+                    .font(.system(size: 30, weight: .medium))
+                    .foregroundStyle(Color(hex: "#B07D5A").opacity(0.6))
+            }
+
+            VStack(spacing: 6) {
+                Text(emptyTitle)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "#1C1208"))
+
+                Text(emptyMessage)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color(hex: "#9C836A"))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 50)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(.vertical, 44)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
     }
-    
-    private var iconForEmptyState: String {
+
+    var iconForEmpty: String {
         switch selectedFilter {
         case .all: return "tray"
         case .topup: return "arrow.down.circle"
@@ -241,155 +263,81 @@ struct FilteredTransactionView: View {
         case .reward: return "star"
         }
     }
-    
-    private var emptyStateTitle: String {
-        if selectedFilter == .all {
-            return "No transactions yet"
-        }
-        return "No \(selectedFilter.rawValue) transactions"
+
+    var emptyTitle: String {
+        selectedFilter == .all ? "No transactions yet" : "No \(selectedFilter.rawValue) history"
     }
-    
-    private var emptyStateMessage: String {
+
+    var emptyMessage: String {
         switch selectedFilter {
-        case .all:
-            return "Top up your wallet to get started"
-        case .topup:
-            return "Add funds to see your top-up history"
-        case .payment:
-            return "Make a purchase to see payment history"
-        case .refund:
-            return "Cancelled orders will appear here"
-        case .reward:
-            return "Complete milestones to earn rewards"
+        case .all: return "Top up your wallet to start brewing"
+        case .topup: return "Add funds and your top-up history shows here"
+        case .payment: return "Place an order and it'll appear here"
+        case .refund: return "Cancelled orders will show up here"
+        case .reward: return "Earn rewards by completing milestones"
         }
     }
 }
 
-// MARK: - Filter Chip
 
-struct FilterChip: View {
-    let title: String
+struct CoffeeFilterChip: View {
+    let filter: FilteredTransactionView.TransactionFilter
     let isSelected: Bool
     let count: Int
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 6) {
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(isSelected ? .semibold : .medium)
-                
+            HStack(spacing: 5) {
+                Image(systemName: filter.icon)
+                    .font(.system(size: 11, weight: .semibold))
+
+                Text(filter.rawValue)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+
                 if count > 0 {
                     Text("\(count)")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(isSelected ? .white : .secondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(isSelected ? Color(hex: "#6F3A1F") : Color(hex: "#9C836A"))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
                         .background(
                             Capsule()
-                                .fill(isSelected ? Color.white.opacity(0.25) : Color(.tertiarySystemFill))
+                                .fill(isSelected ? Color.white.opacity(0.3) : Color(hex: "#F0E4D8"))
                         )
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(
-                Capsule()
-                    .fill(isSelected ? Color.coffeeBrown : Color(.secondarySystemGroupedBackground))
+                isSelected
+                    ? LinearGradient(
+                        colors: [Color(hex: "#3B1A08"), Color(hex: "#6F3A1F")],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    : LinearGradient(
+                        colors: [Color.white, Color.white],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
             )
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? .white : Color(hex: "#4A2C14"))
+            .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .strokeBorder(isSelected ? Color.clear : Color(.separator), lineWidth: 0.5)
+                    .strokeBorder(
+                        isSelected ? Color.clear : Color(hex: "#D4B89A"),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(
+                color: isSelected ? Color(hex: "#3B1A08").opacity(0.25) : Color.clear,
+                radius: 6, x: 0, y: 3
             )
         }
         .buttonStyle(.plain)
         .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(.spring(response: 0.2), value: isSelected)
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isSelected)
     }
-}
-
-// MARK: - Stat Card
-
-struct StatCard: View {
-    let title: String
-    let amount: Double
-    let color: Color
-    let icon: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.caption)
-                    .foregroundStyle(color)
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Text(amount.currencyFormatted)
-                .font(.system(.subheadline, design: .rounded))
-                .fontWeight(.semibold)
-                .foregroundStyle(color)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(color.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(color.opacity(0.15), lineWidth: 1)
-        )
-    }
-}
-
-// MARK: - Preview
-
-#Preview {
-    VStack {
-        FilteredTransactionView(
-            transactions: [
-                WalletTransaction(
-                    id: "1",
-                    userId: "user1",
-                    type: .topup,
-                    amount: 50.0,
-                    balanceBefore: 0,
-                    balanceAfter: 50,
-                    description: "Top-up via Card",
-                    referenceId: nil,
-                    timestamp: Date()
-                ),
-                WalletTransaction(
-                    id: "2",
-                    userId: "user1",
-                    type: .payment,
-                    amount: -12.5,
-                    balanceBefore: 50,
-                    balanceAfter: 37.5,
-                    description: "Order #ABC123",
-                    referenceId: "ABC123",
-                    timestamp: Date().addingTimeInterval(-3600)
-                ),
-                WalletTransaction(
-                    id: "3",
-                    userId: "user1",
-                    type: .reward,
-                    amount: 5.0,
-                    balanceBefore: 37.5,
-                    balanceAfter: 42.5,
-                    description: "Loyalty Bonus",
-                    referenceId: nil,
-                    timestamp: Date().addingTimeInterval(-7200)
-                )
-            ],
-            isLoading: false
-        )
-    }
-    .padding()
-    .background(Color(.systemGroupedBackground))
 }
