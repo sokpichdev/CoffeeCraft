@@ -202,7 +202,7 @@ struct WalletTestView: View {
 
             testButton(
                 title: "Refund $20",
-                color: Color.activeTF,
+                color: Color.accentPrimary,
                 disabled: !isLoggedIn || isLoading
             ) {
                 await runAction("Refund $20") {
@@ -223,7 +223,7 @@ struct WalletTestView: View {
 
             testButton(
                 title: "+ $15 Reward",
-                color: Color.vanillaYellow,
+                color: Color.accentGold,
                 disabled: !isLoggedIn || isLoading
             ) {
                 await runAction("Reward +$15") {

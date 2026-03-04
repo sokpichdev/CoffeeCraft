@@ -83,14 +83,14 @@ struct FilteredTransactionView: View {
         HStack(alignment: .firstTextBaseline) {
             Text("Transactions")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundStyle(Color(hex: "#1C1208"))
+                .foregroundStyle(Color.textPrimary)
 
             Spacer()
 
             if !isLoading && !transactions.isEmpty {
                 Text("\(filteredTransactions.count) record\(filteredTransactions.count == 1 ? "" : "s")")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color(hex: "#9C836A"))
+                    .foregroundStyle(Color.textMuted)
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: filteredTransactions.count)
             }
@@ -124,7 +124,7 @@ struct FilteredTransactionView: View {
 
     var netTotalBanner: some View {
         let isPositive = netTotal >= 0
-        let color: Color = isPositive ? Color(hex: "#3A8C5C") : Color(hex: "#C0392B")
+        let color: Color = isPositive ? Color.semanticSuccess : Color.semanticError
 
         return HStack(spacing: 6) {
             Image(systemName: isPositive ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
@@ -133,7 +133,7 @@ struct FilteredTransactionView: View {
 
             Text(selectedFilter == .all ? "Net balance change" : "\(selectedFilter.rawValue) total")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Color(hex: "#9C836A"))
+                .foregroundStyle(Color.textMuted)
 
             Spacer()
 
@@ -177,7 +177,7 @@ struct FilteredTransactionView: View {
 
                 if tx.id != filteredTransactions.last?.id {
                     Rectangle()
-                        .fill(Color(hex: "#E8D8CC"))
+                        .fill(Color.border)
                         .frame(height: 0.75)
                         .padding(.leading, 74)
                 }
@@ -185,7 +185,7 @@ struct FilteredTransactionView: View {
         }
         .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.coffeeDarkBrown.opacity(0.06), radius: 12, x: 0, y: 4)
         .animation(.easeInOut(duration: 0.28), value: filteredTransactions.map(\.id))
     }
 
@@ -213,7 +213,7 @@ struct FilteredTransactionView: View {
 
                 if i < 4 {
                     Rectangle()
-                        .fill(Color(hex: "#E8D8CC"))
+                        .fill(Color.border)
                         .frame(height: 0.75)
                         .padding(.leading, 74)
                 }
@@ -221,28 +221,28 @@ struct FilteredTransactionView: View {
         }
         .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.coffeeDarkBrown.opacity(0.06), radius: 12, x: 0, y: 4)
     }
     
     var emptyState: some View {
         VStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: "#F5EDE4"))
+                    .fill(Color.bgPrimary)
                     .frame(width: 72, height: 72)
                 Image(systemName: iconForEmpty)
                     .font(.system(size: 30, weight: .medium))
-                    .foregroundStyle(Color(hex: "#B07D5A").opacity(0.6))
+                    .foregroundStyle(Color.textMuted.opacity(0.6))
             }
 
             VStack(spacing: 6) {
                 Text(emptyTitle)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(hex: "#1C1208"))
+                    .foregroundStyle(Color.textPrimary)
 
                 Text(emptyMessage)
                     .font(.system(size: 13))
-                    .foregroundStyle(Color(hex: "#9C836A"))
+                    .foregroundStyle(Color.textMuted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -251,7 +251,7 @@ struct FilteredTransactionView: View {
         .padding(.vertical, 44)
         .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.coffeeDarkBrown.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 
     var iconForEmpty: String {
@@ -298,7 +298,7 @@ struct CoffeeFilterChip: View {
                 if count > 0 {
                     Text("\(count)")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(isSelected ? Color(hex: "#6F3A1F") : Color(hex: "#9C836A"))
+                        .foregroundStyle(isSelected ? Color.textSecondary : Color.textMuted)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(
@@ -312,7 +312,7 @@ struct CoffeeFilterChip: View {
             .background(
                 isSelected
                     ? LinearGradient(
-                        colors: [Color(hex: "#3B1A08"), Color(hex: "#6F3A1F")],
+                        colors: [Color.coffeeDarkBrown, Color.accentPrimary],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -322,17 +322,17 @@ struct CoffeeFilterChip: View {
                         endPoint: .trailing
                     )
             )
-            .foregroundStyle(isSelected ? .white : Color(hex: "#4A2C14"))
+            .foregroundStyle(isSelected ? .white : Color.textSecondary)
             .clipShape(Capsule())
             .overlay(
                 Capsule()
                     .strokeBorder(
-                        isSelected ? Color.clear : Color(hex: "#D4B89A"),
+                        isSelected ? Color.clear : Color.border,
                         lineWidth: 1
                     )
             )
             .shadow(
-                color: isSelected ? Color(hex: "#3B1A08").opacity(0.25) : Color.clear,
+                color: isSelected ? Color.coffeeDarkBrown.opacity(0.25) : Color.clear,
                 radius: 6, x: 0, y: 3
             )
         }

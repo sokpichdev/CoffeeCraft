@@ -41,7 +41,7 @@ struct WalletView: View {
         }, onRefresh: {
             await vm.refresh()
         })
-        .background(Color.mainCreamBg)
+        .background(Color.bgPrimary)
         .customNavigationBar("My Wallet") {
             ToolBarButton.back { dismiss() }
         }
@@ -58,11 +58,11 @@ struct WalletView: View {
         HStack(spacing: 10) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Color(hex: "#C0392B"))
+                .foregroundStyle(Color.semanticError)
 
             Text(message)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Color(hex: "#C0392B"))
+                .foregroundStyle(Color.semanticError)
 
             Spacer()
 
@@ -74,17 +74,17 @@ struct WalletView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(Color(hex: "#C0392B"))
+                    .background(Color.semanticError)
                     .clipShape(Capsule())
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color(hex: "#C0392B").opacity(0.08))
+        .background(Color.semanticError.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(Color(hex: "#C0392B").opacity(0.2), lineWidth: 1)
+                .strokeBorder(Color.semanticError.opacity(0.2), lineWidth: 1)
         )
         .transition(.move(edge: .top).combined(with: .opacity))
     }
