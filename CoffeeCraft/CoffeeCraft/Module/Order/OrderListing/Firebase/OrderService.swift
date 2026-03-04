@@ -33,20 +33,7 @@ class OrderService: ObservableObject {
                     throw NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
                 }
 
-                // MARK: - Step 1: Deduct wallet BEFORE writing order
-                if paymentMethod == .wallet {
-                    AppLog.order.debug("Deducting \(total) CC from wallet for userId: \(userId)")
-                    // orderId not known yet — use a temp placeholder, overwritten after we get the real id
-                    // We pass a temp key; Phase 5 refund uses walletAmountPaid + orderId from the order doc
-                    try await WalletService.shared.deductForOrder(
-                        userId: userId,
-                        amount: total,
-                        orderId: "pending"
-                    )
-                    AppLog.order.debug("Wallet deduction successful")
-                }
-
-                // MARK: - Step 2: Generate order number
+                // MARK: - Step 1: Generate order number
                 let counterId = String.todayCounterId
                 let counterRef = db.collection("counters").document(counterId)
 
@@ -68,14 +55,21 @@ class OrderService: ObservableObject {
                 }
 
                 guard let orderNumber = result as? Int else {
-                    // Order number failed — refund wallet if we already deducted
-                    if paymentMethod == .wallet {
-                        try? await WalletService.shared.refund(userId: userId, amount: total, orderId: "order-number-failed")
-                    }
                     throw NSError(domain: "OrderService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to generate order number"])
                 }
 
                 let formattedOrderId = orderNumber.formattedDailyOrderId
+
+                // MARK: - Step 2: Deduct wallet — real orderId is now known
+                if paymentMethod == .wallet {
+                    AppLog.order.debug("Deducting \(total) CC from wallet — userId: \(userId), orderId: \(formattedOrderId)")
+                    try await WalletService.shared.deductForOrder(
+                        userId: userId,
+                        amount: total,
+                        orderId: formattedOrderId
+                    )
+                    AppLog.order.debug("Wallet deduction successful — ledger linked to orderId: \(formattedOrderId)")
+                }
 
                 // MARK: - Step 3: Build order document
                 var orderData: [String: Any] = [
@@ -104,7 +98,7 @@ class OrderService: ObservableObject {
                     orderData["walletAmountPaid"] = total
                 }
 
-                // MARK: - Step 4: Write order
+                // MARK: - Step 4: Write order — refund if this fails (deduction already happened)
                 do {
                     try await db.collection("orders").document(formattedOrderId).setData(orderData)
                 } catch {
