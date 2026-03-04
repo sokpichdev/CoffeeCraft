@@ -15,6 +15,7 @@ class WalletViewModel: ObservableObject {
     @Published var transactions: [WalletTransaction] = []
     @Published var isLoading: Bool = false
     @Published var isRefreshing: Bool = false
+    @Published var errorMessage: String? = nil
 
     private let service = WalletService.shared
     private var walletListener: ListenerRegistration?
@@ -37,10 +38,12 @@ class WalletViewModel: ObservableObject {
                 guard let self else { return }
                 if let error {
                     AppLog.firestore.error("❌ WalletViewModel listener: \(error.localizedDescription)")
+                    self.errorMessage = "Could not load wallet. Pull down to retry."
                     self.isLoading = false
                     self.isRefreshing = false
                     return
                 }
+                self.errorMessage = nil
                 self.wallet = try? snapshot?.data(as: Wallet.self)
                 self.isLoading = false
                 self.isRefreshing = false
@@ -51,8 +54,10 @@ class WalletViewModel: ObservableObject {
     func loadTransactions(userId: String) async {
         do {
             transactions = try await service.fetchTransactions(userId: userId)
+            errorMessage = nil
         } catch {
             AppLog.firestore.error("❌ WalletViewModel.loadTransactions: \(error.localizedDescription)")
+            errorMessage = "Could not load transactions. Pull down to retry."
         }
     }
 
