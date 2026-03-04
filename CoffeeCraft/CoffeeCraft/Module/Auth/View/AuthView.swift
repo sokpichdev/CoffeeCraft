@@ -21,7 +21,7 @@ struct AuthView: View {
             Ellipse()
                 .fill(
                     RadialGradient(
-                        colors: [Color.brown.opacity(0.10), .clear],
+                        colors: [Color.accentPrimary.opacity(0.10), .clear],
                         center: .center,
                         startRadius: 0,
                         endRadius: 280
@@ -86,7 +86,7 @@ struct AuthView: View {
                                 Text(screen == .login ? "Don't have an account? " : "Already have an account? ")
                                     .foregroundStyle(Color(.secondaryLabel)) +
                                 Text(screen == .login ? "Sign Up" : "Log In")
-                                    .foregroundStyle(Color.brown)
+                                    .foregroundStyle(Color.accentPrimary)
                                     .fontWeight(.semibold)
                             }
                             .font(.subheadline)
@@ -111,14 +111,14 @@ struct AuthView: View {
         VStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color.brown.opacity(0.10))
+                    .fill(Color.accentPrimary.opacity(0.10))
                     .frame(width: 100, height: 100)
                 Circle()
-                    .stroke(Color.brown.opacity(0.18), lineWidth: 1)
+                    .stroke(Color.accentPrimary.opacity(0.18), lineWidth: 1)
                     .frame(width: 86, height: 86)
                 Image(systemName: "cup.and.saucer.fill")
                     .font(.system(size: 40, weight: .medium))
-                    .foregroundStyle(Color.brown)
+                    .foregroundStyle(Color.accentPrimary)
             }
             .scaleEffect(heroAppeared ? 1 : 0.65)
             .opacity(heroAppeared ? 1 : 0)

@@ -46,7 +46,7 @@ struct InfiniteCarousel<Content: View, T: Hashable>: View {
         .scrollPosition(id: $scrollPosition)
         .scrollTargetBehavior(.paging)
         .frame(height: height)
-        .background(Color.black)
+        .background(Color.textPrimary)
         .onAppear {
             // Dynamically start in the middle set
             scrollPosition = items.count * centerOffset

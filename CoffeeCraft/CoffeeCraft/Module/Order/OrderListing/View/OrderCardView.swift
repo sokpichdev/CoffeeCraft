@@ -60,7 +60,7 @@ struct OrderCardView: View {
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(uiColor: .tertiarySystemBackground))
         )
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.textPrimary.opacity(0.05), radius: 4, x: 0, y: 2)
         .contentShape(Rectangle())
         .onTapGesture {
             onNavigate?()
@@ -165,7 +165,7 @@ struct OrderCardView: View {
                 .foregroundColor(.brown)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(Color.coffeeBrown.opacity(0.1)))
+                .background(Capsule().fill(Color.accentPrimary.opacity(0.1)))
             }
             .buttonStyle(.plain)
         }
@@ -184,7 +184,7 @@ struct OrderCardView: View {
                 )
             }
         }
-        .background(Color.gray.opacity(0.03))
+        .background(Color.textMuted.opacity(0.03))
     }
     
     private var footerSection: some View {
@@ -215,7 +215,7 @@ struct OrderCardView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
-                    .background(Capsule().fill(Color.coffeeOliveGreen))
+                    .background(Capsule().fill(Color.semanticSuccess))
                 }
                 .buttonStyle(.plain)
             } else {
@@ -311,7 +311,7 @@ struct OverflowBadge: View {
             .fontWeight(.bold)
             .foregroundColor(.white)
             .frame(width: 32, height: 32)
-            .background(Circle().fill(Color.coffeeBrown))
+            .background(Circle().fill(Color.accentPrimary))
             .overlay(Circle().stroke(Color.white, lineWidth: 2))
     }
 }

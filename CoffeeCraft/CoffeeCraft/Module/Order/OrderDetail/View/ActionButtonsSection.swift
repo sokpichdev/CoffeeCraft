@@ -61,9 +61,9 @@ struct ActionButtonsSection: View {
 
             if isCancelled {
                 HStack(spacing: 10) {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Color.errorRed.opacity(0.8))
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Color.semanticError.opacity(0.8))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Order Cancelled").font(.subheadline.weight(.semibold)).foregroundStyle(Color.errorRed)
+                        Text("Order Cancelled").font(.subheadline.weight(.semibold)).foregroundStyle(Color.semanticError)
                         if order.wasWalletPayment, let amount = order.walletAmountPaid {
                             Text("+\(amount.currencyFormatted) refunded to your wallet").font(.caption).foregroundStyle(.secondary)
                         }
@@ -71,9 +71,9 @@ struct ActionButtonsSection: View {
                     Spacer()
                 }
                 .padding(14)
-                .background(Color.errorRed.opacity(0.07))
+                .background(Color.semanticError.opacity(0.07))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.errorRed.opacity(0.2), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.semanticError.opacity(0.2), lineWidth: 1))
             }
         }
     }

@@ -100,9 +100,9 @@ struct AllCardsView: View {
                     
                     // Ownership Status Badge
                     if card.isOwnedByCurrentUser {
-                        StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.coffeeLight)
+                        StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.accentPrimary)
                     } else {
-                        StatusBadgeView(icon: "person.2.fill", text: "Shared", textColor: .black, bgColor: Color.coffeeCream)
+                        StatusBadgeView(icon: "person.2.fill", text: "Shared", textColor: .textPrimary, bgColor: Color.surfaceSub)
                     }
                     Spacer()
                 }
@@ -115,7 +115,7 @@ struct AllCardsView: View {
             // buttons
             HStack(spacing: 12) {
                 if !card.isActiveForCurrentUser {
-                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle", bgColors: [Color.coffeeBrown, Color.coffeeLight]) {
+                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle", bgColors: [Color.accentPrimary, Color.coffeeLight]) {
                         Task {
                             try await cardVM.setActiveCard(card)
                         }
@@ -142,7 +142,7 @@ struct AllCardsView: View {
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(card.isActiveForCurrentUser ? Color.coffeeBrown.opacity(0.06) : Color.clear)
+                .fill(card.isActiveForCurrentUser ? Color.accentPrimary.opacity(0.06) : Color.clear)
         )
     }
     
@@ -214,7 +214,7 @@ struct CardsShimmerView: View {
             .padding(8)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.coffeeBrown.opacity(0.06))
+                    .fill(Color.accentPrimary.opacity(0.06))
             )
         }
     }

@@ -35,15 +35,15 @@ struct CoffeeLoaderView: View {
                 ZStack {
                     // Layer 1 - Bottom wave (slowest, largest)
                     WaveShape(offset: waveOffset1, percent: progress ?? fillLevel, amplitude: 6 * waveIntensity)
-                    .fill(Color.black.opacity(0.3))
+                    .fill(Color.accentPrimary.opacity(0.3))
                     
                     // Layer 2 - Middle wave (medium speed)
                     WaveShape(offset: waveOffset2, percent: progress ?? fillLevel, amplitude: 5 * waveIntensity)
-                    .fill(Color.black.opacity(0.5))
+                    .fill(Color.accentPrimary.opacity(0.7))
                     
                     // Layer 3 - Top wave (fastest, smallest)
                     WaveShape(offset: waveOffset3, percent: progress ?? fillLevel, amplitude: 4 * waveIntensity)
-                    .fill(Color.black)
+                    .fill(Color.accentPrimary)
                 }
                 .frame(height: imageSize * (progress ?? fillLevel))
             }

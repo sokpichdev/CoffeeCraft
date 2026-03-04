@@ -21,7 +21,7 @@ struct LibraryCategoryCard: View {
                     HStack(spacing: 12) {
                         ZStack {
                             Circle()
-                                .fill(isSelected ? Color.brown : Color.brown.opacity(0.2))
+                                .fill(isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.2))
                                 .frame(width: 50, height: 50)
                             
                             Image(systemName: isSelected ? "checkmark" : "folder.fill")
@@ -50,7 +50,7 @@ struct LibraryCategoryCard: View {
                     }) {
                         Image(systemName: showDetails ? "chevron.up.circle.fill" : "info.circle.fill")
                             .font(.title2)
-                            .foregroundColor(Color.brown)
+                            .foregroundColor(Color.accentPrimary)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -77,7 +77,7 @@ struct LibraryCategoryCard: View {
                                 .foregroundColor(.brown)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Capsule().fill(Color.brown.opacity(0.1)))
+                                .background(Capsule().fill(Color.accentPrimary.opacity(0.1)))
                         }
                     }
                 }
@@ -92,7 +92,7 @@ struct LibraryCategoryCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(isSelected ? Color.brown : Color.clear, lineWidth: 2)
+                .stroke(isSelected ? Color.accentPrimary : Color.clear, lineWidth: 2)
         )
     }
 }

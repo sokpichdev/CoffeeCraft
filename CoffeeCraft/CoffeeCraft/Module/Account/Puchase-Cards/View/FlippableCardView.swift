@@ -154,7 +154,7 @@ struct FlippableCardView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: width * 0.08)
-                            .foregroundStyle(Color.yellow.opacity(0.9))
+                            .foregroundStyle(Color.accentGold.opacity(0.9))
                     }
                     
                     Spacer()
@@ -206,7 +206,7 @@ struct FlippableCardView: View {
                 VStack(spacing: 0) {
                     // Magnetic stripe
                     Rectangle()
-                        .fill(Color.black)
+                        .fill(Color.coffeeDarkBrown)
                         .frame(height: cardHeight * 0.12)
                         .frame(maxWidth: .infinity)
                     
@@ -233,7 +233,7 @@ struct FlippableCardView: View {
                                                         .resizable()
                                                         .scaledToFit()
                                                         .frame(width: width * 0.035)
-                                                        .foregroundStyle(Color.orange)
+                                                        .foregroundStyle(Color.accentGold)
                                                 }
                                             }
                                         }
@@ -243,7 +243,7 @@ struct FlippableCardView: View {
                             
                             Text("\(10 - (card.points % 10)) more for a FREE drink!")
                                 .font(.system(size: width * 0.028, weight: .medium))
-                                .foregroundStyle(Color.orange)
+                                .foregroundStyle(Color.accentGold)
                         }
                         
                         // Barcode
@@ -252,7 +252,7 @@ struct FlippableCardView: View {
                             HStack(spacing: 1) {
                                 ForEach(0..<30) { i in
                                     Rectangle()
-                                        .fill(Color.black)
+                                        .fill(Color.coffeeDarkBrown)
                                         .frame(width: i % 3 == 0 ? 2 : 1.5, height: cardHeight * 0.1)
                                 }
                             }

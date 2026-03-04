@@ -24,7 +24,7 @@ struct CustomSegmentedControl: View {
                         RoundedRectangle(cornerRadius: 24)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.coffeeWarmBrown, Color.coffeeWarmBrown.opacity(0.85)],
+                                    colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.85)],
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
@@ -42,7 +42,7 @@ struct CustomSegmentedControl: View {
                         .foregroundColor(
                             selectedSegment == segment
                             ? .white
-                            : Color.coffeeBrown
+                            : Color.accentPrimary
                         )
                 }
                 .frame(maxWidth: .infinity, minHeight: height)

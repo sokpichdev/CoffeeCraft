@@ -72,7 +72,7 @@ public struct ColorModel {
     public init(with state: MaterialTextFeild.XState) {
         var textColor = UIColor.black
         var floatingLabelColor = UIColor.black
-        var normalLabelColor = UIColor.darkGray
+        var normalLabelColor = UIColor.textMuted
         var outlineColor = UIColor.black
         
         if #available(iOS 13.0, *) {

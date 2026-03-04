@@ -189,7 +189,7 @@ struct ProfileView: View {
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color(.secondarySystemGroupedBackground))
-                .shadow(color: Color.black.opacity(0.06), radius: 10, y: 3)
+                .shadow(color: Color.textPrimary.opacity(0.06), radius: 10, y: 3)
         )
     }
     
@@ -199,13 +199,13 @@ struct ProfileView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.brown, Color.brown.opacity(0.75), Color.brown.opacity(0.5)],
+                            colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.75), Color.accentPrimary.opacity(0.5)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 110, height: 110)
-                    .shadow(color: Color.brown.opacity(0.4), radius: 12, y: 6)
+                    .shadow(color: Color.accentPrimary.opacity(0.4), radius: 12, y: 6)
                 
                 Image(systemName: "person.fill")
                     .resizable()

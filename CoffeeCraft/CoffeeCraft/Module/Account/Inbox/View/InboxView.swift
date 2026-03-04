@@ -152,7 +152,7 @@ struct InboxView: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Color.brown.opacity(0.1))
+                    .fill(Color.accentPrimary.opacity(0.1))
                     .frame(width: 90, height: 90)
                 Image(systemName: "bell.slash.fill")
                     .font(.system(size: 38))

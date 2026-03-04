@@ -139,13 +139,13 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
     var color: Color {
         switch self {
         case .home:
-            return .brown
+            return .accentPrimary
         case .menu:
-            return .brown
+            return .accentPrimary
         case .orders:
-            return .brown
+            return .accentPrimary
         case .profile:
-            return .brown
+            return .accentPrimary
         }
     }
 }

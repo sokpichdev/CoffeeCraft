@@ -60,7 +60,7 @@ struct LoginView: View {
                     Text("Forgot Password?")
                         .font(.footnote)
                         .fontWeight(.medium)
-                        .foregroundStyle(Color.brown)
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
             CustomCoffeeButton(title: "Log In", isDisabled: isDisabled) {

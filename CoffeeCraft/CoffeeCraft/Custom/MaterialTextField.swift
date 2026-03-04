@@ -88,18 +88,18 @@ extension MaterialTextFeild {
     public func setColorModel(_ colorModel: ColorModel, for state: XState) {
         colorModels[state] = colorModel
 //        if state == .normal {
-//            colorModels[state] = ColorModel(textColor: UIColor(Color.primaryTextColor),
+//            colorModels[state] = ColorModel(textColor: UIColor(Color.textPrimary),
 //                                                                                        floatingLabelColor: UIColor(Color.textFieldLabel),
-//                                                                                        normalLabelColor: UIColor(Color.placeHolderColor),
+//                                                                                        normalLabelColor: UIColor(Color.textMuted),
 //                                                                                        outlineColor: UIColor.textFieldBorder)
 //        } else if state == .editing {
-//            colorModels[state] = ColorModel(textColor: UIColor(Color.primaryTextColor),
+//            colorModels[state] = ColorModel(textColor: UIColor(Color.textPrimary),
 //                                                                                        floatingLabelColor: UIColor(Color.textFieldLabel),
-//                                                                                        normalLabelColor: UIColor(Color.placeHolderColor),
+//                                                                                        normalLabelColor: UIColor(Color.textMuted),
 //                                                                                        outlineColor: UIColor.textFieldBorder)
 //        } else if state == .error {
-//            colorModels[state] = ColorModel(textColor: UIColor(Color.primaryTextColor),
-//                                                       floatingLabelColor: UIColor(Color.primaryThemeColor),
+//            colorModels[state] = ColorModel(textColor: UIColor(Color.textPrimary),
+//                                                       floatingLabelColor: UIColor(Color.accentPrimary),
 //                                                       normalLabelColor: .textFieldError,
 //                                                       outlineColor: UIColor.textFieldError)
 //        } else {

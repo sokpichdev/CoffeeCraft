@@ -86,7 +86,7 @@ struct ProductDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(product.name)
                                 .font(.system(size: 24, weight: .bold, design: .serif))
-                                .foregroundColor(Color.brown)
+                                .foregroundColor(Color.accentPrimary)
                             
                             Text(product.description)
                                 .font(.body)
@@ -96,7 +96,7 @@ struct ProductDetailView: View {
                         .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
                         
                         Rectangle()
-                            .fill(Color.brown.opacity(0.2))
+                            .fill(Color.accentPrimary.opacity(0.2))
                             .frame(height: 1)
                             .padding(.horizontal)
                         
@@ -122,7 +122,7 @@ struct ProductDetailView: View {
                                 }
                                 .padding(.top)
                                 Rectangle()
-                                    .fill(Color.brown.opacity(0.2))
+                                    .fill(Color.accentPrimary.opacity(0.2))
                                     .frame(height: 1)
                             }
                             .padding(.horizontal)
@@ -166,7 +166,7 @@ struct ProductDetailView: View {
             ToolBarButton(
                 placement: .topBarTrailing,
                 buttonType: .icon(favVM.isFavorite ? "heart.fill" : "heart"),
-                tint: favVM.isFavorite ? .red : Color.brown
+                tint: favVM.isFavorite ? .semanticError : Color.accentPrimary
             ) {
                 if UserSession.shared.isLoggedIn {
                     Task {
@@ -187,7 +187,7 @@ struct ProductDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("More in \(product.category)")
                 .font(.system(size: 17, weight: .semibold, design: .serif))
-                .foregroundColor(Color.brown)
+                .foregroundColor(Color.accentPrimary)
                 .padding(.horizontal)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -232,11 +232,11 @@ struct ProductDetailView: View {
                 // Base price pill on the image
                 Text("from $\(product.price, specifier: "%.2f")")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(Color.accentPrimary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
                     .background(Capsule().fill(Color.parchment.opacity(0.92)))
-                    .shadow(color: Color.brown.opacity(0.15), radius: 6, x: 0, y: 2)
+                    .shadow(color: Color.accentPrimary.opacity(0.15), radius: 6, x: 0, y: 2)
                     .padding(.bottom, 16)
             }
             .frame(width: UIScreen.main.bounds.width, height: stretchHeight)
@@ -255,7 +255,7 @@ struct ProductDetailView: View {
                     } label: {
                         Image(systemName: "minus")
                             .font(.headline.weight(.semibold))
-                            .foregroundColor(quantity > 1 ? Color.brown : Color.brown.opacity(0.25))
+                            .foregroundColor(quantity > 1 ? Color.accentPrimary : Color.accentPrimary.opacity(0.25))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
@@ -263,7 +263,7 @@ struct ProductDetailView: View {
                     
                     Text("\(quantity)")
                         .font(.headline.weight(.semibold))
-                        .foregroundColor(Color.brown)
+                        .foregroundColor(Color.accentPrimary)
                         .frame(minWidth: 28)
                         .contentTransition(.numericText())
                         .animation(.easeInOut(duration: 0.15), value: quantity)
@@ -274,14 +274,14 @@ struct ProductDetailView: View {
                     } label: {
                         Image(systemName: "plus")
                             .font(.headline.weight(.semibold))
-                            .foregroundColor(Color.brown)
+                            .foregroundColor(Color.accentPrimary)
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                .background(Capsule().fill(Color.brown.opacity(0.07)))
-                .overlay(Capsule().stroke(Color.brown.opacity(0.18), lineWidth: 1))
+                .background(Capsule().fill(Color.accentPrimary.opacity(0.07)))
+                .overlay(Capsule().stroke(Color.accentPrimary.opacity(0.18), lineWidth: 1))
                 
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart") {
                     if UserSession.shared.isLoggedIn {
@@ -334,7 +334,7 @@ struct StickyFooterView<Actions: View>: View {
 
                 Text(String(format: "$%.2f", amount))
                     .font(.system(size: 22, weight: .bold, design: .serif))
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(Color.accentPrimary)
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: amount)
             }

@@ -66,14 +66,14 @@ struct HomeView: View {
                 ShimmerView(cornerRadius: 0).frame(height: height)
             } else if bannerImages.isEmpty {
                 ZStack {
-                    Color.coffeeBrown.opacity(0.08)
+                    Color.accentPrimary.opacity(0.08)
                     VStack(spacing: 10) {
                         Image(systemName: "photo.on.rectangle.angled")
                             .font(.system(size: 44))
-                            .foregroundColor(Color.coffeeBrown.opacity(0.4))
+                            .foregroundColor(Color.accentPrimary.opacity(0.4))
                         Text("No Banners Available")
                             .font(.subheadline.weight(.medium))
-                            .foregroundColor(Color.coffeeBrown.opacity(0.6))
+                            .foregroundColor(Color.accentPrimary.opacity(0.6))
                     }
                 }
                 .frame(height: height)
@@ -114,7 +114,7 @@ struct HomeView: View {
                         .foregroundColor(.secondary)
                     Text(UserSession.shared.userName ?? "Coffee Lover")
                         .font(.title3).fontWeight(.bold).fontDesign(.serif)
-                        .foregroundColor(Color.brown)
+                        .foregroundColor(Color.accentPrimary)
                 }
                 Spacer()
             }
@@ -139,12 +139,12 @@ struct HomeView: View {
                                     .animation(.spring(duration: 0.4), value: walletVM.wallet?.balance)
                             }
                         }
-                        .foregroundStyle(Color.coffeeBrown)
+                        .foregroundStyle(Color.accentPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)
-                        .background(Color.coffeeBrown.opacity(0.1))
+                        .background(Color.accentPrimary.opacity(0.1))
                         .clipShape(Capsule())
-                        .overlay(Capsule().strokeBorder(Color.coffeeBrown.opacity(0.2), lineWidth: 1))
+                        .overlay(Capsule().strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1))
 
                     }
                     // Points pill
@@ -154,12 +154,12 @@ struct HomeView: View {
                         Text("\(cardVM.activeCard?.points ?? 0) pts")
                             .font(.system(size: 13, weight: .bold))
                     }
-                    .foregroundStyle(Color.orange)
+                    .foregroundStyle(Color.accentGold)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
-                    .background(Color.orange.opacity(0.1))
+                    .background(Color.accentGold.opacity(0.1))
                     .clipShape(Capsule())
-                    .overlay(Capsule().strokeBorder(Color.orange.opacity(0.2), lineWidth: 1))
+                    .overlay(Capsule().strokeBorder(Color.accentGold.opacity(0.2), lineWidth: 1))
 
                     Spacer()
 
@@ -178,13 +178,13 @@ struct HomeView: View {
                         .padding(.vertical, 7)
                         .background(
                             LinearGradient(
-                                colors: [Color.coffeeBrown, Color.coffeeLight],
+                                colors: [Color.accentPrimary, Color.coffeeLight],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
                         .clipShape(Capsule())
-                        .shadow(color: Color.coffeeBrown.opacity(0.3), radius: 6, y: 3)
+                        .shadow(color: Color.accentPrimary.opacity(0.3), radius: 6, y: 3)
                     }
                     .buttonStyle(.plain)
                 }
@@ -193,7 +193,7 @@ struct HomeView: View {
         .padding(16)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 3)
+        .shadow(color: Color.textPrimary.opacity(0.05), radius: 8, y: 3)
     }
 
     private var greetingText: String {
@@ -274,16 +274,16 @@ struct HomeView: View {
                         Image(systemName: "arrow.right")
                             .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(Color.accentPrimary)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
                     .background(
                         Capsule()
-                            .fill(Color.brown.opacity(0.1))
+                            .fill(Color.accentPrimary.opacity(0.1))
                     )
                     .overlay(
                         Capsule()
-                            .stroke(Color.brown.opacity(0.25), lineWidth: 1)
+                            .stroke(Color.accentPrimary.opacity(0.25), lineWidth: 1)
                     )
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
@@ -301,7 +301,7 @@ struct SectionHeader: View {
         HStack(spacing: 7) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color.brown)
+                .foregroundColor(Color.accentPrimary)
             Text(title)
                 .font(.system(size: 16, weight: .semibold, design: .serif))
                 .foregroundColor(Color.primary)
@@ -344,14 +344,14 @@ struct CozyOrderButton: View {
                 RoundedRectangle(cornerRadius: 20)
                     .fill(
                         LinearGradient(
-                            colors: [Color.coffeeBrown, Color.coffeeBrown.opacity(0.78)],
+                            colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.78)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
             )
             .shadow(
-                color: Color.coffeeBrown.opacity(isDisabled ? 0.05 : 0.3),
+                color: Color.accentPrimary.opacity(isDisabled ? 0.05 : 0.3),
                 radius: 8, x: 0, y: 4
             )
             .overlay(
@@ -359,7 +359,7 @@ struct CozyOrderButton: View {
                     if isDisabled {
                         Text("Coming Soon")
                             .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(Color.coffeeBrown)
+                            .foregroundColor(Color.accentPrimary)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
                             .background(Capsule().fill(Color.white.opacity(0.85)))
@@ -381,7 +381,7 @@ struct PageIndicator: View {
         HStack(spacing: 6) {
             ForEach(0..<count, id: \.self) { index in
                 Capsule()
-                    .fill(index == currentIndex ? Color.coffeeBrown : Color.white.opacity(0.75))
+                    .fill(index == currentIndex ? Color.accentPrimary : Color.white.opacity(0.75))
                     .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
                     .frame(
                         width: index == currentIndex ? 20 : 7,
@@ -392,7 +392,7 @@ struct PageIndicator: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 7)
-        .background(Capsule().fill(Color.black.opacity(0.12)))
+        .background(Capsule().fill(Color.textPrimary.opacity(0.12)))
     }
 }
 
@@ -426,14 +426,14 @@ extension HomeView {
                 .offset(y: minY > 0 ? -minY : 0)
             } else {
                 ZStack {
-                    Color.coffeeBrown.opacity(0.08)
+                    Color.accentPrimary.opacity(0.08)
                     VStack(spacing: 10) {
                         Image(systemName: "photo.on.rectangle.angled")
                             .font(.system(size: 44))
-                            .foregroundColor(Color.coffeeBrown.opacity(0.4))
+                            .foregroundColor(Color.accentPrimary.opacity(0.4))
                         Text("No Banners Available")
                             .font(.subheadline)
-                            .foregroundColor(Color.coffeeBrown.opacity(0.6))
+                            .foregroundColor(Color.accentPrimary.opacity(0.6))
                     }
                 }
                 .frame(height: dynamicHeight)

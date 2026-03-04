@@ -69,7 +69,7 @@ struct CategorySelectionSheet: View {
                                 }
                                 .padding()
                                 .padding(.horizontal)
-                                .background(category == tempSelectedCategory ? Color.brown.opacity(0.1) : Color.clear)
+                                .background(category == tempSelectedCategory ? Color.accentPrimary.opacity(0.1) : Color.clear)
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
@@ -95,7 +95,7 @@ struct CategorySelectionSheet: View {
                                 .font(.subheadline.bold())
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 8)
-                                .background(Color.brown)
+                                .background(Color.accentPrimary)
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                             }

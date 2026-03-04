@@ -63,13 +63,13 @@ struct SearchResultRow: View {
             
             Image(systemName: "chevron.right")
                 .font(.headline)
-                .foregroundColor(Color.brown)
+                .foregroundColor(Color.accentPrimary)
         }
         .padding(12)
         .frame(height: 90)
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+        .shadow(color: Color.textPrimary.opacity(0.1), radius: 3, x: 0, y: 1)
     }
     
     private var matchIcon: String {

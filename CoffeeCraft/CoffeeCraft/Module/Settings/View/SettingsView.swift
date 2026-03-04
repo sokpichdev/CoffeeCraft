@@ -52,7 +52,7 @@ struct SettingsView: View {
                 }
                 
                 if UserSession.shared.isLoggedIn {
-                    CustomCoffeeButton(title: "Logout", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.errorRed, Color.errorRed.opacity(0.85)], contentPlacement: .leading) {
+                    CustomCoffeeButton(title: "Logout", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.semanticError, Color.semanticError.opacity(0.85)], contentPlacement: .leading) {
                         AlertManager.shared.showDestructive(
                             title: "Log Out?",
                             message: "Are you sure you want to log out?",
@@ -67,7 +67,7 @@ struct SettingsView: View {
                     }
                     .padding(.top, 8)
                 } else {
-                    CustomCoffeeButton(title: "Log In", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.leafGreen, Color.leafGreen.opacity(0.85)], contentPlacement: .leading) {
+                    CustomCoffeeButton(title: "Log In", buttonImage: "rectangle.portrait.and.arrow.right.fill", bgColors: [Color.semanticSuccess, Color.semanticSuccess.opacity(0.85)], contentPlacement: .leading) {
                         push(AnyView(AuthView().environmentObject(authVM)))
                     }
                     .padding(.top, 8)

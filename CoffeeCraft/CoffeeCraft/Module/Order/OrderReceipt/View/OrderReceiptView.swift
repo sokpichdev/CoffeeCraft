@@ -158,13 +158,13 @@ struct ReceiptPaper: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
             }
-            .background(Color.coffeeCream.opacity(0.35))
+            .background(Color.surfaceSub.opacity(0.35))
             
             TornEdge(position: .bottom)
         }
         .background(
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.coffeeCream.opacity(0.35))
+                .fill(Color.surfaceSub.opacity(0.35))
         )
         .shadow(color: Color.coffeeDarkBrown.opacity(0.10), radius: 16, x: 0, y: 6)
         .opacity(appeared ? 1 : 0)
