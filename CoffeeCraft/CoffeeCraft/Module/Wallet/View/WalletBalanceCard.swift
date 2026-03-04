@@ -75,20 +75,29 @@ struct WalletBalanceCard: View {
                 )
             )
     }
-
+    
     private var decorativeRings: some View {
-        ZStack {
-            Circle()
-                .strokeBorder(Color.white.opacity(0.055), lineWidth: 55)
-                .frame(width: 270, height: 270)
-                .offset(x: 110, y: -90)
+            ZStack {
+                // Big ring
+                Circle()
+                    .strokeBorder(Color.white.opacity(0.055), lineWidth: 55)
+                    .frame(width: 270, height: 270)
+                    .offset(x: 110, y: -90)
+                
+                Image(systemName: "cup.and.saucer.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 100)
+                    .foregroundStyle(Color(hex: "#D4956A").opacity(0.055))
+                    .offset(x: 110, y: -90)
 
-            Circle()
-                .strokeBorder(Color.white.opacity(0.035), lineWidth: 36)
-                .frame(width: 150, height: 150)
-                .offset(x: -70, y: 60)
+                // Small ring
+                Circle()
+                    .strokeBorder(Color.white.opacity(0.035), lineWidth: 36)
+                    .frame(width: 150, height: 150)
+                    .offset(x: -70, y: 60)
+            }
         }
-    }
 
     private var balanceSection: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -97,15 +106,10 @@ struct WalletBalanceCard: View {
             HStack(alignment: .bottom) {
                 Text("MY WALLET")
                     .font(.system(size: balanceHeight * 0.2 * 0.3, weight: .bold, design: .rounded))
-                    .minimumScaleFactor(0.5)
                     .tracking(2.8)
                     .foregroundStyle(Color.white.opacity(0.45))
 
                 Spacer()
-
-//                Image(systemName: "cup.and.saucer.fill")
-//                    .font(.system(size: balanceHeight * 0.2 * 0.8))
-//                    .foregroundStyle(Color(hex: "#D4956A").opacity(0.35))
             }
             .frame(height: balanceHeight * 0.2)
 
@@ -113,6 +117,8 @@ struct WalletBalanceCard: View {
             Text(wallet?.formattedBalance ?? "$0.00")
                 .font(.system(size: balanceHeight * 0.4 * 0.8, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.2)
                 .contentTransition(.numericText())
                 .animation(.spring(duration: 0.5), value: wallet?.balance)
                 .frame(height: balanceHeight * 0.4)
