@@ -36,7 +36,7 @@ struct ReorderButtonSection: View {
             .padding()
             .background(
                 LinearGradient(
-                    colors: [Color.coffeeBrown, Color.coffeeBrown.opacity(0.8)],
+                    colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.8)],
                     startPoint: .leading,
                     endPoint: .trailing
                 )

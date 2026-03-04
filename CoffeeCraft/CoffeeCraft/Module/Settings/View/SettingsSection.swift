@@ -26,7 +26,7 @@ struct SettingsSection<Content: View>: View {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.headline)
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(Color.accentPrimary)
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
@@ -42,7 +42,7 @@ struct SettingsSection<Content: View>: View {
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color(.secondarySystemGroupedBackground))
-                    .shadow(color: Color.black.opacity(0.06), radius: 8, y: 2)
+                    .shadow(color: Color.textPrimary.opacity(0.06), radius: 8, y: 2)
             )
         }
     }

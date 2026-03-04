@@ -57,8 +57,8 @@ struct CustomizationView: View {
                                 iconName: "book.fill",
                                 title: "Add from Library",
                                 subtitle: "Choose pre-defined options",
-                                gradientColors: [Color.brown, Color.brown.opacity(0.8)],
-                                shadowColor: Color.brown
+                                gradientColors: [Color.accentPrimary, Color.accentPrimary.opacity(0.8)],
+                                shadowColor: Color.accentPrimary
                             ) {
                                 showAddFromLibrary = true
                             }
@@ -67,8 +67,8 @@ struct CustomizationView: View {
                                 iconName: "plus.circle.fill",
                                 title: "Create Custom",
                                 subtitle: "Design your own category",
-                                gradientColors: [Color.orange, Color.orange.opacity(0.8)],
-                                shadowColor: Color.orange
+                                gradientColors: [Color.accentGold, Color.accentGold.opacity(0.8)],
+                                shadowColor: Color.accentGold
                             ) {
                                 showCreateCustom = true
                             }

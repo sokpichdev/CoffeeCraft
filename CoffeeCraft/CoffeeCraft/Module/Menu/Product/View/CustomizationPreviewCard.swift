@@ -21,7 +21,7 @@ struct CustomizationPreviewCard: View {
                 HStack(spacing: 12) {
                     Image(systemName: "tag.fill")
                         .font(.headline)
-                        .foregroundColor(Color.brown.opacity(0.7))
+                        .foregroundColor(Color.accentPrimary.opacity(0.7))
                     
                     Text(category.name)
                         .font(.subheadline)
@@ -36,11 +36,11 @@ struct CustomizationPreviewCard: View {
                         .foregroundColor(.brown)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Capsule().fill(Color.brown.opacity(0.15)))
+                        .background(Capsule().fill(Color.accentPrimary.opacity(0.15)))
                     
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.headline)
-                        .foregroundColor(Color.brown)
+                        .foregroundColor(Color.accentPrimary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
@@ -57,7 +57,7 @@ struct CustomizationPreviewCard: View {
                         HStack {
                             HStack(spacing: 6) {
                                 Circle()
-                                    .fill(Color.brown.opacity(0.3))
+                                    .fill(Color.accentPrimary.opacity(0.3))
                                     .frame(width: 4, height: 4)
                                 
                                 Text(option.name)
@@ -91,7 +91,7 @@ struct CustomizationPreviewCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.brown.opacity(0.2), lineWidth: 1)
+                .stroke(Color.accentPrimary.opacity(0.2), lineWidth: 1)
         )
     }
 }

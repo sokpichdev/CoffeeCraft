@@ -164,7 +164,7 @@ struct EditProductView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.brown)
+                    .background(Color.accentPrimary)
                     .foregroundColor(.white)
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 3)

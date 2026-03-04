@@ -189,15 +189,15 @@ struct UITextFieldWrapper1<TrailingView: View>: UIViewRepresentable {
         textField.setOutlineLineWidth(1, for: .editing)
         textField.label.numberOfLines = 2
         
-        textField.setColorModel(ColorModel(textColor: UIColor(Color.primaryTextColor),
-                                           floatingLabelColor: UIColor(Color.gray),
-                                           normalLabelColor: UIColor(Color.placeHolderColor),
+        textField.setColorModel(ColorModel(textColor: UIColor(Color.textPrimary),
+                                           floatingLabelColor: UIColor(Color.textMuted),
+                                           normalLabelColor: UIColor(Color.textMuted),
                                            outlineColor: .textFieldBorder), for: .normal)
-        textField.setColorModel(ColorModel(textColor: UIColor(Color.primaryTextColor),
+        textField.setColorModel(ColorModel(textColor: UIColor(Color.textPrimary),
                                            floatingLabelColor: .activeTF,
                                            normalLabelColor: .activeTF,
                                            outlineColor: .activeTF), for: .editing)
-        textField.setColorModel(ColorModel(textColor: UIColor(Color.primaryTextColor),
+        textField.setColorModel(ColorModel(textColor: UIColor(Color.textPrimary),
                                            floatingLabelColor: .textFieldError,
                                            normalLabelColor: .textFieldError,
                                            outlineColor: .textFieldError), for: .error)

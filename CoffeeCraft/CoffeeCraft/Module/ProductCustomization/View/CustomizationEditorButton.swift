@@ -21,7 +21,7 @@ struct CustomizationEditorButton: View {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(Color.brown.opacity(0.1))
+                        .fill(Color.accentPrimary.opacity(0.1))
                         .frame(width: 50, height: 50)
                     
                     Image(systemName: "slider.horizontal.3")
@@ -57,7 +57,7 @@ struct CustomizationEditorButton: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.headline)
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(Color.accentPrimary)
             }
             .padding()
             .background(

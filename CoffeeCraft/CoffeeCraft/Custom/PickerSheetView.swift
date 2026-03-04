@@ -31,7 +31,7 @@ struct PickerSheetView: View {
                                 if selectedOption == option {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.headline)
-                                        .foregroundColor(Color.brown)
+                                        .foregroundColor(Color.accentPrimary)
                                 }
                             }
                             .padding()

@@ -75,7 +75,7 @@ struct ForgotPasswordView: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
-                .foregroundStyle(Color.brown)
+                .foregroundStyle(Color.accentPrimary)
             }
         }
         .padding(20)

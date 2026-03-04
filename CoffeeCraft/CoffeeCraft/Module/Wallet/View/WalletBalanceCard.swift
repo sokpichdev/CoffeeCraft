@@ -51,7 +51,7 @@ struct WalletBalanceCard: View {
         }
         .frame(width: cardWidth, height: cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .shadow(color: Color(hex: "#1C0A00").opacity(0.4), radius: 24, x: 0, y: 12)
+        .shadow(color: Color.coffeeDarkBrown.opacity(0.4), radius: 24, x: 0, y: 12)
         .scaleEffect(appear ? 1 : 0.96)
         .opacity(appear ? 1 : 0)
         .onAppear {

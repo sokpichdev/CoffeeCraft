@@ -183,7 +183,7 @@ struct FilteredTransactionView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
         .animation(.easeInOut(duration: 0.28), value: filteredTransactions.map(\.id))
@@ -219,7 +219,7 @@ struct FilteredTransactionView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
     }
@@ -249,7 +249,7 @@ struct FilteredTransactionView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 44)
-        .background(Color.white)
+        .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .shadow(color: Color(hex: "#3B1A08").opacity(0.06), radius: 12, x: 0, y: 4)
     }
@@ -303,7 +303,7 @@ struct CoffeeFilterChip: View {
                         .padding(.vertical, 1)
                         .background(
                             Capsule()
-                                .fill(isSelected ? Color.white.opacity(0.3) : Color(hex: "#F0E4D8"))
+                                .fill(isSelected ? Color.surfacePrimary.opacity(0.3) : Color.surfaceSub)
                         )
                 }
             }
@@ -317,7 +317,7 @@ struct CoffeeFilterChip: View {
                         endPoint: .trailing
                     )
                     : LinearGradient(
-                        colors: [Color.white, Color.white],
+                        colors: [Color.surfacePrimary, Color.surfacePrimary],
                         startPoint: .leading,
                         endPoint: .trailing
                     )

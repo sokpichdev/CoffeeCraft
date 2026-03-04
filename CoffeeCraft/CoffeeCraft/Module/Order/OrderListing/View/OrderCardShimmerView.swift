@@ -32,7 +32,7 @@ struct OrderCardShimmerView: View {
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(uiColor: .tertiarySystemBackground))
         )
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.textPrimary.opacity(0.05), radius: 4, x: 0, y: 2)
         .contentShape(Rectangle())
     }
 
@@ -47,20 +47,20 @@ struct OrderCardShimmerView: View {
 
             HStack(spacing: 6) {
                 Circle()
-                    .fill(Color.brown.opacity(0.2))
+                    .fill(Color.accentPrimary.opacity(0.2))
                     .frame(width: 8, height: 8)
                 ShimmerView().frame(width: 50, height: 15)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(Color.brown.opacity(0.15))
+            .background(Color.accentPrimary.opacity(0.15))
             .cornerRadius(20)
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.brown.opacity(0.2), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.accentPrimary.opacity(0.2), lineWidth: 1))
         }
         .padding()
         .background(
             LinearGradient(
-                colors: [Color.brown.opacity(0.05), Color.clear],
+                colors: [Color.accentPrimary.opacity(0.05), Color.clear],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

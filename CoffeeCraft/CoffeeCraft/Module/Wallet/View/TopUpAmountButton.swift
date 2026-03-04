@@ -25,7 +25,7 @@ struct TopUpAmountButton: View {
                 VStack(spacing: 6) {
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.title2)
-                        .foregroundStyle(isSelected ? .white : Color.coffeeBrown)
+                        .foregroundStyle(isSelected ? .white : Color.accentPrimary)
 
                     Text(amount.currencyFormatted)
                         .font(.title3)
@@ -39,7 +39,7 @@ struct TopUpAmountButton: View {
                         .fill(
                             isSelected
                                 ? LinearGradient(
-                                    colors: [Color.coffeeBrown, Color.coffeeLight],
+                                    colors: [Color.accentPrimary, Color.coffeeLight],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                   )
@@ -53,12 +53,12 @@ struct TopUpAmountButton: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .strokeBorder(
-                            isSelected ? Color.coffeeBrown : Color.coffeeBrown.opacity(0.15),
+                            isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.15),
                             lineWidth: isSelected ? 2 : 1
                         )
                 )
                 .shadow(
-                    color: isSelected ? Color.coffeeBrown.opacity(0.35) : Color.clear,
+                    color: isSelected ? Color.accentPrimary.opacity(0.35) : Color.clear,
                     radius: 8, y: 4
                 )
 
@@ -70,7 +70,7 @@ struct TopUpAmountButton: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
                         .background(
-                            Capsule().fill(Color.errorRed)
+                            Capsule().fill(Color.semanticError)
                         )
                         .offset(x: -8, y: 8)
                 }

@@ -21,7 +21,7 @@ struct AsyncImageCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: corner)
-                .fill(Color.gray.opacity(0.2))
+                .fill(Color.textMuted.opacity(0.2))
             
             if !isURLValid || (imageURL ?? "").isEmpty {
                 VStack(spacing: height * 0.05) {

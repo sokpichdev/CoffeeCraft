@@ -133,7 +133,7 @@ struct MenuView: View {
                                     Rectangle()
                                         .fill(
                                             selectedSectionID == section.id
-                                            ? Color.brown.opacity(0.15)
+                                            ? Color.accentPrimary.opacity(0.15)
                                             : Color.clear
                                         )
                                 )
@@ -339,9 +339,9 @@ struct MenuSectionShimmerView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.coffeeCream.opacity(0.4), lineWidth: 1)
+                .stroke(Color.surfaceSub.opacity(0.4), lineWidth: 1)
         )
-        .shadow(color: Color.coffeeCream.opacity(0.4), radius: 1)
+        .shadow(color: Color.surfaceSub.opacity(0.4), radius: 1)
     }
 }
 

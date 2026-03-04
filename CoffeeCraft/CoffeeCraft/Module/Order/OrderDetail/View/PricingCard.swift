@@ -50,12 +50,12 @@ struct PricingCard: View {
         let isWallet = method == PaymentMethod.wallet.rawValue
         HStack(spacing: 8) {
             Image(systemName: isWallet ? "creditcard.fill" : "banknote")
-                .font(.caption).foregroundStyle(isWallet ? Color.coffeeBrown : Color.secondary)
+                .font(.caption).foregroundStyle(isWallet ? Color.accentPrimary : Color.secondary)
             Text(isWallet ? "Paid with Wallet" : "Pay at Counter")
                 .font(.caption).foregroundStyle(.secondary)
             Spacer()
             if isWallet, let amount = walletAmountPaid {
-                Text(amount.currencyFormatted).font(.caption.weight(.bold)).foregroundStyle(Color.coffeeBrown)
+                Text(amount.currencyFormatted).font(.caption.weight(.bold)).foregroundStyle(Color.accentPrimary)
             }
         }
         .padding(.top, 2)

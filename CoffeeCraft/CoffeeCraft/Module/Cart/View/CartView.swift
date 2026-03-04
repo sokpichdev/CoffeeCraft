@@ -53,7 +53,7 @@ struct CartView: View {
 
                         CustomCoffeeButton(
                             title: "Checkout",
-                            bgColors: [Color.brown],
+                            bgColors: [Color.accentPrimary],
                             isDisabled: cartManager.items.isEmpty || !cartManager.canCheckout(walletBalance: walletVM.wallet?.balance)
                         ) {
                             confirmAndPlaceOrder()
@@ -112,17 +112,17 @@ struct CartView: View {
                     if method == .wallet && UserSession.shared.isLoggedIn {
                         Text(walletVM.formattedBalance)
                             .font(.system(size: 10))
-                            .foregroundStyle(canAfford ? Color.leafGreen : Color.errorRed)
+                            .foregroundStyle(canAfford ? Color.semanticSuccess : Color.semanticError)
                     }
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
             .frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 10)
-                .fill(isSelected ? Color.coffeeBrown : Color(.secondarySystemGroupedBackground)))
+                .fill(isSelected ? Color.accentPrimary : Color(.secondarySystemGroupedBackground)))
             .foregroundStyle(isSelected ? .white : .primary)
             .overlay(RoundedRectangle(cornerRadius: 10)
-                .strokeBorder(isSelected ? Color.coffeeBrown : Color.coffeeBrown.opacity(0.2), lineWidth: 1))
+                .strokeBorder(isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.2), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .disabled(method == .wallet && !UserSession.shared.isLoggedIn)
@@ -132,10 +132,10 @@ struct CartView: View {
 
     private var insufficientBalanceBanner: some View {
         HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.errorRed)
+            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.semanticError)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Insufficient balance")
-                    .font(.caption.weight(.semibold)).foregroundStyle(Color.errorRed)
+                    .font(.caption.weight(.semibold)).foregroundStyle(Color.semanticError)
                 Text("Need \(cartManager.total.currencyFormatted) · have \(walletVM.formattedBalance)")
                     .font(.caption2).foregroundStyle(.secondary)
             }
@@ -143,13 +143,13 @@ struct CartView: View {
             Button {
                 ToastManager.shared.show(message: "Top up your wallet first", type: .warning)
             } label: {
-                Text("Top Up").font(.caption.weight(.bold)).foregroundStyle(Color.coffeeBrown)
+                Text("Top Up").font(.caption.weight(.bold)).foregroundStyle(Color.accentPrimary)
             }
         }
         .padding(10)
-        .background(Color.errorRed.opacity(0.08))
+        .background(Color.semanticError.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.errorRed.opacity(0.25), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.semanticError.opacity(0.25), lineWidth: 1))
     }
 
     // MARK: - Place Order

@@ -10,7 +10,7 @@ struct CustomCoffeeButton: View {
     var title: String = ""
     var buttonImage: String = ""
     var foregroundColor: Color = .white
-    var bgColors: [Color] = [Color.coffeeBrown, Color.coffeeLight]
+    var bgColors: [Color] = [Color.accentPrimary, Color.coffeeLight]
     var contentPlacement: ButtonContentPlacement = .center
     var isDisabled: Bool = false
     var verticalPadding: CGFloat = 12
@@ -50,7 +50,7 @@ struct CustomCoffeeButton: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .strokeBorder(Color.coffeeBrown.opacity(0.3), lineWidth: 1)
+                    .strokeBorder(Color.accentPrimary.opacity(0.3), lineWidth: 1)
             )
         }
         .disabled(isDisabled)

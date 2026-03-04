@@ -28,7 +28,7 @@ struct CategorySelectionButton: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.headline)
-                    .foregroundColor(Color.brown)
+                    .foregroundColor(Color.accentPrimary)
             }
             .padding(.vertical, 10)
             .contentShape(Rectangle())
@@ -45,7 +45,7 @@ struct CategorySelectionButton: View {
                 .stroke(Color(.systemGray4), lineWidth: 0.5)
         )
         .shadow(
-            color: colorScheme == .dark ? Color.clear : Color.black.opacity(0.05),
+            color: colorScheme == .dark ? Color.clear : Color.textPrimary.opacity(0.05),
             radius: 2,
             x: 0,
             y: 1

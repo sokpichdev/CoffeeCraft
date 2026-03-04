@@ -32,7 +32,7 @@ struct AddCardView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding()
-            .background(Color.blue.opacity(0.1))
+            .background(Color.accentGold.opacity(0.1))
             .cornerRadius(12)
             
             // Input Section

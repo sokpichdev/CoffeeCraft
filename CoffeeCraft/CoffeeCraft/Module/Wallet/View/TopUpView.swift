@@ -104,9 +104,9 @@ private struct TopUpAmountStep: View {
                 // ── Header ────────────────────────────────────────────────
                 VStack(spacing: 8) {
                     ZStack {
-                        Circle().fill(Color.coffeeBrown.opacity(0.1)).frame(width: 64, height: 64)
+                        Circle().fill(Color.accentPrimary.opacity(0.1)).frame(width: 64, height: 64)
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 32)).foregroundStyle(Color.coffeeBrown)
+                            .font(.system(size: 32)).foregroundStyle(Color.accentPrimary)
                     }
                     Text("Top Up Wallet").font(.title2).fontWeight(.bold)
                     Text("Choose an amount to add to your wallet")
@@ -116,9 +116,9 @@ private struct TopUpAmountStep: View {
                         Image(systemName: "creditcard.fill").font(.caption)
                         Text("Balance: \(walletVM.formattedBalance)").font(.caption).fontWeight(.medium)
                     }
-                    .foregroundStyle(Color.coffeeBrown)
+                    .foregroundStyle(Color.accentPrimary)
                     .padding(.horizontal, 14).padding(.vertical, 6)
-                    .background(Color.coffeeBrown.opacity(0.1)).clipShape(Capsule())
+                    .background(Color.accentPrimary.opacity(0.1)).clipShape(Capsule())
                 }
                 .padding(.top, 8)
 
@@ -144,7 +144,7 @@ private struct TopUpAmountStep: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Or enter amount (USD)").font(.subheadline).fontWeight(.semibold)
                     HStack(spacing: 10) {
-                        Text("$").font(.title3).fontWeight(.bold).foregroundStyle(Color.coffeeBrown)
+                        Text("$").font(.title3).fontWeight(.bold).foregroundStyle(Color.accentPrimary)
                         TextField("0.00", text: $customInput)
                             .keyboardType(.decimalPad)
                             .focused($keyboardFocused)
@@ -160,7 +160,7 @@ private struct TopUpAmountStep: View {
                         .fill(Color(.secondarySystemGroupedBackground)))
                     .overlay(RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(
-                            keyboardFocused ? Color.coffeeBrown : Color.coffeeBrown.opacity(0.2),
+                            keyboardFocused ? Color.accentPrimary : Color.accentPrimary.opacity(0.2),
                             lineWidth: keyboardFocused ? 2 : 1
                         ))
                 }
@@ -186,7 +186,7 @@ private struct TopUpAmountStep: View {
                 CustomCoffeeButton(
                     title:       "Continue",
                     buttonImage: "arrow.right.circle.fill",
-                    bgColors:    [Color.coffeeBrown, Color.coffeeLight],
+                    bgColors:    [Color.accentPrimary, Color.coffeeLight],
                     isDisabled:  resolvedUSD == nil || (resolvedUSD ?? 0) <= 0
                 ) {
                     keyboardFocused = false
@@ -208,7 +208,7 @@ private struct TopUpAmountStep: View {
             Text(label).font(.subheadline).foregroundStyle(.secondary)
             Spacer()
             Text(value).font(.subheadline).fontWeight(.bold)
-                .foregroundStyle(highlight ? Color.leafGreen : Color.coffeeBrown)
+                .foregroundStyle(highlight ? Color.semanticSuccess : Color.accentPrimary)
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
     }
@@ -230,17 +230,17 @@ private struct PresetAmountButton: View {
                 .frame(maxWidth: .infinity).padding(.vertical, 20)
                 .background(RoundedRectangle(cornerRadius: 16).fill(
                     isSelected
-                        ? AnyShapeStyle(LinearGradient(colors: [Color.coffeeBrown, Color.coffeeLight], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        ? AnyShapeStyle(LinearGradient(colors: [Color.accentPrimary, Color.coffeeLight], startPoint: .topLeading, endPoint: .bottomTrailing))
                         : AnyShapeStyle(Color(.secondarySystemGroupedBackground))
                 ))
                 .overlay(RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(isSelected ? Color.coffeeBrown : Color.coffeeBrown.opacity(0.15), lineWidth: isSelected ? 2 : 1))
-                .shadow(color: isSelected ? Color.coffeeBrown.opacity(0.35) : .clear, radius: 8, y: 4)
+                    .strokeBorder(isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.15), lineWidth: isSelected ? 2 : 1))
+                .shadow(color: isSelected ? Color.accentPrimary.opacity(0.35) : .clear, radius: 8, y: 4)
 
                 if let badge {
                     Text(badge).font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
                         .padding(.horizontal, 6).padding(.vertical, 3)
-                        .background(Capsule().fill(Color.errorRed))
+                        .background(Capsule().fill(Color.semanticError))
                         .offset(x: -8, y: 8)
                 }
             }
@@ -272,7 +272,7 @@ private struct TopUpBankStep: View {
                 Divider()
                 CustomCoffeeButton(
                     title: "Continue", buttonImage: "arrow.right.circle.fill",
-                    bgColors: [Color.coffeeBrown, Color.coffeeLight],
+                    bgColors: [Color.accentPrimary, Color.coffeeLight],
                     isDisabled: selectedBank == nil
                 ) { onContinue() }
                 .padding(20)
@@ -301,15 +301,15 @@ private struct BankRow: View {
                 }
                 Spacer()
                 ZStack {
-                    Circle().strokeBorder(isSelected ? Color.coffeeBrown : Color.secondary.opacity(0.3), lineWidth: 2).frame(width: 22, height: 22)
-                    if isSelected { Circle().fill(Color.coffeeBrown).frame(width: 12, height: 12) }
+                    Circle().strokeBorder(isSelected ? Color.accentPrimary : Color.secondary.opacity(0.3), lineWidth: 2).frame(width: 22, height: 22)
+                    if isSelected { Circle().fill(Color.accentPrimary).frame(width: 12, height: 12) }
                 }
             }
             .padding(16)
             .background(RoundedRectangle(cornerRadius: 16)
-                .fill(isSelected ? Color.coffeeBrown.opacity(0.06) : Color(.secondarySystemGroupedBackground)))
+                .fill(isSelected ? Color.accentPrimary.opacity(0.06) : Color(.secondarySystemGroupedBackground)))
             .overlay(RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(isSelected ? Color.coffeeBrown.opacity(0.4) : Color.clear, lineWidth: 1.5))
+                .strokeBorder(isSelected ? Color.accentPrimary.opacity(0.4) : Color.clear, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
         .animation(.spring(duration: 0.2), value: isSelected)
@@ -353,16 +353,16 @@ private struct TopUpCheckoutStep: View {
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
                     }
-                    .shadow(color: Color.black.opacity(0.08), radius: 12, y: 4)
+                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
 
                     // ── Info note ─────────────────────────────────────────
                     HStack(spacing: 8) {
-                        Image(systemName: "info.circle.fill").foregroundStyle(Color.coffeeBrown)
+                        Image(systemName: "info.circle.fill").foregroundStyle(Color.accentPrimary)
                         Text("Balance will be credited instantly after payment is confirmed.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding(14)
-                    .background(Color.coffeeBrown.opacity(0.07))
+                    .background(Color.accentPrimary.opacity(0.07))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding(20)
@@ -374,7 +374,7 @@ private struct TopUpCheckoutStep: View {
                 CustomCoffeeButton(
                     title:       isLoading ? "Processing..." : "Pay \(String(format: "$%.2f", usdAmount))",
                     buttonImage: isLoading ? "" : "checkmark.circle.fill",
-                    bgColors:    [Color.coffeeBrown, Color.coffeeLight],
+                    bgColors:    [Color.accentPrimary, Color.coffeeLight],
                     isDisabled:  isLoading
                 ) { Task { await pay() } }
                 .padding(20)
@@ -391,7 +391,7 @@ private struct TopUpCheckoutStep: View {
             Text(label).font(.subheadline).foregroundStyle(.secondary)
             Spacer()
             Text(value).font(.subheadline).fontWeight(.bold)
-                .foregroundStyle(highlight ? Color.leafGreen : .primary)
+                .foregroundStyle(highlight ? Color.semanticSuccess : .primary)
         }
         .padding(.horizontal, 16).padding(.vertical, 14)
     }

@@ -15,7 +15,7 @@ struct CustomMultipleSelectionView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.system(size: 15, weight: .semibold, design: .serif))
-                .foregroundColor(Color.brown)
+                .foregroundColor(Color.accentPrimary)
 
             ChipFlowLayout(horizontalSpacing: 8, verticalSpacing: 10) {
                 ForEach(options.keys.sorted(), id: \.self) { option in
@@ -41,27 +41,27 @@ struct CustomMultipleSelectionView: View {
                                 }
                                 Text(option)
                                     .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                                    .foregroundColor(isSelected ? .white : Color.brown)
+                                    .foregroundColor(isSelected ? .white : Color.accentPrimary)
                             }
                             .padding(.vertical, 9)
                             .padding(.horizontal, 18)
                             .background(
                                 Capsule()
-                                    .fill(isSelected ? Color.brown : Color.brown.opacity(0.08))
+                                    .fill(isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.08))
                             )
                             .overlay(
                                 Capsule()
-                                    .stroke(Color.brown.opacity(isSelected ? 0 : 0.2), lineWidth: 1)
+                                    .stroke(Color.accentPrimary.opacity(isSelected ? 0 : 0.2), lineWidth: 1)
                             )
                             .shadow(
-                                color: isSelected ? Color.brown.opacity(0.3) : .clear,
+                                color: isSelected ? Color.accentPrimary.opacity(0.3) : .clear,
                                 radius: 6, x: 0, y: 3
                             )
 
                             if price > 0 {
                                 Text("+$\(price, specifier: "%.2f")")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(isSelected ? Color.brown : .secondary)
+                                    .foregroundColor(isSelected ? Color.accentPrimary : .secondary)
                             } else {
                                 Text("Free")
                                     .font(.system(size: 11, weight: .medium))

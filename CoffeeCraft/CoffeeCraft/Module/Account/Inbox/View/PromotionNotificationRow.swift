@@ -33,7 +33,7 @@ struct PromotionNotificationRow: View {
                 .foregroundColor(.purple)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(Color.purple.opacity(0.1))
+                .background(Color.accentPrimary.opacity(0.1))
                 .clipShape(Capsule())
                 .padding(.top, 2)
             }

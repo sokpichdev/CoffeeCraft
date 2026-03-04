@@ -37,7 +37,7 @@ struct AnnouncementCardView: View {
         }
         .background(.ultraThinMaterial)
         .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
+        .shadow(color: Color.textPrimary.opacity(0.2), radius: 5, x: 0, y: 3)
     }
 }
 
@@ -60,6 +60,6 @@ struct AnnouncementCardShimmerView: View {
         }
         .background(.ultraThinMaterial)
         .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
+        .shadow(color: Color.textPrimary.opacity(0.2), radius: 5, x: 0, y: 3)
     }
 }

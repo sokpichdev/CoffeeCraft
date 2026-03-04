@@ -68,11 +68,11 @@ struct WalletTestView: View {
     private var warningBanner: some View {
         HStack(spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(Color.warningAmber)
+                .foregroundStyle(Color.semanticWarning)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Dev Only — Delete After Phase 1")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.warningAmber)
+                    .foregroundStyle(Color.semanticWarning)
                 Text("Remove WalletTestView.swift before release.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -80,11 +80,11 @@ struct WalletTestView: View {
             Spacer()
         }
         .padding(12)
-        .background(Color.warningAmber.opacity(0.1))
+        .background(Color.semanticWarning.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.warningAmber.opacity(0.4), lineWidth: 1)
+                .stroke(Color.semanticWarning.opacity(0.4), lineWidth: 1)
         )
     }
 
@@ -95,7 +95,7 @@ struct WalletTestView: View {
 
             HStack {
                 Circle()
-                    .fill(isLoggedIn ? Color.leafGreen : Color.errorRed)
+                    .fill(isLoggedIn ? Color.semanticSuccess : Color.semanticError)
                     .frame(width: 8, height: 8)
                 Text(isLoggedIn ? "Logged in" : "Not logged in — sign in first")
                     .font(.caption)
@@ -162,7 +162,7 @@ struct WalletTestView: View {
                 ForEach([50.0, 100.0, 200.0], id: \.self) { amount in
                     testButton(
                         title: "+\(amount.currencyFormatted)",
-                        color: Color.leafGreen,
+                        color: Color.semanticSuccess,
                         disabled: !isLoggedIn || isLoading
                     ) {
                         await runAction("Top-Up \(amount.currencyFormatted)") {
@@ -181,7 +181,7 @@ struct WalletTestView: View {
 
             testButton(
                 title: "Deduct $20",
-                color: Color.errorRed,
+                color: Color.semanticError,
                 disabled: !isLoggedIn || isLoading || (wallet?.balance ?? 0) < 20
             ) {
                 await runAction("Deduct $20") {
@@ -268,7 +268,7 @@ struct WalletTestView: View {
 
                         Text(tx.formattedAmount)
                             .font(.caption.weight(.bold))
-                            .foregroundStyle(tx.isCredit ? Color.leafGreen : Color.errorRed)
+                            .foregroundStyle(tx.isCredit ? Color.semanticSuccess : Color.semanticError)
                     }
                     .padding(.vertical, 4)
 
@@ -318,7 +318,7 @@ struct WalletTestView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
-            .background(disabled ? Color.gray.opacity(0.3) : color)
+            .background(disabled ? Color.surfaceSub : color)
             .foregroundColor(disabled ? .secondary : .white)
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }

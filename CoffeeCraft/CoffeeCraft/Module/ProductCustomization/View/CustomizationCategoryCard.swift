@@ -41,7 +41,7 @@ struct CustomizationCategoryCard: View {
                         
                         Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                             .font(.headline)
-                            .foregroundColor(Color.brown)
+                            .foregroundColor(Color.accentPrimary)
                     }
                 }
                 .padding()
@@ -69,8 +69,8 @@ struct CustomizationCategoryCard: View {
                     // Add option button
                     CustomCoffeeButton(title: "Add Option",
                                        buttonImage: "plus.circle.fill",
-                                       foregroundColor: Color.coffeeBrown,
-                                       bgColors: [Color.coffeeBrown.opacity(0.1)]) {
+                                       foregroundColor: Color.accentPrimary,
+                                       bgColors: [Color.accentPrimary.opacity(0.1)]) {
                         withAnimation {
                             category.options.append(CustomizationOption(name: "", price: 0.0))
                         }

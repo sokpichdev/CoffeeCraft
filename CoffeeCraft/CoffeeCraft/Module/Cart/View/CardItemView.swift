@@ -58,6 +58,6 @@ struct CardItemView: View {
         .padding()
         .background(Color(.tertiarySystemBackground))
         .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.textPrimary.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
