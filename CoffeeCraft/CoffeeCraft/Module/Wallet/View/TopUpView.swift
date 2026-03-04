@@ -5,16 +5,13 @@
 //  Created by Sok Pich on 03/03/2026.
 //
 //  3-step top-up sheet:
-//    Step 1 — Amount  : preset USD amounts or custom keyboard input
+//    Step 1 — Amount  : preset $ amounts or custom keyboard input
 //    Step 2 — Bank    : static list of payment methods
 //    Step 3 — Checkout: confirmation + one-tap pay → WalletService.topUp()
 //
-//  Conversion rate: 1 USD = 10 CC  (CC_PER_USD constant below)
+//  Currency: USD ($). 1:1 — amount paid equals amount credited to wallet.
 
 import SwiftUI
-
-// MARK: - Constants
-private let CC_PER_USD: Double = 10
 
 // MARK: - Bank Option
 struct BankOption: Identifiable {
@@ -61,7 +58,6 @@ struct TopUpView: View {
                             walletVM:  walletVM,
                             bank:      bank,
                             usdAmount: usd,
-                            ccAmount:  usd * CC_PER_USD,
                             onSuccess: { dismiss() }
                         )
                     }
@@ -113,7 +109,7 @@ private struct TopUpAmountStep: View {
                             .font(.system(size: 32)).foregroundStyle(Color.coffeeBrown)
                     }
                     Text("Top Up Wallet").font(.title2).fontWeight(.bold)
-                    Text("Choose an amount to add CoffeeCoins")
+                    Text("Choose an amount to add to your wallet")
                         .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
 
                     HStack(spacing: 5) {
@@ -133,7 +129,6 @@ private struct TopUpAmountStep: View {
                         ForEach(presets, id: \.usd) { option in
                             PresetAmountButton(
                                 usd:        option.usd,
-                                cc:         option.usd * CC_PER_USD,
                                 badge:      option.badge,
                                 isSelected: selectedUSD == option.usd && customInput.isEmpty
                             ) {
@@ -156,7 +151,7 @@ private struct TopUpAmountStep: View {
                             .font(.title3).fontWeight(.semibold)
                             .onChange(of: customInput) { _, _ in selectedUSD = nil }
                         if !customInput.isEmpty {
-                            Text("= \(Int((Double(customInput) ?? 0) * CC_PER_USD)) CC")
+                            Text((Double(customInput) ?? 0).currencyFormatted)
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }
@@ -173,13 +168,13 @@ private struct TopUpAmountStep: View {
                 // ── Summary card ──────────────────────────────────────────
                 if let usd = resolvedUSD, usd > 0 {
                     VStack(spacing: 0) {
-                        summaryRow(label: "You pay",     value: String(format: "$%.2f USD", usd))
+                        summaryRow(label: "You pay",     value: String(format: "$%.2f", usd))
                         Divider().padding(.horizontal, 16)
-                        summaryRow(label: "You receive", value: "+\(Int(usd * CC_PER_USD)) CC", highlight: true)
+                        summaryRow(label: "You receive", value: "+\(usd.currencyFormatted)", highlight: true)
                         Divider().padding(.horizontal, 16)
                         summaryRow(
                             label: "New balance",
-                            value: "\(Int((walletVM.wallet?.balance ?? 0) + usd * CC_PER_USD)) CC"
+                            value: ((walletVM.wallet?.balance ?? 0) + usd).currencyFormatted
                         )
                     }
                     .background(Color(.secondarySystemGroupedBackground))
@@ -221,19 +216,16 @@ private struct TopUpAmountStep: View {
 
 // MARK: - Preset Amount Button
 private struct PresetAmountButton: View {
-    let usd: Double; let cc: Double; let badge: String?
+    let usd: Double; let badge: String?
     let isSelected: Bool; let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             ZStack(alignment: .topTrailing) {
                 VStack(spacing: 4) {
-                    Text(String(format: "$%.0f", usd))
+                    Text(usd.currencyFormatted)
                         .font(.title2).fontWeight(.bold)
                         .foregroundStyle(isSelected ? .white : .primary)
-                    Text("\(Int(cc)) CC")
-                        .font(.caption).fontWeight(.medium)
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : .secondary)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 20)
                 .background(RoundedRectangle(cornerRadius: 16).fill(
@@ -327,7 +319,7 @@ private struct BankRow: View {
 // MARK: - Step 3: Checkout
 private struct TopUpCheckoutStep: View {
     @ObservedObject var walletVM: WalletViewModel
-    let bank: BankOption; let usdAmount: Double; let ccAmount: Double
+    let bank: BankOption; let usdAmount: Double
     let onSuccess: () -> Void
 
     @State private var isLoading = false
@@ -354,7 +346,7 @@ private struct TopUpCheckoutStep: View {
                             Divider().padding(.horizontal, 16)
                             checkoutRow(label: "Amount",      value: String(format: "$%.2f USD", usdAmount))
                             Divider().padding(.horizontal, 16)
-                            checkoutRow(label: "You receive", value: "+\(Int(ccAmount)) CC", highlight: true)
+                            checkoutRow(label: "You receive", value: "+\(usdAmount.currencyFormatted)", highlight: true)
                             Divider().padding(.horizontal, 16)
                             checkoutRow(label: "Method",      value: bank.name)
                         }
@@ -366,7 +358,7 @@ private struct TopUpCheckoutStep: View {
                     // ── Info note ─────────────────────────────────────────
                     HStack(spacing: 8) {
                         Image(systemName: "info.circle.fill").foregroundStyle(Color.coffeeBrown)
-                        Text("CoffeeCoins will be credited instantly after payment is confirmed.")
+                        Text("Balance will be credited instantly after payment is confirmed.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding(14)
@@ -412,9 +404,9 @@ private struct TopUpCheckoutStep: View {
         }
         isLoading = true
         do {
-            try await WalletService.shared.topUp(userId: userId, amount: ccAmount)
+            try await WalletService.shared.topUp(userId: userId, amount: usdAmount)
             await walletVM.loadTransactions(userId: userId)
-            ToastManager.shared.show(message: "+\(Int(ccAmount)) CC added to your wallet", type: .success)
+            ToastManager.shared.show(message: "+\(usdAmount.currencyFormatted) added to your wallet", type: .success)
             onSuccess()
         } catch {
             AlertManager.shared.showError(message: error.localizedDescription)

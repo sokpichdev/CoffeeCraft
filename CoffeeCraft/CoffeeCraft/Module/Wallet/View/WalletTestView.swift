@@ -124,8 +124,8 @@ struct WalletTestView: View {
                 Group {
                     labelRow("Balance",    wallet.formattedBalance)
                     labelRow("Currency",   wallet.currency)
-                    labelRow("Total Top-Up", "\(Int(wallet.totalTopUp)) CC")
-                    labelRow("Total Spent",  "\(Int(wallet.totalSpent)) CC")
+                    labelRow("Total Top-Up", wallet.totalTopUp.currencyFormatted)
+                    labelRow("Total Spent",  wallet.totalSpent.currencyFormatted)
                     labelRow("Updated At", wallet.updatedAt.formatted(date: .abbreviated, time: .shortened))
                 }
             } else {
@@ -161,11 +161,11 @@ struct WalletTestView: View {
             HStack(spacing: 10) {
                 ForEach([50.0, 100.0, 200.0], id: \.self) { amount in
                     testButton(
-                        title: "+\(Int(amount)) CC",
+                        title: "+\(amount.currencyFormatted)",
                         color: Color.leafGreen,
                         disabled: !isLoggedIn || isLoading
                     ) {
-                        await runAction("Top-Up \(Int(amount)) CC") {
+                        await runAction("Top-Up \(amount.currencyFormatted)") {
                             try await WalletService.shared.topUp(userId: userId, amount: amount)
                         }
                     }
@@ -180,11 +180,11 @@ struct WalletTestView: View {
                 .foregroundStyle(.secondary)
 
             testButton(
-                title: "Deduct 20 CC",
+                title: "Deduct $20",
                 color: Color.errorRed,
                 disabled: !isLoggedIn || isLoading || (wallet?.balance ?? 0) < 20
             ) {
-                await runAction("Deduct 20 CC") {
+                await runAction("Deduct $20") {
                     try await WalletService.shared.deductForOrder(
                         userId: userId,
                         amount: 20,
@@ -201,11 +201,11 @@ struct WalletTestView: View {
                 .foregroundStyle(.secondary)
 
             testButton(
-                title: "Refund 20 CC",
+                title: "Refund $20",
                 color: Color.activeTF,
                 disabled: !isLoggedIn || isLoading
             ) {
-                await runAction("Refund 20 CC") {
+                await runAction("Refund $20") {
                     try await WalletService.shared.refund(
                         userId: userId,
                         amount: 20,
@@ -222,11 +222,11 @@ struct WalletTestView: View {
                 .foregroundStyle(.secondary)
 
             testButton(
-                title: "+ 15 CC Reward",
+                title: "+ $15 Reward",
                 color: Color.vanillaYellow,
                 disabled: !isLoggedIn || isLoading
             ) {
-                await runAction("Reward +15 CC") {
+                await runAction("Reward +$15") {
                     try await WalletService.shared.addReward(
                         userId: userId,
                         amount: 15,

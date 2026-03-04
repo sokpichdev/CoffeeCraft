@@ -130,7 +130,7 @@ struct AccountView: View {
     // MARK: Wallet
     var walletSection: some View {
         SettingsSection(title: "My Wallet", icon: "creditcard.fill") {
-            RowInSectionView(label: walletVM.formattedBalance, title: "CoffeeCoins", systemImage: "creditcard.fill") {
+            RowInSectionView(label: walletVM.formattedBalance, title: "Wallet", systemImage: "creditcard.fill") {
                 push(AnyView(WalletView()))
             }
         }

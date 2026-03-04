@@ -65,7 +65,7 @@ struct ActionButtonsSection: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Order Cancelled").font(.subheadline.weight(.semibold)).foregroundStyle(Color.errorRed)
                         if order.wasWalletPayment, let amount = order.walletAmountPaid {
-                            Text("+\(Int(amount)) CC refunded to your wallet").font(.caption).foregroundStyle(.secondary)
+                            Text("+\(amount.currencyFormatted) refunded to your wallet").font(.caption).foregroundStyle(.secondary)
                         }
                     }
                     Spacer()

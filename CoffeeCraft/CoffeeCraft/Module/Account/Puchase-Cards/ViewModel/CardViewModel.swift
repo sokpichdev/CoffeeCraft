@@ -263,7 +263,7 @@ class CardViewModel: ObservableObject {
     }
     
     // MARK: - Loyalty Reward Constants
-    // Every `rewardMilestone` points earned → `rewardCC` CoffeeCoins added to wallet.
+    // Every `rewardMilestone` points earned → `rewardCC` dollars added to wallet.
     // Uses integer-division milestone detection so it works correctly across multiple
     // orders and shared cards without ever double-awarding the same milestone.
     //   e.g. 9 → 10 pts: (9/10=0) < (10/10=1) ✓ milestone
@@ -328,15 +328,15 @@ class CardViewModel: ObservableObject {
                     amount: Self.rewardCC,
                     reason: reason
                 )
-                AppLog.firestore.info("✅ Reward granted: +\(Int(Self.rewardCC)) CC — \(reason)")
+                AppLog.firestore.info("✅ Reward granted: +\(Self.rewardCC.currencyFormatted) — \(reason)")
             } catch {
                 AppLog.firestore.error("❌ addReward failed for \(reason): \(error.localizedDescription)")
             }
         }
 
-        let totalCC = newMilestones * Int(Self.rewardCC)
+        let totalReward = Double(newMilestones) * Self.rewardCC
         ToastManager.shared.show(
-            message: "🎉 +\(totalCC) CC loyalty reward!",
+            message: "🎉 +\(totalReward.currencyFormatted) loyalty reward!",
             type: .success
         )
     }

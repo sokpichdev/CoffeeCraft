@@ -17,7 +17,7 @@ import FirebaseFirestore
 // /wallets/<USER_UID>
 // {
 //   "balance":    87.50,
-//   "currency":   "CC",
+//   "currency":   "USD",
 //   "totalTopUp": 200.0,
 //   "totalSpent": 112.50,
 //   "createdAt":  <Timestamp>,
@@ -33,8 +33,8 @@ struct Wallet: Identifiable, Codable {
     // MARK: - Stored Properties
 
     @DocumentID var id: String?     // = userId (Firebase UID)
-    var balance: Double             // Current CC balance (cached aggregate)
-    let currency: String            // Always "CC" — reserved for future use
+    var balance: Double             // Current $ balance (cached aggregate)
+    let currency: String            // e.g. "USD" — reserved for future multi-currency support
     var totalTopUp: Double          // Lifetime total topped up
     var totalSpent: Double          // Lifetime total spent on orders
     let createdAt: Date             // When wallet was first created
@@ -42,9 +42,9 @@ struct Wallet: Identifiable, Codable {
 
     // MARK: - Computed Helpers
 
-    /// Balance formatted for display — e.g. "87 CC"
+    /// Balance formatted for display — e.g. "$87.5" or "$10"
     var formattedBalance: String {
-        "\(Int(balance)) CC"
+        balance.currencyFormatted
     }
 
     /// True if balance is enough to cover a given amount
@@ -67,7 +67,7 @@ extension Wallet {
         Wallet(
             id: userId,
             balance: 0,
-            currency: "CC",
+            currency: "USD",
             totalTopUp: 0,
             totalSpent: 0,
             createdAt: Date(),

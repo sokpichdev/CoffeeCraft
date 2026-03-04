@@ -73,7 +73,7 @@ class WalletViewModel: ObservableObject {
     }
 
     var formattedBalance: String {
-        wallet?.formattedBalance ?? "0 CC"
+        wallet?.formattedBalance ?? "$0"
     }
 
     var hasWallet: Bool { wallet != nil }

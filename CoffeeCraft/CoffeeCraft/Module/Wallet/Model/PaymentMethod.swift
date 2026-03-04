@@ -24,7 +24,7 @@ enum PaymentMethod: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .wallet: return "CoffeeCoins Wallet"
+        case .wallet: return "Wallet"
         case .cash:   return "Cash at Counter"
         }
     }
@@ -38,7 +38,7 @@ enum PaymentMethod: String, Codable, CaseIterable {
 
     var description: String {
         switch self {
-        case .wallet: return "Pay using your CC balance"
+        case .wallet: return "Pay using your wallet balance"
         case .cash:   return "Pay in person at the counter"
         }
     }

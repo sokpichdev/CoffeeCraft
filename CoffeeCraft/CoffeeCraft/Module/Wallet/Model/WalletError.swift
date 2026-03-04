@@ -29,7 +29,7 @@ enum WalletError: LocalizedError {
         case .userNotAuthenticated:
             return "User not authenticated. Please sign in and try again."
         case .insufficientBalance:
-            return "Insufficient CoffeeCoins balance. Please top up and try again."
+            return "Insufficient wallet balance. Please top up and try again."
         case .walletNotFound:
             return "Wallet not found. Please top up first to create your wallet."
         case .invalidAmount:

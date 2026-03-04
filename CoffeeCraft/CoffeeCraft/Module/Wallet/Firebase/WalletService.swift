@@ -50,7 +50,7 @@ final class WalletService {
     // MARK: - Create Wallet
 
     /// Creates a brand-new wallet document for a user if one doesn't exist yet.
-    /// Called automatically by topUp() the first time a user adds CC.
+    /// Called automatically by topUp() the first time a user adds $.
     /// Safe to call multiple times — uses merge: true so existing data is preserved.
     func createWalletIfNeeded(userId: String, userName: String) async throws {
         AppLog.firestore.debug("🆕 WalletService.createWalletIfNeeded — userId: \(userId)")
@@ -66,7 +66,7 @@ final class WalletService {
         let now = Timestamp(date: Date())
         try await walletRef.setData([
             "balance":    0.0,
-            "currency":   "CC",
+            "currency":   "USD",
             "totalTopUp": 0.0,
             "totalSpent": 0.0,
             "createdAt":  now,
@@ -78,10 +78,10 @@ final class WalletService {
 
     // MARK: - Top-Up
 
-    /// Atomically adds `amount` CC to the user's wallet and writes a "topup" transaction.
+    /// Atomically adds `amount` $ to the user's wallet and writes a "topup" transaction.
     /// - Parameters:
     ///   - userId: Firebase Auth UID
-    ///   - amount: Positive Double — the CC amount to add
+    ///   - amount: Positive Double — the $ amount to add
     /// - Throws: WalletError.invalidAmount if amount ≤ 0
     func topUp(userId: String, amount: Double) async throws {
         guard amount > 0 else {
@@ -113,7 +113,7 @@ final class WalletService {
                     let now = Timestamp(date: Date())
                     transaction.setData([
                         "balance":    newBalance,
-                        "currency":   "CC",
+                        "currency":   "USD",
                         "totalTopUp": amount,
                         "totalSpent": 0.0,
                         "createdAt":  now,
@@ -128,7 +128,7 @@ final class WalletService {
                     amount:        amount,
                     balanceBefore: current,
                     balanceAfter:  newBalance,
-                    description:   "Top-up \(Int(amount)) CC",
+                    description:   "Top-up \(amount.currencyFormatted)",
                     referenceId:   nil,
                     timestamp:     Date()
                 )
@@ -143,12 +143,12 @@ final class WalletService {
             }
         }
 
-        AppLog.firestore.info("✅ WalletService.topUp complete — +\(Int(amount)) CC for userId: \(userId)")
+        AppLog.firestore.info("✅ WalletService.topUp complete — +\(amount.currencyFormatted) for userId: \(userId)")
     }
 
     // MARK: - Deduct (Pay for Order)
 
-    /// Atomically deducts `amount` CC from the wallet when an order is paid via wallet.
+    /// Atomically deducts `amount` $ from the wallet when an order is paid via wallet.
     /// Throws WalletError.insufficientBalance if balance is too low — call canAfford() first.
     /// - Parameters:
     ///   - userId:  Firebase Auth UID
@@ -211,12 +211,12 @@ final class WalletService {
             }
         }
 
-        AppLog.firestore.info("✅ WalletService.deductForOrder complete — -\(Int(amount)) CC for orderId: \(orderId)")
+        AppLog.firestore.info("✅ WalletService.deductForOrder complete — -\(amount.currencyFormatted) for orderId: \(orderId)")
     }
 
     // MARK: - Refund
 
-    /// Atomically refunds `amount` CC back to the wallet when a wallet-paid order is cancelled.
+    /// Atomically refunds `amount` $ back to the wallet when a wallet-paid order is cancelled.
     /// - Parameters:
     ///   - userId:  Firebase Auth UID
     ///   - amount:  Positive Double — the original amount to return
@@ -269,15 +269,15 @@ final class WalletService {
             }
         }
 
-        AppLog.firestore.info("✅ WalletService.refund complete — +\(Int(amount)) CC refunded for orderId: \(orderId)")
+        AppLog.firestore.info("✅ WalletService.refund complete — +\(amount.currencyFormatted) refunded for orderId: \(orderId)")
     }
 
     // MARK: - Reward Credits
 
-    /// Atomically adds bonus CC as a loyalty reward (e.g. when a milestone is reached).
+    /// Atomically adds bonus $ as a loyalty reward (e.g. when a milestone is reached).
     /// - Parameters:
     ///   - userId: Firebase Auth UID
-    ///   - amount: Positive Double — the bonus CC to award
+    ///   - amount: Positive Double — the bonus $ to award
     ///   - reason: Human-readable description e.g. "Loyalty milestone – 10th order"
     func addReward(userId: String, amount: Double, reason: String) async throws {
         guard amount > 0 else {
@@ -306,7 +306,7 @@ final class WalletService {
                     let now = Timestamp(date: Date())
                     transaction.setData([
                         "balance":    newBalance,
-                        "currency":   "CC",
+                        "currency":   "USD",
                         "totalTopUp": 0.0,
                         "totalSpent": 0.0,
                         "createdAt":  now,
@@ -335,7 +335,7 @@ final class WalletService {
             }
         }
 
-        AppLog.firestore.info("✅ WalletService.addReward complete — +\(Int(amount)) CC for reason: \(reason)")
+        AppLog.firestore.info("✅ WalletService.addReward complete — +\(amount.currencyFormatted) for reason: \(reason)")
     }
 
     // MARK: - Fetch Wallet

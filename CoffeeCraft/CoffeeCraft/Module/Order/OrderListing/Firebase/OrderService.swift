@@ -62,7 +62,7 @@ class OrderService: ObservableObject {
 
                 // MARK: - Step 2: Deduct wallet — real orderId is now known
                 if paymentMethod == .wallet {
-                    AppLog.order.debug("Deducting \(total) CC from wallet — userId: \(userId), orderId: \(formattedOrderId)")
+                    AppLog.order.debug("Deducting \(total) from wallet — userId: \(userId), orderId: \(formattedOrderId)")
                     try await WalletService.shared.deductForOrder(
                         userId: userId,
                         amount: total,
