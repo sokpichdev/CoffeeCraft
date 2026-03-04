@@ -41,7 +41,7 @@ struct WalletView: View {
         }, onRefresh: {
             await vm.refresh()
         })
-        .background(Color(hex: "#F5EDE4"))   // warm cream background
+        .background(Color.mainCreamBg)
         .customNavigationBar("My Wallet") {
             ToolBarButton.back { dismiss() }
         }
