@@ -122,28 +122,31 @@ struct HomeView: View {
             // Balance + Points + Top Up row
             if UserSession.shared.isLoggedIn {
                 HStack(spacing: 10) {
-
-                    // CC Balance pill
-                    HStack(spacing: 5) {
-                        Image(systemName: "creditcard.fill")
-                            .font(.system(size: 11, weight: .semibold))
-                        if walletVM.isLoading && walletVM.wallet == nil {
-                            ShimmerView(cornerRadius: 6)
-                                .frame(width: 48, height: 14)
-                        } else {
-                            Text(walletVM.formattedBalance)
-                                .font(.system(size: 13, weight: .bold))
-                                .contentTransition(.numericText())
-                                .animation(.spring(duration: 0.4), value: walletVM.wallet?.balance)
+                    PushLink {
+                        FilteredTransactionView(transactions: walletVM.transactions, isLoading: walletVM.isLoading)
+                    } label: {
+                        // CC Balance pill
+                        HStack(spacing: 5) {
+                            Image(systemName: "creditcard.fill")
+                                .font(.system(size: 11, weight: .semibold))
+                            if walletVM.isLoading && walletVM.wallet == nil {
+                                ShimmerView(cornerRadius: 6)
+                                    .frame(width: 48, height: 14)
+                            } else {
+                                Text(walletVM.formattedBalance)
+                                    .font(.system(size: 13, weight: .bold))
+                                    .contentTransition(.numericText())
+                                    .animation(.spring(duration: 0.4), value: walletVM.wallet?.balance)
+                            }
                         }
-                    }
-                    .foregroundStyle(Color.coffeeBrown)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(Color.coffeeBrown.opacity(0.1))
-                    .clipShape(Capsule())
-                    .overlay(Capsule().strokeBorder(Color.coffeeBrown.opacity(0.2), lineWidth: 1))
+                        .foregroundStyle(Color.coffeeBrown)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(Color.coffeeBrown.opacity(0.1))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().strokeBorder(Color.coffeeBrown.opacity(0.2), lineWidth: 1))
 
+                    }
                     // Points pill
                     HStack(spacing: 5) {
                         Image(systemName: "star.fill")
