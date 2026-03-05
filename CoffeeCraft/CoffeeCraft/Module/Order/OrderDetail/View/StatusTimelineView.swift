@@ -24,7 +24,7 @@ struct StatusTimelineView: View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Order Progress")
                 .font(.title3).fontWeight(.bold)
-                .foregroundColor(.primary)
+                .foregroundColor(.textPrimary)
             
             VStack(spacing: 0) {
                 ForEach(Array(statuses.enumerated()), id: \.offset) { index, item in

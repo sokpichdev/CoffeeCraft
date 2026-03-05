@@ -19,7 +19,7 @@ struct PricingCard: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                Text("Payment Summary").font(.title3).fontWeight(.bold).foregroundColor(.primary)
+                Text("Payment Summary").font(.title3).fontWeight(.bold).foregroundColor(.textPrimary)
                 Spacer()
             }
             VStack(spacing: 12) {
@@ -27,7 +27,7 @@ struct PricingCard: View {
                 PriceRow(label: "Tax & Fees", value: tax, color: .secondary)
                 Divider().background(Color.secondary.opacity(0.2)).padding(.vertical, 4)
                 HStack {
-                    Text("Total").font(.title3).fontWeight(.bold).foregroundColor(.primary)
+                    Text("Total").font(.title3).fontWeight(.bold).foregroundColor(.textPrimary)
                     Spacer()
                     Text("\(totalPrice, specifier: "%.2f") USD").font(.title2).fontWeight(.bold)
                 }

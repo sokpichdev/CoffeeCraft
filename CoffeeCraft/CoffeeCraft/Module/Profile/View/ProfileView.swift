@@ -40,7 +40,7 @@ struct ProfileView: View {
             .animation(.spring(response: 0.42, dampingFraction: 0.88), value: selectedTab)
         }
         .clipped()
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         
         .customNavigationBar(selectedTab == 0 ? "Profile" : "Edit Profile") {
             if selectedTab == 0 {
@@ -188,8 +188,7 @@ struct ProfileView: View {
         .padding(.horizontal, 20)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.secondarySystemGroupedBackground))
-                .shadow(color: Color.textPrimary.opacity(0.06), radius: 10, y: 3)
+                .fill(Color(.surfacePrimary))
         )
     }
     
@@ -218,11 +217,11 @@ struct ProfileView: View {
                 Text(authVM.currentUser?.name ?? "User")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.textPrimary)
                 
                 Text("Coffee Enthusiast")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.textSecondary)
             }
         }
         .padding(.top, 12)

@@ -44,13 +44,13 @@ struct ComingSoonView: View {
             
             Text("Stay tuned for updates ☕️")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
             Button(action: {
                 authVM.logout() { _ in }
             }, label: {
                 Text("Logout")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
             })
         }
         .padding()

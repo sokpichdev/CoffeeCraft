@@ -19,9 +19,9 @@ enum AlertType {
 
     var color: Color {
         switch self {
-        case .success: return .leafGreen
-        case .warning: return .warningAmber
-        case .error: return .errorRed
+        case .success: return .semanticSuccess
+        case .warning: return .semanticWarning
+        case .error: return .semanticError
         }
     }
     

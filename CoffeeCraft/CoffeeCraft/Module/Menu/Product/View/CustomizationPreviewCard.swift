@@ -26,7 +26,7 @@ struct CustomizationPreviewCard: View {
                     Text(category.name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.textPrimary)
                     
                     Spacer()
                     
@@ -62,7 +62,7 @@ struct CustomizationPreviewCard: View {
                                 
                                 Text(option.name)
                                     .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.textSecondary)
                             }
                             
                             Spacer()

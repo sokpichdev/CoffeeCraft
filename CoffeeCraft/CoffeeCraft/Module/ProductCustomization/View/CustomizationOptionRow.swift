@@ -36,7 +36,7 @@ struct CustomizationOptionRow: View {
             HStack(spacing: 4) {
                 Text("$")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
                 
                 TextField("0.00", value: $option.price, format: .number.precision(.fractionLength(2)))
                     .textFieldStyle(PlainTextFieldStyle())

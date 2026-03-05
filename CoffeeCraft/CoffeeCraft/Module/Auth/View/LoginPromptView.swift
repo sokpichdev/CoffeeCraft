@@ -22,7 +22,7 @@ struct LoginPromptView: View {
 
             Text("Create an account or log in to place orders, track your history, and earn rewards.")
                 .font(.headline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 

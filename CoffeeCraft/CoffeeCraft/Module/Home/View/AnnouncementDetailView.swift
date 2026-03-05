@@ -24,14 +24,16 @@ struct AnnouncementDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(announcement?.title ?? "")
                         .font(.title2.bold())
+                        .foregroundColor(.textPrimary)
                     
                     Text(announcement?.description ?? "")
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.textTertiary)
                 }
                 .padding(.horizontal)
             }
         })
+        .background(Color.bgPrimary)
         .customNavigationBar("Announcement") {
             ToolBarButton.back {
                 dismiss()

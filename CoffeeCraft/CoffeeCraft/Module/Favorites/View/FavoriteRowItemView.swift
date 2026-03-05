@@ -13,20 +13,21 @@ struct FavoriteRowItemView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(item.productName)
+                    .foregroundColor(.textPrimary)
                     .font(.headline)
                     .lineLimit(1)
                 
                 if !item.customizations.isEmpty {
                     Text(item.customizations.map { "\($0.value)" }.joined(separator: ", "))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                         .lineLimit(2)
                 }
                 
                 Text(String(format: "$%.2f", item.basePrice))
                     .font(.subheadline)
                     .bold()
-                    .foregroundColor(.brown)
+                    .foregroundColor(.textSecondary)
             }
             
             Spacer()
@@ -34,8 +35,8 @@ struct FavoriteRowItemView: View {
                 .shadow(radius: 2)
         }
         .padding(8)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color(.surfacePrimary))
         .cornerRadius(12)
-        .shadow(color: Color.textPrimary.opacity(0.2), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.surfacePrimary.opacity(0.2), radius: 5, x: 0, y: 2)
     }
 }

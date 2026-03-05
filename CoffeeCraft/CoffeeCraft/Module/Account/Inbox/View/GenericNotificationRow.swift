@@ -20,7 +20,7 @@ struct GenericNotificationRow: View { // for fallback
 
             Text(notification.message)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
                 .lineLimit(2)
         }
     }

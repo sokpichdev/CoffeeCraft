@@ -81,7 +81,7 @@ struct OrderCardView: View {
                 if let date = order.timestamp {
                     Text(date.formatted(date: .abbreviated, time: .shortened))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                         .frame(height: 12)
                 }
             }
@@ -192,7 +192,7 @@ struct OrderCardView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Total Amount")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
 
                 Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
@@ -274,7 +274,7 @@ struct DetailItemRow: View {
                 if let selections = item.selections, !selections.isEmpty {
                     Text(selections.map { $0.value }.joined(separator: " • "))
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                         .lineLimit(1)
                 }
                 

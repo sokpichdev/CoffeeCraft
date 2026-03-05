@@ -80,7 +80,7 @@ struct SettingsView: View {
             }
             .padding()
         })
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .customNavigationBar("Setting") {
             ToolBarButton.back {
                 dismiss()

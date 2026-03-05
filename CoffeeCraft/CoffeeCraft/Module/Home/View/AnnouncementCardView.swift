@@ -24,20 +24,20 @@ struct AnnouncementCardView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(announcement.title ?? "")
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.textPrimary)
 
                 Text(announcement.description ?? "")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.textTertiary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
             .padding(.horizontal, 5)
             .padding(.bottom, 10)
         }
-        .background(.ultraThinMaterial)
+        .background(.surfacePrimary)
         .cornerRadius(15)
-        .shadow(color: Color.textPrimary.opacity(0.2), radius: 5, x: 0, y: 3)
+        .shadow(color: Color.surfacePrimary.opacity(0.2), radius: 5, x: 0, y: 3)
     }
 }
 
@@ -58,8 +58,8 @@ struct AnnouncementCardShimmerView: View {
             .padding(.horizontal, 5)
             .padding(.bottom, 10)
         }
-        .background(.ultraThinMaterial)
+        .background(.surfacePrimary)
         .cornerRadius(15)
-        .shadow(color: Color.textPrimary.opacity(0.2), radius: 5, x: 0, y: 3)
+        .shadow(color: Color.surfacePrimary.opacity(0.2), radius: 5, x: 0, y: 3)
     }
 }

@@ -34,7 +34,7 @@ struct AppearanceSettingsView: View {
                 Spacer()
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .customNavigationBar("Appearance") {
             ToolBarButton.back {
                 dismiss()

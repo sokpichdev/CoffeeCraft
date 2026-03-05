@@ -30,7 +30,7 @@ struct CardItemView: View {
                         if let value = item.selections[key], !value.isEmpty {
                             Text("\(key): \(value)")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                         }
                     }
                 }
@@ -51,7 +51,7 @@ struct CardItemView: View {
                 if item.quantity > 1 {
                     Text(String(format: "$%.2f ea", item.totalPrice / Double(item.quantity))) /// ea = each
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                 }
             }
         }

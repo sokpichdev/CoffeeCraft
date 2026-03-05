@@ -27,7 +27,7 @@ struct CustomizationCategoryCard: View {
                     
                     TextField("Category name", text: $category.name)
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.textPrimary)
                     
                     Spacer()
                     

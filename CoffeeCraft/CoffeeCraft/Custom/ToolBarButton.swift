@@ -14,7 +14,7 @@ struct ToolBarButton: ToolbarContent {
 
     let placement: ToolbarItemPlacement
     let buttonType: ButtonType
-    var tint: Color = .brown
+    var tint: Color = .textSecondary
     var font: Font = .headline
     let action: () -> Void
 
@@ -39,7 +39,7 @@ struct ToolBarButton: ToolbarContent {
 struct ToolBarProgress: ToolbarContent {
 
     let placement: ToolbarItemPlacement
-    var tint: Color = .brown
+    var tint: Color = .textSecondary
 
     var body: some ToolbarContent {
         ToolbarItem(placement: placement) {

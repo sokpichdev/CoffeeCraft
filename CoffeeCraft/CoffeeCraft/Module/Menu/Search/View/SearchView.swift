@@ -41,14 +41,14 @@ struct SearchView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 50))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                                 .padding(.top, 60)
                             Text("No results found")
                                 .font(.headline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                             Text("Try searching with different keywords")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                         }
                         .frame(maxWidth: .infinity)
                     } else {

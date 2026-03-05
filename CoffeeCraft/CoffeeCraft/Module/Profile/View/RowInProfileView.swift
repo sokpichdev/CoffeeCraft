@@ -21,14 +21,14 @@ struct RowInProfileView<Content: View>: View {
                 Circle()
                     .fill(
                         isEditing && (editType == .phone || editType == .email) ?
-                        Color(.tertiarySystemGroupedBackground).opacity(0.5) : Color(.tertiarySystemGroupedBackground)
+                        Color(.surfacePrimary).opacity(0.5) : Color(.surfacePrimary)
                     )
                     .frame(width: 36, height: 36)
                 
                 Image(systemName: systemImage)
                     .font(.headline)
                     .foregroundColor(isEditing && (editType == .phone || editType == .email) ?
-                                     Color.secondary : Color(.brown))
+                                     Color.textMuted : Color.textSecondary)
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -36,7 +36,7 @@ struct RowInProfileView<Content: View>: View {
                     Text(label)
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.textSecondary)
                 }
                 
                 if isEditing {
@@ -44,23 +44,23 @@ struct RowInProfileView<Content: View>: View {
                     case .name:
                         TextField("", text: $title)
                             .font(.headline)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.textPrimary)
 
                     case .email, .phone:
                         // Email is NOT editable, but color changes when editing
                         Text(title)
                             .font(.headline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.textMuted)
 
                     default:
                         Text(previousTitle)
                             .font(.headline)
-                            .foregroundStyle(.secondary.opacity(0.5))
+                            .foregroundStyle(.textSecondary.opacity(0.5))
                     }
                 } else {
                     Text(title)
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.textPrimary)
                 }
             }
             

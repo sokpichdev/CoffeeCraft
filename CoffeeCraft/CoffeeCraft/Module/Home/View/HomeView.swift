@@ -45,7 +45,7 @@ struct HomeView: View {
             }
         })
         .edgesIgnoringSafeArea(.top)
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .sheet(isPresented: $showTopUp) {
             TopUpView(walletVM: walletVM)
         }
@@ -111,10 +111,10 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(greetingText)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                     Text(UserSession.shared.userName ?? "Coffee Lover")
                         .font(.title3).fontWeight(.bold).fontDesign(.serif)
-                        .foregroundColor(Color.accentPrimary)
+                        .foregroundColor(Color.textPrimary)
                 }
                 Spacer()
             }
@@ -139,7 +139,7 @@ struct HomeView: View {
                                     .animation(.spring(duration: 0.4), value: walletVM.wallet?.balance)
                             }
                         }
-                        .foregroundStyle(Color.accentPrimary)
+                        .foregroundStyle(Color.textPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)
                         .background(Color.accentPrimary.opacity(0.1))
@@ -154,7 +154,7 @@ struct HomeView: View {
                         Text("\(cardVM.activeCard?.points ?? 0) pts")
                             .font(.system(size: 13, weight: .bold))
                     }
-                    .foregroundStyle(Color.accentGold)
+                    .foregroundStyle(Color.textPrimary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
                     .background(Color.accentGold.opacity(0.1))
@@ -173,7 +173,7 @@ struct HomeView: View {
                             Text("Top Up")
                                 .font(.system(size: 13, weight: .semibold))
                         }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.textPrimary).colorScheme(.dark)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 7)
                         .background(
@@ -191,9 +191,9 @@ struct HomeView: View {
             }
         }
         .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.textPrimary.opacity(0.05), radius: 8, y: 3)
+        .shadow(color: Color.surfacePrimary.opacity(0.05), radius: 8, y: 3)
     }
 
     private var greetingText: String {
@@ -245,7 +245,7 @@ struct HomeView: View {
             } else if announcementVM.announcements.isEmpty {
                 Text("No announcements yet — check back soon!")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else {
@@ -274,16 +274,16 @@ struct HomeView: View {
                         Image(systemName: "arrow.right")
                             .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundColor(Color.accentPrimary)
+                    .foregroundColor(Color.textPrimary)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
                     .background(
                         Capsule()
-                            .fill(Color.accentPrimary.opacity(0.1))
+                            .fill(Color.surfaceSub)
                     )
                     .overlay(
                         Capsule()
-                            .stroke(Color.accentPrimary.opacity(0.25), lineWidth: 1)
+                            .stroke(Color.accentPrimary.opacity(0.5), lineWidth: 1)
                     )
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
@@ -301,10 +301,10 @@ struct SectionHeader: View {
         HStack(spacing: 7) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color.accentPrimary)
+                .foregroundColor(Color.textSecondary)
             Text(title)
                 .font(.system(size: 16, weight: .semibold, design: .serif))
-                .foregroundColor(Color.primary)
+                .foregroundColor(Color.textPrimary)
             Spacer()
         }
     }
@@ -323,21 +323,22 @@ struct CozyOrderButton: View {
             VStack(spacing: 8) {
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(isDisabled ? 0.4 : 0.25))
+                        .fill(Color.textPrimary.opacity(isDisabled ? 0.4 : 0.25))
                         .frame(width: 48, height: 48)
                     Image(systemName: icon)
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(isDisabled ? Color.white.opacity(0.5) : .white)
+                        .foregroundColor(isDisabled ? Color.textPrimary.opacity(0.5) : .textPrimary)
                 }
 
                 Text(title)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(isDisabled ? Color.white.opacity(0.5) : .white)
+                    .foregroundColor(isDisabled ? Color.textPrimary.opacity(0.5) : .textPrimary)
 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(isDisabled ? Color.white.opacity(0.4) : Color.white.opacity(0.8))
+                    .foregroundColor(isDisabled ? Color.textPrimary.opacity(0.4) : Color.textPrimary.opacity(0.8))
             }
+            .colorScheme(.dark)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
             .background(
@@ -381,7 +382,7 @@ struct PageIndicator: View {
         HStack(spacing: 6) {
             ForEach(0..<count, id: \.self) { index in
                 Capsule()
-                    .fill(index == currentIndex ? Color.accentPrimary : Color.white.opacity(0.75))
+                    .fill(index == currentIndex ? Color.accentPrimary : Color.textPrimary.opacity(0.75))
                     .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
                     .frame(
                         width: index == currentIndex ? 20 : 7,
@@ -392,7 +393,8 @@ struct PageIndicator: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 7)
-        .background(Capsule().fill(Color.textPrimary.opacity(0.12)))
+        .background(Capsule().fill(Color.textPrimary.opacity(0.3)))
+        .colorScheme(.dark)
     }
 }
 
@@ -419,8 +421,7 @@ extension HomeView {
                     )
                 }
                 .overlay(
-                    PageIndicator(count: bannerImages.count, currentIndex: currentIndex)
-                        .padding(.bottom, 15),
+                    PageIndicator(count: bannerImages.count, currentIndex: currentIndex),
                     alignment: .bottom
                 )
                 .offset(y: minY > 0 ? -minY : 0)

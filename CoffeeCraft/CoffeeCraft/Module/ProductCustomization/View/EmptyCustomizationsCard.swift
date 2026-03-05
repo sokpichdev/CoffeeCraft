@@ -15,11 +15,11 @@ struct EmptyCustomizationsCard: View {
             
             Text("No Customizations Yet")
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundColor(.textPrimary)
             
             Text("Add options from the library or create your own custom categories")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
         }

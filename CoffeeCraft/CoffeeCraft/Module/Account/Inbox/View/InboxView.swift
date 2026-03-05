@@ -15,7 +15,7 @@ struct InboxView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemGroupedBackground)
+            Color(.bgPrimary)
                 .ignoresSafeArea()
 
             Group {
@@ -49,21 +49,33 @@ struct InboxView: View {
     private var notificationList: some View {
         CustomRefreshScrollView({
             // Unread count pill
-            if inboxVM.unreadCount > 0 {
-                HStack {
-                    Label(
-                        "\(inboxVM.unreadCount) unread",
-                        systemImage: "bell.badge.fill"
-                    )
-                    .font(.caption.bold())
-                    .foregroundColor(.brown)
-                    Spacer()
+            Group {
+                if inboxVM.unreadCount > 0 {
+                    HStack {
+                        Label(
+                            "\(inboxVM.unreadCount) unread",
+                            systemImage: "bell.badge.fill"
+                        )
+                        .font(.caption.bold())
+                        .foregroundColor(.textSecondary)
+                        Spacer()
+                    }
+                } else {
+                    HStack {
+                        Label(
+                            "All read",
+                            systemImage: "bell.badge.fill"
+                        )
+                        .font(.caption.bold())
+                        .foregroundColor(.textSecondary)
+                        Spacer()
+                    }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .padding(.bottom, 4)
             }
-
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
+            
             LazyVStack(spacing: 10) {
                 ForEach(inboxVM.notifications) { notification in
                     NotificationRow(notification: notification)
@@ -96,7 +108,6 @@ struct InboxView: View {
                                 .tint(.brown)
                             }
                         }
-                        // ── Pagination trigger ──────────────────────────────
                         .onAppear {
                             guard inboxVM.notifications.count < inboxVM.totalNotificationCount,
                                   notification.id == inboxVM.notifications.last?.id,
@@ -138,11 +149,11 @@ struct InboxView: View {
     private var loadingState: some View {
         VStack(spacing: 16) {
             ProgressView()
-                .tint(.brown)
+                .tint(.textSecondary)
                 .scaleEffect(1.2)
             Text("Loading notifications...")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -162,7 +173,7 @@ struct InboxView: View {
                 .font(.title3.bold())
             Text("No notifications yet.\nWe'll let you know when your order is ready.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

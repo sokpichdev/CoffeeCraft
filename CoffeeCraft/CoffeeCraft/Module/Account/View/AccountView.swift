@@ -40,7 +40,7 @@ struct AccountView: View {
                 cardVM.setUser(userId: userId, isRefresh: true)
             }
         })
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .customNavigationBar("Account") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
                push(AnyView(SettingsView()
@@ -90,13 +90,13 @@ struct AccountView: View {
                     .frame(width: 40, height: 40)
                     .foregroundStyle(.white)
             }
-            .shadow(color: Color.accentPrimary.opacity(0.3), radius: 8, y: 4)
+            .shadow(color: Color.surfacePrimary.opacity(0.3), radius: 8, y: 4)
             
             VStack(spacing: 6) {
                 Text(UserSession.shared.userName ?? "")
                     .font(.title2)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.textPrimary)
                 
                 PushLink {
                     if userSession.isLoggedIn {
@@ -122,8 +122,8 @@ struct AccountView: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.secondarySystemGroupedBackground))
-                .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
+                .fill(Color(.surfacePrimary))
+//                .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
         )
     }
     
@@ -142,11 +142,11 @@ struct AccountView: View {
             HStack(spacing: 8) {
                 Image(systemName: "creditcard.fill")
                     .font(.headline)
-                    .foregroundColor(Color.accentPrimary)
+                    .foregroundColor(Color.textSecondary)
                 Text("My Cards")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.textPrimary)
             }
             .padding(.leading, 4)
             
@@ -181,17 +181,17 @@ struct AccountView: View {
                         VStack {
                             ZStack {
                                 Circle()
-                                    .fill(Color(.secondarySystemGroupedBackground))
+                                    .fill(Color(.surfacePrimary))
                                     .frame(width: 50, height: 50)
                                     .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
                                 
                                 Image(systemName: "arrow.right")
                                     .font(.headline)
-                                    .foregroundColor(Color.accentPrimary)
+                                    .foregroundColor(Color.textSecondary)
                             }
                             Text("See All")
                                 .font(.subheadline)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.textPrimary)
                         }
                     }
                 }
@@ -211,11 +211,11 @@ struct AccountView: View {
                                 
                                 Image(systemName: "cart.badge.plus")
                                     .font(.headline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(.textPrimary)
                             }
                             Text("Purchase")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textPrimary)
                         }
                     })
                     Button(action: {
@@ -228,17 +228,17 @@ struct AccountView: View {
                         VStack {
                             ZStack {
                                 Circle()
-                                    .fill(Color(.secondarySystemGroupedBackground))
+                                    .fill(Color(.surfacePrimary))
                                     .frame(width: 50, height: 50)
                                     .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
                                 
                                 Image(systemName: "plus")
                                     .font(.headline)
-                                    .foregroundColor(Color.accentPrimary)
+                                    .foregroundColor(Color.textSecondary)
                             }
                             Text("Add")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textPrimary)
                         }
                     })
                 }
@@ -305,7 +305,7 @@ struct AccountView: View {
             Text("Stay connected with us")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.textSecondary)
             
             HStack(spacing: 20) {
                 SocialMediaButton(icon: "play.rectangle.fill", url: "")
@@ -340,19 +340,19 @@ struct RowInSectionView: View {
                     
                     Image(systemName: systemImage)
                         .font(.headline)
-                        .foregroundColor(Color.accentPrimary)
+                        .foregroundColor(Color.textSecondary)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     if let label = label {
                         Text(label)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.textSecondary)
                     }
                     
                     Text(title)
                         .font(.subheadline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.textPrimary)
                 }
                 
                 Spacer()
@@ -374,14 +374,14 @@ struct RowInSectionView: View {
                     if trailingSystemImage != "" {
                         Image(systemName: trailingSystemImage)
                             .font(.headline)
-                            .foregroundColor(Color.accentPrimary)
+                            .foregroundColor(Color.textSecondary)
                     }
                 }
             }
             .padding(.vertical, 12)
         }
         .disabled(onClicked == nil)
-        .foregroundStyle(.primary)
+        .foregroundStyle(.textPrimary)
     }
 }
 
@@ -402,12 +402,12 @@ struct SocialMediaButton: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(Color(.tertiarySystemGroupedBackground))
+                    .fill(Color(.surfacePrimary))
                     .frame(width: 44, height: 44)
                 
                 Image(systemName: icon)
                     .font(.headline)
-                    .foregroundColor(Color.accentPrimary)
+                    .foregroundColor(Color.textSecondary)
             }
         }
     }

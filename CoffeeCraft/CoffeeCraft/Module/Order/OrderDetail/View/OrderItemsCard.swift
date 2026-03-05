@@ -18,13 +18,13 @@ struct OrderItemsCard: View {
             HStack {
                 Text("Items")
                     .font(.title3).fontWeight(.bold)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.textPrimary)
                 
                 Spacer()
                 
                 Text("\(totalQty) item\(items.count == 1 ? "" : "s")")
                     .font(.subheadline).fontWeight(.medium)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.secondary.opacity(0.1))
@@ -65,7 +65,7 @@ struct OrderItemRow: View {
                         }
                         Text(item.name ?? "")
                             .font(.body).fontWeight(.semibold)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.textPrimary)
                     }
                     
                     // Selections
@@ -74,15 +74,15 @@ struct OrderItemRow: View {
                             ForEach(selections.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
                                 HStack(spacing: 4) {
                                     Text("•")
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(.textSecondary)
                                     Text(key)
                                         .font(.system(size: 13))
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(.textSecondary)
                                     Text("·")
                                         .foregroundColor(.secondary.opacity(0.5))
                                     Text(value)
                                         .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.primary.opacity(0.8))
+                                        .foregroundColor(.textPrimary.opacity(0.8))
                                 }
                             }
                         }
@@ -93,10 +93,10 @@ struct OrderItemRow: View {
                         HStack(alignment: .top, spacing: 4) {
                             Text("• Extras:")
                                 .font(.footnote)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                             Text(extras.joined(separator: ", "))
                                 .font(.footnote).fontWeight(.medium)
-                                .foregroundColor(.primary.opacity(0.8))
+                                .foregroundColor(.textPrimary.opacity(0.8))
                         }
                     }
                 }

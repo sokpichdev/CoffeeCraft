@@ -50,7 +50,7 @@ struct CustomCoffeeButton: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .strokeBorder(Color.accentPrimary.opacity(0.3), lineWidth: 1)
+                    .strokeBorder(Color.accentPrimary.opacity(0.5), lineWidth: 1)
             )
         }
         .disabled(isDisabled)

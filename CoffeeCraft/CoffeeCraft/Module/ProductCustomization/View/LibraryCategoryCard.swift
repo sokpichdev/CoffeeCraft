@@ -32,11 +32,11 @@ struct LibraryCategoryCard: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(category.name)
                                 .font(.headline)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.textPrimary)
                             
                             Text("\(category.options.count) options available")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                         }
                     }
                     
@@ -65,7 +65,7 @@ struct LibraryCategoryCard: View {
                     Text("Options:")
                         .font(.caption)
                         .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                     
                     ForEach(category.options) { option in
                         HStack {

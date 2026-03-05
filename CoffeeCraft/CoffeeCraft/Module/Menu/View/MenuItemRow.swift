@@ -17,9 +17,9 @@ struct MenuItemRow: View {
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
                     .minimumScaleFactor(0.5) // allow shrinking if needed
-                    .foregroundColor(.primary)
+                    .foregroundColor(.textPrimary)
                 Text("$\(item.price, specifier: "%.2f")")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
             }
             Spacer()
             AsyncImageCard(imageURL: item.imageURL, height: 78, width: 78, corner: 10)

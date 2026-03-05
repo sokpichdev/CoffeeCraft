@@ -86,6 +86,7 @@ struct ShareCardSheet: View {
                 }
             }
         }
+        .background(Color.bgPrimary)
     }
     
     private func shareCard(userID: String) {
