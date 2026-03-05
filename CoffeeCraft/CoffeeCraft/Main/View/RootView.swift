@@ -54,7 +54,8 @@ struct RootView: View {
                                     .environmentObject(walletVM)
                             }
                         case .map:
-                            MapView()
+                            MapView(selectedTab: $selectedTab)
+                                .environmentObject(OrderEnvironment.shared)
                         case .orders:
                             if UserSession.shared.currentUser?.role == .manager {
                                 AdminOrdersView()

@@ -3,13 +3,12 @@
 //  CoffeeCraft
 //
 //  Created by Sok Pich
-//  Map Module — Phase 2: Branches on Map
-//
-//  Changes from Phase 1:
-//  - Add: branch annotations with BranchAnnotationView
-//  - Add: BranchListView strip pinned above tab bar
-//  - Add: fetchBranches() on appear
-//  - Tap annotation → selects branch + pans camera
+//  Map Module — Phase 3: Branch Selection + Routing
+//  Changes from Phase 2:
+//  - Add: MapPolyline drawn when a branch is selected
+//  - Add: BranchDetailSheet as a .sheet presentation
+//  - Update: tap pin / strip card → selectBranch(_:) instead of direct assignment
+//  - Add: "Order from here" writes to OrderEnvironment + switches tab
 //
 
 import SwiftUI
@@ -20,6 +19,18 @@ import MapKit
 struct MapView: View {
 
     @State private var viewModel = MapViewModel()
+
+    /// Shared environment — written here, read by the Order module.
+    @EnvironmentObject private var orderEnv: OrderEnvironment
+
+    /// Controls which tab is active — used by "Order from here" to jump to Menu/Orders.
+    @Binding var selectedTab: Tab
+
+    // MARK: - Init (default binding for preview / standalone use)
+
+    init(selectedTab: Binding<Tab> = .constant(.home)) {
+        self._selectedTab = selectedTab
+    }
 
     var body: some View {
         NavigationStack {
@@ -38,7 +49,7 @@ struct MapView: View {
                 // MARK: Recenter button
                 if viewModel.isPermissionGranted {
                     recenterButton
-                        .padding(.bottom, 188) // sits above the branch strip
+                        .padding(.bottom, 188)
                         .padding(.trailing, 16)
                 }
 
@@ -50,10 +61,7 @@ struct MapView: View {
                             branches: viewModel.sortedBranches(),
                             selectedBranch: viewModel.selectedBranch,
                             distanceLabel: { viewModel.distanceLabel(to: $0) },
-                            onSelect: { branch in
-                                viewModel.selectedBranch = branch
-                                viewModel.focus(on: branch)
-                            }
+                            onSelect: { viewModel.selectBranch($0) }
                         )
                     }
                     .ignoresSafeArea(edges: .bottom)
@@ -64,6 +72,31 @@ struct MapView: View {
                 viewModel.requestLocationPermission()
                 viewModel.fetchBranches()
             }
+            // MARK: Branch detail sheet
+            .sheet(isPresented: $viewModel.isSheetPresented) {
+                viewModel.deselectBranch()
+            } content: {
+                if let branch = viewModel.selectedBranch {
+                    BranchDetailSheet(
+                        branch: branch,
+                        distanceLabel: viewModel.distanceLabel(to: branch),
+                        etaLabel: viewModel.etaLabel,
+                        onOrderHere: {
+                            orderEnv.select(branch: branch)
+                            viewModel.isSheetPresented = false
+                            // Switch to menu tab so user can browse + order
+                            withAnimation(.easeInOut) { selectedTab = .menu }
+                        },
+                        onDismiss: {
+                            viewModel.deselectBranch()
+                        }
+                    )
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.hidden) // we draw our own handle
+                    .presentationCornerRadius(24)
+                    .presentationBackground(Color.bgPrimary)
+                }
+            }
         }
     }
 
@@ -71,8 +104,20 @@ struct MapView: View {
 
     private var mapLayer: some View {
         Map(position: $viewModel.cameraPosition, selection: .constant(nil)) {
+
             // User location dot
             UserAnnotation()
+
+            // Route polyline (shown when a branch is selected)
+            if let polyline = viewModel.routePolyline {
+                MapPolyline(polyline)
+                    .stroke(Color.accentPrimary, style: StrokeStyle(
+                        lineWidth: 4,
+                        lineCap: .round,
+                        lineJoin: .round,
+                        dash: [8, 4]
+                    ))
+            }
 
             // Branch annotations
             ForEach(viewModel.branches) { branch in
@@ -82,10 +127,7 @@ struct MapView: View {
                         isSelected: viewModel.selectedBranch?.id == branch.id
                     )
                     .onTapGesture {
-                        withAnimation(.spring(response: 0.3)) {
-                            viewModel.selectedBranch = branch
-                        }
-                        viewModel.focus(on: branch)
+                        viewModel.selectBranch(branch)
                     }
                 }
             }
@@ -95,11 +137,9 @@ struct MapView: View {
             MapCompass()
             MapScaleView()
         }
-        // Tap map background → deselect branch
+        // Tap map background → deselect
         .onTapGesture {
-            withAnimation(.spring(response: 0.3)) {
-                viewModel.selectedBranch = nil
-            }
+            viewModel.deselectBranch()
         }
     }
 
@@ -121,9 +161,10 @@ struct MapView: View {
         .accessibilityLabel("Re-center map on my location")
     }
 }
-
+//
 //// MARK: - Preview
 //
 //#Preview {
 //    MapView()
+//        .environmentObject(OrderEnvironment.shared)
 //}
