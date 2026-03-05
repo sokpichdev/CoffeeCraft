@@ -105,6 +105,7 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
 
     case home       // Home / Featured
     case menu       // Coffee menu
+    case map        // Branch finder
     case orders     // Past orders
     case profile    // User profile
 
@@ -116,6 +117,8 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
             return "house.fill"
         case .menu:
             return "list.bullet.rectangle.portrait.fill"
+        case .map:
+            return "map.fill"
         case .orders:
             return "clock.fill"
         case .profile:
@@ -129,6 +132,8 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
             return "Home"
         case .menu:
             return "Menu"
+        case .map:
+            return "Map"
         case .orders:
             return "Orders"
         case .profile:
@@ -141,6 +146,8 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         case .home:
             return .accentPrimary
         case .menu:
+            return .accentPrimary
+        case .map:
             return .accentPrimary
         case .orders:
             return .accentPrimary
