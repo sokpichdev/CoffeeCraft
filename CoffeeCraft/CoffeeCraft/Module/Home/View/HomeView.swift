@@ -154,7 +154,7 @@ struct HomeView: View {
                         Text("\(cardVM.activeCard?.points ?? 0) pts")
                             .font(.system(size: 13, weight: .bold))
                     }
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundStyle(Color.accentGold)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
                     .background(Color.accentGold.opacity(0.1))

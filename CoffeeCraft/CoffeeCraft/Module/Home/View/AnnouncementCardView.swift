@@ -28,7 +28,7 @@ struct AnnouncementCardView: View {
 
                 Text(announcement.description ?? "")
                     .font(.subheadline)
-                    .foregroundColor(.textTertiary)
+                    .foregroundColor(.commonGray)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
