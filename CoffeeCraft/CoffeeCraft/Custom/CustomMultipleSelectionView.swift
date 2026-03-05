@@ -36,12 +36,12 @@ struct CustomMultipleSelectionView: View {
                                 if isSelected {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.textPrimary).colorScheme(.dark)
                                         .transition(.scale.combined(with: .opacity))
                                 }
                                 Text(option)
                                     .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                                    .foregroundColor(isSelected ? .white : Color.accentPrimary)
+                                    .foregroundColor(isSelected ? Color.textPrimary : Color.coffeeDarkBrown).colorScheme(.dark)
                             }
                             .padding(.vertical, 9)
                             .padding(.horizontal, 18)
@@ -51,21 +51,21 @@ struct CustomMultipleSelectionView: View {
                             )
                             .overlay(
                                 Capsule()
-                                    .stroke(Color.accentPrimary.opacity(isSelected ? 0 : 0.2), lineWidth: 1)
+                                    .stroke(Color.border.opacity(isSelected ? 0 : 1), lineWidth: 1)
                             )
                             .shadow(
-                                color: isSelected ? Color.accentPrimary.opacity(0.3) : .clear,
+                                color: isSelected ? Color.border.opacity(0.3) : .clear,
                                 radius: 6, x: 0, y: 3
                             )
 
                             if price > 0 {
                                 Text("+$\(price, specifier: "%.2f")")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(isSelected ? Color.accentPrimary : .secondary)
+                                    .foregroundColor(isSelected ? Color.accentPrimary : .commonGray)
                             } else {
                                 Text("Free")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.secondary.opacity(0.6))
+                                    .foregroundColor(.commonGray.opacity(0.6))
                             }
                         }
                     }

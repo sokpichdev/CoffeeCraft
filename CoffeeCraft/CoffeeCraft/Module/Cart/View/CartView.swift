@@ -53,7 +53,7 @@ struct CartView: View {
 
                         CustomCoffeeButton(
                             title: "Checkout",
-                            bgColors: [Color.accentPrimary],
+                            bgColors: [Color.coffeeOliveGreen.opacity(0.85), Color.coffeeOliveGreen],
                             isDisabled: cartManager.items.isEmpty || !cartManager.canCheckout(walletBalance: walletVM.wallet?.balance)
                         ) {
                             confirmAndPlaceOrder()
@@ -62,7 +62,7 @@ struct CartView: View {
                     }
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(.bgPrimary)
             .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
                 CustomNavigationStack {

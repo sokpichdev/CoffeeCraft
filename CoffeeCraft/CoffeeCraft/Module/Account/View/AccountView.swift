@@ -40,7 +40,7 @@ struct AccountView: View {
                 cardVM.setUser(userId: userId, isRefresh: true)
             }
         })
-        .background(Color.bgPrimary)
+        .background(Color.bgSecondary)
         .customNavigationBar("Account") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
                push(AnyView(SettingsView()

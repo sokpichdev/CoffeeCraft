@@ -71,11 +71,11 @@ struct CustomizationPreviewCard: View {
                                 Text("$\(String(format: "%.2f", option.price))")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.brown)
+                                    .foregroundColor(.coffeeBrown)
                             } else {
                                 Text("Free")
                                     .font(.subheadline)
-                                    .foregroundColor(.green)
+                                    .foregroundColor(.coffeeOliveGreen)
                             }
                         }
                         .padding(.horizontal, 12)

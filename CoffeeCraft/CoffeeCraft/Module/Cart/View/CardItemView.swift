@@ -18,11 +18,12 @@ struct CardItemView: View {
                         Text("×\(item.quantity)")
                             .font(.subheadline)
                             .fontWeight(.bold)
-                            .foregroundColor(.coffeeBrown)
+                            .foregroundColor(.accentGold)
                     }
                     Text(item.product.name)
                         .font(.subheadline)
                         .fontWeight(.bold)
+                        .foregroundColor(.textPrimary)
                 }
 
                 if !item.selections.isEmpty {
@@ -38,7 +39,7 @@ struct CardItemView: View {
                 if !item.extras.isEmpty {
                     Text("Extras: \(item.extras.joined(separator: ", "))")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.textTertiary)
                 }
             }
             Spacer()
@@ -51,13 +52,13 @@ struct CardItemView: View {
                 if item.quantity > 1 {
                     Text(String(format: "$%.2f ea", item.totalPrice / Double(item.quantity))) /// ea = each
                         .font(.caption2)
-                        .foregroundColor(.textSecondary)
+                        .foregroundColor(.textPrimary.opacity(0.5))
                 }
             }
         }
         .padding()
-        .background(Color(.tertiarySystemBackground))
+        .background(.surfacePrimary)
         .cornerRadius(14)
-        .shadow(color: Color.textPrimary.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.surfacePrimary.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }

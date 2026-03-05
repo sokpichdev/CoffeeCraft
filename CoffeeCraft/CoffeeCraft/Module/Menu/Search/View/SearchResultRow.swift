@@ -19,7 +19,7 @@ struct SearchResultRow: View {
         case .category:
             return ("in \(product.category)", .blue)
         case .description:
-            return ("matches description", .green)
+            return ("matches description", .coffeeOliveGreen)
         case .price:
             return ("", .clear)
         }
@@ -55,7 +55,7 @@ struct SearchResultRow: View {
                 
                 Text("$\(product.price, specifier: "%.2f")")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)
+                    .foregroundColor(.textTertiary)
                 Spacer(minLength: 0)
             }
             
@@ -63,13 +63,13 @@ struct SearchResultRow: View {
             
             Image(systemName: "chevron.right")
                 .font(.headline)
-                .foregroundColor(Color.accentPrimary)
+                .foregroundColor(Color.textSecondary)
         }
         .padding(12)
         .frame(height: 90)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(.surfacePrimary)
         .cornerRadius(12)
-        .shadow(color: Color.textPrimary.opacity(0.1), radius: 3, x: 0, y: 1)
+        .shadow(color: Color.surfacePrimary.opacity(0.1), radius: 3, x: 0, y: 1)
     }
     
     private var matchIcon: String {

@@ -42,7 +42,7 @@ struct CustomSingleSelectionview: View {
                         VStack(spacing: 3) {
                             Text(option)
                                 .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                                .foregroundColor(isSelected ? .white : Color.accentPrimary)
+                                .foregroundColor(isSelected ? Color.textPrimary : Color.coffeeDarkBrown).colorScheme(.dark)
                                 .padding(.vertical, 9)
                                 .padding(.horizontal, 18)
                                 .background(
@@ -51,21 +51,21 @@ struct CustomSingleSelectionview: View {
                                 )
                                 .overlay(
                                     Capsule()
-                                        .stroke(Color.accentPrimary.opacity(isSelected ? 0 : 0.2), lineWidth: 1)
+                                        .stroke(Color.border.opacity(isSelected ? 0 : 1), lineWidth: 1)
                                 )
                                 .shadow(
-                                    color: isSelected ? Color.accentPrimary.opacity(0.3) : .clear,
+                                    color: isSelected ? Color.border.opacity(0.3) : .clear,
                                     radius: 6, x: 0, y: 3
                                 )
 
                             if price > 0 {
                                 Text("+$\(price, specifier: "%.2f")")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(isSelected ? Color.accentPrimary : .secondary)
+                                    .foregroundColor(isSelected ? Color.accentPrimary : .commonGray)
                             } else {
                                 Text("Included")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.secondary.opacity(0.6))
+                                    .foregroundColor(.commonGray.opacity(0.6))
                             }
                         }
                     }

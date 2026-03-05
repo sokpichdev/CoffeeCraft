@@ -86,11 +86,11 @@ struct ProductDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(product.name)
                                 .font(.system(size: 24, weight: .bold, design: .serif))
-                                .foregroundColor(Color.accentPrimary)
+                                .foregroundColor(.textPrimary)
                             
                             Text(product.description)
                                 .font(.body)
-                                .foregroundColor(.textSecondary)
+                                .foregroundColor(.textTertiary)
                                 .lineSpacing(3)
                         }
                         .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
@@ -129,7 +129,7 @@ struct ProductDetailView: View {
                         } else {
                             Text("No customization available.")
                                 .font(.subheadline)
-                                .foregroundColor(.textSecondary)
+                                .foregroundColor(.textTertiary)
                                 .padding(.horizontal)
                         }
                         
@@ -146,6 +146,7 @@ struct ProductDetailView: View {
             
             stickyFooter
         }
+        .background(Color.bgPrimary)
         .task(id: customizationHash) {
             await favVM.loadFavoriteState(
                 product: product,
@@ -232,7 +233,7 @@ struct ProductDetailView: View {
                 // Base price pill on the image
                 Text("from $\(product.price, specifier: "%.2f")")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color.accentPrimary)
+                    .foregroundColor(Color.textPrimary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
                     .background(Capsule().fill(Color.parchment.opacity(0.92)))
@@ -263,7 +264,7 @@ struct ProductDetailView: View {
                     
                     Text("\(quantity)")
                         .font(.headline.weight(.semibold))
-                        .foregroundColor(Color.accentPrimary)
+                        .foregroundColor(Color.textPrimary)
                         .frame(minWidth: 28)
                         .contentTransition(.numericText())
                         .animation(.easeInOut(duration: 0.15), value: quantity)
@@ -281,7 +282,7 @@ struct ProductDetailView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
                 .background(Capsule().fill(Color.accentPrimary.opacity(0.07)))
-                .overlay(Capsule().stroke(Color.accentPrimary.opacity(0.18), lineWidth: 1))
+                .overlay(Capsule().stroke(Color.border, lineWidth: 1))
                 
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart") {
                     if UserSession.shared.isLoggedIn {
@@ -334,7 +335,7 @@ struct StickyFooterView<Actions: View>: View {
 
                 Text(String(format: "$%.2f", amount))
                     .font(.system(size: 22, weight: .bold, design: .serif))
-                    .foregroundColor(Color.accentPrimary)
+                    .foregroundColor(.textPrimary)
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: amount)
             }

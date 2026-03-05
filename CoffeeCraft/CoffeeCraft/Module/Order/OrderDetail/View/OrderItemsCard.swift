@@ -105,7 +105,7 @@ struct OrderItemRow: View {
                 
                 Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                     .font(.body).fontWeight(.bold)
-                    .foregroundColor(.coffeeCream)
+                    .foregroundColor(.textPrimary)
             }
             
             if !isLast {

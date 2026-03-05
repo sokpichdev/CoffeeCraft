@@ -50,7 +50,7 @@ struct OrderHeaderCard: View {
                     
                     Text(String(userName.prefix(1).uppercased()))
                         .font(.title3).fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.textPrimary).colorScheme(.dark)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
