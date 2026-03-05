@@ -53,6 +53,8 @@ struct RootView: View {
                                     .environmentObject(productVM)
                                     .environmentObject(walletVM)
                             }
+                        case .map:
+                            MapView()
                         case .orders:
                             if UserSession.shared.currentUser?.role == .manager {
                                 AdminOrdersView()

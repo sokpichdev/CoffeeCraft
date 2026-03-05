@@ -37,5 +37,7 @@
         <string>twitter</string>
         <string>fb</string>
     </array>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>CoffeeCraft needs your location to find nearby branches and deliver to you.</string>
 </dict>
 </plist>
