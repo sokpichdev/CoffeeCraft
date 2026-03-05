@@ -3,12 +3,14 @@
 //  CoffeeCraft
 //
 //  Created by Sok Pich
-//  Map Module — Phase 2: Branches on Map
+//  Map Module — Phase 3: Branch Selection + Routing
 //
-//  Changes from Phase 1:
-//  - Fix: replaced cameraPosition == .automatic with hasInitiallyLocated flag
-//  - Add: branch list from MockBranchData (Firestore in Phase 6)
-//  - Add: selectedBranch, distance helpers, focus(on:)
+//  Changes from Phase 2:
+//  - Add: isSheetPresented — controls BranchDetailSheet visibility
+//  - Add: routePolyline — drawn on map when a branch is selected
+//  - Add: etaLabel — travel time string from MKDirections
+//  - Add: calculateRoute(to:) — async MKDirections fetch
+//  - Add: selectBranch(_:) — single action that sets branch + fetches route + shows sheet
 //
 
 import SwiftUI
@@ -30,6 +32,12 @@ final class MapViewModel: NSObject {
     var branches: [Branch] = []
     var selectedBranch: Branch?
 
+    // MARK: - Sheet + Route State
+
+    var isSheetPresented = false
+    var routePolyline: MKPolyline?
+    var etaLabel: String = ""
+
     // MARK: - Permission State
 
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
@@ -45,8 +53,6 @@ final class MapViewModel: NSObject {
     // MARK: - Private
 
     private let locationManager = CLLocationManager()
-
-    /// Guards the initial auto-center so panning after the first fix is never hijacked.
     private var hasInitiallyLocated = false
 
     // MARK: - Init
@@ -59,9 +65,8 @@ final class MapViewModel: NSObject {
         authorizationStatus = locationManager.authorizationStatus
     }
 
-    // MARK: - Public Actions
+    // MARK: - Location
 
-    /// Call on MapView .onAppear — triggers permission dialog or starts updates immediately.
     func requestLocationPermission() {
         switch locationManager.authorizationStatus {
         case .notDetermined:
@@ -73,18 +78,28 @@ final class MapViewModel: NSObject {
         }
     }
 
-    /// Load branches — MockBranchData for now, Firestore in Phase 6.
+    func recenterOnUser() {
+        guard let userLocation else { return }
+        withAnimation(.easeInOut(duration: 0.4)) {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: userLocation.coordinate,
+                latitudinalMeters: 1_000,
+                longitudinalMeters: 1_000
+            ))
+        }
+    }
+
+    // MARK: - Branches
+
     func fetchBranches() {
         branches = MockBranchData.all
     }
 
-    /// Branches sorted nearest-first from the user's current position.
     func sortedBranches() -> [Branch] {
         guard let userLocation else { return branches }
         return branches.sorted { distance(to: $0) < distance(to: $1) }
     }
 
-    /// Distance in metres from userLocation to a branch.
     func distance(to branch: Branch) -> CLLocationDistance {
         guard let userLocation else { return .infinity }
         return userLocation.distance(from: CLLocation(
@@ -93,7 +108,6 @@ final class MapViewModel: NSObject {
         ))
     }
 
-    /// Formatted distance label, e.g. "1.2 km" or "350 m".
     func distanceLabel(to branch: Branch) -> String {
         let metres = distance(to: branch)
         guard metres != .infinity else { return "" }
@@ -102,7 +116,6 @@ final class MapViewModel: NSObject {
             : String(format: "%.0f m", metres)
     }
 
-    /// Pan the camera to a branch with a comfortable zoom level.
     func focus(on branch: Branch) {
         withAnimation(.easeInOut(duration: 0.4)) {
             cameraPosition = .region(MKCoordinateRegion(
@@ -113,16 +126,63 @@ final class MapViewModel: NSObject {
         }
     }
 
-    /// Re-center camera on the user's live position.
-    func recenterOnUser() {
-        guard let userLocation else { return }
-        withAnimation(.easeInOut(duration: 0.4)) {
-            cameraPosition = .region(MKCoordinateRegion(
-                center: userLocation.coordinate,
-                latitudinalMeters: 1_000,
-                longitudinalMeters: 1_000
-            ))
+    // MARK: - Branch Selection (Phase 3)
+
+    /// Single entry point for selecting a branch — sets state, fetches route, shows sheet.
+    func selectBranch(_ branch: Branch) {
+        withAnimation(.spring(response: 0.3)) {
+            selectedBranch = branch
+            isSheetPresented = true
         }
+        focus(on: branch)
+
+        Task {
+            await calculateRoute(to: branch)
+        }
+    }
+
+    /// Clears selection, hides sheet, removes route polyline.
+    func deselectBranch() {
+        withAnimation(.spring(response: 0.3)) {
+            selectedBranch = nil
+            isSheetPresented = false
+            routePolyline = nil
+            etaLabel = ""
+        }
+    }
+
+    // MARK: - Route Calculation
+
+    /// Calculates a driving route from the user's location to `branch` using MKDirections.
+    /// Stores the polyline for map overlay and a human-readable ETA string.
+    private func calculateRoute(to branch: Branch) async {
+        guard let userLocation else { return }
+
+        let request = MKDirections.Request()
+        request.source = MKMapItem(
+            placemark: MKPlacemark(coordinate: userLocation.coordinate)
+        )
+        request.destination = MKMapItem(
+            placemark: MKPlacemark(coordinate: branch.coordinate)
+        )
+        request.transportType = .automobile
+
+        do {
+            let response = try await MKDirections(request: request).calculate()
+            guard let route = response.routes.first else { return }
+
+            await MainActor.run {
+                routePolyline = route.polyline
+                etaLabel = formatETA(route.expectedTravelTime)
+            }
+        } catch {
+            print("[MapViewModel] Route error: \(error.localizedDescription)")
+        }
+    }
+
+    private func formatETA(_ seconds: TimeInterval) -> String {
+        let minutes = Int(seconds / 60)
+        return minutes < 1 ? "< 1 min drive" : "~\(minutes) min drive"
     }
 
     // MARK: - Private
@@ -148,9 +208,6 @@ extension MapViewModel: CLLocationManagerDelegate {
         guard let latest = locations.last else { return }
         userLocation = latest
 
-        // ✅ Fix: MapCameraPosition is not Equatable.
-        // The old `cameraPosition == .automatic` check never evaluated correctly.
-        // A plain Bool flag is the correct guard for the initial auto-center.
         guard !hasInitiallyLocated else { return }
         hasInitiallyLocated = true
 
