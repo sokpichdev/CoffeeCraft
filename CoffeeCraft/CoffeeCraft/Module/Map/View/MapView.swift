@@ -2,8 +2,14 @@
 //  MapView.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//  Map Module — Phase 1: Basic Map Integration
+//  Created by Sok Pich
+//  Map Module — Phase 2: Branches on Map
+//
+//  Changes from Phase 1:
+//  - Add: branch annotations with BranchAnnotationView
+//  - Add: BranchListView strip pinned above tab bar
+//  - Add: fetchBranches() on appear
+//  - Tap annotation → selects branch + pans camera
 //
 
 import SwiftUI
@@ -29,16 +35,34 @@ struct MapView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
 
-                // MARK: Recenter button (only when location is available)
+                // MARK: Recenter button
                 if viewModel.isPermissionGranted {
                     recenterButton
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 188) // sits above the branch strip
                         .padding(.trailing, 16)
+                }
+
+                // MARK: Branch list strip
+                if !viewModel.branches.isEmpty {
+                    VStack(spacing: 0) {
+                        Spacer()
+                        BranchListView(
+                            branches: viewModel.sortedBranches(),
+                            selectedBranch: viewModel.selectedBranch,
+                            distanceLabel: { viewModel.distanceLabel(to: $0) },
+                            onSelect: { branch in
+                                viewModel.selectedBranch = branch
+                                viewModel.focus(on: branch)
+                            }
+                        )
+                    }
+                    .ignoresSafeArea(edges: .bottom)
                 }
             }
             .customNavigationBar("Find a Branch", hideBackBtn: false)
             .onAppear {
                 viewModel.requestLocationPermission()
+                viewModel.fetchBranches()
             }
         }
     }
@@ -46,15 +70,36 @@ struct MapView: View {
     // MARK: - Map Layer
 
     private var mapLayer: some View {
-        Map(position: $viewModel.cameraPosition) {
-            // Phase 1: user dot only.
-            // Branch annotations added in Phase 2.
+        Map(position: $viewModel.cameraPosition, selection: .constant(nil)) {
+            // User location dot
             UserAnnotation()
+
+            // Branch annotations
+            ForEach(viewModel.branches) { branch in
+                Annotation(branch.name, coordinate: branch.coordinate) {
+                    BranchAnnotationView(
+                        branch: branch,
+                        isSelected: viewModel.selectedBranch?.id == branch.id
+                    )
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.3)) {
+                            viewModel.selectedBranch = branch
+                        }
+                        viewModel.focus(on: branch)
+                    }
+                }
+            }
         }
         .mapStyle(.standard(elevation: .realistic))
         .mapControls {
             MapCompass()
             MapScaleView()
+        }
+        // Tap map background → deselect branch
+        .onTapGesture {
+            withAnimation(.spring(response: 0.3)) {
+                viewModel.selectedBranch = nil
+            }
         }
     }
 
@@ -64,7 +109,7 @@ struct MapView: View {
         Button(action: viewModel.recenterOnUser) {
             ZStack {
                 Circle()
-                    .fill(.surfacePrimary)
+                    .fill(Color.surfacePrimary)
                     .frame(width: 48, height: 48)
                     .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 3)
 
@@ -76,3 +121,9 @@ struct MapView: View {
         .accessibilityLabel("Re-center map on my location")
     }
 }
+
+//// MARK: - Preview
+//
+//#Preview {
+//    MapView()
+//}

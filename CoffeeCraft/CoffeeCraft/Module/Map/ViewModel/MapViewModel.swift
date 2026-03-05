@@ -2,8 +2,13 @@
 //  MapViewModel.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//  Map Module — Phase 1: Basic Map Integration
+//  Created by Sok Pich
+//  Map Module — Phase 2: Branches on Map
+//
+//  Changes from Phase 1:
+//  - Fix: replaced cameraPosition == .automatic with hasInitiallyLocated flag
+//  - Add: branch list from MockBranchData (Firestore in Phase 6)
+//  - Add: selectedBranch, distance helpers, focus(on:)
 //
 
 import SwiftUI
@@ -19,6 +24,11 @@ final class MapViewModel: NSObject {
 
     var cameraPosition: MapCameraPosition = .automatic
     var userLocation: CLLocation?
+
+    // MARK: - Branch State
+
+    var branches: [Branch] = []
+    var selectedBranch: Branch?
 
     // MARK: - Permission State
 
@@ -36,19 +46,22 @@ final class MapViewModel: NSObject {
 
     private let locationManager = CLLocationManager()
 
+    /// Guards the initial auto-center so panning after the first fix is never hijacked.
+    private var hasInitiallyLocated = false
+
     // MARK: - Init
 
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 10 // update every 10 metres
+        locationManager.distanceFilter = 10
         authorizationStatus = locationManager.authorizationStatus
     }
 
     // MARK: - Public Actions
 
-    /// Call this on MapView .onAppear to trigger the permission dialog.
+    /// Call on MapView .onAppear — triggers permission dialog or starts updates immediately.
     func requestLocationPermission() {
         switch locationManager.authorizationStatus {
         case .notDetermined:
@@ -60,21 +73,59 @@ final class MapViewModel: NSObject {
         }
     }
 
-    /// Re-center the camera on the user's current position.
-    func recenterOnUser() {
-        guard let location = userLocation else { return }
-        withAnimation(.easeInOut(duration: 0.5)) {
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: location.coordinate,
-                    latitudinalMeters: 1_000,
-                    longitudinalMeters: 1_000
-                )
-            )
+    /// Load branches — MockBranchData for now, Firestore in Phase 6.
+    func fetchBranches() {
+        branches = MockBranchData.all
+    }
+
+    /// Branches sorted nearest-first from the user's current position.
+    func sortedBranches() -> [Branch] {
+        guard let userLocation else { return branches }
+        return branches.sorted { distance(to: $0) < distance(to: $1) }
+    }
+
+    /// Distance in metres from userLocation to a branch.
+    func distance(to branch: Branch) -> CLLocationDistance {
+        guard let userLocation else { return .infinity }
+        return userLocation.distance(from: CLLocation(
+            latitude: branch.latitude,
+            longitude: branch.longitude
+        ))
+    }
+
+    /// Formatted distance label, e.g. "1.2 km" or "350 m".
+    func distanceLabel(to branch: Branch) -> String {
+        let metres = distance(to: branch)
+        guard metres != .infinity else { return "" }
+        return metres >= 1_000
+            ? String(format: "%.1f km", metres / 1_000)
+            : String(format: "%.0f m", metres)
+    }
+
+    /// Pan the camera to a branch with a comfortable zoom level.
+    func focus(on branch: Branch) {
+        withAnimation(.easeInOut(duration: 0.4)) {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: branch.coordinate,
+                latitudinalMeters: 800,
+                longitudinalMeters: 800
+            ))
         }
     }
 
-    // MARK: - Private Helpers
+    /// Re-center camera on the user's live position.
+    func recenterOnUser() {
+        guard let userLocation else { return }
+        withAnimation(.easeInOut(duration: 0.4)) {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: userLocation.coordinate,
+                latitudinalMeters: 1_000,
+                longitudinalMeters: 1_000
+            ))
+        }
+    }
+
+    // MARK: - Private
 
     private func startUpdatingLocation() {
         locationManager.startUpdatingLocation()
@@ -87,9 +138,7 @@ extension MapViewModel: CLLocationManagerDelegate {
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
-        if isPermissionGranted {
-            startUpdatingLocation()
-        }
+        if isPermissionGranted { startUpdatingLocation() }
     }
 
     func locationManager(
@@ -99,22 +148,20 @@ extension MapViewModel: CLLocationManagerDelegate {
         guard let latest = locations.last else { return }
         userLocation = latest
 
-        // Only auto-center on the very first fix
-        if cameraPosition == .automatic {
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: latest.coordinate,
-                    latitudinalMeters: 1_000,
-                    longitudinalMeters: 1_000
-                )
-            )
-        }
+        // ✅ Fix: MapCameraPosition is not Equatable.
+        // The old `cameraPosition == .automatic` check never evaluated correctly.
+        // A plain Bool flag is the correct guard for the initial auto-center.
+        guard !hasInitiallyLocated else { return }
+        hasInitiallyLocated = true
+
+        cameraPosition = .region(MKCoordinateRegion(
+            center: latest.coordinate,
+            latitudinalMeters: 1_000,
+            longitudinalMeters: 1_000
+        ))
     }
 
-    func locationManager(
-        _ manager: CLLocationManager,
-        didFailWithError error: Error
-    ) {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("[MapViewModel] Location error: \(error.localizedDescription)")
     }
 }
