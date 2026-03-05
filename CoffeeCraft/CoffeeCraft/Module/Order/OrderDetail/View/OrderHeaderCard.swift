@@ -18,11 +18,11 @@ struct OrderHeaderCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Order #\(order.orderId ?? 0)")
                         .font(.title2).fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.textPrimary)
                     if let date = order.timestamp {
                         Text(date.formatted(date: .long, time: .shortened))
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.textSecondary)
                     }
                 }
                 
@@ -56,7 +56,7 @@ struct OrderHeaderCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Ordered by")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                         .textCase(.uppercase)
                         .tracking(0.5)
                     
@@ -66,12 +66,12 @@ struct OrderHeaderCard: View {
                                 .scaleEffect(0.8)
                             Text("Loading...")
                                 .font(.callout).fontWeight(.semibold)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                         }
                     } else {
                         Text(userName)
                             .font(.callout).fontWeight(.semibold)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.textPrimary)
                             .lineLimit(1)
                     }
                 }
@@ -86,7 +86,7 @@ struct OrderHeaderCard: View {
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(Color.secondary.opacity(0.1))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.textSecondary)
                             .cornerRadius(6)
                         Spacer()
                     }
@@ -132,7 +132,7 @@ struct StatusBadge: View {
         case "In Progress", "InProgress": return .blue
         case "Ready": return .coffeeOliveGreen
         case "Done", "Completed": return .brown
-        case "Cancelled": return .errorRed   // Phase 5
+        case "Cancelled": return .semanticError   // Phase 5
         default: return .brown
         }
     }

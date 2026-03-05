@@ -89,7 +89,7 @@ struct HeaderSection: View {
                     .foregroundColor(Color.coffeeDarkBrown)
                 Text("Your coffee is on its way ☕")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
             }
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 8)
@@ -303,7 +303,7 @@ struct FooterNote: View {
             Text("Thank you for your order!")
                 .font(.system(size: 13, design: .serif))
                 .italic()
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
             Text("Questions? Visit us at coffeecraft.app")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(Color.secondary.opacity(0.6))

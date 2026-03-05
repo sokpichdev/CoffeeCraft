@@ -90,7 +90,7 @@ struct ProductDetailView: View {
                             
                             Text(product.description)
                                 .font(.body)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                                 .lineSpacing(3)
                         }
                         .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
@@ -129,7 +129,7 @@ struct ProductDetailView: View {
                         } else {
                             Text("No customization available.")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.textSecondary)
                                 .padding(.horizontal)
                         }
                         
@@ -328,7 +328,7 @@ struct StickyFooterView<Actions: View>: View {
             HStack(alignment: .center) {
                 Text(label)
                     .font(.headline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
 
                 Spacer()
 

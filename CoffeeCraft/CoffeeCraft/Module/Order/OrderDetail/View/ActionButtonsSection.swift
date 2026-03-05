@@ -53,7 +53,7 @@ struct ActionButtonsSection: View {
                 CustomCoffeeButton(
                     title: isCancelling ? "Cancelling..." : "Cancel Order",
                     buttonImage: isCancelling ? "" : "xmark.circle",
-                    foregroundColor: .errorRed,
+                    foregroundColor: .semanticError,
                     bgColors: [Color(.secondarySystemGroupedBackground)],
                     isDisabled: isCancelling
                 ) { onCancel?() }

@@ -51,6 +51,7 @@ struct AnnouncementsListView: View {
         }, onRefresh: {
             _ = try? await announcementVM.fetchAnnouncements()
         })
+        .background(Color.bgPrimary)
         .customNavigationBar("Announcements") {
             ToolBarButton.back {
                 dismiss()

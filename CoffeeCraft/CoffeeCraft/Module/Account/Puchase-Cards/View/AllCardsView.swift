@@ -48,6 +48,7 @@ struct AllCardsView: View {
                 cardVM.setUser(userId: userId, isRefresh: true)
             }
         })
+        .background(Color.bgPrimary)
         .customNavigationBar("My Cards (\(snapshotCards.count))") {
             ToolBarButton.back {
                 dismiss()
@@ -102,7 +103,7 @@ struct AllCardsView: View {
                     if card.isOwnedByCurrentUser {
                         StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.accentPrimary)
                     } else {
-                        StatusBadgeView(icon: "person.2.fill", text: "Shared", textColor: .textPrimary, bgColor: Color.surfaceSub)
+                        StatusBadgeView(icon: "person.2.fill", text: "Shared", bgColor: Color.border)
                     }
                     Spacer()
                 }
@@ -127,8 +128,8 @@ struct AllCardsView: View {
                     CustomCoffeeButton(
                         title: card.isActiveForCurrentUser ? "Share" : "",
                         buttonImage: "square.and.arrow.up",
-                        foregroundColor: .coffeeCream,
-                        bgColors: [Color(.secondarySystemGroupedBackground)],
+                        foregroundColor: .textPrimary,
+                        bgColors: [Color(.surfaceSub)],
                         horinzontalPadding: card.isActiveForCurrentUser ? 0 : 16,
                         maxWidth: card.isActiveForCurrentUser ? .infinity : nil
                     ) {
@@ -172,7 +173,7 @@ struct CardEmptyView: View {
 
             Text(title)
                 .font(.title2)
-                .foregroundColor(.primary)
+                .foregroundColor(.textPrimary)
         }
         .frame(width: cardWidth, height: cardWidth / (16 / 9))
         .background(

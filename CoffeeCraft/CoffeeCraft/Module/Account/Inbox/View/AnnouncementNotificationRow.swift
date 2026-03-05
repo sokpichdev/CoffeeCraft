@@ -20,7 +20,7 @@ struct AnnouncementNotificationRow: View {
 
             Text(notification.message)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
                 .lineLimit(3)
         }
     }

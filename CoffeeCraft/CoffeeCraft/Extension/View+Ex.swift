@@ -32,7 +32,7 @@ extension View {
     // MARK: - Function Overloading
     func customNavigationBar(_ title: String, displayMode: NavigationBarItem.TitleDisplayMode = .inline, hideBackBtn: Bool = true
     ) -> some View {
-        self.navigationTitle(title)
+        self.navigationTitle(title).foregroundColor(.textPrimary)
             .navigationBarTitleDisplayMode(displayMode)
             .navigationBarBackButtonHidden(hideBackBtn)
     }

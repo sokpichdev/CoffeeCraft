@@ -30,7 +30,7 @@ struct NotificationRowShell<Content: View>: View {
                 content()
                 Text(notification.createdAt.dateValue().relativeFormatted)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
             }
 
             Spacer(minLength: 0)
@@ -38,8 +38,8 @@ struct NotificationRowShell<Content: View>: View {
             // Unread dot
             if !notification.isRead {
                 Circle()
-                    .fill(Color.surfaceSub)
-                    .frame(width: 9, height: 9)
+                    .fill(Color.coffeeOliveGreen)
+                    .frame(width: 12, height: 12)
                     .padding(.top, 6)
             }
         }
@@ -47,20 +47,19 @@ struct NotificationRowShell<Content: View>: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(notification.isRead
-                      ? Color.accentPrimary.opacity(0.1)
-                      : Color(.secondarySystemGroupedBackground))
+                .fill(Color(.surfacePrimary))
                 .shadow(
                     color: Color.textPrimary.opacity(notification.isRead ? 0.04 : 0.08),
                     radius: notification.isRead ? 2 : 4,
                     x: 0, y: 2
                 )
         )
+        .opacity(notification.isRead ? 0.5 : 1)
         .overlay(alignment: .leading) {
             // Left accent bar for unread items
             if !notification.isRead {
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.surfaceSub)
+                    .fill(Color.accentGold)
                     .frame(width: 3)
                     .padding(.vertical, 10)
             }

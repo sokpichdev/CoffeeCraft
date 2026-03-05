@@ -36,7 +36,7 @@ struct CoffeeToast: View {
             Text(message)
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(.primary)
+                .foregroundColor(.textPrimary)
             
             Spacer()
         }

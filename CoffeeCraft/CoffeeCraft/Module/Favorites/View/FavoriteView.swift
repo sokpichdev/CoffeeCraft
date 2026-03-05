@@ -22,6 +22,7 @@ struct FavoriteView: View {
         }, onRefresh: {
             
         })
+        .background(Color.bgPrimary)
         .customNavigationBar("Favorites") {
             ToolBarButton.back {
                 dismiss()

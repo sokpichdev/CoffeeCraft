@@ -20,7 +20,7 @@ struct RewardNotificationRow: View {
 
             Text(notification.message)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
                 .lineLimit(2)
 
             if let reward = notification.rewardPayload {
@@ -29,10 +29,10 @@ struct RewardNotificationRow: View {
                         .font(.caption.bold())
                         .foregroundColor(.orange)
                     Text("·")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                     Text("Total: \(reward.totalPoints)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                 }
                 .padding(.top, 2)
             }

@@ -31,14 +31,14 @@ struct CustomizationEditorButton: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Customizations")
-                        .foregroundColor(.primary)
+                        .foregroundColor(.textPrimary)
                         .fontWeight(.semibold)
                         .font(.headline)
                     
                     if customizations.isEmpty {
                         Text("No customizations added")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.textSecondary)
                     } else {
                         HStack(spacing: 4) {
                             Text("\(customizations.count)")

@@ -28,7 +28,7 @@ struct AddCardView: View {
                 
                 Text("The card owner must add your email **\(UserSession.shared.userEmail ?? "")** as an authorized user before you can add their card.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding()
@@ -55,7 +55,7 @@ struct AddCardView: View {
                 
                 Text("\(cardNumber.count)/16 digits")
                     .font(.caption)
-                    .foregroundColor(cardNumber.count == 16 ? .green : .secondary)
+                    .foregroundColor(cardNumber.count == 16 ? .semanticSuccess : .textSecondary)
             }
 
             CustomCoffeeButton(
@@ -73,6 +73,7 @@ struct AddCardView: View {
             Utilize.hideKeyboard()
         }
         .padding(.horizontal)
+        .background(.bgPrimary)
         .customNavigationBar("Add Card") {
             ToolBarButton.back {
                 dismiss()

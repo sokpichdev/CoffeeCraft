@@ -29,7 +29,7 @@ struct CustomizationLibrarySheet: View {
                         
                         Text("Run the customization seeder to populate pre-defined options")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                     }

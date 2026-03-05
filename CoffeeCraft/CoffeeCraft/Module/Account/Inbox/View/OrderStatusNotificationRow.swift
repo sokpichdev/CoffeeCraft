@@ -15,16 +15,16 @@ struct OrderStatusNotificationRow: View {
         NotificationRowShell(
             notification: notification,
             icon: payload?.statusIcon ?? "clock.fill",
-            iconColor: .coffeeCream
+            iconColor: .coffeeOliveGreen
         ) {
             Text(notification.title)
                 .font(.subheadline.bold())
-                .foregroundColor(.primary)
+                .foregroundColor(.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(notification.message)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.textTertiary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }

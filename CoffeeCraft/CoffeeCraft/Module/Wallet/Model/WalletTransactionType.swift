@@ -49,8 +49,8 @@ enum WalletTransactionType: String, Codable, CaseIterable {
     /// Color tint for the icon — green for credits, red for debits
     var color: Color {
         switch self {
-        case .topup:   return Color("leafGreen")
-        case .payment: return Color("errorRed")
+        case .topup:   return .semanticSuccess
+        case .payment: return .semanticError
         case .refund:  return Color("activeTF")
         case .reward:  return Color("vanillaYellow")
         }

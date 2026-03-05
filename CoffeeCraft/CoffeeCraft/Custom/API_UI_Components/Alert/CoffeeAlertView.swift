@@ -42,14 +42,14 @@ struct CoffeeAlertView: View {
                     Text(alertModel.title)
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.textPrimary)
                 }
                 
                 if alertModel.message != "" {
                     Text(alertModel.message)
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 

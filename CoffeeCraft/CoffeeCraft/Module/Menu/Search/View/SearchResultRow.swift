@@ -36,7 +36,7 @@ struct SearchResultRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(product.name)
                     .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.textPrimary)
                     .lineLimit(1)
                 
                 if matchType != .name && !matchBadge.0.isEmpty {
@@ -55,7 +55,7 @@ struct SearchResultRow: View {
                 
                 Text("$\(product.price, specifier: "%.2f")")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
                 Spacer(minLength: 0)
             }
             
