@@ -28,7 +28,7 @@ struct AnnouncementDetailView: View {
                     
                     Text(announcement?.description ?? "")
                         .font(.body)
-                        .foregroundColor(.textTertiary)
+                        .foregroundColor(.commonGray)
                 }
                 .padding(.horizontal)
             }
