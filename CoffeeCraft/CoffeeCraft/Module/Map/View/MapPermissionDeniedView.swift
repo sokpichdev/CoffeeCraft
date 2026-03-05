@@ -2,8 +2,9 @@
 //  MapPermissionDeniedView.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
+//  Created by Sok Pich
 //  Map Module — Phase 1: Basic Map Integration
+//  (unchanged in Phase 2)
 //
 
 import SwiftUI
@@ -78,3 +79,9 @@ struct MapPermissionDeniedView: View {
         UIApplication.shared.open(url)
     }
 }
+
+//// MARK: - Preview
+//
+//#Preview {
+//    MapPermissionDeniedView()
+//}
