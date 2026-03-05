@@ -42,7 +42,7 @@ struct CustomCoffeeButton: View {
             .padding(.horizontal, horinzontalPadding)
             .background(
                 LinearGradient(
-                    colors: !isDisabled ? bgColors : [.coffeeCream.opacity(0.5)],
+                    colors: !isDisabled ? bgColors : [.coffeeCream.opacity(0.3)],
                     startPoint: .leading,
                     endPoint: .trailing
                 )

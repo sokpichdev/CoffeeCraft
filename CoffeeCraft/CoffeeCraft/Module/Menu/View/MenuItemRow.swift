@@ -28,13 +28,12 @@ struct MenuItemRow: View {
         .frame(height: 90)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color.bgSecondary.opacity(0.5))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.surfaceSub.opacity(0.4), lineWidth: 1)
+                .stroke(Color.border, lineWidth: 1)
         )
-        .shadow(color: Color.surfaceSub.opacity(0.4), radius: 1)
     }
 }
 

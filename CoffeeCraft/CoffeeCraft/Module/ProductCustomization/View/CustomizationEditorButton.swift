@@ -25,7 +25,7 @@ struct CustomizationEditorButton: View {
                         .frame(width: 50, height: 50)
                     
                     Image(systemName: "slider.horizontal.3")
-                        .foregroundColor(.brown)
+                        .foregroundColor(.coffeeBrown)
                         .font(.title3)
                 }
                 
@@ -38,7 +38,7 @@ struct CustomizationEditorButton: View {
                     if customizations.isEmpty {
                         Text("No customizations added")
                             .font(.caption)
-                            .foregroundColor(.textSecondary)
+                            .foregroundColor(.textTertiary)
                     } else {
                         HStack(spacing: 4) {
                             Text("\(customizations.count)")
@@ -49,7 +49,7 @@ struct CustomizationEditorButton: View {
                             Text("options")
                         }
                         .font(.caption)
-                        .foregroundColor(.brown)
+                        .foregroundColor(.coffeeBrown)
                     }
                 }
                 

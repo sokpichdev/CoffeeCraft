@@ -16,11 +16,12 @@ struct CustomNumberField: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.brown)
+                .foregroundColor(.coffeeBrown)
             TextField(title, value: $value, format: .number.precision(.fractionLength(2)))
                 .textFieldStyle(PlainTextFieldStyle())
                 .keyboardType(.decimalPad)
                 .padding(10)
+                .foregroundColor(.textPrimary)
         }
         .padding(.horizontal)
         .background(
@@ -29,7 +30,7 @@ struct CustomNumberField: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color(.systemGray4), lineWidth: 0.5)
+                .stroke(Color.border, lineWidth: 0.5)
         )
         .shadow(
             color: colorScheme == .dark ? Color.clear : Color.textPrimary.opacity(0.05),

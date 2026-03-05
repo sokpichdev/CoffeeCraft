@@ -40,6 +40,7 @@ struct AdminOrdersView: View {
             }
         }
         .customNavigationBar("Orders")
+        .background(Color.bgSecondary)
     }
 }
 

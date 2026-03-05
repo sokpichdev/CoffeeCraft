@@ -77,6 +77,7 @@ struct OrderCardView: View {
                     .fontWeight(.bold)
                     .fontDesign(.rounded)
                     .frame(height: 16)
+                    .foregroundColor(.textPrimary)
                 
                 if let date = order.timestamp {
                     Text(date.formatted(date: .abbreviated, time: .shortened))
@@ -162,7 +163,7 @@ struct OrderCardView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
-                .foregroundColor(.brown)
+                .foregroundColor(.coffeeBrown)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Capsule().fill(Color.accentPrimary.opacity(0.1)))
@@ -196,7 +197,7 @@ struct OrderCardView: View {
 
                 Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
-                    .foregroundColor(.brown)
+                    .foregroundColor(.coffeeBrown)
             }
 
             Spacer()
@@ -212,7 +213,7 @@ struct OrderCardView: View {
                             .font(.caption)
                             .fontWeight(.semibold)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.textPrimary).colorScheme(.dark)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
                     .background(Capsule().fill(Color.semanticSuccess))
@@ -221,7 +222,7 @@ struct OrderCardView: View {
             } else {
                 Image(systemName: "chevron.right")
                     .font(.headline).fontWeight(.semibold)
-                    .foregroundColor(.brown.opacity(0.4))
+                    .foregroundColor(.coffeeBrown.opacity(0.4))
             }
         }
         .padding()
@@ -263,12 +264,13 @@ struct DetailItemRow: View {
                         Text("×\(qty)")
                             .font(.subheadline)
                             .fontWeight(.bold)
-                            .foregroundColor(.brown)
+                            .foregroundColor(.accentGold)
                     }
                     Text(item.name ?? "")
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .lineLimit(1)
+                        .foregroundColor(.textPrimary)
                 }
                 
                 if let selections = item.selections, !selections.isEmpty {
@@ -281,7 +283,7 @@ struct DetailItemRow: View {
                 if let extras = item.extras, !extras.isEmpty {
                     Text(extras.joined(separator: ", "))
                         .font(.caption2)
-                        .foregroundColor(.coffeeBrown.opacity(0.8))
+                        .foregroundColor(.textTertiary.opacity(0.8))
                         .lineLimit(1)
                 }
             }
@@ -291,6 +293,7 @@ struct DetailItemRow: View {
             Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                 .font(.subheadline)
                 .fontWeight(.semibold)
+                .foregroundColor(.textPrimary)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)

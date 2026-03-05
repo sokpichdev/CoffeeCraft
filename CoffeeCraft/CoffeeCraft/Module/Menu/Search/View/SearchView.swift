@@ -69,6 +69,7 @@ struct SearchView: View {
             }, onRefresh: {
                 
             })
+            .background(Color.bgPrimary)
             .searchable(text: $searchText, prompt: "Search products...")
             .customNavigationBar("Search") {
                 ToolBarButton(placement: .navigationBarLeading, buttonType: .icon("xmark")) {

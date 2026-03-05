@@ -35,7 +35,11 @@ struct MenuView: View {
         ZStack(alignment: .bottom) {
             HStack(spacing: 0) {
                 categorySidebar
-                Divider()
+                Rectangle()
+                    .fill(Color.border)
+                    .frame(width: 0.5)
+                    .frame(maxHeight: .infinity)
+                    .ignoresSafeArea(edges: .top)
                 productList
             }
 
@@ -122,7 +126,7 @@ struct MenuView: View {
                                     Text(section.name)
                                         .font(.subheadline).fontWeight(.medium)
                                         .foregroundColor(
-                                            selectedSectionID == section.id ? .brown : .primary
+                                            selectedSectionID == section.id ? .accentGold : .textPrimary
                                         )
                                         .padding(.vertical, 10)
                                         .padding(.leading, 8)
@@ -148,7 +152,7 @@ struct MenuView: View {
                 .padding(.vertical, 10)
             }
             .frame(width: 120)
-            .background(Color(.systemGray6))
+            .background(Color.bgSecondary)
             .onChange(of: selectedSectionID) { _, newSection in
                 if let newSection = newSection, !isScrollingProgrammatically {
                     withAnimation {
@@ -195,6 +199,7 @@ struct MenuView: View {
                 .transition(.opacity)
             }
         }
+        .background(Color.bgPrimary.opacity(0.8))
     }
 
     // MARK: - Section View
@@ -204,11 +209,12 @@ struct MenuView: View {
                 .font(.title3.bold())
                 .padding(.horizontal)
                 .frame(height: 23)
+                .foregroundColor(.textPrimary)
 
             VStack(spacing: 10) {
                 ForEach(section.items) { product in
                     PushLink(value: product) { product in
-                        ProductDetailView(product: product, allProducts: productVM.products)                            .environmentObject(cartManager)
+                        ProductDetailView(product: product, allProducts: productVM.products).environmentObject(cartManager)
                             .environmentObject(favVM)
                     } label: {
                         MenuItemRow(item: product)
@@ -232,7 +238,7 @@ struct MenuView: View {
                         handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
                     } label: {
                         Label("Add new item", systemImage: "plus.circle.fill")
-                            .foregroundColor(.brown)
+                            .foregroundColor(.coffeeBrown)
                     }
                     .padding(.vertical, 6)
                 }

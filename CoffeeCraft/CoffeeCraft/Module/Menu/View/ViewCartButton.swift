@@ -30,7 +30,8 @@ struct ViewCartButton: View {
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Color.accentPrimary)
+                .foregroundColor(.textPrimary).colorScheme(.light)
+                .background(Color.coffeeOliveGreen)
                 .foregroundColor(.white)
                 .cornerRadius(14)
                 .shadow(radius: 4)

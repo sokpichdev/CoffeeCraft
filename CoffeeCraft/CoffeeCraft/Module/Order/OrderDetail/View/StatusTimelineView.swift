@@ -83,7 +83,7 @@ struct TimelineRow: View {
                             .frame(width: indicatorSize, height: indicatorSize)
 
                         Circle()
-                            .fill(Color(.secondarySystemGroupedBackground))
+                            .fill(Color.bgSecondary)
                             .frame(width: indicatorSize - 3, height: indicatorSize - 3)
                         
                         Circle()
@@ -92,20 +92,20 @@ struct TimelineRow: View {
                     }
                 } else {
                     Circle()
-                        .fill(isCompleted ? Color.semanticSuccess : Color.textMuted.opacity(0.2))
+                        .fill(isCompleted ? Color.semanticSuccess : Color.bgSecondary)
                         .frame(width: circleSize, height: circleSize)
                 }
 
                 Image(systemName: isCompleted && !isCurrent ? "checkmark" : icon)
                     .font(.system(size: 14, weight: isCompleted ? .bold : .regular))
-                    .foregroundColor(isCompleted ? .white : .gray)
+                    .foregroundColor(isCompleted ? .textPrimary : .commonGray).colorScheme(.dark)
             }
             .frame(width: circleSize, height: circleSize)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 16, weight: isCurrent ? .semibold : .regular))
-                    .foregroundColor(isCompleted ? .primary : .secondary)
+                    .foregroundColor(isCompleted ? .textPrimary : .commonGray)
 
                 if let subtitle {
                     Text(subtitle)
@@ -121,7 +121,7 @@ struct TimelineRow: View {
         .background(alignment: .bottomLeading) {
             if !isLast {
                 Rectangle()
-                    .fill(isCompleted ? Color.semanticSuccess.opacity(0.3) : Color.textMuted.opacity(0.2))
+                    .fill(isCompleted ? Color.semanticSuccess.opacity(0.3) : Color.bgSecondary)
                     .frame(width: lineWidth, height: lineHeight)
                     .padding(.leading, (circleSize - lineWidth) / 2)
             }
