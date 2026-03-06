@@ -104,8 +104,7 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
     }
 
     case home       // Home / Featured
-    case menu       // Coffee menu
-    case map        // Branch finder
+    case menu       // Coffee menu + branch selection
     case orders     // Past orders
     case profile    // User profile
 
@@ -113,46 +112,23 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
 
     var icon: String {
         switch self {
-        case .home:
-            return "house.fill"
-        case .menu:
-            return "list.bullet.rectangle.portrait.fill"
-        case .map:
-            return "map.fill"
-        case .orders:
-            return "clock.fill"
-        case .profile:
-            return "person.crop.circle.fill"
+        case .home:    return "house.fill"
+        case .menu:    return "list.bullet.rectangle.portrait.fill"
+        case .orders:  return "clock.fill"
+        case .profile: return "person.crop.circle.fill"
         }
     }
 
     var title: String {
         switch self {
-        case .home:
-            return "Home"
-        case .menu:
-            return "Menu"
-        case .map:
-            return "Map"
-        case .orders:
-            return "Orders"
-        case .profile:
-            return "Account"
+        case .home:    return "Home"
+        case .menu:    return "Menu"
+        case .orders:  return "Orders"
+        case .profile: return "Account"
         }
     }
 
     var color: Color {
-        switch self {
-        case .home:
-            return .accentPrimary
-        case .menu:
-            return .accentPrimary
-        case .map:
-            return .accentPrimary
-        case .orders:
-            return .accentPrimary
-        case .profile:
-            return .accentPrimary
-        }
+        return .accentPrimary
     }
 }

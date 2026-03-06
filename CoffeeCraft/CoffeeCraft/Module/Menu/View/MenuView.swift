@@ -15,6 +15,7 @@ struct MenuView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
+    @EnvironmentObject var orderEnv: OrderEnvironment
     @Environment(\.pushScreen) private var push
 
     // MARK: - Scroll Sync State
@@ -27,28 +28,35 @@ struct MenuView: View {
     @State private var showCartSheet = false
     @State private var selectedProductToEdit: Product?
     @State private var showSearchSheet = false
+    @State private var showBranchSheet = false
 
     var isManager: Bool = false
 
     // MARK: - Body
     var body: some View {
         ZStack(alignment: .bottom) {
-            HStack(spacing: 0) {
-                categorySidebar
-                Rectangle()
-                    .fill(Color.border)
-                    .frame(width: 0.5)
-                    .frame(maxHeight: .infinity)
-                    .ignoresSafeArea(edges: .top)
-                productList
-            }
-
-            if !cartManager.items.isEmpty {
-                ViewCartButton(cartManager: cartManager) {
-                    showCartSheet = true
+            if orderEnv.selectedBranch == nil {
+                // ── No branch selected — show placeholder ──────────────
+                noBranchSelectedView
+            } else {
+                // ── Branch selected — show menu ────────────────────────
+                HStack(spacing: 0) {
+                    categorySidebar
+                    Rectangle()
+                        .fill(Color.border)
+                        .frame(width: 0.5)
+                        .frame(maxHeight: .infinity)
+                        .ignoresSafeArea(edges: .top)
+                    productList
                 }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .animation(.spring(), value: cartManager.items.count)
+
+                if !cartManager.items.isEmpty {
+                    ViewCartButton(cartManager: cartManager) {
+                        showCartSheet = true
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.spring(), value: cartManager.items.count)
+                }
             }
         }
         .onAppear {
@@ -56,18 +64,26 @@ struct MenuView: View {
             if let userId = UserSession.shared.userId {
                 cartManager.loadCartFromFirestore(userId: userId)
             }
-            // Set initial section
             if selectedSectionID == nil, let firstSection = productVM.sections.first {
                 selectedSectionID = firstSection.id
             }
+            // Auto-present branch sheet if no branch is selected yet
+            if orderEnv.selectedBranch == nil {
+                showBranchSheet = true
+            }
         }
-        .customNavigationBar("Menu") {
+        .customNavigationBar(branchNavTitle) {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("magnifyingglass")) {
                 if UserSession.shared.isLoggedIn {
                     showSearchSheet = true
                 } else {
                     push(AnyView(AuthView().environmentObject(AuthViewModel())))
                 }
+            }
+            if let branchName = orderEnv.selectedBranchName {
+                ToolBarButton(placement: .principal, buttonType: .text(branchName), action: {
+                    showBranchSheet = true
+                })
             }
         }
         .fullScreenCover(isPresented: $showCartSheet) {
@@ -82,6 +98,57 @@ struct MenuView: View {
                 .environmentObject(cartManager)
                 .environmentObject(favVM)
         }
+        .sheet(isPresented: $showBranchSheet) {
+            MenuBranchSelectionSheet()
+            .environmentObject(orderEnv)
+        }
+    }
+
+    // MARK: - Branch Nav Title helper
+    // Returns the tappable branch name or a plain "Menu" title.
+    // Tapping the branch name re-opens the branch sheet.
+    private var branchNavTitle: String {
+        orderEnv.selectedBranchName ?? "Menu"
+    }
+
+    // MARK: - No Branch Selected View
+    private var noBranchSelectedView: some View {
+        VStack(spacing: 20) {
+            Spacer()
+            Image(systemName: "mappin.circle")
+                .font(.system(size: 56))
+                .foregroundStyle(.textMuted)
+
+            VStack(spacing: 8) {
+                Text("Please select a store")
+                    .font(.custom("Nunito-Bold", size: 20))
+                    .foregroundStyle(.textPrimary)
+                Text("Choose a branch to see its menu and place an order.")
+                    .font(.custom("Nunito-Regular", size: 14))
+                    .foregroundStyle(.textMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+
+            Button {
+                showBranchSheet = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "building.2.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                    Text("Select a Store")
+                        .font(.custom("Nunito-Bold", size: 16))
+                }
+                .foregroundStyle(.white)
+                .frame(height: 50)
+                .padding(.horizontal, 32)
+                .background(Color.accentPrimary)
+                .cornerRadius(14)
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.bgPrimary)
     }
 //    @ViewBuilder
     private func handleNavigateToEditProduct(sectionId: String, product: Product) -> some View {
