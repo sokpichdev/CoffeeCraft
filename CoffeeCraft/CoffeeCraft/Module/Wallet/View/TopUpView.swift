@@ -4,12 +4,6 @@
 //
 //  Created by Sok Pich on 03/03/2026.
 //
-//  3-step top-up sheet:
-//    Step 1 — Amount  : preset $ amounts or custom keyboard input
-//    Step 2 — Bank    : static list of payment methods
-//    Step 3 — Checkout: confirmation + one-tap pay → WalletService.topUp()
-//
-//  Currency: USD ($). 1:1 — amount paid equals amount credited to wallet.
 
 import SwiftUI
 
@@ -46,12 +40,11 @@ struct TopUpView: View {
                 walletVM: walletVM,
                 selectedUSD: $selectedUSD,
                 customInput: $customInput,
-                onContinue: { path.append("bank") }
+                selectedBank: $selectedBank,
+                onContinue: { path.append("checkout") }
             )
             .navigationDestination(for: String.self) { step in
                 switch step {
-                case "bank":
-                    TopUpBankStep(selectedBank: $selectedBank, onContinue: { path.append("checkout") })
                 case "checkout":
                     if let bank = selectedBank, let usd = resolvedUSD {
                         TopUpCheckoutStep(
@@ -69,7 +62,6 @@ struct TopUpView: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
     }
-
     private var resolvedUSD: Double? {
         if let s = selectedUSD { return s }
         if let v = Double(customInput), v > 0 { return v }
@@ -83,6 +75,7 @@ private struct TopUpAmountStep: View {
     @ObservedObject var walletVM: WalletViewModel
     @Binding var selectedUSD: Double?
     @Binding var customInput: String
+    @Binding var selectedBank: BankOption?
     let onContinue: () -> Void
 
     @FocusState private var keyboardFocused: Bool
@@ -182,12 +175,24 @@ private struct TopUpAmountStep: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
+                // ── Payment Method ────────────────────────────────────────
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Payment Method").font(.subheadline).fontWeight(.semibold)
+                    VStack(spacing: 8) {
+                        ForEach(bankOptions) { bank in
+                            BankRow(bank: bank, isSelected: selectedBank?.id == bank.id) {
+                                selectedBank = bank
+                            }
+                        }
+                    }
+                }
+
                 // ── Continue ──────────────────────────────────────────────
                 CustomCoffeeButton(
                     title: "Continue",
                     buttonImage: "arrow.right.circle.fill",
                     bgColors: [Color.accentPrimary, Color.coffeeLight],
-                    isDisabled: resolvedUSD == nil || (resolvedUSD ?? 0) <= 0
+                    isDisabled: resolvedUSD == nil || (resolvedUSD ?? 0) <= 0 || selectedBank == nil
                 ) {
                     keyboardFocused = false
                     onContinue()
