@@ -1,3 +1,5 @@
+import Combine
+import SwiftUI
 //
 //  CustomTextField1.swift
 //  CoffeeCraft
@@ -5,8 +7,6 @@
 //  Created by Sok Pich on 12/29/25.
 //
 import UIKit
-import SwiftUI
-import Combine
 
 struct CustomTextField1<TrailingView: View>: View {
     @Binding var text: String
@@ -224,7 +224,6 @@ struct UITextFieldWrapper1<TrailingView: View>: UIViewRepresentable {
             textField.leftView = containerView
             textField.leftViewMode = .always
             textField.leftView?.contentMode = .scaleAspectFit
-            
         }
 //
 //        if trailingIcon != nil {
@@ -290,7 +289,6 @@ struct UITextFieldWrapper1<TrailingView: View>: UIViewRepresentable {
         if !isFocus {
             uiView.isValidate = showValidate && uiView.text?.count ?? 0 > 0
         }
-        
     }
 
     func makeCoordinator() -> Coordinator {
@@ -347,4 +345,3 @@ enum TextFieldType {
     case otp
     case withTrailingButton
 }
-

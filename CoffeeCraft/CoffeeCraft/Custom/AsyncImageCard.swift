@@ -1,3 +1,4 @@
+import SDWebImageSwiftUI
 //
 //  AsyncImageCard.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 12/16/25.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct AsyncImageCard: View {
     let imageURL: String?

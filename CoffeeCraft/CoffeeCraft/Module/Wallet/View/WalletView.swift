@@ -37,7 +37,6 @@ struct WalletView: View {
             }
             .padding(.horizontal)
             .padding(.top, 8)
-
         }, onRefresh: {
             await vm.refresh()
         })

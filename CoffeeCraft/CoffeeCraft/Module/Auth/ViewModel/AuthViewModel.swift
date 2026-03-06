@@ -5,10 +5,10 @@
 //  Created by Sok Pich on 10/20/25.
 //
 
-import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseMessaging
+import SwiftUI
 
 @MainActor
 class AuthViewModel: ObservableObject {
@@ -361,7 +361,7 @@ extension AuthViewModel {
     }
     
     func checkUsername() {
-        if name.count == 0 {
+        if name.isEmpty {
             nameValidation = .init(isValid: false, message: "Name cannot be empty")
         } else if name.count < 6 || name.count > 15 {
             nameValidation = .init(isValid: false, message: "Name must be between 6 - 15 letters")
@@ -400,5 +400,4 @@ extension AuthViewModel {
         passwordValidation = .init()
         nameValidation = .init()
     }
-
 }

@@ -35,13 +35,13 @@ struct BranchHoursView: View {
 
     private var schedule: [DaySchedule] {
         let days: [(String, String)] = [
-            ("Monday",    "Mon"),
-            ("Tuesday",   "Tue"),
+            ("Monday", "Mon"),
+            ("Tuesday", "Tue"),
             ("Wednesday", "Wed"),
-            ("Thursday",  "Thu"),
-            ("Friday",    "Fri"),
-            ("Saturday",  "Sat"),
-            ("Sunday",    "Sun"),
+            ("Thursday", "Thu"),
+            ("Friday", "Fri"),
+            ("Saturday", "Sat"),
+            ("Sunday", "Sun")
         ]
         let todayIndex = (Calendar.current.component(.weekday, from: Date()) + 5) % 7
 
@@ -105,8 +105,8 @@ struct BranchHoursView: View {
 //
 //// MARK: - Preview
 //
-//#Preview {
+// #Preview {
 //    BranchHoursView(branch: MockBranchData.all[0])
 //        .padding()
 //        .background(Color.bgPrimary)
-//}
+// }

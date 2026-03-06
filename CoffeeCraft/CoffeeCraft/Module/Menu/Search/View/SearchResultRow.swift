@@ -1,3 +1,4 @@
+import SDWebImageSwiftUI
 //
 //  SearchResultRow.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 1/16/26.
 //
 import SwiftUI
-import SDWebImageSwiftUI
 
 struct SearchResultRow: View {
     let product: Product

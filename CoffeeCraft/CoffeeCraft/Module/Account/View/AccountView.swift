@@ -55,7 +55,7 @@ struct AccountView: View {
                 }
             }
         }
-        .onChange(of: UserSession.shared.currentUser) { oldValue, newValue in
+        .onChange(of: UserSession.shared.currentUser) { _, newValue in
             if let userId = newValue?.id {
                 // Reset and fetch when user changes (login/logout)
                 cardVM.isActiveCardFetched = false
@@ -320,10 +320,10 @@ struct AccountView: View {
 }
 
 struct RowInSectionView: View {
-    var label: String? = nil
+    var label: String?
     let title: String
     let systemImage: String
-    var badgeCount: Int? = nil
+    var badgeCount: Int?
     
     var trailingSystemImage: String = "chevron.right"
     var onClicked: (() -> Void)?

@@ -18,7 +18,7 @@ struct WalletTransactionRow: View {
     var body: some View {
         HStack(spacing: 14) {
 
-            //icon badge
+            // icon badge
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(transaction.type.color.opacity(0.12))

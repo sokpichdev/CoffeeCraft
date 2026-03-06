@@ -5,8 +5,8 @@
 //  Created by Sok Pich on 03/03/2026.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 @MainActor
 class WalletViewModel: ObservableObject {
@@ -15,7 +15,7 @@ class WalletViewModel: ObservableObject {
     @Published var transactions: [WalletTransaction] = []
     @Published var isLoading: Bool = false
     @Published var isRefreshing: Bool = false
-    @Published var errorMessage: String? = nil
+    @Published var errorMessage: String?
 
     private let service = WalletService.shared
     private var walletListener: ListenerRegistration?

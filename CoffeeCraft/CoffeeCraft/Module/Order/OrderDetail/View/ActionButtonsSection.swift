@@ -12,9 +12,9 @@ struct ActionButtonsSection: View {
     let isActive: Bool
     var isUpdating: Bool = false
     var isCancelling: Bool = false
-    var onUpdateStatus: ((String) -> Void)? = nil
-    var onReorder: (() -> Void)? = nil
-    var onCancel: (() -> Void)? = nil
+    var onUpdateStatus: ((String) -> Void)?
+    var onReorder: (() -> Void)?
+    var onCancel: (() -> Void)?
 
     private var isCompleted: Bool {
         let s = order.status?.lowercased() ?? ""

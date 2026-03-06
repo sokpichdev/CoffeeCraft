@@ -14,7 +14,7 @@ struct CartView: View {
     @EnvironmentObject var orderEnv: OrderEnvironment   // Phase 4 — clear after order
     @Environment(\.dismiss) private var dismiss
 
-    @State private var editingItem: CartItem? = nil
+    @State private var editingItem: CartItem?
     @StateObject private var orderService = OrderService()
     @StateObject private var productVM = ProductViewModel()
 
@@ -191,7 +191,6 @@ struct CartView: View {
         }
     }
 }
-
 
 // MARK: - CartBranchInfoCard
 

@@ -33,7 +33,6 @@ enum CardError: LocalizedError {
         case .notOwner:
             return "You are not the owner"
         case .noAccess: return "No access to this card"
-
         }
     }
 }

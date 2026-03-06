@@ -42,9 +42,9 @@ struct CustomAttributedStringText: View {
 // MARK: - Each segment
 struct TextSegment {
     var text: String
-    var color: Color? = nil
-    var font: Font? = nil
-    var link: URL? = nil
+    var color: Color?
+    var font: Font?
+    var link: URL?
     var underline: Bool = false
     var strikethrough: Bool = false
     var italic: Bool = false

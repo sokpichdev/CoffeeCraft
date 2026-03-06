@@ -45,11 +45,11 @@ struct Branch: Identifiable, Codable, Hashable {
     var amenityIcons: [(icon: String, label: String)] {
         amenities.compactMap { key in
             switch key {
-            case "wifi":       return ("wifi",               "WiFi")
+            case "wifi":       return ("wifi", "WiFi")
             case "parking":    return ("parkingsign.circle", "Parking")
-            case "dine-in":    return ("fork.knife",         "Dine-in")
-            case "takeaway":   return ("bag",                "Takeaway")
-            case "drive-thru": return ("car",                "Drive-Thru")
+            case "dine-in":    return ("fork.knife", "Dine-in")
+            case "takeaway":   return ("bag", "Takeaway")
+            case "drive-thru": return ("car", "Drive-Thru")
             default:           return nil
             }
         }

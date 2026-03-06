@@ -5,8 +5,8 @@
 //  Created by Sok Pich on 1/26/26.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 import SwiftUI
 
 struct LoyaltyCard: Identifiable, Codable {

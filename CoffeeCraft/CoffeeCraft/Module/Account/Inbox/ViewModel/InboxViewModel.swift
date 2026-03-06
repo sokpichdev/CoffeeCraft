@@ -1,10 +1,10 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  InboxViewModel.swift
 //  CoffeeCraft
 //
 import SwiftUI
-import FirebaseFirestore
-import FirebaseAuth
 import UserNotifications
 
 @MainActor

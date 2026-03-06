@@ -20,7 +20,6 @@ struct FavoriteView: View {
             }
             .padding()
         }, onRefresh: {
-            
         })
         .background(Color.bgPrimary)
         .customNavigationBar("Favorites") {

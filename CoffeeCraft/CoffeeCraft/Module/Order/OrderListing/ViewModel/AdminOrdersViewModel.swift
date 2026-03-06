@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  AdminOrdersViewModel.swift
 //  CoffeeCraft
@@ -5,8 +7,6 @@
 //  Created by Sok Pich on 10/23/25.
 //
 import SwiftUI
-import FirebaseFirestore
-import FirebaseAuth
 
 @MainActor
 class AdminOrdersViewModel: ObservableObject {
@@ -77,7 +77,6 @@ class AdminOrdersViewModel: ObservableObject {
                 isLoadingAllOrders = false
                 setupAllOrdersListener()
             }
-
         } catch {
             isLoadingAllOrders = false
             AppLog.order.error("❌ fetchAllOrders error: \(error.localizedDescription)")
@@ -181,7 +180,6 @@ class AdminOrdersViewModel: ObservableObject {
                 isLoadingMyOrders = false
                 setupMyOrdersListener(userId: userId)
             }
-
         } catch {
             isLoadingMyOrders = false
             AppLog.order.error("❌ fetchMyOrders error: \(error.localizedDescription)")
@@ -256,7 +254,6 @@ class AdminOrdersViewModel: ObservableObject {
 
             applyLocalStatusChange(orderId: orderId, status: status)
             return true
-
         } catch {
             AppLog.order.error("❌ updateOrderStatus error: \(error.localizedDescription)")
         AlertManager.shared.showError(

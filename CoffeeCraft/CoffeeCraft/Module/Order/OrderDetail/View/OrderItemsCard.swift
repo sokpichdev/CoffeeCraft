@@ -9,7 +9,6 @@ import SwiftUI
 struct OrderItemsCard: View {
     let items: [CartItemData]
     
-    
     var body: some View {
         let totalQty = items.reduce(0) {
             $0 + ($1.quantity ?? 1)
@@ -45,7 +44,6 @@ struct OrderItemsCard: View {
         )
     }
 }
-
 
 struct OrderItemRow: View {
     let item: CartItemData

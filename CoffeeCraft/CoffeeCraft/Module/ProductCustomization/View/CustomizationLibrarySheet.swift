@@ -48,11 +48,10 @@ struct CustomizationLibrarySheet: View {
                         }
                         .padding()
                     }, onRefresh: {
-                        
                     })
                 }
             }
-            .customNavigationBar("Customization Library"){
+            .customNavigationBar("Customization Library") {
                 ToolBarButton(placement: .topBarTrailing, buttonType: .icon("checkmark")) {
                     dismiss()
                 }

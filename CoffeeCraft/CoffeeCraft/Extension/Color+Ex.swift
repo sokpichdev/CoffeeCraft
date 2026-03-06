@@ -49,7 +49,7 @@ extension Color {
 //  │ semanticError       │ #B03A2A      │ #E05040      │
 //  └─────────────────────┴──────────────┴──────────────┘
 
-//extension Color {
+// extension Color {
 //
 //    // ── Backgrounds ──────────────────────────────────────────────
 //    /// Main app background. Warm cream (light) / Deep espresso (dark).
@@ -86,10 +86,10 @@ extension Color {
 //    static let semanticWarning = Color("semanticWarning")
 //    /// Errors, cancellations, form failures.
 //    static let semanticError   = Color("semanticError")
-//}
+// }
 //
 //// MARK: - Legacy Coffee Brand Tokens  (backward compat — now all adaptive)
-//extension Color {
+// extension Color {
 //    static let coffeeBrown      = Color("coffeeBrown")
 //    static let coffeeLight      = Color("coffeeLight")
 //    static let coffeeDarkBrown  = Color("coffeeDarkBrown")
@@ -111,7 +111,7 @@ extension Color {
 //    static let creamWhite    = Color("creamWhite")
 //    static let espressoBlack = Color("espressoBlack")
 //    static let parchment     = Color("parchment")
-//}
+// }
 
 // MARK: - Gradient Helpers
 extension LinearGradient {

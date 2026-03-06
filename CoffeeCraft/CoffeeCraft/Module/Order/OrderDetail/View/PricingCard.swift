@@ -10,8 +10,8 @@ import SwiftUI
 struct PricingCard: View {
     let totalPrice: Double
     let items: [CartItemData]
-    var paymentMethod: String? = nil
-    var walletAmountPaid: Double? = nil
+    var paymentMethod: String?
+    var walletAmountPaid: Double?
 
     var subtotal: Double { items.reduce(0) { $0 + ($1.price ?? 0.0) } }
     var tax: Double { totalPrice - subtotal }

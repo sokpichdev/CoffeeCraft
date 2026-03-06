@@ -90,6 +90,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6AFAC5312EA5E69E00037932 /* Build configuration list for PBXNativeTarget "CoffeeCraft" */;
 			buildPhases = (
+				6AD8D50D2F5AE678008A4B6F /* ShellScript */,
 				6AFAC51F2EA5E69C00037932 /* Sources */,
 				6AFAC5202EA5E69C00037932 /* Frameworks */,
 				6AFAC5212EA5E69C00037932 /* Resources */,
@@ -167,6 +168,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6AD8D50D2F5AE678008A4B6F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "if command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6AFAC51F2EA5E69C00037932 /* Sources */ = {

@@ -53,7 +53,7 @@ struct InfiniteCarousel<Content: View, T: Hashable>: View {
             scheduleAutoScrollRestart()
         }
         .onChange(of: scrollPosition) { _, newValue in
-            guard let newValue, items.count > 0 else { return }
+            guard let newValue, !items.isEmpty else { return }
             currentIndex = newValue % items.count
             recenterIfNeeded(newValue)
         }

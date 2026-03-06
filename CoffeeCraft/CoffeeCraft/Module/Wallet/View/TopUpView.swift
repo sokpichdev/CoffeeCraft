@@ -23,10 +23,10 @@ struct BankOption: Identifiable {
 }
 
 private let bankOptions: [BankOption] = [
-    BankOption(id: "aba",      name: "ABA Bank",      icon: "building.columns.fill", color: .blue,                   description: "Scan & Pay via ABA Mobile"),
-    BankOption(id: "vattanac", name: "Vattanac Bank", icon: "building.columns.fill", color: Color(hex: "1A56DB"),    description: "Scan & Pay via Vattanac Mobile"),
-    BankOption(id: "acleda",   name: "ACLEDA Bank",   icon: "building.columns.fill", color: .orange,                 description: "Scan & Pay via ACLEDA Unity"),
-    BankOption(id: "wing",     name: "Wing Bank",     icon: "w.circle.fill",         color: .green,                  description: "Scan & Pay via Wing Mobile"),
+    BankOption(id: "aba", name: "ABA Bank", icon: "building.columns.fill", color: .blue, description: "Scan & Pay via ABA Mobile"),
+    BankOption(id: "vattanac", name: "Vattanac Bank", icon: "building.columns.fill", color: Color(hex: "1A56DB"), description: "Scan & Pay via Vattanac Mobile"),
+    BankOption(id: "acleda", name: "ACLEDA Bank", icon: "building.columns.fill", color: .orange, description: "Scan & Pay via ACLEDA Unity"),
+    BankOption(id: "wing", name: "Wing Bank", icon: "w.circle.fill", color: .green, description: "Scan & Pay via Wing Mobile")
 ]
 
 // MARK: - TopUpView (sheet root)
@@ -36,17 +36,17 @@ struct TopUpView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var path          = NavigationPath()
-    @State private var selectedUSD:  Double?    = nil
-    @State private var customInput:  String     = ""
-    @State private var selectedBank: BankOption? = nil
+    @State private var selectedUSD: Double?
+    @State private var customInput: String     = ""
+    @State private var selectedBank: BankOption?
 
     var body: some View {
         NavigationStack(path: $path) {
             TopUpAmountStep(
-                walletVM:    walletVM,
+                walletVM: walletVM,
                 selectedUSD: $selectedUSD,
                 customInput: $customInput,
-                onContinue:  { path.append("bank") }
+                onContinue: { path.append("bank") }
             )
             .navigationDestination(for: String.self) { step in
                 switch step {
@@ -55,8 +55,8 @@ struct TopUpView: View {
                 case "checkout":
                     if let bank = selectedBank, let usd = resolvedUSD {
                         TopUpCheckoutStep(
-                            walletVM:  walletVM,
-                            bank:      bank,
+                            walletVM: walletVM,
+                            bank: bank,
                             usdAmount: usd,
                             onSuccess: { dismiss() }
                         )
@@ -88,7 +88,7 @@ private struct TopUpAmountStep: View {
     @FocusState private var keyboardFocused: Bool
 
     private let presets: [(usd: Double, badge: String?)] = [
-        (2, nil), (5, nil), (10, "Popular"), (20, "Best Value"),
+        (2, nil), (5, nil), (10, "Popular"), (20, "Best Value")
     ]
 
     private var resolvedUSD: Double? {
@@ -128,8 +128,8 @@ private struct TopUpAmountStep: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         ForEach(presets, id: \.usd) { option in
                             PresetAmountButton(
-                                usd:        option.usd,
-                                badge:      option.badge,
+                                usd: option.usd,
+                                badge: option.badge,
                                 isSelected: selectedUSD == option.usd && customInput.isEmpty
                             ) {
                                 selectedUSD     = option.usd
@@ -168,7 +168,7 @@ private struct TopUpAmountStep: View {
                 // ── Summary card ──────────────────────────────────────────
                 if let usd = resolvedUSD, usd > 0 {
                     VStack(spacing: 0) {
-                        summaryRow(label: "You pay",     value: String(format: "$%.2f", usd))
+                        summaryRow(label: "You pay", value: String(format: "$%.2f", usd))
                         Divider().padding(.horizontal, 16)
                         summaryRow(label: "You receive", value: "+\(usd.currencyFormatted)", highlight: true)
                         Divider().padding(.horizontal, 16)
@@ -184,10 +184,10 @@ private struct TopUpAmountStep: View {
 
                 // ── Continue ──────────────────────────────────────────────
                 CustomCoffeeButton(
-                    title:       "Continue",
+                    title: "Continue",
                     buttonImage: "arrow.right.circle.fill",
-                    bgColors:    [Color.accentPrimary, Color.coffeeLight],
-                    isDisabled:  resolvedUSD == nil || (resolvedUSD ?? 0) <= 0
+                    bgColors: [Color.accentPrimary, Color.coffeeLight],
+                    isDisabled: resolvedUSD == nil || (resolvedUSD ?? 0) <= 0
                 ) {
                     keyboardFocused = false
                     onContinue()
@@ -342,13 +342,13 @@ private struct TopUpCheckoutStep: View {
                         .clipShape(UnevenRoundedRectangle(topLeadingRadius: 20, topTrailingRadius: 20))
 
                         VStack(spacing: 0) {
-                            checkoutRow(label: "Recipient",   value: "CoffeeCraft Wallet")
+                            checkoutRow(label: "Recipient", value: "CoffeeCraft Wallet")
                             Divider().padding(.horizontal, 16)
-                            checkoutRow(label: "Amount",      value: String(format: "$%.2f USD", usdAmount))
+                            checkoutRow(label: "Amount", value: String(format: "$%.2f USD", usdAmount))
                             Divider().padding(.horizontal, 16)
                             checkoutRow(label: "You receive", value: "+\(usdAmount.currencyFormatted)", highlight: true)
                             Divider().padding(.horizontal, 16)
-                            checkoutRow(label: "Method",      value: bank.name)
+                            checkoutRow(label: "Method", value: bank.name)
                         }
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
@@ -372,10 +372,10 @@ private struct TopUpCheckoutStep: View {
             VStack(spacing: 0) {
                 Divider()
                 CustomCoffeeButton(
-                    title:       isLoading ? "Processing..." : "Pay \(String(format: "$%.2f", usdAmount))",
+                    title: isLoading ? "Processing..." : "Pay \(String(format: "$%.2f", usdAmount))",
                     buttonImage: isLoading ? "" : "checkmark.circle.fill",
-                    bgColors:    [Color.accentPrimary, Color.coffeeLight],
-                    isDisabled:  isLoading
+                    bgColors: [Color.accentPrimary, Color.coffeeLight],
+                    isDisabled: isLoading
                 ) { Task { await pay() } }
                 .padding(20)
             }

@@ -1,3 +1,4 @@
+import FirebaseFirestore
 //
 //  CartManager.swift
 //  CoffeeCraft
@@ -8,7 +9,6 @@
 //  All existing methods unchanged.
 //
 import SwiftUI
-import FirebaseFirestore
 
 @MainActor
 class CartManager: ObservableObject {
@@ -67,8 +67,7 @@ class CartManager: ObservableObject {
             db.collection("carts").document(userId).setData(["items": data]) { [weak self] error in
                 guard self != nil else { return }
                 DispatchQueue.main.async {
-                    if let error = error { AlertManager.shared.showError(message: error.localizedDescription) }
-                    else { completion?() }
+                    if let error = error { AlertManager.shared.showError(message: error.localizedDescription) } else { completion?() }
                 }
             }
         } catch {

@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  OrderViewModel.swift
 //  CoffeeCraft
@@ -17,8 +19,6 @@
 //  └─────────────────────────────────────────────────────────┘
 //
 import SwiftUI
-import FirebaseFirestore
-import FirebaseAuth
 
 @MainActor
 class OrderViewModel: ObservableObject {
@@ -84,7 +84,6 @@ class OrderViewModel: ObservableObject {
             isLoading = false
 
             setupRealtimeListener(userId: userId)
-
         } catch {
             isLoading = false
             AppLog.order.error("❌ fetchOrders error: \(error.localizedDescription)")
@@ -137,7 +136,6 @@ class OrderViewModel: ObservableObject {
             // Re-attach listener so it now covers ALL loaded orders, not just the first page.
             // e.g. user has scrolled to 50 orders → listener watches 50, not 5.
             setupRealtimeListener(userId: userId)
-
         } catch {
             AppLog.order.error("❌ loadMore error: \(error.localizedDescription)")
             AlertManager.shared.showError(

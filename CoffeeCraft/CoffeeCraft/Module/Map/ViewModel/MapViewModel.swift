@@ -7,9 +7,9 @@
 //  All Phase 5 behaviour unchanged.
 //
 
-import SwiftUI
-import MapKit
 import CoreLocation
+import MapKit
+import SwiftUI
 
 // MARK: - MapViewModel
 
@@ -156,7 +156,7 @@ final class MapViewModel: NSObject {
     func distance(to branch: Branch) -> CLLocationDistance {
         guard let userLocation else { return .infinity }
         return userLocation.distance(from: CLLocation(
-            latitude:  branch.latitude,
+            latitude: branch.latitude,
             longitude: branch.longitude
         ))
     }
@@ -182,7 +182,7 @@ final class MapViewModel: NSObject {
 
         // Analytics — Phase 6
         MapAnalytics.branchSelected(
-            branchId:   branch.id ?? "unknown",
+            branchId: branch.id ?? "unknown",
             branchName: branch.name,
             distanceKm: distanceKm(to: branch)
         )
@@ -222,8 +222,8 @@ final class MapViewModel: NSObject {
         }
         let userCoord   = userLocation.coordinate
         let branchCoord = branch.coordinate
-        let minLat = min(userCoord.latitude,  branchCoord.latitude)
-        let maxLat = max(userCoord.latitude,  branchCoord.latitude)
+        let minLat = min(userCoord.latitude, branchCoord.latitude)
+        let maxLat = max(userCoord.latitude, branchCoord.latitude)
         let minLon = min(userCoord.longitude, branchCoord.longitude)
         let maxLon = max(userCoord.longitude, branchCoord.longitude)
         let latDelta = max((maxLat - minLat) * 1.6, 0.005)
@@ -231,11 +231,11 @@ final class MapViewModel: NSObject {
         withAnimation(.easeInOut(duration: 0.5)) {
             cameraPosition = .region(MKCoordinateRegion(
                 center: CLLocationCoordinate2D(
-                    latitude:  (minLat + maxLat) / 2,
+                    latitude: (minLat + maxLat) / 2,
                     longitude: (minLon + maxLon) / 2
                 ),
                 span: MKCoordinateSpan(
-                    latitudeDelta:  latDelta,
+                    latitudeDelta: latDelta,
                     longitudeDelta: lonDelta
                 )
             ))

@@ -13,7 +13,6 @@ struct WalletBalanceCard: View {
     let cardWidth: CGFloat
     let onTopUp: () -> Void
 
-    
     private var cardHeight: CGFloat {
         cardWidth / (16 / 9)
     }
@@ -45,7 +44,6 @@ struct WalletBalanceCard: View {
                 quickTopUpShelf
                     .frame(height: actionHeight)
                     .frame(maxWidth: .infinity)
-
             }
             .frame(width: cardWidth, height: cardHeight)
         }
@@ -122,7 +120,6 @@ struct WalletBalanceCard: View {
                 .contentTransition(.numericText())
                 .animation(.spring(duration: 0.5), value: wallet?.balance)
                 .frame(height: balanceHeight * 0.4)
-
 
             // Stats pill
             if let wallet {

@@ -77,7 +77,6 @@ extension String {
         formatter.dateFormat = "yyyy-MM-dd"
         return "orders_\(formatter.string(from: Date()))"
     }
-
 }
 extension Int {
     var formattedDailyOrderId: String {

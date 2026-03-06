@@ -10,7 +10,7 @@ struct RowInProfileView<Content: View>: View {
     @Binding var title: String
     @Binding var isEditing: Bool
     var previousTitle: String = ""
-    var label: String? = nil
+    var label: String?
     let systemImage: String
     let editType: EditProductType
     

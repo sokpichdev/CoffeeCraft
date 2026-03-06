@@ -57,7 +57,7 @@ final class PushSlideTransition: NSObject, UIViewControllerAnimatedTransitioning
         // when SwiftUI's auto-layout tries to recalculate positions mid-flight.
         container.addSubview(toView)
         toView.frame   = CGRect(x: width, y: 0, width: width, height: height)  // off-screen right
-        fromView.frame = CGRect(x: 0,     y: 0, width: width, height: height)  // current position
+        fromView.frame = CGRect(x: 0, y: 0, width: width, height: height)  // current position
 
         // Shadow strip: a narrow view positioned at toView's left edge.
         // It travels with toView as it slides in, giving depth between screens.

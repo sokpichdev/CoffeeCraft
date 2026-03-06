@@ -165,7 +165,7 @@ private struct BranchCard: View {
 
 //// MARK: - Preview
 //
-//#Preview {
+// #Preview {
 //    ZStack(alignment: .bottom) {
 //        Color.bgPrimary.ignoresSafeArea()
 //        BranchListView(
@@ -175,4 +175,4 @@ private struct BranchCard: View {
 //            onSelect: { _ in }
 //        )
 //    }
-//}
+// }

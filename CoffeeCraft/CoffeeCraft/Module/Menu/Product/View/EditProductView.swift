@@ -175,7 +175,6 @@ struct EditProductView: View {
             .padding(.top, 20)
             .frame(maxWidth: .infinity)
         }, onRefresh: {
-            
         })
         .background(Color.bgSecondary)
         .customNavigationBar(isEditing ? "Edit Product" : "Add Product") {

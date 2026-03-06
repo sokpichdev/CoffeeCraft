@@ -6,7 +6,6 @@
 //
 import SwiftUI
 
-
 struct OrderReceiptView: View {
     let order: Order
     let userName: String
@@ -275,7 +274,7 @@ struct TotalSection: View {
 // MARK: - Barcode
 struct BarcodeStrip: View {
     var body: some View {
-        GeometryReader { geo in
+        GeometryReader { _ in
             HStack(spacing: 0) {
                 ForEach(0..<60, id: \.self) { i in
                     let widths: [CGFloat] = [1, 2, 1, 3, 1, 2, 2, 1]

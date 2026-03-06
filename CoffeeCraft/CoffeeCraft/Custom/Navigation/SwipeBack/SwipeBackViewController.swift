@@ -21,7 +21,6 @@ extension View {
     }
 }
 
-
 // ============================================================
 // MARK: - SwipeBackInstaller (UIViewControllerRepresentable)
 // ============================================================
@@ -53,7 +52,6 @@ private struct SwipeBackInstaller: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: SwipeBackViewController, context: Context) {}
 }
-
 
 // ============================================================
 // MARK: - SwipeBackViewController

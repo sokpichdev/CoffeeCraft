@@ -78,7 +78,6 @@ struct CustomizationView: View {
                     .padding(.top, 10)
                     .padding(.horizontal)
                 }, onRefresh: {
-                    
                 })
                 .scrollDismissesKeyboard(.immediately)
             }

@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  FavoriteViewModel.swift
 //  CoffeeCraft
@@ -5,8 +7,6 @@
 //  Created by Sok Pich on 1/16/26.
 //
 import SwiftUI
-import FirebaseFirestore
-import FirebaseAuth
 
 @MainActor
 class FavoriteViewModel: ObservableObject {
@@ -19,7 +19,7 @@ class FavoriteViewModel: ObservableObject {
     /// Tracks the last key we actually fired a Firestore request for.
     /// Format: "<productId>|<customizationHash>"
     /// Any call arriving with the same key is a duplicate and is dropped.
-    private var lastLoadedKey: String? = nil
+    private var lastLoadedKey: String?
 
     // MARK: - Helpers
     func currentCustomizationForFavorite(selections: [String: String], selectedExtras: [String]) -> [String: String] {

@@ -46,7 +46,7 @@ struct ComingSoonView: View {
                 .font(.subheadline)
                 .foregroundColor(.textSecondary)
             Button(action: {
-                authVM.logout() { _ in }
+                authVM.logout { _ in }
             }, label: {
                 Text("Logout")
                     .font(.subheadline)
