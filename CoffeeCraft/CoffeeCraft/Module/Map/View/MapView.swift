@@ -2,9 +2,10 @@
 //  MapView.swift
 //  CoffeeCraft
 //
-//  Map Module — Simplified
-//  Shows branches on map, bottom card strip, branch detail sheet.
-//  No routing polyline, no directions view, no delivery simulation.
+//  Map Module — Phase 4
+//  Added: offline banner when isOffline == true.
+//  Added: stopListening() on disappear.
+//  Everything else unchanged from Phase 3.
 //
 
 import SwiftUI
@@ -36,6 +37,15 @@ struct MapView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
 
+                // MARK: Offline banner
+                if viewModel.isOffline {
+                    VStack {
+                        offlineBanner
+                        Spacer()
+                    }
+                    .ignoresSafeArea(edges: .top)
+                }
+
                 // MARK: Recenter button
                 if viewModel.isPermissionGranted {
                     recenterButton
@@ -62,6 +72,9 @@ struct MapView: View {
                 viewModel.requestLocationPermission()
                 viewModel.fetchBranches()
             }
+            .onDisappear {
+                viewModel.stopListening()
+            }
 
             // MARK: Branch detail sheet
             .sheet(isPresented: $viewModel.isSheetPresented,
@@ -86,6 +99,24 @@ struct MapView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Offline Banner
+
+    private var offlineBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 13, weight: .semibold))
+            Text("Offline — showing saved branches")
+                .font(.custom("Nunito-SemiBold", size: 13))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .background(Color.semanticWarning)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.easeInOut(duration: 0.3), value: viewModel.isOffline)
     }
 
     // MARK: - Map Layer

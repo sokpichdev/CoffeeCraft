@@ -27,6 +27,14 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
     /// The CC amount actually deducted. Used by Phase 5 refund.
     var walletAmountPaid: Double?
 
+    // MARK: Phase 4 — Branch tagging (Map module)
+    /// Firestore document ID of the branch this order was placed from.
+    /// nil on orders placed before Phase 4 — treat as "branch unspecified".
+    var branchId: String?
+    /// Display name snapshot at time of order. Stored so history shows
+    /// the correct name even if the branch is renamed later.
+    var branchName: String?
+
     // MARK: Computed helpers
 
     var wasWalletPayment: Bool {

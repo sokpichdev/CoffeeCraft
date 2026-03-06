@@ -2,9 +2,10 @@
 //  MapViewModel.swift
 //  CoffeeCraft
 //
-//  Map Module — Simplified
-//  Responsibilities: location, branch list, branch selection, sheet presentation.
-//  Routing, directions, and delivery simulation removed — Phase 5+.
+//  Map Module — Phase 4
+//  fetchBranches() now wires to BranchRepository (Firestore live listener).
+//  isOffline state drives an offline banner in MapView.
+//  All other behaviour unchanged from Phase 3.
 //
 
 import SwiftUI
@@ -26,6 +27,10 @@ final class MapViewModel: NSObject {
     var branches: [Branch] = []
     var selectedBranch: Branch?
     var isSheetPresented = false
+
+    // MARK: - Offline State
+
+    var isOffline = false
 
     // MARK: - Permission State
 
@@ -80,9 +85,23 @@ final class MapViewModel: NSObject {
 
     // MARK: - Branches
 
+    /// Starts a Firestore live listener via BranchRepository.
+    /// Updates isOffline based on network connectivity.
+    /// Falls back to MockBranchData when offline or Firestore is empty.
     func fetchBranches() {
-        // TODO Phase 6: replace with Firestore listener
-        branches = MockBranchData.all
+        isOffline = !NetworkMonitor.shared.isConnected
+
+        BranchRepository.shared.listen { [weak self] updatedBranches in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.branches  = updatedBranches
+                self.isOffline = !NetworkMonitor.shared.isConnected
+            }
+        }
+    }
+
+    func stopListening() {
+        BranchRepository.shared.stopListening()
     }
 
     func sortedBranches() -> [Branch] {
@@ -113,7 +132,6 @@ final class MapViewModel: NSObject {
             selectedBranch   = branch
             isSheetPresented = true
         }
-        // Pan map to branch
         withAnimation(.easeInOut(duration: 0.4)) {
             cameraPosition = .region(MKCoordinateRegion(
                 center: branch.coordinate,
@@ -130,7 +148,46 @@ final class MapViewModel: NSObject {
         }
     }
 
-    // MARK: - Open in Apple Maps
+    // MARK: - fitRoute
+
+    func fitRoute(to branch: Branch) {
+        guard let userLocation else {
+            withAnimation(.easeInOut(duration: 0.4)) {
+                cameraPosition = .region(MKCoordinateRegion(
+                    center: branch.coordinate,
+                    latitudinalMeters: 800,
+                    longitudinalMeters: 800
+                ))
+            }
+            return
+        }
+
+        let userCoord   = userLocation.coordinate
+        let branchCoord = branch.coordinate
+
+        let minLat = min(userCoord.latitude,  branchCoord.latitude)
+        let maxLat = max(userCoord.latitude,  branchCoord.latitude)
+        let minLon = min(userCoord.longitude, branchCoord.longitude)
+        let maxLon = max(userCoord.longitude, branchCoord.longitude)
+
+        let latDelta = max((maxLat - minLat) * 1.6, 0.005)
+        let lonDelta = max((maxLon - minLon) * 1.6, 0.005)
+
+        withAnimation(.easeInOut(duration: 0.5)) {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: CLLocationCoordinate2D(
+                    latitude:  (minLat + maxLat) / 2,
+                    longitude: (minLon + maxLon) / 2
+                ),
+                span: MKCoordinateSpan(
+                    latitudeDelta:  latDelta,
+                    longitudeDelta: lonDelta
+                )
+            ))
+        }
+    }
+
+    // MARK: - Apple Maps Handoff
 
     func openInAppleMaps(branch: Branch) {
         let placemark = MKPlacemark(coordinate: branch.coordinate)
@@ -166,7 +223,8 @@ extension MapViewModel: CLLocationManagerDelegate {
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    func locationManager(_ manager: CLLocationManager,
+                         didFailWithError error: Error) {
         print("[MapViewModel] Location error: \(error.localizedDescription)")
     }
 }

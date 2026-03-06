@@ -75,6 +75,7 @@ struct MenuView: View {
                 .environmentObject(cartManager)
                 .environmentObject(favVM)
                 .environmentObject(cardVM)
+                .environmentObject(OrderEnvironment.shared)
         }
         .sheet(isPresented: $showSearchSheet) {
             SearchView(products: productVM.products)
@@ -350,4 +351,3 @@ struct MenuSectionShimmerView: View {
         .shadow(color: Color.surfaceSub.opacity(0.4), radius: 1)
     }
 }
-

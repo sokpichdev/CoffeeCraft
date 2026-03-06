@@ -11,6 +11,7 @@ struct CartView: View {
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var walletVM: WalletViewModel
+    @EnvironmentObject var orderEnv: OrderEnvironment   // Phase 4 — clear after order
     @Environment(\.dismiss) private var dismiss
 
     @State private var editingItem: CartItem? = nil
@@ -179,6 +180,7 @@ struct CartView: View {
                     }
                 }
                 cartManager.clearCart(userId: UserSession.shared.userId ?? "")
+                orderEnv.clear()   // Phase 4 — reset selected branch after order
                 dismiss()
             }
         }

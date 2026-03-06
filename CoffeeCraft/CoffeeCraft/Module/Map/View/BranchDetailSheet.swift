@@ -2,9 +2,13 @@
 //  BranchDetailSheet.swift
 //  CoffeeCraft
 //
-//  Map Module — Simplified
-//  Branch detail: header, hours, amenities, phone, Apple Maps link, Order CTA.
-//  Route info and directions view removed — Phase 5+.
+//  Created by Sok Pich
+//  Map Module — Phase 3 (Simplified)
+//
+//  Removed: routing info row, isCalculatingRoute spinner,
+//           geodesic badge, Directions → InAppDirectionsView flow.
+//  Added:   Call chip (tel://), Directions chip (Apple Maps via MKMapItem),
+//           full-width Order from Here CTA.
 //
 
 import SwiftUI
@@ -38,7 +42,7 @@ struct BranchDetailSheet: View {
                     }
 
                     hoursSection
-                    ctaButtons.padding(.bottom, 8)
+                    ctaButton.padding(.bottom, 8)
                 }
                 .padding(20)
             }
@@ -83,7 +87,6 @@ struct BranchDetailSheet: View {
                     .foregroundStyle(.textMuted)
                     .lineLimit(2)
 
-                // Open / Closed badge
                 HStack(spacing: 5) {
                     Circle()
                         .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
@@ -96,7 +99,7 @@ struct BranchDetailSheet: View {
 
             Spacer()
 
-            // Dismiss X
+            // Dismiss
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .semibold))
@@ -108,56 +111,48 @@ struct BranchDetailSheet: View {
         }
     }
 
-    // MARK: - Info Row (distance + phone + Apple Maps)
+    // MARK: - Info Row  (distance · Call · Directions)
 
     private var infoRow: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             // Distance
-            let distance = viewModel.distanceLabel(to: branch)
-            if !distance.isEmpty {
-                Label(distance, systemImage: "location.fill")
+            let dist = viewModel.distanceLabel(to: branch)
+            if !dist.isEmpty {
+                Label(dist, systemImage: "location.fill")
                     .font(.custom("Nunito-SemiBold", size: 13))
                     .foregroundStyle(.textSecondary)
             }
 
             Spacer()
 
-            // Phone call
+            // Call
             if let phoneURL = URL(string: "tel://\(branch.phone.filter("0123456789+".contains))") {
                 Link(destination: phoneURL) {
-                    HStack(spacing: 5) {
-                        Image(systemName: "phone.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                        Text("Call")
-                            .font(.custom("Nunito-SemiBold", size: 13))
-                    }
-                    .foregroundStyle(.accentPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(Color.accentPrimary.opacity(0.1))
-                    .cornerRadius(10)
+                    chipLabel("phone.fill", "Call")
                 }
                 .accessibilityLabel("Call \(branch.name)")
             }
 
-            // Apple Maps
-            Button {
-                viewModel.openInAppleMaps(branch: branch)
-            } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "map.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("Directions")
-                        .font(.custom("Nunito-SemiBold", size: 13))
-                }
-                .foregroundStyle(.accentPrimary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(Color.accentPrimary.opacity(0.1))
-                .cornerRadius(10)
+            // Apple Maps directions
+            Button { viewModel.openInAppleMaps(branch: branch) } label: {
+                chipLabel("map.fill", "Directions")
             }
             .accessibilityLabel("Get directions to \(branch.name) in Apple Maps")
         }
+    }
+
+    private func chipLabel(_ icon: String, _ title: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+            Text(title)
+                .font(.custom("Nunito-SemiBold", size: 13))
+        }
+        .foregroundStyle(.accentPrimary)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(Color.accentPrimary.opacity(0.1))
+        .cornerRadius(10)
     }
 
     // MARK: - Amenities
@@ -216,7 +211,7 @@ struct BranchDetailSheet: View {
 
     // MARK: - CTA
 
-    private var ctaButtons: some View {
+    private var ctaButton: some View {
         Button(action: onOrderHere) {
             HStack(spacing: 8) {
                 Image(systemName: "bag.fill")
