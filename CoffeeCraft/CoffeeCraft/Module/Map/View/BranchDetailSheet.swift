@@ -2,10 +2,8 @@
 //  BranchDetailSheet.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 6
-//  Added: estimatedWaitMinutes row in info section.
-//  Added: MapAnalytics.branchOrderStarted() on "Order from Here" tap.
-//  All other behaviour unchanged from Phase 5.
+//  Map Module — UI Enhanced
+//  Sticky header gradient, floating CTA, refined info row, polished amenities.
 //
 
 import SwiftUI
@@ -20,42 +18,75 @@ struct BranchDetailSheet: View {
     let onDismiss: () -> Void
 
     @State private var showHours = false
+    @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            dragHandle
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                dragHandle
+                    .padding(.bottom, 4)
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 20) {
-                    headerSection
-                    Divider().opacity(0.5)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        headerSection
+                            .padding(.horizontal, 20)
+                            .padding(.top, 4)
+                            .padding(.bottom, 16)
 
-                    infoRow
-                    Divider().opacity(0.5)
+                        infoRow
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 16)
 
-                    if !branch.amenityIcons.isEmpty {
-                        amenitiesSection
-                        Divider().opacity(0.5)
+                        if !branch.amenityIcons.isEmpty {
+                            amenitiesSection
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 16)
+                        }
+
+                        hoursSection
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 16)
+
+                        // Spacer so CTA doesn't overlap last content
+                        Color.clear.frame(height: 88)
                     }
-
-                    hoursSection
-                    ctaButton.padding(.bottom, 8)
                 }
-                .padding(20)
+            }
+
+            // ── Sticky CTA at bottom ────────────────────────────────
+            VStack(spacing: 0) {
+                // Fade gradient
+                LinearGradient(
+                    colors: [Color.bgPrimary.opacity(0), Color.bgPrimary],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 32)
+
+                ctaButton
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
+                    .background(Color.bgPrimary)
             }
         }
         .background(Color.bgPrimary)
-        .cornerRadius(24, corners: [.topLeft, .topRight])
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .offset(y: appeared ? 0 : 40)
+        .opacity(appeared ? 1 : 0)
+        .onAppear {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+                appeared = true
+            }
+        }
     }
 
     // MARK: - Drag Handle
 
     private var dragHandle: some View {
-        RoundedRectangle(cornerRadius: 3)
-            .fill(Color.border)
-            .frame(width: 40, height: 4)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
+        Capsule()
+            .fill(Color.border.opacity(0.8))
+            .frame(width: 36, height: 4)
+            .padding(.top, 10)
             .frame(maxWidth: .infinity)
     }
 
@@ -63,59 +94,79 @@ struct BranchDetailSheet: View {
 
     private var headerSection: some View {
         HStack(alignment: .top, spacing: 14) {
+            // Icon
             ZStack {
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.accentPrimary.opacity(0.12))
-                    .frame(width: 54, height: 54)
+                    .frame(width: 58, height: 58)
+
                 Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundStyle(.accentPrimary)
+                    .font(.system(size: 26, weight: .medium))
+                    .foregroundStyle(Color.accentPrimary)
+                    .symbolRenderingMode(.hierarchical)
             }
 
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(branch.name)
-                    .font(.custom("Nunito-Bold", size: 18))
-                    .foregroundStyle(.textPrimary)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.textPrimary)
 
                 Text(branch.address)
-                    .font(.custom("Nunito-Regular", size: 13))
-                    .foregroundStyle(.textMuted)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(Color.textMuted)
                     .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
+                // Status
                 HStack(spacing: 5) {
                     Circle()
                         .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                         .frame(width: 7, height: 7)
                     Text(branch.isOpen ? "Open Now" : "Closed")
-                        .font(.custom("Nunito-SemiBold", size: 12))
-                        .foregroundStyle(branch.isOpen ? .semanticSuccess : .semanticError)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                 }
+                .padding(.top, 1)
             }
 
             Spacer()
 
+            // Dismiss
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.textMuted)
-                    .frame(width: 28, height: 28)
-                    .background(Color.surfaceSub)
-                    .clipShape(Circle())
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color.textMuted)
+                    .frame(width: 30, height: 30)
+                    .background(
+                        Circle().fill(Color.surfaceSub)
+                    )
             }
+            .buttonStyle(BounceButtonStyle())
         }
     }
 
-    // MARK: - Info Row  (distance · wait time · Call · Directions)
+    // MARK: - Info Row
 
     private var infoRow: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 12) {
-                // Distance
+        VStack(spacing: 10) {
+            // Quick actions row
+            HStack(spacing: 8) {
                 let dist = viewModel.distanceLabel(to: branch)
                 if !dist.isEmpty {
-                    Label(dist, systemImage: "location.fill")
-                        .font(.custom("Nunito-SemiBold", size: 13))
-                        .foregroundStyle(.textSecondary)
+                    // Distance pill
+                    HStack(spacing: 5) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text(dist)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundStyle(Color.textSecondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .fill(Color.surfaceSub)
+                    )
                 }
 
                 Spacer()
@@ -123,51 +174,64 @@ struct BranchDetailSheet: View {
                 // Call
                 if let phoneURL = URL(string: "tel://\(branch.phone.filter("0123456789+".contains))") {
                     Link(destination: phoneURL) {
-                        chipLabel("phone.fill", "Call")
+                        actionChip("phone.fill", "Call")
                     }
                     .accessibilityLabel("Call \(branch.name)")
                 }
 
-                // Apple Maps
+                // Directions
                 Button { viewModel.openInAppleMaps(branch: branch) } label: {
-                    chipLabel("map.fill", "Directions")
+                    actionChip("map.fill", "Directions")
                 }
-                .accessibilityLabel("Get directions to \(branch.name) in Apple Maps")
+                .buttonStyle(BounceButtonStyle())
+                .accessibilityLabel("Directions to \(branch.name)")
             }
 
-            // Wait time row — Phase 6 (only shown when estimatedWaitMinutes is set)
+            // Wait time row
             if let waitLabel = branch.waitLabel {
-                HStack(spacing: 6) {
+                HStack(spacing: 7) {
                     Image(systemName: "clock.fill")
                         .font(.system(size: 12, weight: .semibold))
                     Text(waitLabel)
-                        .font(.custom("Nunito-SemiBold", size: 13))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    Spacer()
+                    Text("Est. wait")
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundStyle(Color.textMuted)
                 }
-                .foregroundStyle(branch.estimatedWaitMinutes == 0 ? .semanticSuccess : .accentPrimary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    (branch.estimatedWaitMinutes == 0 ? Color.semanticSuccess : Color.accentPrimary)
-                        .opacity(0.1)
+                .foregroundStyle(
+                    branch.estimatedWaitMinutes == 0 ? Color.semanticSuccess : Color.accentPrimary
                 )
-                .cornerRadius(10)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(
+                            (branch.estimatedWaitMinutes == 0
+                                ? Color.semanticSuccess
+                                : Color.accentPrimary)
+                                .opacity(0.1)
+                        )
+                }
                 .accessibilityLabel("Estimated wait: \(waitLabel)")
             }
         }
     }
 
-    private func chipLabel(_ icon: String, _ title: String) -> some View {
+    private func actionChip(_ icon: String, _ title: String) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .semibold))
             Text(title)
-                .font(.custom("Nunito-SemiBold", size: 13))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
         }
-        .foregroundStyle(.accentPrimary)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Color.accentPrimary.opacity(0.1))
-        .cornerRadius(10)
+        .foregroundStyle(Color.accentPrimary)
+        .padding(.horizontal, 13)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                .fill(Color.accentPrimary.opacity(0.1))
+        )
     }
 
     // MARK: - Amenities
@@ -175,27 +239,38 @@ struct BranchDetailSheet: View {
     private var amenitiesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Amenities")
-                .font(.custom("Nunito-Bold", size: 14))
-                .foregroundStyle(.textPrimary)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.textPrimary)
 
             HStack(spacing: 10) {
                 ForEach(branch.amenityIcons, id: \.label) { amenity in
-                    VStack(spacing: 5) {
+                    VStack(spacing: 6) {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.surfaceSub)
-                                .frame(width: 44, height: 44)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.accentPrimary.opacity(0.1))
+                                .frame(width: 46, height: 46)
                             Image(systemName: amenity.icon)
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(.accentPrimary)
+                                .font(.system(size: 19, weight: .medium))
+                                .foregroundStyle(Color.accentPrimary)
+                                .symbolRenderingMode(.hierarchical)
                         }
                         Text(amenity.label)
-                            .font(.custom("Nunito-Regular", size: 10))
-                            .foregroundStyle(.textMuted)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(Color.textMuted)
                     }
                 }
+                Spacer()
             }
         }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.surfacePrimary)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                }
+        )
     }
 
     // MARK: - Hours
@@ -203,23 +278,44 @@ struct BranchDetailSheet: View {
     private var hoursSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
-                withAnimation(.easeInOut(duration: 0.25)) { showHours.toggle() }
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
+                    showHours.toggle()
+                }
             } label: {
                 HStack {
+                    Image(systemName: "clock")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.accentPrimary)
                     Text("Opening Hours")
-                        .font(.custom("Nunito-Bold", size: 14))
-                        .foregroundStyle(.textPrimary)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
                     Spacer()
-                    Image(systemName: showHours ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.textMuted)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Color.textMuted)
+                        .rotationEffect(.degrees(showHours ? 180 : 0))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showHours)
                 }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.surfacePrimary)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                        }
+                )
             }
             .buttonStyle(.plain)
 
             if showHours {
                 BranchHoursView(branch: branch)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(
+                        .asymmetric(
+                            insertion: .push(from: .top).combined(with: .opacity),
+                            removal: .push(from: .bottom).combined(with: .opacity)
+                        )
+                    )
             }
         }
     }
@@ -229,7 +325,6 @@ struct BranchDetailSheet: View {
     private var ctaButton: some View {
         Button {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            // Analytics — Phase 6
             MapAnalytics.branchOrderStarted(
                 branchId: branch.id ?? "unknown",
                 branchName: branch.name
@@ -237,36 +332,28 @@ struct BranchDetailSheet: View {
             onOrderHere()
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: "bag.fill")
+                Image(systemName: branch.isOpen ? "bag.fill" : "xmark.circle.fill")
                     .font(.system(size: 15, weight: .semibold))
+                    .symbolRenderingMode(.hierarchical)
                 Text(branch.isOpen ? "Order from Here" : "Branch Closed")
-                    .font(.custom("Nunito-Bold", size: 16))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
             }
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(branch.isOpen ? Color.accentPrimary : Color.textMuted)
-            .cornerRadius(14)
+            .frame(height: 54)
+            .background {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(branch.isOpen ? Color.accentPrimary : Color.textMuted)
+                    .shadow(
+                        color: branch.isOpen ? Color.accentPrimary.opacity(0.4) : .clear,
+                        radius: 12, x: 0, y: 5
+                    )
+            }
         }
+        .buttonStyle(BounceButtonStyle())
         .disabled(!branch.isOpen)
         .accessibilityLabel(
-            branch.isOpen
-                ? "Order from \(branch.name)"
-                : "\(branch.name) is currently closed"
-        )
-    }
-}
-
-// MARK: - Preview
-
-#Preview {
-    ZStack(alignment: .bottom) {
-        Color.black.opacity(0.3).ignoresSafeArea()
-        BranchDetailSheet(
-            branch: MockBranchData.all[1],
-            viewModel: MapViewModel(),
-            onOrderHere: {},
-            onDismiss: {}
+            branch.isOpen ? "Order from \(branch.name)" : "\(branch.name) is currently closed"
         )
     }
 }

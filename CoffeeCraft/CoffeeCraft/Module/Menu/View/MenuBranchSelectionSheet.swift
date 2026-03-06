@@ -2,7 +2,8 @@
 //  MenuBranchSelectionSheet.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 3/6/26.
+//  UI Enhanced — Apple-style row cards, shimmer loading, polished empty state.
+//
 
 import SwiftUI
 
@@ -24,12 +25,8 @@ struct MenuBranchSelectionSheet: View {
             $0.address.lowercased().contains(q)
         }
     }
-    
+
     var body: some View {
-        // Native NavigationStack scopes navigation entirely within the sheet.
-        // CustomNavigationStack / push resolves to the root app navigator (behind
-        // the sheet) — that is why the map was appearing behind. navigationDestination
-        // keeps everything inside this modal presentation.
         NavigationStack {
             ZStack {
                 Color.bgPrimary.ignoresSafeArea()
@@ -44,20 +41,18 @@ struct MenuBranchSelectionSheet: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .customNavigationBar("Select a Store") {
-                ToolBarButton.back {
-                    dismiss()
-                }
+                ToolBarButton.back { dismiss() }
                 ToolBarButton(placement: .topBarTrailing, buttonType: .icon("map.fill")) {
                     navigateToMap = true
-//                    push(AnyView(MapView().environmentObject(orderEnv)))
                 }
             }
-            .searchable(text: $searchText,
-                        placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: "Search by name or address")
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search by name or address"
+            )
             .navigationDestination(isPresented: $navigateToMap) {
-                MapView()
-                    .environmentObject(orderEnv)
+                MapView().environmentObject(orderEnv)
             }
         }
         .onAppear { fetchBranches() }
@@ -66,9 +61,11 @@ struct MenuBranchSelectionSheet: View {
         }
     }
 
+    // MARK: - Branch List
+
     private var branchList: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: 10) {
                 ForEach(filteredBranches) { branch in
                     BranchRowCard(branch: branch) {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -82,26 +79,46 @@ struct MenuBranchSelectionSheet: View {
         }
     }
 
+    // MARK: - Loading (shimmer placeholders)
+
     private var loadingView: some View {
-        VStack(spacing: 14) {
-            ForEach(0..<4, id: \.self) { _ in
-                ShimmerView(cornerRadius: 16)
-                    .frame(height: 88)
+        ScrollView {
+            VStack(spacing: 10) {
+                ForEach(0..<5, id: \.self) { _ in
+                    ShimmerView(cornerRadius: 18)
+                        .frame(height: 92)
+                }
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
     }
 
+    // MARK: - Empty State
+
     private var emptyView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "mappin.slash.circle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.textMuted)
-            Text(searchText.isEmpty ? "No stores available" : "No stores match your search")
-                .font(.subheadline)
-                .foregroundStyle(.textMuted)
+        VStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentPrimary.opacity(0.1))
+                    .frame(width: 72, height: 72)
+                Image(systemName: "mappin.slash.circle.fill")
+                    .font(.system(size: 34, weight: .medium))
+                    .foregroundStyle(Color.accentPrimary)
+                    .symbolRenderingMode(.hierarchical)
+            }
+
+            Text(searchText.isEmpty ? "No Stores Available" : "No Results")
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.textPrimary)
+
+            Text(searchText.isEmpty
+                 ? "Check back soon — we're expanding."
+                 : "Try a different name or address.")
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(Color.textMuted)
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -117,6 +134,8 @@ struct MenuBranchSelectionSheet: View {
     }
 }
 
+// MARK: - BranchRowCard
+
 struct BranchRowCard: View {
     let branch: Branch
     let onSelect: () -> Void
@@ -125,53 +144,58 @@ struct BranchRowCard: View {
         Button(action: onSelect) {
             HStack(spacing: 14) {
 
-                // Icon
+                // ── Icon tile ───────────────────────────────────────
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(branch.isOpen
-                              ? Color.accentPrimary.opacity(0.12)
-                              : Color.surfaceSub)
-                        .frame(width: 48, height: 48)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(
+                            branch.isOpen
+                                ? Color.accentPrimary.opacity(0.12)
+                                : Color.surfaceSub
+                        )
+                        .frame(width: 52, height: 52)
                     Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(branch.isOpen ? .accentPrimary : .textMuted)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundStyle(branch.isOpen ? Color.accentPrimary : Color.textMuted)
+                        .symbolRenderingMode(.hierarchical)
                 }
 
-                // Info
+                // ── Info ────────────────────────────────────────────
                 VStack(alignment: .leading, spacing: 4) {
                     Text(branch.name)
-                        .font(.subheadline).fontWeight(.bold)
-                        .foregroundStyle(.textPrimary)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
                         .lineLimit(1)
 
                     Text(branch.address)
-                        .font(.caption)
-                        .foregroundStyle(.textMuted)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color.textMuted)
                         .lineLimit(1)
 
-                    // Status + amenity chips
                     HStack(spacing: 8) {
+                        // Open / closed
                         HStack(spacing: 4) {
                             Circle()
                                 .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                                 .frame(width: 6, height: 6)
                             Text(branch.isOpen ? "Open" : "Closed")
-                                .font(.caption2).fontWeight(.semibold)
-                                .foregroundStyle(branch.isOpen ? .semanticSuccess : .semanticError)
+                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .foregroundStyle(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                         }
 
+                        // Amenity chips (max 2)
                         ForEach(branch.amenityIcons.prefix(2), id: \.label) { amenity in
                             HStack(spacing: 3) {
                                 Image(systemName: amenity.icon)
                                     .font(.system(size: 9))
                                 Text(amenity.label)
-                                    .font(.caption2)
+                                    .font(.system(size: 10, weight: .medium))
                             }
-                            .foregroundStyle(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                             .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.surfaceSub)
-                            .cornerRadius(5)
+                            .padding(.vertical, 3)
+                            .background(
+                                Capsule().fill(Color.surfaceSub)
+                            )
                         }
                     }
                 }
@@ -179,21 +203,21 @@ struct BranchRowCard: View {
                 Spacer(minLength: 0)
 
                 Image(systemName: "chevron.right")
-                    .font(.headline)
-                    .foregroundStyle(.textMuted)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.textMuted.opacity(0.5))
             }
             .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
+            .background {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .fill(Color.surfacePrimary)
-                    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(Color.border, lineWidth: 0.8)
-            )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                    }
+                    .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+            }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(BounceButtonStyle())
         .accessibilityLabel("\(branch.name), \(branch.isOpen ? "Open" : "Closed"), \(branch.address)")
         .accessibilityHint("Double tap to select this store")
     }
