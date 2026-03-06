@@ -2,7 +2,19 @@
 //  OrderViewModel.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 10/23/25.
+//  Rewrote pagination from fake client-side slicing to real Firestore
+//  cursor-based pagination using startAfter(lastDocument).
+//
+//  Strategy:
+//  ┌─────────────────────────────────────────────────────────┐
+//  │  fetchOrders()  → page 1, stores last doc as cursor     │
+//  │  loadMore()     → next page starting after cursor,      │
+//  │                   then re-attaches listener to cover    │
+//  │                   ALL loaded orders so far              │
+//  │  refreshOrders()→ resets cursor + all state, re-fetches │
+//  │  listener       → limit grows with orders.count so      │
+//  │                   every visible order gets live updates │
+//  └─────────────────────────────────────────────────────────┘
 //
 import SwiftUI
 import FirebaseFirestore
@@ -10,75 +22,68 @@ import FirebaseAuth
 
 @MainActor
 class OrderViewModel: ObservableObject {
+
+    // MARK: - Published State
+
     @Published var orders: [Order] = []
-    @Published var totalOrdersCount = 0
-    @Published var isLoading = false
+    @Published var isLoading = false       // true only during first page load
+    @Published var isLoadingMore = false   // true while loading page 2+
+    @Published var hasMorePages = true     // flips false when Firestore returns < pageSize
+
+    // MARK: - Private
 
     private let db = Firestore.firestore()
-    private var listener: ListenerRegistration?
     private let pageSize = 5
+
+    /// Cursor pointing to the last document fetched.
+    /// The next page query starts *after* this snapshot.
+    private var lastDocument: DocumentSnapshot?
+
+    /// Realtime listener attached to the first page (most recent orders).
+    /// Used only for status updates — not for loading new pages.
+    private var listener: ListenerRegistration?
 
     deinit {
         listener?.remove()
     }
 
-    func fetchOrders(pageNum: Int) async {
+    // MARK: - Initial Fetch
+
+    /// Fetches page 1. Called from `onAppear`.
+    /// Guards against re-fetching if data is already loaded.
+    func fetchOrders() async {
         guard let userId = Auth.auth().currentUser?.uid else {
             AppLog.order.warning("⚠️ fetchOrders — no authenticated user, skipping")
             return
         }
 
-        guard pageNum > 1 || orders.isEmpty else { return }
+        // Don't re-fetch if we already have data (e.g. tab switch)
+        guard orders.isEmpty else { return }
 
-        let offset = (pageNum - 1) * pageSize
-        AppLog.order.debug("📋 fetchOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
+        AppLog.order.debug("📋 fetchOrders — uid: \(userId)")
+        isLoading = true
 
         do {
-            if pageNum == 1 {
-                isLoading = true
-
-                let countSnapshot = try await db.collection("orders")
-                    .whereField("userId", isEqualTo: userId)
-                    .getDocuments()
-
-                totalOrdersCount = countSnapshot.documents.count
-                AppLog.order.debug("📊 fetchOrders — totalOrdersCount: \(self.totalOrdersCount)")
-            }
-
-            let snapshot = try await db.collection("orders")
+            let snapshot = try await db
+                .collection("orders")
                 .whereField("userId", isEqualTo: userId)
                 .order(by: "timestamp", descending: true)
+                .limit(to: pageSize)
                 .getDocuments()
 
-            let docs = snapshot.documents
+            let fetched = snapshot.documents.compactMap { try? $0.data(as: Order.self) }
 
-            let endIndex = min(offset + pageSize, docs.count)
-            guard offset < docs.count else {
-                AppLog.order.debug("📋 fetchOrders — offset \(offset) beyond docs.count \(docs.count), no more pages")
-                isLoading = false
-                return
-            }
+            orders = fetched
+            lastDocument = snapshot.documents.last
+            hasMorePages = snapshot.documents.count == pageSize
 
-            let pageDocuments = Array(docs[offset..<endIndex])
-            let newOrders = pageDocuments.compactMap {
-                try? $0.data(as: Order.self)
-            }
+            AppLog.order.debug("✅ fetchOrders — loaded \(fetched.count) order(s), hasMore: \(self.hasMorePages)")
+            AppLog.printList(fetched, label: "Orders Page 1", logger: AppLog.order)
 
-            let existingIds = Set(orders.compactMap { $0.id })
-            let uniqueNewOrders = newOrders.filter {
-                guard let id = $0.id else { return false }
-                return !existingIds.contains(id)
-            }
+            try await MinimumLoadingTime(0.5).waitIfNeeded()
+            isLoading = false
 
-            orders.append(contentsOf: uniqueNewOrders)
-            AppLog.order.debug("✅ fetchOrders — appended \(uniqueNewOrders.count) unique order(s) on page \(pageNum), total loaded: \(self.orders.count)")
-            AppLog.printList(uniqueNewOrders, label: "Orders Page \(pageNum)", logger: AppLog.order)
-
-            if pageNum == 1 {
-                try await MinimumLoadingTime(0.5).waitIfNeeded()
-                isLoading = false
-                setupRealtimeListener(userId: userId)
-            }
+            setupRealtimeListener(userId: userId)
 
         } catch {
             isLoading = false
@@ -90,50 +95,139 @@ class OrderViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Infinite Scroll — Load Next Page
+
+    /// Called when the last visible card triggers `.onAppear`.
+    /// Appends the next page of orders using the stored cursor.
+    func loadMore() async {
+        guard !isLoadingMore,
+              hasMorePages,
+              let cursor = lastDocument,
+              let userId = Auth.auth().currentUser?.uid
+        else { return }
+
+        AppLog.order.debug("📋 loadMore — fetching next page after cursor, loaded so far: \(self.orders.count)")
+        isLoadingMore = true
+
+        do {
+            let snapshot = try await db
+                .collection("orders")
+                .whereField("userId", isEqualTo: userId)
+                .order(by: "timestamp", descending: true)
+                .start(afterDocument: cursor)
+                .limit(to: pageSize)
+                .getDocuments()
+
+            let newOrders = snapshot.documents.compactMap { try? $0.data(as: Order.self) }
+
+            // Deduplicate — listener may have already inserted a new order
+            let existingIds = Set(orders.compactMap { $0.id })
+            let unique = newOrders.filter { order in
+                guard let id = order.id else { return false }
+                return !existingIds.contains(id)
+            }
+
+            orders.append(contentsOf: unique)
+            lastDocument = snapshot.documents.last
+            hasMorePages = snapshot.documents.count == pageSize
+
+            AppLog.order.debug("✅ loadMore — appended \(unique.count) order(s), total: \(self.orders.count), hasMore: \(self.hasMorePages)")
+            AppLog.printList(unique, label: "Orders Next Page", logger: AppLog.order)
+
+            // Re-attach listener so it now covers ALL loaded orders, not just the first page.
+            // e.g. user has scrolled to 50 orders → listener watches 50, not 5.
+            setupRealtimeListener(userId: userId)
+
+        } catch {
+            AppLog.order.error("❌ loadMore error: \(error.localizedDescription)")
+            AlertManager.shared.showError(
+                title: "Error loading more orders",
+                message: error.localizedDescription
+            )
+        }
+
+        isLoadingMore = false
+    }
+
+    // MARK: - Pull-to-Refresh
+
+    /// Resets all state and re-fetches from page 1.
+    func refreshOrders() async {
+        AppLog.order.debug("🔄 refreshOrders — resetting and re-fetching page 1")
+        listener?.remove()
+        listener = nil
+        orders = []
+        lastDocument = nil
+        hasMorePages = true
+        await fetchOrders()
+    }
+
+    // MARK: - Realtime Listener
+
+    /// Attaches a listener covering exactly `orders.count` documents — so every
+    /// order the user has scrolled to receives live status updates.
+    ///
+    /// Called after the initial fetch (limit = pageSize) and re-called after
+    /// every loadMore() so the limit grows with what's on screen.
+    ///
+    ///   Loaded 5  orders → listener limit = 5
+    ///   Loaded 25 orders → listener limit = 25
+    ///   Loaded 50 orders → listener limit = 50
+    ///
+    /// Handles two change types:
+    ///   .added    → new order just placed (insert at top)
+    ///   .modified → status change on existing order (update in place)
     private func setupRealtimeListener(userId: String) {
         listener?.remove()
-        AppLog.order.debug("🔌 setupRealtimeListener — attaching listener for uid: \(userId)")
 
-        listener = db.collection("orders")
+        // Use current loaded count so the listener always covers everything visible.
+        // Fall back to pageSize on the very first attach (before orders are set).
+        let listenLimit = max(orders.count, pageSize)
+
+        AppLog.order.debug("🔌 setupRealtimeListener — attaching for uid: \(userId), limit: \(listenLimit)")
+
+        listener = db
+            .collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
+            .limit(to: listenLimit)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
+                guard let self else { return }
 
-                if let error = error {
-                    AppLog.order.error("❌ setupRealtimeListener — error: \(error.localizedDescription)")
-                    AlertManager.shared.showError(title: "Realtime listener error", message: error.localizedDescription)
+                if let error {
+                    AppLog.order.error("❌ setupRealtimeListener — \(error.localizedDescription)")
                     return
                 }
 
                 guard let changes = snapshot?.documentChanges else { return }
 
                 for change in changes {
-                    if change.type == .added {
-                        if let newOrder = try? change.document.data(as: Order.self) {
-                            if !self.orders.contains(where: { $0.id == newOrder.id }) {
-                                self.orders.insert(newOrder, at: 0)
-                                self.totalOrdersCount += 1
-                                AppLog.order.debug("➕ setupRealtimeListener — new order inserted: \(newOrder.id ?? "nil"), total: \(self.totalOrdersCount)")
-                            }
+                    switch change.type {
+
+                    case .added:
+                        guard let newOrder = try? change.document.data(as: Order.self),
+                              let id = newOrder.id
+                        else { continue }
+
+                        // Only insert if not already present (avoids duplicating initial fetch)
+                        if !self.orders.contains(where: { $0.id == id }) {
+                            self.orders.insert(newOrder, at: 0)
+                            AppLog.order.debug("➕ listener — new order inserted: \(id)")
                         }
-                    } else if change.type == .modified {
-                        if let updatedOrder = try? change.document.data(as: Order.self),
-                           let index = self.orders.firstIndex(where: { $0.id == updatedOrder.id }) {
-                            self.orders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupRealtimeListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
-                        }
+
+                    case .modified:
+                        guard let updated = try? change.document.data(as: Order.self),
+                              let id = updated.id,
+                              let index = self.orders.firstIndex(where: { $0.id == id })
+                        else { continue }
+
+                        self.orders[index] = updated
+                        AppLog.order.debug("✏️ listener — order updated: \(id), status: \(updated.status ?? "unknown")")
+
+                    default:
+                        break
                     }
                 }
             }
-    }
-
-    func refreshOrders() async {
-        AppLog.order.debug("🔄 refreshOrders — clearing and re-fetching from page 1")
-        listener?.remove()
-        orders = []
-        totalOrdersCount = 0
-        await fetchOrders(pageNum: 1)
     }
 }
