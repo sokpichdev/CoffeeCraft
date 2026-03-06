@@ -2,17 +2,14 @@
 //  BranchListView.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//  Created by Sok Pich
-//  Map Module — Phase 2: Branches on Map
+//  Map Module — UI Enhanced
+//  Richer cards: wait-time badge, icon color saturation, tighter typographic rhythm.
 //
 
 import SwiftUI
 
 // MARK: - BranchListView
 
-/// Horizontal scrollable strip sitting above the tab bar.
-/// Tapping a card pans the map to that branch.
 struct BranchListView: View {
     let branches: [Branch]
     let selectedBranch: Branch?
@@ -22,7 +19,7 @@ struct BranchListView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     ForEach(branches) { branch in
                         BranchCard(
                             branch: branch,
@@ -34,21 +31,16 @@ struct BranchListView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.top, 10)
+                .padding(.bottom, 14)
             }
-            // Auto-scroll the strip when selectedBranch changes
             .onChange(of: selectedBranch?.id) { _, newId in
                 guard let newId else { return }
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
                     proxy.scrollTo(newId, anchor: .center)
                 }
             }
         }
-        .background(
-            Color.bgPrimary
-                .cornerRadius(20, corners: [.topLeft, .topRight])
-                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -4)
-        )
     }
 }
 
@@ -60,119 +52,146 @@ private struct BranchCard: View {
     let isSelected: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 0) {
 
-            // ── Header row ──────────────────────────────────────────
-            HStack(alignment: .top, spacing: 6) {
-                // Icon
+            // ── Header ──────────────────────────────────────────────
+            HStack(alignment: .top, spacing: 10) {
+                // Icon tile
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(isSelected ? Color.accentPrimary : Color.surfaceSub)
-                        .frame(width: 38, height: 38)
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .fill(
+                            isSelected
+                                ? Color.accentPrimary
+                                : Color.accentPrimary.opacity(0.1)
+                        )
+                        .frame(width: 40, height: 40)
+
                     Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(isSelected ? .white : .accentPrimary)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(isSelected ? .white : Color.accentPrimary)
+                        .symbolRenderingMode(.hierarchical)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(branch.name)
-                        .font(.custom("Nunito-Bold", size: 13))
-                        .foregroundStyle(isSelected ? .accentPrimary : .textPrimary)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(isSelected ? Color.accentPrimary : Color.textPrimary)
                         .lineLimit(1)
 
                     Text(branch.address)
-                        .font(.custom("Nunito-Regular", size: 11))
-                        .foregroundStyle(.textMuted)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundStyle(Color.textMuted)
                         .lineLimit(1)
                 }
 
                 Spacer(minLength: 0)
             }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            .padding(.bottom, 10)
 
-            // ── Status + distance row ────────────────────────────────
-            HStack(spacing: 8) {
-                // Open / Closed badge
+            Divider()
+                .padding(.horizontal, 12)
+                .opacity(0.5)
+
+            // ── Status row ──────────────────────────────────────────
+            HStack(spacing: 0) {
+                // Open/closed
                 HStack(spacing: 4) {
                     Circle()
                         .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                         .frame(width: 6, height: 6)
                     Text(branch.isOpen ? "Open" : "Closed")
-                        .font(.custom("Nunito-SemiBold", size: 11))
-                        .foregroundStyle(branch.isOpen ? .semanticSuccess : .semanticError)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundStyle(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                 }
 
                 if !distance.isEmpty {
-                    Text("·")
-                        .foregroundStyle(.textMuted)
+                    Text("  ·  ")
+                        .foregroundStyle(Color.textMuted)
                         .font(.system(size: 11))
 
                     HStack(spacing: 3) {
                         Image(systemName: "location.fill")
                             .font(.system(size: 9))
-                            .foregroundStyle(.textMuted)
+                            .foregroundStyle(Color.textMuted)
                         Text(distance)
-                            .font(.custom("Nunito-Regular", size: 11))
-                            .foregroundStyle(.textMuted)
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundStyle(Color.textMuted)
                     }
                 }
 
                 Spacer(minLength: 0)
+
+                // Wait time pill — shown when available
+                if let wait = branch.estimatedWaitMinutes {
+                    HStack(spacing: 3) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                        Text(wait == 0 ? "No wait" : "~\(wait) min")
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundStyle(wait == 0 ? Color.semanticSuccess : Color.accentPrimary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(
+                        Capsule()
+                            .fill(
+                                (wait == 0 ? Color.semanticSuccess : Color.accentPrimary)
+                                    .opacity(0.1)
+                            )
+                    )
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
 
             // ── Amenity chips ────────────────────────────────────────
             if !branch.amenityIcons.isEmpty {
-                HStack(spacing: 6) {
+                HStack(spacing: 5) {
                     ForEach(branch.amenityIcons.prefix(3), id: \.label) { amenity in
                         HStack(spacing: 3) {
                             Image(systemName: amenity.icon)
                                 .font(.system(size: 9, weight: .medium))
                             Text(amenity.label)
-                                .font(.custom("Nunito-Regular", size: 10))
+                                .font(.system(size: 10, weight: .medium))
                         }
-                        .foregroundStyle(.textSecondary)
+                        .foregroundStyle(Color.textSecondary)
                         .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(Color.surfaceSub)
-                        .cornerRadius(6)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(Color.surfaceSub)
+                        )
                     }
+                    Spacer(minLength: 0)
                 }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
+            } else {
+                Spacer().frame(height: 8)
             }
         }
-        .padding(12)
-        .frame(width: 230)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
+        .frame(width: 232)
+        .background {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(Color.surfacePrimary)
                 .shadow(
                     color: isSelected
-                        ? Color.accentPrimary.opacity(0.18)
-                        : Color.black.opacity(0.06),
-                    radius: isSelected ? 8 : 4,
-                    x: 0, y: 2
+                        ? Color.accentPrimary.opacity(0.2)
+                        : Color.black.opacity(0.07),
+                    radius: isSelected ? 12 : 5,
+                    x: 0, y: 3
                 )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(
-                    isSelected ? Color.accentPrimary.opacity(0.5) : Color.border,
-                    lineWidth: isSelected ? 1.5 : 0.8
+                    isSelected ? Color.accentPrimary.opacity(0.55) : Color.border.opacity(0.6),
+                    lineWidth: isSelected ? 1.5 : 0.5
                 )
-        )
-        .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+        }
+        .scaleEffect(isSelected ? 1.025 : 1.0)
+        .animation(.spring(response: 0.32, dampingFraction: 0.68), value: isSelected)
     }
 }
-
-//// MARK: - Preview
-//
-// #Preview {
-//    ZStack(alignment: .bottom) {
-//        Color.bgPrimary.ignoresSafeArea()
-//        BranchListView(
-//            branches: MockBranchData.all,
-//            selectedBranch: MockBranchData.all[1],
-//            distanceLabel: { _ in "1.2 km" },
-//            onSelect: { _ in }
-//        )
-//    }
-// }

@@ -2,17 +2,8 @@
 //  BranchWaitTimeEditor.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 3/6/26.
-//
-
-//
-//  BranchWaitTimeEditor.swift
-//  CoffeeCraft
-//
-//  Map Module — Phase 6
-//  Admin-only sheet for updating a branch's estimated wait time.
-//  Shown from AdminOrdersView via a long-press or dedicated button.
-//  Only managers can write estimatedWaitMinutes (enforced by Firestore rules).
+//  Map Module — UI Enhanced
+//  Checkmark on selected tile, richer header, cleaner action area.
 //
 
 import SwiftUI
@@ -37,57 +28,80 @@ struct BranchWaitTimeEditor: View {
 
     var body: some View {
         CustomNavigationStack {
-            VStack(spacing: 24) {
+            VStack(spacing: 0) {
 
-                // Branch name header
-                VStack(spacing: 4) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 28))
-                        .foregroundStyle(.accentPrimary)
+                // ── Header ──────────────────────────────────────────
+                VStack(spacing: 6) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.accentPrimary.opacity(0.12))
+                            .frame(width: 60, height: 60)
+                        Image(systemName: "clock.badge.fill")
+                            .font(.system(size: 26, weight: .medium))
+                            .foregroundStyle(Color.accentPrimary)
+                            .symbolRenderingMode(.hierarchical)
+                    }
+                    .padding(.top, 12)
+
                     Text(branch.name)
-                        .font(.custom("Nunito-Bold", size: 18))
-                        .foregroundStyle(.textPrimary)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
+
                     Text("Set estimated wait time for customers")
-                        .font(.custom("Nunito-Regular", size: 13))
-                        .foregroundStyle(.textMuted)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundStyle(Color.textMuted)
+                        .multilineTextAlignment(.center)
                 }
-                .padding(.top, 8)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 28)
 
-                // Wait time picker
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Wait Time")
-                        .font(.custom("Nunito-Bold", size: 14))
-                        .foregroundStyle(.textPrimary)
-                        .padding(.horizontal, 20)
+                // ── Section label ───────────────────────────────────
+                HStack {
+                    Text("Estimated Wait")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.textSecondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 10)
 
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
-                        ForEach(options, id: \.self) { mins in
-                            WaitOption(
-                                minutes: mins,
-                                isSelected: selectedMinutes == mins
-                            ) {
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                withAnimation(.spring(response: 0.25)) {
-                                    selectedMinutes = mins
-                                }
+                // ── Wait grid ───────────────────────────────────────
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4),
+                    spacing: 10
+                ) {
+                    ForEach(options, id: \.self) { mins in
+                        WaitOption(
+                            minutes: mins,
+                            isSelected: selectedMinutes == mins
+                        ) {
+                            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+                            withAnimation(.spring(response: 0.28, dampingFraction: 0.65)) {
+                                selectedMinutes = mins
                             }
                         }
                     }
-                    .padding(.horizontal, 20)
                 }
+                .padding(.horizontal, 20)
 
-                // Error message
+                // ── Error ───────────────────────────────────────────
                 if let err = saveError {
-                    Text(err)
-                        .font(.custom("Nunito-Regular", size: 13))
-                        .foregroundStyle(.semanticError)
-                        .padding(.horizontal, 20)
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 12))
+                        Text(err)
+                            .font(.system(size: 13, weight: .regular))
+                    }
+                    .foregroundStyle(Color.semanticError)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 14)
                 }
 
                 Spacer()
 
-                // Action buttons
-                VStack(spacing: 12) {
+                // ── Actions ─────────────────────────────────────────
+                VStack(spacing: 10) {
+                    // Save button
                     Button {
                         saveWaitTime(minutes: selectedMinutes)
                     } label: {
@@ -99,29 +113,39 @@ struct BranchWaitTimeEditor: View {
                             } else {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 15, weight: .semibold))
+                                    .symbolRenderingMode(.hierarchical)
                             }
                             Text(isSaving ? "Saving…" : "Save Wait Time")
-                                .font(.custom("Nunito-Bold", size: 16))
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
                         }
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.accentPrimary)
-                        .cornerRadius(14)
+                        .frame(height: 54)
+                        .background {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color.accentPrimary)
+                                .shadow(color: Color.accentPrimary.opacity(0.4), radius: 12, x: 0, y: 5)
+                        }
                     }
+                    .buttonStyle(BounceButtonStyle())
                     .disabled(isSaving)
 
+                    // Clear button — secondary, muted
                     Button {
                         saveWaitTime(minutes: nil)
                     } label: {
                         Text("Clear Wait Time")
-                            .font(.custom("Nunito-SemiBold", size: 14))
-                            .foregroundStyle(.textMuted)
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.textMuted)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
                     }
+                    .buttonStyle(BounceButtonStyle())
                     .disabled(isSaving || branch.estimatedWaitMinutes == nil)
+                    .opacity((isSaving || branch.estimatedWaitMinutes == nil) ? 0.4 : 1)
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 24)
+                .padding(.bottom, 28)
             }
             .background(Color.bgPrimary)
             .customNavigationBar("Wait Time") {
@@ -136,21 +160,18 @@ struct BranchWaitTimeEditor: View {
 
     private func saveWaitTime(minutes: Int?) {
         guard let branchId = branch.id else { return }
-        isSaving  = true
+        isSaving = true
         saveError = nil
         Task {
             do {
-                try await BranchRepository.shared.update(
-                    branchId: branchId,
-                    waitMinutes: minutes
-                )
+                try await BranchRepository.shared.update(branchId: branchId, waitMinutes: minutes)
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 await MainActor.run { dismiss() }
             } catch {
                 UINotificationFeedbackGenerator().notificationOccurred(.error)
                 await MainActor.run {
                     saveError = error.localizedDescription
-                    isSaving  = false
+                    isSaving = false
                 }
             }
         }
@@ -164,28 +185,42 @@ private struct WaitOption: View {
     let isSelected: Bool
     let onTap: () -> Void
 
-    var label: String {
-        minutes == 0 ? "No wait" : "\(minutes) min"
-    }
+    var label: String { minutes == 0 ? "No wait" : "\(minutes) min" }
 
     var body: some View {
         Button(action: onTap) {
-            Text(label)
-                .font(.custom(isSelected ? "Nunito-Bold" : "Nunito-Regular", size: 13))
-                .foregroundStyle(isSelected ? .white : .textPrimary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(isSelected ? Color.accentPrimary : Color.surfaceSub)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(
-                            isSelected ? Color.clear : Color.border,
-                            lineWidth: 0.8
-                        )
-                )
+            VStack(spacing: 4) {
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .transition(.scale.combined(with: .opacity))
+                }
+
+                Text(label)
+                    .font(.system(size: 12, weight: isSelected ? .bold : .regular, design: .rounded))
+                    .foregroundStyle(isSelected ? .white : Color.textPrimary)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background {
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .fill(isSelected ? Color.accentPrimary : Color.surfaceSub)
+                    .overlay {
+                        if !isSelected {
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                        }
+                    }
+                    .shadow(
+                        color: isSelected ? Color.accentPrimary.opacity(0.35) : .clear,
+                        radius: 8, x: 0, y: 3
+                    )
+            }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(BounceButtonStyle())
         .accessibilityLabel("\(label), \(isSelected ? "selected" : "not selected")")
     }
 }

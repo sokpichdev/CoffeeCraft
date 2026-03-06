@@ -2,10 +2,8 @@
 //  MapView.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4
-//  Added: offline banner when isOffline == true.
-//  Added: stopListening() on disappear.
-//  Everything else unchanged from Phase 3.
+//  Map Module — UI Enhanced
+//  Glass bottom panel with ultraThinMaterial, floating recenter pill, animated offline toast.
 //
 
 import MapKit
@@ -13,87 +11,84 @@ import SwiftUI
 
 struct MapView: View {
 
-    @State private var viewModel  = MapViewModel()
+    @State private var viewModel   = MapViewModel()
     @State private var localSearch = ""
     @EnvironmentObject private var orderEnv: OrderEnvironment
 
     var body: some View {
-//        CustomNavigationStack {
-            ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottom) {
 
-                // MARK: Map / Permission
-                Group {
-                    if viewModel.isPermissionDenied {
-                        MapPermissionDeniedView()
-                    } else {
-                        mapLayer
-                    }
+            // ── Map / Permission ────────────────────────────────────
+            Group {
+                if viewModel.isPermissionDenied {
+                    MapPermissionDeniedView()
+                } else {
+                    mapLayer
                 }
-                .ignoresSafeArea(edges: .bottom)
+            }
+            .ignoresSafeArea(edges: .bottom)
 
-                // MARK: Offline banner
-                if viewModel.isOffline {
-                    VStack {
-                        offlineBanner
-                        Spacer()
-                    }
-                    .ignoresSafeArea(edges: .top)
-                }
-
-                // MARK: Recenter button
-                if viewModel.isPermissionGranted {
-                    HStack {
-                        Spacer()
-                        recenterButton
-                            .padding(.bottom, viewModel.filteredBranches().isEmpty ? 32 : 244)
-                            .padding(.trailing, 16)
-                    }
-                }
-
-                // MARK: Bottom panel — search + filters + branch strip
-                VStack(spacing: 0) {
+            // ── Offline banner (top toast) ──────────────────────────
+            if viewModel.isOffline {
+                VStack {
+                    offlineBanner
+                        .padding(.top, 56)   // below status bar
+                        .padding(.horizontal, 16)
                     Spacer()
-                    bottomPanel
                 }
-                .ignoresSafeArea(edges: .bottom)
-            }
-            
-            .onAppear {
-                viewModel.requestLocationPermission()
-                viewModel.fetchBranches()
-            }
-            .onDisappear {
-                viewModel.stopListening()
+                .ignoresSafeArea(edges: .top)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.isOffline)
             }
 
-            // MARK: Branch detail sheet
-            .sheet(isPresented: $viewModel.isSheetPresented,
-                   onDismiss: { viewModel.deselectBranch() }) {
-                if let branch = viewModel.selectedBranch {
-                    BranchDetailSheet(
-                        branch: branch,
-                        viewModel: viewModel,
-                        onOrderHere: {
-                            // Write branch to shared env; MenuBranchSelectionSheet's
-                            // onChange will auto-dismiss and MenuView will show products.
-                            orderEnv.select(branch: branch)
-                            viewModel.isSheetPresented = false
-                        },
-                        onDismiss: { viewModel.deselectBranch() }
-                    )
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.hidden)
-                    .presentationCornerRadius(24)
-                    .presentationBackground(Color.bgPrimary)
+            // ── Recenter button ─────────────────────────────────────
+            if viewModel.isPermissionGranted {
+                HStack {
+                    Spacer()
+                    recenterButton
+                        .padding(.bottom, viewModel.filteredBranches().isEmpty ? 180 : 318)
+                        .padding(.trailing, 16)
                 }
+                .animation(.spring(response: 0.35, dampingFraction: 0.72), value: viewModel.filteredBranches().count)
             }
-//        }
+
+            // ── Bottom panel ────────────────────────────────────────
+            bottomPanel
+        }
+        .ignoresSafeArea(edges: .bottom)
+        .onAppear {
+            viewModel.requestLocationPermission()
+            viewModel.fetchBranches()
+        }
+        .onDisappear {
+            viewModel.stopListening()
+        }
+        .sheet(isPresented: $viewModel.isSheetPresented,
+               onDismiss: { viewModel.deselectBranch() }) {
+            if let branch = viewModel.selectedBranch {
+                BranchDetailSheet(
+                    branch: branch,
+                    viewModel: viewModel,
+                    onOrderHere: {
+                        orderEnv.select(branch: branch)
+                        viewModel.isSheetPresented = false
+                    },
+                    onDismiss: { viewModel.deselectBranch() }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
+                .presentationCornerRadius(26)
+                .presentationBackground(Color.bgPrimary)
+            }
+        }
         .customNavigationBar("Find a Branch", hideBackBtn: false)
     }
 
+    // MARK: - Bottom Panel
+
     private var bottomPanel: some View {
         VStack(spacing: 0) {
-            // Search bar + filter chips
+            // Search + filters
             VStack(spacing: 8) {
                 MapSearchBar(text: $localSearch) {
                     viewModel.searchQuery = ""
@@ -103,20 +98,17 @@ struct MapView: View {
                     viewModel.updateSearchQuery(new)
                 }
 
-                MapFilterChips(activeFilters: $viewModel.activeFilters, onFilterToggled: { viewModel.trackFilterApplied($0) })
+                MapFilterChips(
+                    activeFilters: $viewModel.activeFilters,
+                    onFilterToggled: { viewModel.trackFilterApplied($0) }
+                )
             }
-            .padding(.top, 14)
+            .padding(.top, 16)
             .padding(.bottom, 10)
-            .background(
-                Color.bgPrimary
-                    .cornerRadius(20, corners: [.topLeft, .topRight])
-                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -4)
-            )
 
-            // Branch strip OR empty state
+            // Branch strip or empty state
             if viewModel.filteredBranches().isEmpty {
                 emptyState
-                    .background(Color.bgPrimary)
             } else {
                 BranchListView(
                     branches: viewModel.filteredBranches(),
@@ -124,26 +116,44 @@ struct MapView: View {
                     distanceLabel: { viewModel.distanceLabel(to: $0) },
                     onSelect: { viewModel.selectBranch($0) }
                 )
-                .background(Color.bgPrimary)
             }
         }
+        .background(
+            // Layered glass background
+            ZStack {
+                Color.bgPrimary.opacity(0.92)
+                    .background(.ultraThinMaterial)
+            }
+            .clipShape(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .path(in: CGRect(x: -40, y: 0, width: UIScreen.main.bounds.width + 80, height: 500))
+            )
+            .overlay(alignment: .top) {
+                // Subtle top edge line
+                Capsule()
+                    .fill(Color.border.opacity(0.4))
+                    .frame(width: 40, height: 3)
+                    .padding(.top, 8)
+            }
+        )
+        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -6)
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(.textMuted)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Color.textMuted)
             Text(viewModel.hasActiveSearchOrFilter
-                 ? "No branches match your search or filters."
+                 ? "No branches match your search."
                  : "No branches available.")
-                .font(.custom("Nunito-SemiBold", size: 13))
-                .foregroundStyle(.textMuted)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color.textMuted)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
+        .padding(.vertical, 20)
         .accessibilityLabel("No branches found")
     }
 
@@ -152,7 +162,6 @@ struct MapView: View {
     private var mapLayer: some View {
         Map(position: $viewModel.cameraPosition, selection: .constant(nil)) {
             UserAnnotation()
-
             ForEach(viewModel.filteredBranches()) { branch in
                 Annotation(branch.name, coordinate: branch.coordinate) {
                     BranchAnnotationView(
@@ -175,40 +184,47 @@ struct MapView: View {
         .onTapGesture { viewModel.deselectBranch() }
     }
 
-    // MARK: - Offline Banner
+    // MARK: - Offline Banner (toast pill style)
 
     private var offlineBanner: some View {
         HStack(spacing: 8) {
             Image(systemName: "wifi.slash")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
             Text("Offline — showing saved branches")
-                .font(.custom("Nunito-SemiBold", size: 13))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
         }
         .foregroundStyle(.white)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 18)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity)
-        .background(Color.semanticWarning)
-        .transition(.move(edge: .top).combined(with: .opacity))
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isOffline)
+        .background(
+            Capsule()
+                .fill(Color.semanticWarning)
+                .shadow(color: Color.semanticWarning.opacity(0.45), radius: 12, x: 0, y: 4)
+        )
         .accessibilityLabel("You are offline. Showing saved branch data.")
     }
 
-    // MARK: - Recenter Button
+    // MARK: - Recenter Button (pill style)
 
     private var recenterButton: some View {
         Button(action: viewModel.recenterOnUser) {
-            ZStack {
-                Circle()
-                    .fill(Color.surfacePrimary)
-                    .frame(width: 48, height: 48)
-                    .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 3)
+            HStack(spacing: 6) {
                 Image(systemName: "location.fill")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(.accentPrimary)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.accentPrimary)
             }
+            .frame(width: 44, height: 44)
+            .background(
+                Circle()
+                    .fill(.regularMaterial)
+                    .overlay {
+                        Circle()
+                            .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                    }
+                    .shadow(color: .black.opacity(0.14), radius: 10, x: 0, y: 4)
+            )
         }
+        .buttonStyle(BounceButtonStyle())
         .accessibilityLabel("Re-center map on my location")
-        .accessibilityHint("Double tap to move the map back to your current position")
     }
 }

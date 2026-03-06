@@ -2,15 +2,8 @@
 //  BranchAnnotationView.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//
-
-//
-//  BranchAnnotationView.swift
-//  CoffeeCraft
-//
-//  Created by Sok Pich
-//  Map Module — Phase 2: Branches on Map
+//  Map Module — UI Enhanced
+//  Richer selected state: name callout above pin, shadow bloom, smoother spring.
 //
 
 import SwiftUI
@@ -21,53 +14,80 @@ struct BranchAnnotationView: View {
     let branch: Branch
     let isSelected: Bool
 
-    // MARK: - Layout constants
-
-    private let pinSize: CGFloat = 44
-    private let selectedSize: CGFloat = 56
-    private let tailHeight: CGFloat = 8
+    private let pinSize: CGFloat = 42
+    private let selectedSize: CGFloat = 52
+    private let tailHeight: CGFloat = 7
 
     private var size: CGFloat { isSelected ? selectedSize : pinSize }
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── Bubble ──────────────────────────────────────────────
+
+            // ── Name callout (only when selected) ──────────────────
+            if isSelected {
+                Text(branch.name)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background {
+                        Capsule()
+                            .fill(Color.accentPrimary)
+                            .shadow(color: Color.accentPrimary.opacity(0.5), radius: 8, x: 0, y: 4)
+                    }
+                    .transition(
+                        .asymmetric(
+                            insertion: .scale(scale: 0.7, anchor: .bottom).combined(with: .opacity),
+                            removal: .scale(scale: 0.7, anchor: .bottom).combined(with: .opacity)
+                        )
+                    )
+                    .padding(.bottom, 5)
+            }
+
+            // ── Pin bubble ──────────────────────────────────────────
             ZStack {
+                // Outer glow ring when selected
+                if isSelected {
+                    Circle()
+                        .fill(Color.accentPrimary.opacity(0.2))
+                        .frame(width: size + 14, height: size + 14)
+                }
+
                 Circle()
                     .fill(isSelected ? Color.accentPrimary : Color.surfacePrimary)
                     .frame(width: size, height: size)
                     .shadow(
                         color: isSelected
-                            ? Color.accentPrimary.opacity(0.45)
-                            : Color.black.opacity(0.12),
-                        radius: isSelected ? 10 : 5,
+                            ? Color.accentPrimary.opacity(0.5)
+                            : Color.black.opacity(0.14),
+                        radius: isSelected ? 14 : 5,
                         x: 0,
-                        y: isSelected ? 4 : 2
+                        y: isSelected ? 6 : 2
                     )
-                    .overlay(
-                        Circle()
-                            .strokeBorder(
-                                isSelected ? Color.clear : Color.border,
-                                lineWidth: 1.5
-                            )
-                    )
+                    .overlay {
+                        if !isSelected {
+                            Circle()
+                                .strokeBorder(Color.border, lineWidth: 1)
+                        }
+                    }
 
-                // Coffee cup icon
                 Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: isSelected ? 22 : 18, weight: .medium))
-                    .foregroundStyle(isSelected ? .white : .accentPrimary)
+                    .font(.system(size: isSelected ? 22 : 17, weight: .medium))
+                    .foregroundStyle(isSelected ? .white : Color.accentPrimary)
+                    .symbolRenderingMode(.hierarchical)
 
-                // Closed overlay badge
+                // Closed badge
                 if !branch.isOpen {
                     Circle()
                         .fill(Color.semanticError)
-                        .frame(width: 14, height: 14)
-                        .overlay(
+                        .frame(width: 15, height: 15)
+                        .overlay {
                             Image(systemName: "xmark")
                                 .font(.system(size: 7, weight: .black))
                                 .foregroundStyle(.white)
-                        )
-                        .offset(x: size * 0.3, y: -(size * 0.3))
+                        }
+                        .offset(x: size * 0.32, y: -(size * 0.32))
                 }
             }
 
@@ -75,16 +95,13 @@ struct BranchAnnotationView: View {
             Triangle()
                 .fill(isSelected ? Color.accentPrimary : Color.surfacePrimary)
                 .frame(width: 10, height: tailHeight)
-                .shadow(
-                    color: Color.black.opacity(0.08),
-                    radius: 2, x: 0, y: 2
-                )
         }
-        .scaleEffect(isSelected ? 1.0 : 0.9)
-        .animation(.spring(response: 0.3, dampingFraction: 0.65), value: isSelected)
-        .accessibilityLabel(
-            "\(branch.name), \(branch.isOpen ? "Open" : "Closed")"
+        .scaleEffect(isSelected ? 1.0 : 0.88)
+        .animation(
+            .spring(response: 0.38, dampingFraction: 0.62),
+            value: isSelected
         )
+        .accessibilityLabel("\(branch.name), \(branch.isOpen ? "Open" : "Closed")")
     }
 }
 
@@ -100,15 +117,3 @@ private struct Triangle: Shape {
         return path
     }
 }
-
-//// MARK: - Preview
-//
-// #Preview {
-//    HStack(spacing: 24) {
-//        BranchAnnotationView(branch: MockBranchData.all[0], isSelected: false)
-//        BranchAnnotationView(branch: MockBranchData.all[0], isSelected: true)
-//        BranchAnnotationView(branch: MockBranchData.all[2], isSelected: false) // closed
-//    }
-//    .padding(32)
-//    .background(Color.bgPrimary)
-// }

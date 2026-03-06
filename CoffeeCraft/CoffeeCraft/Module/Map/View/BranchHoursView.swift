@@ -2,20 +2,13 @@
 //  BranchHoursView.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//  Map Module — Phase 3: Branch Selection + Routing
+//  Map Module — UI Enhanced
+//  Cleaner row rhythm, refined today highlight with left accent bar.
 //
 
 import SwiftUI
 
 // MARK: - BranchHoursView
-
-/// Displays a branch's weekly opening hours.
-/// Today's row is highlighted with accentPrimary tint.
-///
-/// The Branch model stores `openingHours` as a plain string (e.g. "Mon–Sun  7:00 – 22:00").
-/// This view parses `DaySchedule` entries so each day can be shown individually.
-/// For mock data the same string covers all 7 days — Phase 6 can swap in a richer model.
 
 struct BranchHoursView: View {
 
@@ -31,17 +24,10 @@ struct BranchHoursView: View {
         let isToday: Bool
     }
 
-    // MARK: - Build schedule from branch data
-
     private var schedule: [DaySchedule] {
         let days: [(String, String)] = [
-            ("Monday", "Mon"),
-            ("Tuesday", "Tue"),
-            ("Wednesday", "Wed"),
-            ("Thursday", "Thu"),
-            ("Friday", "Fri"),
-            ("Saturday", "Sat"),
-            ("Sunday", "Sun")
+            ("Monday", "Mon"), ("Tuesday", "Tue"), ("Wednesday", "Wed"),
+            ("Thursday", "Thu"), ("Friday", "Fri"), ("Saturday", "Sat"), ("Sunday", "Sun")
         ]
         let todayIndex = (Calendar.current.component(.weekday, from: Date()) + 5) % 7
 
@@ -49,7 +35,7 @@ struct BranchHoursView: View {
             DaySchedule(
                 day: pair.0,
                 shortDay: pair.1,
-                hours: branch.openingHours,   // Phase 6: per-day lookup
+                hours: branch.openingHours,
                 isToday: index == todayIndex
             )
         }
@@ -57,56 +43,61 @@ struct BranchHoursView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(schedule) { entry in
-                HStack {
+            ForEach(Array(schedule.enumerated()), id: \.element.id) { idx, entry in
+                HStack(spacing: 12) {
+                    // Today accent bar
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(entry.isToday ? Color.accentPrimary : Color.clear)
+                        .frame(width: 3, height: 28)
+
                     // Day label
                     Text(entry.shortDay)
-                        .font(.custom(entry.isToday ? "Nunito-Bold" : "Nunito-Regular", size: 13))
-                        .foregroundStyle(entry.isToday ? Color.accentPrimary : .textSecondary)
-                        .frame(width: 36, alignment: .leading)
+                        .font(.system(size: 13, weight: entry.isToday ? .bold : .regular, design: .rounded))
+                        .foregroundStyle(entry.isToday ? Color.accentPrimary : Color.textSecondary)
+                        .frame(width: 30, alignment: .leading)
 
                     // Hours
                     Text(entry.hours)
-                        .font(.custom(entry.isToday ? "Nunito-SemiBold" : "Nunito-Regular", size: 13))
-                        .foregroundStyle(entry.isToday ? Color.textPrimary : .textMuted)
+                        .font(.system(size: 13, weight: entry.isToday ? .semibold : .regular))
+                        .foregroundStyle(entry.isToday ? Color.textPrimary : Color.textMuted)
 
                     Spacer()
 
-                    // Today badge
+                    // Today chip
                     if entry.isToday {
                         Text("Today")
-                            .font(.custom("Nunito-Bold", size: 10))
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.accentPrimary)
-                            .cornerRadius(6)
+                            .background(
+                                Capsule().fill(Color.accentPrimary)
+                            )
                     }
                 }
-                .padding(.vertical, 7)
-                .padding(.horizontal, 12)
-                .background(entry.isToday ? Color.accentPrimary.opacity(0.07) : Color.clear)
+                .padding(.vertical, 9)
+                .padding(.trailing, 14)
+                .background(
+                    entry.isToday
+                        ? Color.accentPrimary.opacity(0.06)
+                        : Color.clear
+                )
 
-                if entry.shortDay != "Sun" {
+                if idx < schedule.count - 1 {
                     Divider()
-                        .padding(.leading, 12)
-                        .opacity(0.4)
+                        .padding(.leading, 19)
+                        .opacity(0.3)
                 }
             }
         }
-        .background(Color.surfacePrimary)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(Color.border, lineWidth: 0.8)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.surfacePrimary)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
-//
-//// MARK: - Preview
-//
-// #Preview {
-//    BranchHoursView(branch: MockBranchData.all[0])
-//        .padding()
-//        .background(Color.bgPrimary)
-// }
