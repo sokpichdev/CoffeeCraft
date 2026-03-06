@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  MenuView.swift
 //  CoffeeCraft
@@ -5,8 +7,6 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
-import FirebaseAuth
-import FirebaseFirestore
 
 struct MenuView: View {
 

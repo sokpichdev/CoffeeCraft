@@ -12,8 +12,8 @@ struct ProductDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushScreen) private var push
     let product: Product
-    var cartItem: CartItem? = nil // optional cart item for editing
-    var onUpdate: (() -> Void)? = nil
+    var cartItem: CartItem? // optional cart item for editing
+    var onUpdate: (() -> Void)?
     var allProducts: [Product] = []
     
     @State private var selectedExtras: [String]
@@ -317,8 +317,6 @@ struct ProductDetailView: View {
 //  StickyFooterView.swift
 //  CoffeeCraft
 //
-import SwiftUI
-
 struct StickyFooterView<Actions: View>: View {
     let label: String
     let amount: Double

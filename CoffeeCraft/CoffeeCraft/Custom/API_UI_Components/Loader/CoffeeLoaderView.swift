@@ -8,7 +8,7 @@ import SwiftUI
 
 struct CoffeeLoaderView: View {
     
-    var progress: CGFloat? = nil
+    var progress: CGFloat?
     
     @State private var fillLevel: CGFloat = 0
     @State private var waveOffset1: CGFloat = 0
@@ -59,7 +59,7 @@ struct CoffeeLoaderView: View {
             .foregroundColor(.coffeeDarkBrown.opacity(0.5))
             .font(.system(size: imageSize))
         )
-        .onChange(of: progress) { oldValue, newValue in
+        .onChange(of: progress) { _, newValue in
             if let newValue = newValue {
                 // Control wave intensity based on progress
                 // More progress = calmer waves, less progress = more intense waves, 0.5 so it's not too calm

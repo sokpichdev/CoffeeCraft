@@ -5,9 +5,9 @@
 //  Created by Sok Pich on 3/3/26.
 //
 
-import SwiftUI
-import FirebaseFirestore
 import FirebaseAuth
+import FirebaseFirestore
+import SwiftUI
 
 @MainActor
 class ReorderManager: ObservableObject {
@@ -78,7 +78,7 @@ class ReorderManager: ObservableObject {
 
     func analyzeItems(orderItems: [CartItemData], currentCart: [CartItem]) -> (toMerge: [(existing: CartItem, additionalQty: Int)], toAdd: [CartItemData]) {
         var toMerge: [(existing: CartItem, additionalQty: Int)] = []
-        var toAdd:   [CartItemData] = []
+        var toAdd: [CartItemData] = []
 
         for orderItem in orderItems {
             if let match = findExactMatch(orderItem, in: currentCart) {
@@ -160,7 +160,7 @@ class ReorderManager: ObservableObject {
         guard !additions.isEmpty || !toMerge.isEmpty else { return }
 
         // Single Firestore write for all changes
-        cartManager.batchReorder(userId: userId, merges: toMerge,additions: additions) {
+        cartManager.batchReorder(userId: userId, merges: toMerge, additions: additions) {
             let newCount = additions.count
             let mergedCount = toMerge.count
 

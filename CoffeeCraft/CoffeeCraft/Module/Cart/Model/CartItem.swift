@@ -1,3 +1,4 @@
+import FirebaseFirestore
 //
 //  CartItem.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import SwiftUI
-import FirebaseFirestore
 
 struct CartItem: Identifiable, Codable {
     let id: UUID

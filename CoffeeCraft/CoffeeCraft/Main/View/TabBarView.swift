@@ -23,7 +23,7 @@ struct TabBarView: View {
     }
 }
 
-fileprivate struct TabsLayoutView: View {
+private struct TabsLayoutView: View {
     @Binding var selectedTab: Tab
     @Namespace var namespace
     

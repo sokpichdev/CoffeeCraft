@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  OrderService.swift
 //  CoffeeCraft
@@ -10,8 +12,6 @@
 //  after deduction, a refund is issued automatically.
 //
 import Foundation
-import FirebaseFirestore
-import FirebaseAuth
 
 @MainActor
 class OrderService: ObservableObject {
@@ -73,22 +73,22 @@ class OrderService: ObservableObject {
 
                 // MARK: - Step 3: Build order document
                 var orderData: [String: Any] = [
-                    "orderId":        orderNumber,
-                    "userId":         userId,
-                    "timestamp":      Timestamp(date: Date()),
-                    "totalPrice":     total,
-                    "status":         "Pending",
-                    "paymentMethod":  paymentMethod.rawValue,
+                    "orderId": orderNumber,
+                    "userId": userId,
+                    "timestamp": Timestamp(date: Date()),
+                    "totalPrice": total,
+                    "status": "Pending",
+                    "paymentMethod": paymentMethod.rawValue,
                     "items": cartItems.map { item -> [String: Any] in
                         var dict: [String: Any] = [
                             "productId": item.product.id,
-                            "name":      item.product.name,
-                            "price":     item.totalPrice,
-                            "imageURL":  item.product.imageURL,
-                            "quantity":  item.quantity
+                            "name": item.product.name,
+                            "price": item.totalPrice,
+                            "imageURL": item.product.imageURL,
+                            "quantity": item.quantity
                         ]
                         if !item.selections.isEmpty { dict["selections"] = item.selections }
-                        if !item.extras.isEmpty     { dict["extras"]     = item.extras     }
+                        if !item.extras.isEmpty { dict["extras"]     = item.extras     }
                         return dict
                     }
                 ]
@@ -105,7 +105,7 @@ class OrderService: ObservableObject {
                 if let branch = OrderEnvironment.shared.selectedBranch {
                     orderData["branchId"]   = branch.id
                     orderData["branchName"] = branch.name
-                    AppLog.order.debug("Order tagged with branch: \(branch.name ?? "unknown")")
+                    AppLog.order.debug("Order tagged with branch: \(branch.name)")
                 }
 
                 // MARK: - Step 4: Write order — refund if this fails (deduction already happened)
@@ -130,7 +130,6 @@ class OrderService: ObservableObject {
                 )
 
                 await onSuccess?()
-
             } catch {
                 LoaderManager.shared.hideLoading()
                 AppLog.order.error("Order failed: \(error.localizedDescription)")

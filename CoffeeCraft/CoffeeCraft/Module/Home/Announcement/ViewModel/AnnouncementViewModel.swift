@@ -1,3 +1,4 @@
+import FirebaseFirestore
 //
 //  AnnouncementViewModel.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 2/11/26.
 //
 import Foundation
-import FirebaseFirestore
 import OSLog
 
 @MainActor

@@ -1,3 +1,4 @@
+import FirebaseFirestore
 //
 //  ProductSeeder.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 10/20/25.
 //
 import Foundation
-import FirebaseFirestore
 
 struct ProductSeeder {
     static func seedSampleProducts() async {

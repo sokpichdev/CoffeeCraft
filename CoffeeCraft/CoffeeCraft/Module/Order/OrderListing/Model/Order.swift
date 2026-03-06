@@ -9,8 +9,8 @@
 //  Old orders without paymentMethod decode cleanly (optional field → nil).
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 struct Order: Identifiable, Codable, Hashable, Equatable {
     @DocumentID var id: String?

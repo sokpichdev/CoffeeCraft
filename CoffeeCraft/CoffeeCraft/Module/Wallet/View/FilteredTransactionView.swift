@@ -165,7 +165,7 @@ struct FilteredTransactionView: View {
 
     var transactionList: some View {
         VStack(spacing: 0) {
-            ForEach(Array(filteredTransactions.enumerated()), id: \.element.id) { index, tx in
+            ForEach(Array(filteredTransactions.enumerated()), id: \.element.id) { _, tx in
                 WalletTransactionRow(transaction: tx)
                     .padding(.horizontal, 16)
                     .transition(
@@ -278,7 +278,6 @@ struct FilteredTransactionView: View {
         }
     }
 }
-
 
 struct CoffeeFilterChip: View {
     let filter: FilteredTransactionView.TransactionFilter

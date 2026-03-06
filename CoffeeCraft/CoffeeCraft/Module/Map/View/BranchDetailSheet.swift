@@ -231,7 +231,7 @@ struct BranchDetailSheet: View {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             // Analytics — Phase 6
             MapAnalytics.branchOrderStarted(
-                branchId:   branch.id ?? "unknown",
+                branchId: branch.id ?? "unknown",
                 branchName: branch.name
             )
             onOrderHere()

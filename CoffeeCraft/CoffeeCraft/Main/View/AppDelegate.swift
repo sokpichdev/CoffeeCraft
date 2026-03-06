@@ -1,3 +1,5 @@
+import FirebaseCore
+import FirebaseMessaging
 //
 //  AppDelegate.swift
 //  CoffeeCraft
@@ -5,8 +7,6 @@
 //  Created by Sok Pich on 2/5/26.
 //
 import UIKit
-import FirebaseCore
-import FirebaseMessaging
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -14,7 +14,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func application(
         _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         // Configure Firebase
         configureFirebase(for: currentEnv)
@@ -74,7 +74,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func application(
         _ application: UIApplication,
-        didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
         AppLog.printItem(userInfo, label: "📩 Remote notification received")
@@ -98,7 +98,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = notification.request.content.userInfo
         AppLog.printItem(userInfo, label: "📬 Notification received in foreground")
 
-        
         // Inform FCM about the message
         Messaging.messaging().appDidReceiveMessage(userInfo)
         

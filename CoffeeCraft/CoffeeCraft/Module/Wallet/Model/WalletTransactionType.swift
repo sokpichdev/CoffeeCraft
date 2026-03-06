@@ -5,14 +5,11 @@
 //  Created by Sok Pich on 3/3/26.
 //
 
-
+import FirebaseFirestore
 //
 //  WalletTransaction.swift
 //  CoffeeCraft
-//
-
-import Foundation
-import FirebaseFirestore
+//import Foundation
 import SwiftUI
 
 // MARK: - WalletTransactionType
@@ -116,13 +113,13 @@ extension WalletTransaction {
     /// Called inside WalletService runTransaction() closures.
     func toFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
-            "userId":        userId,
-            "type":          type.rawValue,
-            "amount":        amount,
+            "userId": userId,
+            "type": type.rawValue,
+            "amount": amount,
             "balanceBefore": balanceBefore,
-            "balanceAfter":  balanceAfter,
-            "description":   description,
-            "timestamp":     Timestamp(date: timestamp)
+            "balanceAfter": balanceAfter,
+            "description": description,
+            "timestamp": Timestamp(date: timestamp)
         ]
         if let referenceId { data["referenceId"] = referenceId }
         return data

@@ -67,7 +67,6 @@ struct SearchView: View {
                 }
                 .padding()
             }, onRefresh: {
-                
             })
             .background(Color.bgPrimary)
             .searchable(text: $searchText, prompt: "Search products...")

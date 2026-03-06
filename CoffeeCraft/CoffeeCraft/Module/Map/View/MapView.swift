@@ -8,8 +8,8 @@
 //  Everything else unchanged from Phase 3.
 //
 
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct MapView: View {
 
@@ -90,7 +90,6 @@ struct MapView: View {
 //        }
         .customNavigationBar("Find a Branch", hideBackBtn: false)
     }
-
 
     private var bottomPanel: some View {
         VStack(spacing: 0) {

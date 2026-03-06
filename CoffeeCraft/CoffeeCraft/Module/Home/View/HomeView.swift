@@ -145,7 +145,6 @@ struct HomeView: View {
                         .background(Color.accentPrimary.opacity(0.1))
                         .clipShape(Capsule())
                         .overlay(Capsule().strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1))
-
                     }
                     // Points pill
                     HStack(spacing: 5) {
@@ -406,7 +405,7 @@ extension HomeView {
             let baseHeight: CGFloat = 260
             let dynamicHeight = baseHeight + (minY > 0 ? minY : 0)
 
-            if bannerImages.count > 0 {
+            if !bannerImages.isEmpty {
                 InfiniteCarousel(
                     items: bannerImages,
                     height: dynamicHeight,

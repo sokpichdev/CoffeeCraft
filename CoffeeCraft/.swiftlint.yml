@@ -1,0 +1,84 @@
+# MARK: - Disabled Rules
+disabled_rules:
+  - trailing_whitespace
+  - todo
+  - force_cast
+  - force_try
+
+# MARK: - Enabled Optional Rules
+opt_in_rules:
+  - closure_spacing
+  - empty_count
+  - explicit_init
+  - first_where
+  - sorted_imports
+  - redundant_nil_coalescing
+  - redundant_string_enum_value
+  - vertical_whitespace_closing_braces
+  - modifier_order
+
+# MARK: - Paths to Ignore
+excluded:
+  - Pods
+  - Carthage
+  - DerivedData
+  - .build
+
+# MARK: - Line Length
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+# MARK: - Function Length
+function_body_length:
+  warning: 40
+  error: 80
+
+# MARK: - Type Length
+type_body_length:
+  warning: 250
+  error: 350
+
+# MARK: - File Length
+file_length:
+  warning: 500
+  error: 800
+
+# MARK: - Identifier Naming
+identifier_name:
+  min_length: 2
+  max_length:
+    warning: 40
+    error: 60
+  excluded:
+    - id
+    - vm
+    - x
+    - y
+
+# MARK: - Nesting Depth
+nesting:
+  type_level:
+    warning: 2
+  function_level:
+    warning: 3
+
+# MARK: - Cyclomatic Complexity
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+# MARK: - Large Tuples
+large_tuple:
+  warning: 3
+  error: 4
+
+# MARK: - Force Cast
+force_cast:
+  severity: warning
+
+# MARK: - Force Try
+force_try:
+  severity: warning

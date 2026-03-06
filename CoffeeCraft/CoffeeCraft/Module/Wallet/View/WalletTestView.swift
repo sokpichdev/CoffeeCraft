@@ -104,9 +104,9 @@ struct WalletTestView: View {
 
             if isLoggedIn {
                 Group {
-                    labelRow("Name",   UserSession.shared.userName ?? "—")
-                    labelRow("UID",    userId)
-                    labelRow("Role",   UserSession.shared.userRole?.rawValue ?? "—")
+                    labelRow("Name", UserSession.shared.userName ?? "—")
+                    labelRow("UID", userId)
+                    labelRow("Role", UserSession.shared.userRole?.rawValue ?? "—")
                 }
             }
         }
@@ -122,10 +122,10 @@ struct WalletTestView: View {
 
             if let wallet {
                 Group {
-                    labelRow("Balance",    wallet.formattedBalance)
-                    labelRow("Currency",   wallet.currency)
+                    labelRow("Balance", wallet.formattedBalance)
+                    labelRow("Currency", wallet.currency)
                     labelRow("Total Top-Up", wallet.totalTopUp.currencyFormatted)
-                    labelRow("Total Spent",  wallet.totalSpent.currencyFormatted)
+                    labelRow("Total Spent", wallet.totalSpent.currencyFormatted)
                     labelRow("Updated At", wallet.updatedAt.formatted(date: .abbreviated, time: .shortened))
                 }
             } else {

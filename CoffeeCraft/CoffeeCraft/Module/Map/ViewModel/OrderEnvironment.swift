@@ -27,7 +27,7 @@ final class OrderEnvironment: ObservableObject {
 
     // MARK: - Convenience accessors
 
-    var selectedBranchId:   String? { selectedBranch?.id   }
+    var selectedBranchId: String? { selectedBranch?.id   }
     var selectedBranchName: String? { selectedBranch?.name }
 
     // MARK: - Actions

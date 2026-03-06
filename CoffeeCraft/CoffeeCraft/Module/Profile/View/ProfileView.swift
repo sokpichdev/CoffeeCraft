@@ -10,7 +10,7 @@ struct ProfileView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
-    @State private var selectedTab = 0 //0 = view, 1 = edit
+    @State private var selectedTab = 0 // 0 = view, 1 = edit
     
     @State private var name = ""
     @State private var phone = ""

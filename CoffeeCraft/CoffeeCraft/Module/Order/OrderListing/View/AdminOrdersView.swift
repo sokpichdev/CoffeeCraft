@@ -1,3 +1,4 @@
+import FirebaseAuth
 //
 //  AdminOrdersView.swift
 //  CoffeeCraft
@@ -5,14 +6,13 @@
 //  Created by Sok Pich on 10/23/25.
 //
 import SwiftUI
-import FirebaseAuth
 
 struct AdminOrdersView: View {
     @StateObject var vm = AdminOrdersViewModel()
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedTab: Segment = .activeOrders
     @State private var showWaitTimeEditor = false
-    @State private var waitTimeBranch: Branch? = nil
+    @State private var waitTimeBranch: Branch?
 
     var body: some View {
         ZStack {
@@ -107,14 +107,14 @@ struct ActiveOrdersContent: View {
                                         HStack(spacing: 8) {
                                             Button("Start") {
                                                 Task {
-                                                    let _ = await vm.updateOrderStatus(order: order, status: "InProgress")
+                                                    _ = await vm.updateOrderStatus(order: order, status: "InProgress")
                                                 }
                                             }
                                             .disabled(order.status != "Pending")
                                             
                                             Button("Ready") {
                                                 Task {
-                                                    let _ = await vm.updateOrderStatus(order: order, status: "Ready")
+                                                    _ = await vm.updateOrderStatus(order: order, status: "Ready")
                                                 }
                                             }
                                             .disabled(order.status != "InProgress")

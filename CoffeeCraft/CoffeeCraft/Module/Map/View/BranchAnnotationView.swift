@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 06/03/2026.
 //
 
-
 //
 //  BranchAnnotationView.swift
 //  CoffeeCraft
@@ -104,7 +103,7 @@ private struct Triangle: Shape {
 
 //// MARK: - Preview
 //
-//#Preview {
+// #Preview {
 //    HStack(spacing: 24) {
 //        BranchAnnotationView(branch: MockBranchData.all[0], isSelected: false)
 //        BranchAnnotationView(branch: MockBranchData.all[0], isSelected: true)
@@ -112,4 +111,4 @@ private struct Triangle: Shape {
 //    }
 //    .padding(32)
 //    .background(Color.bgPrimary)
-//}
+// }

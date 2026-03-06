@@ -1,3 +1,5 @@
+import FirebaseAuth
+import FirebaseFirestore
 //
 //  FCMTokenService.swift
 //  CoffeeCraft
@@ -5,8 +7,6 @@
 //  Created by Sok Pich on 10/22/25.
 //
 import Foundation
-import FirebaseFirestore
-import FirebaseAuth
 import UIKit
 
 class FCMTokenService {

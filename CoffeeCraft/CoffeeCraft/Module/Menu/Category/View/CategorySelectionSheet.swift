@@ -105,7 +105,6 @@ struct CategorySelectionSheet: View {
                     }
                     .padding(.top)
                 }, onRefresh: {
-                    
                 })
             }
             .customNavigationBar("Select Category") {

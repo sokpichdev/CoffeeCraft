@@ -5,8 +5,8 @@
 //  Created by Sok Pich on 2/20/26.
 //
 
-import OSLog
 import Firebase
+import OSLog
 
 // MARK: - AppLog
 // A centralized, reusable logging utility for CoffeeCraft.
@@ -116,10 +116,10 @@ struct AppLog {
             // Try common raw types in order: String → Int → Double → Bool
             if let e = value as? any RawRepresentable {
                 let raw = e.rawValue
-                if let s = raw as? String  { return s }
-                if let i = raw as? Int     { return i }
-                if let d = raw as? Double  { return d }
-                if let b = raw as? Bool    { return b }
+                if let s = raw as? String { return s }
+                if let i = raw as? Int { return i }
+                if let d = raw as? Double { return d }
+                if let b = raw as? Bool { return b }
             }
             // Non-RawRepresentable enum (e.g. associated values) — use case name as string
             return String(describing: value)

@@ -26,7 +26,7 @@ extension MaterialTextFeild {
     }
     
     // MARK: - UITextField Layout Overrides
-    public override func textRect(forBounds bounds: CGRect) -> CGRect {
+    override public func textRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.textRect(forBounds: bounds)
 //        let rightViewWidth = rightView?.frame.width ?? 0
         return CGRect(
@@ -37,7 +37,7 @@ extension MaterialTextFeild {
         )
     }
     
-    public override func editingRect(forBounds bounds: CGRect) -> CGRect {
+    override public func editingRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.editingRect(forBounds: bounds)
         return CGRect(x: leftView == nil ? leftPadding : leftPaddingWithImage,
                       y: superRect.origin.y,
@@ -45,28 +45,28 @@ extension MaterialTextFeild {
                       height: superRect.height)
     }
     
-    public override func leftViewRect(forBounds bounds: CGRect) -> CGRect {
+    override public func leftViewRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.leftViewRect(forBounds: bounds)
         return CGRect(x: 8, y: superRect.origin.y, width: 20, height: superRect.height)
     }
     
-    public override func rightViewRect(forBounds bounds: CGRect) -> CGRect {
+    override public func rightViewRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.rightViewRect(forBounds: bounds)
         return CGRect(x: superRect.origin.x - 8, y: superRect.origin.y, width: 60, height: superRect.height)
     }
 
-    public override func borderRect(forBounds bounds: CGRect) -> CGRect {
+    override public func borderRect(forBounds bounds: CGRect) -> CGRect {
         return .zero
     }
     
-    public override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
+    override public func placeholderRect(forBounds bounds: CGRect) -> CGRect {
         if shouldPlaceholderBeVisible {
             return super.placeholderRect(forBounds: bounds)
         }
         return .zero
     }
     
-    public override func clearButtonRect(forBounds bounds: CGRect) -> CGRect {
+    override public func clearButtonRect(forBounds bounds: CGRect) -> CGRect {
         return CGRect(x: frame.width - clearButtonSideLength - rightPadding,
                       y: (frame.height - clearButtonSideLength) / 2,
                       width: clearButtonSideLength,
@@ -74,7 +74,7 @@ extension MaterialTextFeild {
     }
     
     // MARK: - UITextField drawing overrides
-    public override func drawPlaceholder(in rect: CGRect) {
+    override public func drawPlaceholder(in rect: CGRect) {
         if shouldPlaceholderBeVisible {
             super.drawPlaceholder(in: rect)
         }
@@ -119,7 +119,7 @@ extension MaterialTextFeild {
     }
     
     // MARK: - UIView overrides
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         preLayoutSubviews()
         super.layoutSubviews()
         postLayoutSubviews()
@@ -130,11 +130,11 @@ extension MaterialTextFeild {
         outlineSublayer.lineWidth = outlineLineWidth
     }
     
-    public override var intrinsicContentSize: CGSize {
+    override public var intrinsicContentSize: CGSize {
         return CGSize(width: bounds.width, height: 45)
     }
     
-    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         setNeedsLayout()
     }

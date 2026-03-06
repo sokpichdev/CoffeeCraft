@@ -7,7 +7,7 @@
 import SwiftUI
 
 extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = self
     }
@@ -16,4 +16,3 @@ extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
         return viewControllers.count > 1
     }
 }
-

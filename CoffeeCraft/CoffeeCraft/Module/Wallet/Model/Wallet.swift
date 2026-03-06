@@ -5,8 +5,8 @@
 //  Created by Sok Pich on 3/3/26.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 // MARK: - Wallet
 // Represents a single wallet document in Firestore.

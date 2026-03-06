@@ -1,3 +1,4 @@
+import FirebaseFirestore
 //
 //  CardViewModel.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 1/26/26.
 //
 import Foundation
-import FirebaseFirestore
 import SwiftUI
 
 @MainActor

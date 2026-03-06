@@ -8,9 +8,9 @@ import SwiftUI
 
 struct OrderCardView: View {
     let order: Order
-    var adminActions: (() -> AnyView)? = nil
-    var onNavigate: (() -> Void)? = nil
-    var onReorder: (() -> Void)? = nil
+    var adminActions: (() -> AnyView)?
+    var onNavigate: (() -> Void)?
+    var onReorder: (() -> Void)?
     
     /// Number of items to show in the preview stack before the +N badge
     private let previewDisplayCount: Int = 5

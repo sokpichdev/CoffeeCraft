@@ -5,9 +5,9 @@
 //  Created by Sok Pich on 3/3/26.
 //
 
-import Foundation
-import FirebaseFirestore
 import FirebaseAuth
+import FirebaseFirestore
+import Foundation
 
 // MARK: - WalletService
 // Handles all Firestore reads and writes for the Wallet module.
@@ -65,12 +65,12 @@ final class WalletService {
 
         let now = Timestamp(date: Date())
         try await walletRef.setData([
-            "balance":    0.0,
-            "currency":   "USD",
+            "balance": 0.0,
+            "currency": "USD",
             "totalTopUp": 0.0,
             "totalSpent": 0.0,
-            "createdAt":  now,
-            "updatedAt":  now
+            "createdAt": now,
+            "updatedAt": now
         ])
 
         AppLog.firestore.debug("✅ Wallet created for userId: \(userId)")
@@ -104,39 +104,38 @@ final class WalletService {
                 // 2. Update wallet balance + totals
                 if snapshot.exists {
                     transaction.updateData([
-                        "balance":    newBalance,
+                        "balance": newBalance,
                         "totalTopUp": FieldValue.increment(amount),
-                        "updatedAt":  Timestamp(date: Date())
+                        "updatedAt": Timestamp(date: Date())
                     ], forDocument: walletRef)
                 } else {
                     // First top-up → create wallet inline
                     let now = Timestamp(date: Date())
                     transaction.setData([
-                        "balance":    newBalance,
-                        "currency":   "USD",
+                        "balance": newBalance,
+                        "currency": "USD",
                         "totalTopUp": amount,
                         "totalSpent": 0.0,
-                        "createdAt":  now,
-                        "updatedAt":  now
+                        "createdAt": now,
+                        "updatedAt": now
                     ], forDocument: walletRef)
                 }
 
                 // 3. Write transaction ledger entry
                 let tx = WalletTransaction(
-                    userId:        userId,
-                    type:          .topup,
-                    amount:        amount,
+                    userId: userId,
+                    type: .topup,
+                    amount: amount,
                     balanceBefore: current,
-                    balanceAfter:  newBalance,
-                    description:   "Top-up \(amount.currencyFormatted)",
-                    referenceId:   nil,
-                    timestamp:     Date()
+                    balanceAfter: newBalance,
+                    description: "Top-up \(amount.currencyFormatted)",
+                    referenceId: nil,
+                    timestamp: Date()
                 )
                 transaction.setData(tx.toFirestoreData(), forDocument: txRef)
 
                 AppLog.firestore.debug("✅ topUp transaction prepared — before: \(current), after: \(newBalance)")
                 return nil
-
             } catch {
                 errorPointer?.pointee = error as NSError
                 return nil
@@ -184,27 +183,26 @@ final class WalletService {
 
                 // Update wallet
                 transaction.updateData([
-                    "balance":    newBalance,
+                    "balance": newBalance,
                     "totalSpent": FieldValue.increment(amount),
-                    "updatedAt":  Timestamp(date: Date())
+                    "updatedAt": Timestamp(date: Date())
                 ], forDocument: walletRef)
 
                 // Write ledger entry
                 let tx = WalletTransaction(
-                    userId:        userId,
-                    type:          .payment,
-                    amount:        -amount,
+                    userId: userId,
+                    type: .payment,
+                    amount: -amount,
                     balanceBefore: current,
-                    balanceAfter:  newBalance,
-                    description:   "Order #\(orderId.prefix(6))",
-                    referenceId:   orderId,
-                    timestamp:     Date()
+                    balanceAfter: newBalance,
+                    description: "Order #\(orderId.prefix(6))",
+                    referenceId: orderId,
+                    timestamp: Date()
                 )
                 transaction.setData(tx.toFirestoreData(), forDocument: txRef)
 
                 AppLog.firestore.debug("✅ deductForOrder transaction prepared — before: \(current), after: \(newBalance)")
                 return nil
-
             } catch {
                 errorPointer?.pointee = error as NSError
                 return nil
@@ -244,25 +242,24 @@ final class WalletService {
                 let newBalance = current + amount
 
                 transaction.updateData([
-                    "balance":   newBalance,
+                    "balance": newBalance,
                     "updatedAt": Timestamp(date: Date())
                 ], forDocument: walletRef)
 
                 let tx = WalletTransaction(
-                    userId:        userId,
-                    type:          .refund,
-                    amount:        amount,
+                    userId: userId,
+                    type: .refund,
+                    amount: amount,
                     balanceBefore: current,
-                    balanceAfter:  newBalance,
-                    description:   "Refund for Order #\(orderId.prefix(6))",
-                    referenceId:   orderId,
-                    timestamp:     Date()
+                    balanceAfter: newBalance,
+                    description: "Refund for Order #\(orderId.prefix(6))",
+                    referenceId: orderId,
+                    timestamp: Date()
                 )
                 transaction.setData(tx.toFirestoreData(), forDocument: txRef)
 
                 AppLog.firestore.debug("✅ refund transaction prepared — before: \(current), after: \(newBalance)")
                 return nil
-
             } catch {
                 errorPointer?.pointee = error as NSError
                 return nil
@@ -298,37 +295,36 @@ final class WalletService {
 
                 if snapshot.exists {
                     transaction.updateData([
-                        "balance":   newBalance,
+                        "balance": newBalance,
                         "updatedAt": Timestamp(date: Date())
                     ], forDocument: walletRef)
                 } else {
                     // Wallet doesn't exist yet — create it with the reward
                     let now = Timestamp(date: Date())
                     transaction.setData([
-                        "balance":    newBalance,
-                        "currency":   "USD",
+                        "balance": newBalance,
+                        "currency": "USD",
                         "totalTopUp": 0.0,
                         "totalSpent": 0.0,
-                        "createdAt":  now,
-                        "updatedAt":  now
+                        "createdAt": now,
+                        "updatedAt": now
                     ], forDocument: walletRef)
                 }
 
                 let tx = WalletTransaction(
-                    userId:        userId,
-                    type:          .reward,
-                    amount:        amount,
+                    userId: userId,
+                    type: .reward,
+                    amount: amount,
                     balanceBefore: current,
-                    balanceAfter:  newBalance,
-                    description:   reason,
-                    referenceId:   nil,
-                    timestamp:     Date()
+                    balanceAfter: newBalance,
+                    description: reason,
+                    referenceId: nil,
+                    timestamp: Date()
                 )
                 transaction.setData(tx.toFirestoreData(), forDocument: txRef)
 
                 AppLog.firestore.debug("✅ addReward transaction prepared — before: \(current), after: \(newBalance)")
                 return nil
-
             } catch {
                 errorPointer?.pointee = error as NSError
                 return nil

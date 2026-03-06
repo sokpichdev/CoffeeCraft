@@ -50,7 +50,7 @@ enum MapFilter: String, CaseIterable, Identifiable {
 struct MapFilterChips: View {
 
     @Binding var activeFilters: Set<MapFilter>
-    var onFilterToggled: ((MapFilter) -> Void)? = nil   // Phase 6 analytics hook
+    var onFilterToggled: ((MapFilter) -> Void)?   // Phase 6 analytics hook
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
