@@ -2,10 +2,9 @@
 //  MapViewModel.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4
-//  fetchBranches() now wires to BranchRepository (Firestore live listener).
-//  isOffline state drives an offline banner in MapView.
-//  All other behaviour unchanged from Phase 3.
+//  Map Module — Phase 6
+//  Added: analytics events on selectBranch, filter toggle, search result.
+//  All Phase 5 behaviour unchanged.
 //
 
 import SwiftUI
@@ -28,17 +27,15 @@ final class MapViewModel: NSObject {
     var selectedBranch: Branch?
     var isSheetPresented = false
 
-    // MARK: - Search & Filter  (Phase 5)
+    // MARK: - Search & Filter
 
     var searchQuery: String = ""
     var activeFilters: Set<MapFilter> = []
     private var searchDebounceTask: Task<Void, Never>?
 
-    /// Branches visible on the map and strip after search + filters.
     func filteredBranches() -> [Branch] {
         let base = sortedBranches()
 
-        // AND logic — branch must satisfy every active filter chip
         let afterFilters = activeFilters.isEmpty
             ? base
             : base.filter { branch in activeFilters.allSatisfy { $0.matches(branch) } }
@@ -56,9 +53,24 @@ final class MapViewModel: NSObject {
         searchDebounceTask?.cancel()
         searchDebounceTask = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled else { return }
-            await MainActor.run { self?.searchQuery = query }
+            guard !Task.isCancelled, let self else { return }
+            await MainActor.run {
+                self.searchQuery = query
+                // Fire analytics if query has results
+                let q = query.trimmingCharacters(in: .whitespaces)
+                if !q.isEmpty {
+                    MapAnalytics.mapSearched(
+                        query: q,
+                        resultCount: self.filteredBranches().count
+                    )
+                }
+            }
         }
+    }
+
+    /// Called from MapFilterChips when a chip is toggled ON.
+    func trackFilterApplied(_ filter: MapFilter) {
+        MapAnalytics.filterApplied(filter)
     }
 
     var hasActiveSearchOrFilter: Bool {
@@ -85,8 +97,6 @@ final class MapViewModel: NSObject {
 
     private let locationManager     = CLLocationManager()
     private var hasInitiallyLocated = false
-
-    // MARK: - Init
 
     override init() {
         super.init()
@@ -151,6 +161,12 @@ final class MapViewModel: NSObject {
         ))
     }
 
+    func distanceKm(to branch: Branch) -> Double? {
+        let m = distance(to: branch)
+        guard m != .infinity else { return nil }
+        return m / 1_000
+    }
+
     func distanceLabel(to branch: Branch) -> String {
         let m = distance(to: branch)
         guard m != .infinity else { return "" }
@@ -163,6 +179,14 @@ final class MapViewModel: NSObject {
 
     func selectBranch(_ branch: Branch) {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+        // Analytics — Phase 6
+        MapAnalytics.branchSelected(
+            branchId:   branch.id ?? "unknown",
+            branchName: branch.name,
+            distanceKm: distanceKm(to: branch)
+        )
+
         withAnimation(.spring(response: 0.3)) {
             selectedBranch   = branch
             isSheetPresented = true
@@ -256,6 +280,6 @@ extension MapViewModel: CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager,
                          didFailWithError error: Error) {
-        print("[MapViewModel] Location error: \(error.localizedDescription)")
+        AppLog.firestore.error("[MapViewModel] Location error: \(error.localizedDescription)")
     }
 }

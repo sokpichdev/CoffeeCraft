@@ -11,21 +11,14 @@
 import SwiftUI
 import MapKit
 
-// MARK: - MapView
-
 struct MapView: View {
 
     @State private var viewModel  = MapViewModel()
-    @State private var localSearch = ""     // drives the search bar text field
+    @State private var localSearch = ""
     @EnvironmentObject private var orderEnv: OrderEnvironment
-    @Binding var selectedTab: Tab
-
-    init(selectedTab: Binding<Tab> = .constant(.home)) {
-        self._selectedTab = selectedTab
-    }
 
     var body: some View {
-        NavigationStack {
+//        CustomNavigationStack {
             ZStack(alignment: .bottom) {
 
                 // MARK: Map / Permission
@@ -64,7 +57,7 @@ struct MapView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
             }
-            .customNavigationBar("Find a Branch", hideBackBtn: false)
+            
             .onAppear {
                 viewModel.requestLocationPermission()
                 viewModel.fetchBranches()
@@ -81,9 +74,10 @@ struct MapView: View {
                         branch: branch,
                         viewModel: viewModel,
                         onOrderHere: {
+                            // Write branch to shared env; MenuBranchSelectionSheet's
+                            // onChange will auto-dismiss and MenuView will show products.
                             orderEnv.select(branch: branch)
                             viewModel.isSheetPresented = false
-                            withAnimation(.easeInOut) { selectedTab = .menu }
                         },
                         onDismiss: { viewModel.deselectBranch() }
                     )
@@ -93,10 +87,10 @@ struct MapView: View {
                     .presentationBackground(Color.bgPrimary)
                 }
             }
-        }
+//        }
+        .customNavigationBar("Find a Branch", hideBackBtn: false)
     }
 
-    // MARK: - Bottom Panel
 
     private var bottomPanel: some View {
         VStack(spacing: 0) {
@@ -110,7 +104,7 @@ struct MapView: View {
                     viewModel.updateSearchQuery(new)
                 }
 
-                MapFilterChips(activeFilters: $viewModel.activeFilters)
+                MapFilterChips(activeFilters: $viewModel.activeFilters, onFilterToggled: { viewModel.trackFilterApplied($0) })
             }
             .padding(.top, 14)
             .padding(.bottom, 10)
@@ -218,11 +212,4 @@ struct MapView: View {
         .accessibilityLabel("Re-center map on my location")
         .accessibilityHint("Double tap to move the map back to your current position")
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    MapView()
-        .environmentObject(OrderEnvironment.shared)
 }

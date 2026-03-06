@@ -2,13 +2,10 @@
 //  BranchDetailSheet.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich
-//  Map Module — Phase 3 (Simplified)
-//
-//  Removed: routing info row, isCalculatingRoute spinner,
-//           geodesic badge, Directions → InAppDirectionsView flow.
-//  Added:   Call chip (tel://), Directions chip (Apple Maps via MKMapItem),
-//           full-width Order from Here CTA.
+//  Map Module — Phase 6
+//  Added: estimatedWaitMinutes row in info section.
+//  Added: MapAnalytics.branchOrderStarted() on "Order from Here" tap.
+//  All other behaviour unchanged from Phase 5.
 //
 
 import SwiftUI
@@ -66,7 +63,6 @@ struct BranchDetailSheet: View {
 
     private var headerSection: some View {
         HStack(alignment: .top, spacing: 14) {
-            // Icon
             ZStack {
                 RoundedRectangle(cornerRadius: 14)
                     .fill(Color.accentPrimary.opacity(0.12))
@@ -76,7 +72,6 @@ struct BranchDetailSheet: View {
                     .foregroundStyle(.accentPrimary)
             }
 
-            // Name + address + status
             VStack(alignment: .leading, spacing: 5) {
                 Text(branch.name)
                     .font(.custom("Nunito-Bold", size: 18))
@@ -99,7 +94,6 @@ struct BranchDetailSheet: View {
 
             Spacer()
 
-            // Dismiss
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
                     .font(.system(size: 13, weight: .semibold))
@@ -111,33 +105,54 @@ struct BranchDetailSheet: View {
         }
     }
 
-    // MARK: - Info Row  (distance · Call · Directions)
+    // MARK: - Info Row  (distance · wait time · Call · Directions)
 
     private var infoRow: some View {
-        HStack(spacing: 12) {
-            // Distance
-            let dist = viewModel.distanceLabel(to: branch)
-            if !dist.isEmpty {
-                Label(dist, systemImage: "location.fill")
-                    .font(.custom("Nunito-SemiBold", size: 13))
-                    .foregroundStyle(.textSecondary)
-            }
-
-            Spacer()
-
-            // Call
-            if let phoneURL = URL(string: "tel://\(branch.phone.filter("0123456789+".contains))") {
-                Link(destination: phoneURL) {
-                    chipLabel("phone.fill", "Call")
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                // Distance
+                let dist = viewModel.distanceLabel(to: branch)
+                if !dist.isEmpty {
+                    Label(dist, systemImage: "location.fill")
+                        .font(.custom("Nunito-SemiBold", size: 13))
+                        .foregroundStyle(.textSecondary)
                 }
-                .accessibilityLabel("Call \(branch.name)")
+
+                Spacer()
+
+                // Call
+                if let phoneURL = URL(string: "tel://\(branch.phone.filter("0123456789+".contains))") {
+                    Link(destination: phoneURL) {
+                        chipLabel("phone.fill", "Call")
+                    }
+                    .accessibilityLabel("Call \(branch.name)")
+                }
+
+                // Apple Maps
+                Button { viewModel.openInAppleMaps(branch: branch) } label: {
+                    chipLabel("map.fill", "Directions")
+                }
+                .accessibilityLabel("Get directions to \(branch.name) in Apple Maps")
             }
 
-            // Apple Maps directions
-            Button { viewModel.openInAppleMaps(branch: branch) } label: {
-                chipLabel("map.fill", "Directions")
+            // Wait time row — Phase 6 (only shown when estimatedWaitMinutes is set)
+            if let waitLabel = branch.waitLabel {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text(waitLabel)
+                        .font(.custom("Nunito-SemiBold", size: 13))
+                }
+                .foregroundStyle(branch.estimatedWaitMinutes == 0 ? .semanticSuccess : .accentPrimary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    (branch.estimatedWaitMinutes == 0 ? Color.semanticSuccess : Color.accentPrimary)
+                        .opacity(0.1)
+                )
+                .cornerRadius(10)
+                .accessibilityLabel("Estimated wait: \(waitLabel)")
             }
-            .accessibilityLabel("Get directions to \(branch.name) in Apple Maps")
         }
     }
 
@@ -214,6 +229,11 @@ struct BranchDetailSheet: View {
     private var ctaButton: some View {
         Button {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            // Analytics — Phase 6
+            MapAnalytics.branchOrderStarted(
+                branchId:   branch.id ?? "unknown",
+                branchName: branch.name
+            )
             onOrderHere()
         } label: {
             HStack(spacing: 8) {

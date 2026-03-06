@@ -23,6 +23,11 @@ struct CartView: View {
             ZStack(alignment: .bottom) {
                 CustomRefreshScrollView({
                     VStack(spacing: 12) {
+                        // ── Branch info card (shown when a branch is selected) ──
+                        if let branch = orderEnv.selectedBranch {
+                            CartBranchInfoCard(branch: branch)
+                        }
+
                         ForEach(cartManager.items) { item in
                             Button { editingItem = item } label: { CardItemView(item: item) }
                                 .buttonStyle(PlainButtonStyle())
@@ -184,5 +189,66 @@ struct CartView: View {
                 dismiss()
             }
         }
+    }
+}
+
+
+// MARK: - CartBranchInfoCard
+
+/// Displays the selected branch name and address at the top of the cart.
+/// Shown whenever OrderEnvironment has a selectedBranch set.
+struct CartBranchInfoCard: View {
+    let branch: Branch
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.accentPrimary.opacity(0.12))
+                    .frame(width: 44, height: 44)
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(.accentPrimary)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Ordering from")
+                    .font(.custom("Nunito-Regular", size: 11))
+                    .foregroundStyle(.textMuted)
+                    .textCase(.uppercase)
+                    .tracking(0.4)
+                Text(branch.name)
+                    .font(.custom("Nunito-Bold", size: 15))
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
+                Text(branch.address)
+                    .font(.custom("Nunito-Regular", size: 12))
+                    .foregroundStyle(.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
+                    .frame(width: 7, height: 7)
+                Text(branch.isOpen ? "Open" : "Closed")
+                    .font(.custom("Nunito-SemiBold", size: 12))
+                    .foregroundStyle(branch.isOpen ? .semanticSuccess : .semanticError)
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surfacePrimary)
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Ordering from \(branch.name), \(branch.address), \(branch.isOpen ? "Open" : "Closed")")
     }
 }

@@ -45,6 +45,7 @@ struct RootView: View {
                                     .environmentObject(cardVM)
                                     .environmentObject(productVM)
                                     .environmentObject(walletVM)
+                                    .environmentObject(OrderEnvironment.shared)
                             } else {
                                 MenuView()
                                     .environmentObject(cartManager)
@@ -52,10 +53,8 @@ struct RootView: View {
                                     .environmentObject(cardVM)
                                     .environmentObject(productVM)
                                     .environmentObject(walletVM)
+                                    .environmentObject(OrderEnvironment.shared)
                             }
-                        case .map:
-                            MapView(selectedTab: $selectedTab)
-                                .environmentObject(OrderEnvironment.shared)
                         case .orders:
                             if UserSession.shared.currentUser?.role == .manager {
                                 AdminOrdersView()

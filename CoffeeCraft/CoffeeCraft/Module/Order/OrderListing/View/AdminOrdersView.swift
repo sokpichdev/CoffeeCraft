@@ -11,6 +11,8 @@ struct AdminOrdersView: View {
     @StateObject var vm = AdminOrdersViewModel()
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedTab: Segment = .activeOrders
+    @State private var showWaitTimeEditor = false
+    @State private var waitTimeBranch: Branch? = nil
 
     var body: some View {
         ZStack {
@@ -39,8 +41,22 @@ struct AdminOrdersView: View {
                 }
             }
         }
-        .customNavigationBar("Orders")
+        .customNavigationBar("Orders") {
+            // Phase 6 — Wait time editor for any branch
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("clock.badge.fill")) {
+                // Default to first branch; in a real build, pick from a list
+                waitTimeBranch = MockBranchData.all.first
+                showWaitTimeEditor = true
+            }
+        }
         .background(Color.bgSecondary)
+        .sheet(isPresented: $showWaitTimeEditor) {
+            if let branch = waitTimeBranch {
+                BranchWaitTimeEditor(branch: branch)
+                    .presentationDetents([.medium])
+                    .presentationCornerRadius(24)
+            }
+        }
     }
 }
 

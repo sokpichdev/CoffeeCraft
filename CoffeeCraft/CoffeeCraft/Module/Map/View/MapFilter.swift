@@ -1,11 +1,10 @@
 //
-//  MapFilter.swift
+//  MapFilterChips.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 3/6/26.
-//  Horizontally scrollable filter chips below the search bar.
-//  Each chip toggles independently. Multiple chips can be active at once.
-//  A branch passes if it satisfies ALL active filters (AND logic).
+//  Map Module — Phase 6
+//  Added: analytics call when a filter is toggled ON.
+//  All visual behaviour unchanged from Phase 5.
 //
 
 import SwiftUI
@@ -13,9 +12,9 @@ import SwiftUI
 // MARK: - MapFilter
 
 enum MapFilter: String, CaseIterable, Identifiable {
-    case openNow  = "Open Now"
-    case wifi     = "WiFi"
-    case parking  = "Parking"
+    case openNow   = "Open Now"
+    case wifi      = "WiFi"
+    case parking   = "Parking"
     case drivethru = "Drive-Thru"
 
     var id: String { rawValue }
@@ -29,10 +28,9 @@ enum MapFilter: String, CaseIterable, Identifiable {
         }
     }
 
-    // Amenity key to match against Branch.amenities
     var amenityKey: String? {
         switch self {
-        case .openNow:   return nil          // handled separately via isOpen
+        case .openNow:   return nil
         case .wifi:      return "wifi"
         case .parking:   return "parking"
         case .drivethru: return "drive-thru"
@@ -41,8 +39,8 @@ enum MapFilter: String, CaseIterable, Identifiable {
 
     func matches(_ branch: Branch) -> Bool {
         switch self {
-        case .openNow:   return branch.isOpen
-        default:         return branch.amenities.contains(amenityKey ?? "")
+        case .openNow: return branch.isOpen
+        default:       return branch.amenities.contains(amenityKey ?? "")
         }
     }
 }
@@ -52,6 +50,7 @@ enum MapFilter: String, CaseIterable, Identifiable {
 struct MapFilterChips: View {
 
     @Binding var activeFilters: Set<MapFilter>
+    var onFilterToggled: ((MapFilter) -> Void)? = nil   // Phase 6 analytics hook
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -77,6 +76,7 @@ struct MapFilterChips: View {
                 activeFilters.remove(filter)
             } else {
                 activeFilters.insert(filter)
+                onFilterToggled?(filter)     // fire analytics only when toggled ON
             }
         }
     }
@@ -100,9 +100,7 @@ private struct FilterChip: View {
             .foregroundStyle(isActive ? .white : .accentPrimary)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(
-                isActive ? Color.accentPrimary : Color.surfacePrimary
-            )
+            .background(isActive ? Color.accentPrimary : Color.surfacePrimary)
             .cornerRadius(20)
             .shadow(
                 color: isActive
@@ -113,10 +111,7 @@ private struct FilterChip: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .strokeBorder(
-                        isActive ? Color.clear : Color.border,
-                        lineWidth: 0.8
-                    )
+                    .strokeBorder(isActive ? Color.clear : Color.border, lineWidth: 0.8)
             )
         }
         .buttonStyle(.plain)
