@@ -15,7 +15,8 @@ import MapKit
 
 struct MapView: View {
 
-    @State private var viewModel = MapViewModel()
+    @State private var viewModel  = MapViewModel()
+    @State private var localSearch = ""     // drives the search bar text field
     @EnvironmentObject private var orderEnv: OrderEnvironment
     @Binding var selectedTab: Tab
 
@@ -25,7 +26,7 @@ struct MapView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .bottom) {
 
                 // MARK: Map / Permission
                 Group {
@@ -48,24 +49,20 @@ struct MapView: View {
 
                 // MARK: Recenter button
                 if viewModel.isPermissionGranted {
-                    recenterButton
-                        .padding(.bottom, 188)
-                        .padding(.trailing, 16)
+                    HStack {
+                        Spacer()
+                        recenterButton
+                            .padding(.bottom, viewModel.filteredBranches().isEmpty ? 32 : 244)
+                            .padding(.trailing, 16)
+                    }
                 }
 
-                // MARK: Branch strip
-                if !viewModel.branches.isEmpty {
-                    VStack(spacing: 0) {
-                        Spacer()
-                        BranchListView(
-                            branches: viewModel.sortedBranches(),
-                            selectedBranch: viewModel.selectedBranch,
-                            distanceLabel: { viewModel.distanceLabel(to: $0) },
-                            onSelect: { viewModel.selectBranch($0) }
-                        )
-                    }
-                    .ignoresSafeArea(edges: .bottom)
+                // MARK: Bottom panel — search + filters + branch strip
+                VStack(spacing: 0) {
+                    Spacer()
+                    bottomPanel
                 }
+                .ignoresSafeArea(edges: .bottom)
             }
             .customNavigationBar("Find a Branch", hideBackBtn: false)
             .onAppear {
@@ -88,9 +85,7 @@ struct MapView: View {
                             viewModel.isSheetPresented = false
                             withAnimation(.easeInOut) { selectedTab = .menu }
                         },
-                        onDismiss: {
-                            viewModel.deselectBranch()
-                        }
+                        onDismiss: { viewModel.deselectBranch() }
                     )
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.hidden)
@@ -99,6 +94,92 @@ struct MapView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Bottom Panel
+
+    private var bottomPanel: some View {
+        VStack(spacing: 0) {
+            // Search bar + filter chips
+            VStack(spacing: 8) {
+                MapSearchBar(text: $localSearch) {
+                    viewModel.searchQuery = ""
+                }
+                .padding(.horizontal, 16)
+                .onChange(of: localSearch) { _, new in
+                    viewModel.updateSearchQuery(new)
+                }
+
+                MapFilterChips(activeFilters: $viewModel.activeFilters)
+            }
+            .padding(.top, 14)
+            .padding(.bottom, 10)
+            .background(
+                Color.bgPrimary
+                    .cornerRadius(20, corners: [.topLeft, .topRight])
+                    .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -4)
+            )
+
+            // Branch strip OR empty state
+            if viewModel.filteredBranches().isEmpty {
+                emptyState
+                    .background(Color.bgPrimary)
+            } else {
+                BranchListView(
+                    branches: viewModel.filteredBranches(),
+                    selectedBranch: viewModel.selectedBranch,
+                    distanceLabel: { viewModel.distanceLabel(to: $0) },
+                    onSelect: { viewModel.selectBranch($0) }
+                )
+                .background(Color.bgPrimary)
+            }
+        }
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(.textMuted)
+            Text(viewModel.hasActiveSearchOrFilter
+                 ? "No branches match your search or filters."
+                 : "No branches available.")
+                .font(.custom("Nunito-SemiBold", size: 13))
+                .foregroundStyle(.textMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .accessibilityLabel("No branches found")
+    }
+
+    // MARK: - Map Layer
+
+    private var mapLayer: some View {
+        Map(position: $viewModel.cameraPosition, selection: .constant(nil)) {
+            UserAnnotation()
+
+            ForEach(viewModel.filteredBranches()) { branch in
+                Annotation(branch.name, coordinate: branch.coordinate) {
+                    BranchAnnotationView(
+                        branch: branch,
+                        isSelected: viewModel.selectedBranch?.id == branch.id
+                    )
+                    .onTapGesture { viewModel.selectBranch(branch) }
+                    .accessibilityLabel(
+                        "\(branch.name), \(branch.isOpen ? "Open" : "Closed"), \(viewModel.distanceLabel(to: branch))"
+                    )
+                    .accessibilityHint("Double tap to view branch details")
+                }
+            }
+        }
+        .mapStyle(.standard(elevation: .realistic))
+        .mapControls {
+            MapCompass()
+            MapScaleView()
+        }
+        .onTapGesture { viewModel.deselectBranch() }
     }
 
     // MARK: - Offline Banner
@@ -117,30 +198,7 @@ struct MapView: View {
         .background(Color.semanticWarning)
         .transition(.move(edge: .top).combined(with: .opacity))
         .animation(.easeInOut(duration: 0.3), value: viewModel.isOffline)
-    }
-
-    // MARK: - Map Layer
-
-    private var mapLayer: some View {
-        Map(position: $viewModel.cameraPosition, selection: .constant(nil)) {
-            UserAnnotation()
-
-            ForEach(viewModel.branches) { branch in
-                Annotation(branch.name, coordinate: branch.coordinate) {
-                    BranchAnnotationView(
-                        branch: branch,
-                        isSelected: viewModel.selectedBranch?.id == branch.id
-                    )
-                    .onTapGesture { viewModel.selectBranch(branch) }
-                }
-            }
-        }
-        .mapStyle(.standard(elevation: .realistic))
-        .mapControls {
-            MapCompass()
-            MapScaleView()
-        }
-        .onTapGesture { viewModel.deselectBranch() }
+        .accessibilityLabel("You are offline. Showing saved branch data.")
     }
 
     // MARK: - Recenter Button
@@ -158,6 +216,7 @@ struct MapView: View {
             }
         }
         .accessibilityLabel("Re-center map on my location")
+        .accessibilityHint("Double tap to move the map back to your current position")
     }
 }
 

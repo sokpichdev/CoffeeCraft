@@ -3,14 +3,6 @@
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 3/6/26.
-//
-
-
-//
-//  BranchSeeder.swift
-//  CoffeeCraft
-//
-//  Map Module — Phase 4
 //  Seeds the branches/ Firestore collection with the 5 Phnom Penh branches.
 //
 //  Usage (run once, e.g. from a hidden admin button or from AppDelegate):

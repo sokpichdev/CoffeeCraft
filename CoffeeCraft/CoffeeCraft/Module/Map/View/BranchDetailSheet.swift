@@ -212,7 +212,10 @@ struct BranchDetailSheet: View {
     // MARK: - CTA
 
     private var ctaButton: some View {
-        Button(action: onOrderHere) {
+        Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            onOrderHere()
+        } label: {
             HStack(spacing: 8) {
                 Image(systemName: "bag.fill")
                     .font(.system(size: 15, weight: .semibold))

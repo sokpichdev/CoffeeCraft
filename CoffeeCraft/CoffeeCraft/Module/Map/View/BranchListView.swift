@@ -3,13 +3,6 @@
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 06/03/2026.
-//
-
-
-//
-//  BranchListView.swift
-//  CoffeeCraft
-//
 //  Created by Sok Pich
 //  Map Module — Phase 2: Branches on Map
 //
