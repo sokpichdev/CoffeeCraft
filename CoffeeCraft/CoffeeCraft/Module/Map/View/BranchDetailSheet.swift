@@ -2,20 +2,19 @@
 //  BranchDetailSheet.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//  Map Module — Phase 3: Branch Selection + Routing
+//  Map Module — Simplified
+//  Branch detail: header, hours, amenities, phone, Apple Maps link, Order CTA.
+//  Route info and directions view removed — Phase 5+.
 //
 
 import SwiftUI
-import MapKit
 
 // MARK: - BranchDetailSheet
 
 struct BranchDetailSheet: View {
 
     let branch: Branch
-    let distanceLabel: String
-    let etaLabel: String             // e.g. "~8 min drive"
+    let viewModel: MapViewModel
     let onOrderHere: () -> Void
     let onDismiss: () -> Void
 
@@ -23,36 +22,23 @@ struct BranchDetailSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-
-            // ── Drag handle ─────────────────────────────────────────
             dragHandle
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
-
-                    // ── Header ──────────────────────────────────────
                     headerSection
-
                     Divider().opacity(0.5)
 
-                    // ── ETA + distance ──────────────────────────────
-                    if !etaLabel.isEmpty || !distanceLabel.isEmpty {
-                        routeInfoSection
-                        Divider().opacity(0.5)
-                    }
+                    infoRow
+                    Divider().opacity(0.5)
 
-                    // ── Amenities ───────────────────────────────────
                     if !branch.amenityIcons.isEmpty {
                         amenitiesSection
                         Divider().opacity(0.5)
                     }
 
-                    // ── Opening hours (collapsible) ──────────────────
                     hoursSection
-
-                    // ── CTA buttons ─────────────────────────────────
-                    ctaButtons
-                        .padding(.bottom, 8)
+                    ctaButtons.padding(.bottom, 8)
                 }
                 .padding(20)
             }
@@ -61,7 +47,7 @@ struct BranchDetailSheet: View {
         .cornerRadius(24, corners: [.topLeft, .topRight])
     }
 
-    // MARK: - Subviews
+    // MARK: - Drag Handle
 
     private var dragHandle: some View {
         RoundedRectangle(cornerRadius: 3)
@@ -71,6 +57,8 @@ struct BranchDetailSheet: View {
             .padding(.bottom, 8)
             .frame(maxWidth: .infinity)
     }
+
+    // MARK: - Header
 
     private var headerSection: some View {
         HStack(alignment: .top, spacing: 14) {
@@ -84,6 +72,7 @@ struct BranchDetailSheet: View {
                     .foregroundStyle(.accentPrimary)
             }
 
+            // Name + address + status
             VStack(alignment: .leading, spacing: 5) {
                 Text(branch.name)
                     .font(.custom("Nunito-Bold", size: 18))
@@ -119,20 +108,59 @@ struct BranchDetailSheet: View {
         }
     }
 
-    private var routeInfoSection: some View {
-        HStack(spacing: 20) {
-            if !etaLabel.isEmpty {
-                Label(etaLabel, systemImage: "car.fill")
+    // MARK: - Info Row (distance + phone + Apple Maps)
+
+    private var infoRow: some View {
+        HStack(spacing: 16) {
+            // Distance
+            let distance = viewModel.distanceLabel(to: branch)
+            if !distance.isEmpty {
+                Label(distance, systemImage: "location.fill")
                     .font(.custom("Nunito-SemiBold", size: 13))
                     .foregroundStyle(.textSecondary)
             }
-            if !distanceLabel.isEmpty {
-                Label(distanceLabel, systemImage: "location.fill")
-                    .font(.custom("Nunito-SemiBold", size: 13))
-                    .foregroundStyle(.textSecondary)
+
+            Spacer()
+
+            // Phone call
+            if let phoneURL = URL(string: "tel://\(branch.phone.filter("0123456789+".contains))") {
+                Link(destination: phoneURL) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "phone.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("Call")
+                            .font(.custom("Nunito-SemiBold", size: 13))
+                    }
+                    .foregroundStyle(.accentPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(Color.accentPrimary.opacity(0.1))
+                    .cornerRadius(10)
+                }
+                .accessibilityLabel("Call \(branch.name)")
             }
+
+            // Apple Maps
+            Button {
+                viewModel.openInAppleMaps(branch: branch)
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "map.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Directions")
+                        .font(.custom("Nunito-SemiBold", size: 13))
+                }
+                .foregroundStyle(.accentPrimary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Color.accentPrimary.opacity(0.1))
+                .cornerRadius(10)
+            }
+            .accessibilityLabel("Get directions to \(branch.name) in Apple Maps")
         }
     }
+
+    // MARK: - Amenities
 
     private var amenitiesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -160,13 +188,12 @@ struct BranchDetailSheet: View {
         }
     }
 
+    // MARK: - Hours
+
     private var hoursSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Collapsible header
             Button {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    showHours.toggle()
-                }
+                withAnimation(.easeInOut(duration: 0.25)) { showHours.toggle() }
             } label: {
                 HStack {
                     Text("Opening Hours")
@@ -187,78 +214,41 @@ struct BranchDetailSheet: View {
         }
     }
 
+    // MARK: - CTA
+
     private var ctaButtons: some View {
-        HStack(spacing: 12) {
-            // Get Directions
-            Button(action: openInMaps) {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Directions")
-                        .font(.custom("Nunito-SemiBold", size: 15))
-                }
-                .foregroundStyle(.accentPrimary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color.accentPrimary.opacity(0.1))
-                .cornerRadius(14)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(Color.accentPrimary.opacity(0.3), lineWidth: 1)
-                )
+        Button(action: onOrderHere) {
+            HStack(spacing: 8) {
+                Image(systemName: "bag.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                Text(branch.isOpen ? "Order from Here" : "Branch Closed")
+                    .font(.custom("Nunito-Bold", size: 16))
             }
-            .accessibilityLabel("Get directions to \(branch.name) in Apple Maps")
-
-            // Order from here
-            Button(action: onOrderHere) {
-                HStack(spacing: 6) {
-                    Image(systemName: "bag.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Order Here")
-                        .font(.custom("Nunito-Bold", size: 15))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    branch.isOpen
-                        ? Color.accentPrimary
-                        : Color.textMuted
-                )
-                .cornerRadius(14)
-            }
-            .disabled(!branch.isOpen)
-            .accessibilityLabel(
-                branch.isOpen
-                    ? "Order from \(branch.name)"
-                    : "\(branch.name) is currently closed"
-            )
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(branch.isOpen ? Color.accentPrimary : Color.textMuted)
+            .cornerRadius(14)
         }
-    }
-
-    // MARK: - Helpers
-
-    private func openInMaps() {
-        let placemark = MKPlacemark(coordinate: branch.coordinate)
-        let mapItem   = MKMapItem(placemark: placemark)
-        mapItem.name  = branch.name
-        mapItem.openInMaps(launchOptions: [
-            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
-        ])
+        .disabled(!branch.isOpen)
+        .accessibilityLabel(
+            branch.isOpen
+                ? "Order from \(branch.name)"
+                : "\(branch.name) is currently closed"
+        )
     }
 }
 
-//// MARK: - Preview
-//
-//#Preview {
-//    ZStack(alignment: .bottom) {
-//        Color.black.opacity(0.3).ignoresSafeArea()
-//        BranchDetailSheet(
-//            branch: MockBranchData.all[1],
-//            distanceLabel: "2.3 km",
-//            etaLabel: "~8 min drive",
-//            onOrderHere: {},
-//            onDismiss: {}
-//        )
-//    }
-//}
+// MARK: - Preview
+
+#Preview {
+    ZStack(alignment: .bottom) {
+        Color.black.opacity(0.3).ignoresSafeArea()
+        BranchDetailSheet(
+            branch: MockBranchData.all[1],
+            viewModel: MapViewModel(),
+            onOrderHere: {},
+            onDismiss: {}
+        )
+    }
+}

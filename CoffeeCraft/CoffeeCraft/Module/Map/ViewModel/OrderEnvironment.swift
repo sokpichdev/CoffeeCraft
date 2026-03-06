@@ -2,16 +2,13 @@
 //  OrderEnvironment.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 06/03/2026.
-//  Map Module — Phase 3: Branch Selection + Routing
-//
-//  Injected into the root environment so the Map module can write
-//  the selected branch and the Order module can read it — no direct coupling.
+//  Shared environment object: Map writes selected branch, Order/Cart/Menu reads it.
+//  Injected at app root so it's available to all modules without direct coupling.
 //
 //  Usage:
-//    Write (Map):  orderEnv.select(branch: branch)
-//    Read  (Order): orderEnv.selectedBranchId
-//    Wire  (App):  .environmentObject(OrderEnvironment.shared)
+//    Write (Map):    orderEnv.select(branch: branch)
+//    Read  (Order):  orderEnv.selectedBranch
+//    Clear (Cart):   orderEnv.clear()   ← call after order is placed
 //
 
 import SwiftUI
@@ -22,18 +19,22 @@ final class OrderEnvironment: ObservableObject {
 
     static let shared = OrderEnvironment()
 
-    @Published var selectedBranchId: String?
-    @Published var selectedBranchName: String?
+    // Full Branch stored so downstream modules (Menu, Cart, Order)
+    // can display the branch name without a separate lookup.
+    @Published var selectedBranch: Branch?
+
+    // MARK: - Convenience
+
+    var selectedBranchId: String?   { selectedBranch?.id }
+    var selectedBranchName: String? { selectedBranch?.name }
 
     // MARK: - Actions
 
     func select(branch: Branch) {
-        selectedBranchId   = branch.id
-        selectedBranchName = branch.name
+        selectedBranch = branch
     }
 
     func clear() {
-        selectedBranchId   = nil
-        selectedBranchName = nil
+        selectedBranch = nil
     }
 }

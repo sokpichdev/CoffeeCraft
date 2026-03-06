@@ -2,15 +2,9 @@
 //  MapViewModel.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich
-//  Map Module — Phase 3: Branch Selection + Routing
-//
-//  Changes from Phase 2:
-//  - Add: isSheetPresented — controls BranchDetailSheet visibility
-//  - Add: routePolyline — drawn on map when a branch is selected
-//  - Add: etaLabel — travel time string from MKDirections
-//  - Add: calculateRoute(to:) — async MKDirections fetch
-//  - Add: selectBranch(_:) — single action that sets branch + fetches route + shows sheet
+//  Map Module — Simplified
+//  Responsibilities: location, branch list, branch selection, sheet presentation.
+//  Routing, directions, and delivery simulation removed — Phase 5+.
 //
 
 import SwiftUI
@@ -31,12 +25,7 @@ final class MapViewModel: NSObject {
 
     var branches: [Branch] = []
     var selectedBranch: Branch?
-
-    // MARK: - Sheet + Route State
-
     var isSheetPresented = false
-    var routePolyline: MKPolyline?
-    var etaLabel: String = ""
 
     // MARK: - Permission State
 
@@ -52,17 +41,17 @@ final class MapViewModel: NSObject {
 
     // MARK: - Private
 
-    private let locationManager = CLLocationManager()
+    private let locationManager     = CLLocationManager()
     private var hasInitiallyLocated = false
 
     // MARK: - Init
 
     override init() {
         super.init()
-        locationManager.delegate = self
+        locationManager.delegate        = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 10
-        authorizationStatus = locationManager.authorizationStatus
+        locationManager.distanceFilter  = 10
+        authorizationStatus             = locationManager.authorizationStatus
     }
 
     // MARK: - Location
@@ -72,7 +61,7 @@ final class MapViewModel: NSObject {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .authorizedWhenInUse, .authorizedAlways:
-            startUpdatingLocation()
+            locationManager.startUpdatingLocation()
         default:
             break
         }
@@ -92,6 +81,7 @@ final class MapViewModel: NSObject {
     // MARK: - Branches
 
     func fetchBranches() {
+        // TODO Phase 6: replace with Firestore listener
         branches = MockBranchData.all
     }
 
@@ -103,20 +93,27 @@ final class MapViewModel: NSObject {
     func distance(to branch: Branch) -> CLLocationDistance {
         guard let userLocation else { return .infinity }
         return userLocation.distance(from: CLLocation(
-            latitude: branch.latitude,
+            latitude:  branch.latitude,
             longitude: branch.longitude
         ))
     }
 
     func distanceLabel(to branch: Branch) -> String {
-        let metres = distance(to: branch)
-        guard metres != .infinity else { return "" }
-        return metres >= 1_000
-            ? String(format: "%.1f km", metres / 1_000)
-            : String(format: "%.0f m", metres)
+        let m = distance(to: branch)
+        guard m != .infinity else { return "" }
+        return m >= 1_000
+            ? String(format: "%.1f km", m / 1_000)
+            : String(format: "%.0f m", m)
     }
 
-    func focus(on branch: Branch) {
+    // MARK: - Selection
+
+    func selectBranch(_ branch: Branch) {
+        withAnimation(.spring(response: 0.3)) {
+            selectedBranch   = branch
+            isSheetPresented = true
+        }
+        // Pan map to branch
         withAnimation(.easeInOut(duration: 0.4)) {
             cameraPosition = .region(MKCoordinateRegion(
                 center: branch.coordinate,
@@ -126,69 +123,22 @@ final class MapViewModel: NSObject {
         }
     }
 
-    // MARK: - Branch Selection (Phase 3)
-
-    /// Single entry point for selecting a branch — sets state, fetches route, shows sheet.
-    func selectBranch(_ branch: Branch) {
-        withAnimation(.spring(response: 0.3)) {
-            selectedBranch = branch
-            isSheetPresented = true
-        }
-        focus(on: branch)
-
-        Task {
-            await calculateRoute(to: branch)
-        }
-    }
-
-    /// Clears selection, hides sheet, removes route polyline.
     func deselectBranch() {
         withAnimation(.spring(response: 0.3)) {
-            selectedBranch = nil
+            selectedBranch   = nil
             isSheetPresented = false
-            routePolyline = nil
-            etaLabel = ""
         }
     }
 
-    // MARK: - Route Calculation
+    // MARK: - Open in Apple Maps
 
-    /// Calculates a driving route from the user's location to `branch` using MKDirections.
-    /// Stores the polyline for map overlay and a human-readable ETA string.
-    private func calculateRoute(to branch: Branch) async {
-        guard let userLocation else { return }
-
-        let request = MKDirections.Request()
-        request.source = MKMapItem(
-            placemark: MKPlacemark(coordinate: userLocation.coordinate)
-        )
-        request.destination = MKMapItem(
-            placemark: MKPlacemark(coordinate: branch.coordinate)
-        )
-        request.transportType = .automobile
-
-        do {
-            let response = try await MKDirections(request: request).calculate()
-            guard let route = response.routes.first else { return }
-
-            await MainActor.run {
-                routePolyline = route.polyline
-                etaLabel = formatETA(route.expectedTravelTime)
-            }
-        } catch {
-            print("[MapViewModel] Route error: \(error.localizedDescription)")
-        }
-    }
-
-    private func formatETA(_ seconds: TimeInterval) -> String {
-        let minutes = Int(seconds / 60)
-        return minutes < 1 ? "< 1 min drive" : "~\(minutes) min drive"
-    }
-
-    // MARK: - Private
-
-    private func startUpdatingLocation() {
-        locationManager.startUpdatingLocation()
+    func openInAppleMaps(branch: Branch) {
+        let placemark = MKPlacemark(coordinate: branch.coordinate)
+        let item      = MKMapItem(placemark: placemark)
+        item.name     = branch.name
+        item.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+        ])
     }
 }
 
@@ -198,24 +148,22 @@ extension MapViewModel: CLLocationManagerDelegate {
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
-        if isPermissionGranted { startUpdatingLocation() }
+        if isPermissionGranted { manager.startUpdatingLocation() }
     }
 
-    func locationManager(
-        _ manager: CLLocationManager,
-        didUpdateLocations locations: [CLLocation]
-    ) {
+    func locationManager(_ manager: CLLocationManager,
+                         didUpdateLocations locations: [CLLocation]) {
         guard let latest = locations.last else { return }
         userLocation = latest
-
         guard !hasInitiallyLocated else { return }
         hasInitiallyLocated = true
-
-        cameraPosition = .region(MKCoordinateRegion(
-            center: latest.coordinate,
-            latitudinalMeters: 1_000,
-            longitudinalMeters: 1_000
-        ))
+        withAnimation {
+            cameraPosition = .region(MKCoordinateRegion(
+                center: latest.coordinate,
+                latitudinalMeters: 1_000,
+                longitudinalMeters: 1_000
+            ))
+        }
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
