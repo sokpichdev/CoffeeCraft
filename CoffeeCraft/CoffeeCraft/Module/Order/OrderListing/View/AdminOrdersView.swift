@@ -39,11 +39,7 @@ struct AdminOrdersView: View {
                 }
             }
         }
-        .customNavigationBar("Orders") {
-            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("map.fill")) {
-                Task { await BranchSeeder.seed() }
-            }
-        }
+        .customNavigationBar("Orders")
         .background(Color.bgSecondary)
     }
 }

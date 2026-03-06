@@ -28,6 +28,43 @@ final class MapViewModel: NSObject {
     var selectedBranch: Branch?
     var isSheetPresented = false
 
+    // MARK: - Search & Filter  (Phase 5)
+
+    var searchQuery: String = ""
+    var activeFilters: Set<MapFilter> = []
+    private var searchDebounceTask: Task<Void, Never>?
+
+    /// Branches visible on the map and strip after search + filters.
+    func filteredBranches() -> [Branch] {
+        let base = sortedBranches()
+
+        // AND logic — branch must satisfy every active filter chip
+        let afterFilters = activeFilters.isEmpty
+            ? base
+            : base.filter { branch in activeFilters.allSatisfy { $0.matches(branch) } }
+
+        let q = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !q.isEmpty else { return afterFilters }
+
+        return afterFilters.filter {
+            $0.name.lowercased().contains(q) ||
+            $0.address.lowercased().contains(q)
+        }
+    }
+
+    func updateSearchQuery(_ query: String) {
+        searchDebounceTask?.cancel()
+        searchDebounceTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
+            await MainActor.run { self?.searchQuery = query }
+        }
+    }
+
+    var hasActiveSearchOrFilter: Bool {
+        !searchQuery.isEmpty || !activeFilters.isEmpty
+    }
+
     // MARK: - Offline State
 
     var isOffline = false
@@ -74,6 +111,7 @@ final class MapViewModel: NSObject {
 
     func recenterOnUser() {
         guard let userLocation else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         withAnimation(.easeInOut(duration: 0.4)) {
             cameraPosition = .region(MKCoordinateRegion(
                 center: userLocation.coordinate,
@@ -85,12 +123,8 @@ final class MapViewModel: NSObject {
 
     // MARK: - Branches
 
-    /// Starts a Firestore live listener via BranchRepository.
-    /// Updates isOffline based on network connectivity.
-    /// Falls back to MockBranchData when offline or Firestore is empty.
     func fetchBranches() {
         isOffline = !NetworkMonitor.shared.isConnected
-
         BranchRepository.shared.listen { [weak self] updatedBranches in
             guard let self else { return }
             DispatchQueue.main.async {
@@ -128,6 +162,7 @@ final class MapViewModel: NSObject {
     // MARK: - Selection
 
     func selectBranch(_ branch: Branch) {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         withAnimation(.spring(response: 0.3)) {
             selectedBranch   = branch
             isSheetPresented = true
@@ -161,18 +196,14 @@ final class MapViewModel: NSObject {
             }
             return
         }
-
         let userCoord   = userLocation.coordinate
         let branchCoord = branch.coordinate
-
         let minLat = min(userCoord.latitude,  branchCoord.latitude)
         let maxLat = max(userCoord.latitude,  branchCoord.latitude)
         let minLon = min(userCoord.longitude, branchCoord.longitude)
         let maxLon = max(userCoord.longitude, branchCoord.longitude)
-
         let latDelta = max((maxLat - minLat) * 1.6, 0.005)
         let lonDelta = max((maxLon - minLon) * 1.6, 0.005)
-
         withAnimation(.easeInOut(duration: 0.5)) {
             cameraPosition = .region(MKCoordinateRegion(
                 center: CLLocationCoordinate2D(
