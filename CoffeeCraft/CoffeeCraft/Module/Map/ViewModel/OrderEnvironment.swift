@@ -2,13 +2,15 @@
 //  OrderEnvironment.swift
 //  CoffeeCraft
 //
-//  Shared environment object: Map writes selected branch, Order/Cart/Menu reads it.
-//  Injected at app root so it's available to all modules without direct coupling.
+//  Created by Sok Pich
+//  Map Module — Phase 3 (Simplified)
 //
-//  Usage:
-//    Write (Map):    orderEnv.select(branch: branch)
-//    Read  (Order):  orderEnv.selectedBranch
-//    Clear (Cart):   orderEnv.clear()   ← call after order is placed
+//  Shared bridge: Map writes the selected branch, every other module reads it.
+//  Injected at app root so it's available everywhere without direct coupling.
+//
+//  Write (Map):   orderEnv.select(branch: branch)
+//  Read (Order):  orderEnv.selectedBranch
+//  Clear (Cart):  orderEnv.clear()  ← call this after a successful order
 //
 
 import SwiftUI
@@ -19,13 +21,13 @@ final class OrderEnvironment: ObservableObject {
 
     static let shared = OrderEnvironment()
 
-    // Full Branch stored so downstream modules (Menu, Cart, Order)
-    // can display the branch name without a separate lookup.
+    // Full Branch object so downstream modules (Menu, Cart, Order)
+    // can display name/address without a separate Firestore lookup.
     @Published var selectedBranch: Branch?
 
-    // MARK: - Convenience
+    // MARK: - Convenience accessors
 
-    var selectedBranchId: String?   { selectedBranch?.id }
+    var selectedBranchId:   String? { selectedBranch?.id   }
     var selectedBranchName: String? { selectedBranch?.name }
 
     // MARK: - Actions

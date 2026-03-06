@@ -34,6 +34,29 @@ struct OrderHeaderCard: View {
             Divider()
                 .background(Color.secondary.opacity(0.2))
             
+            // Branch row — Phase 4 (only shown when order has a branch tag)
+            if let branchName = order.branchName, !branchName.isEmpty {
+                HStack(spacing: 10) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.accentPrimary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Branch")
+                            .font(.caption)
+                            .foregroundColor(.textSecondary)
+                            .textCase(.uppercase)
+                            .tracking(0.5)
+                        Text(branchName)
+                            .font(.callout).fontWeight(.semibold)
+                            .foregroundColor(.textPrimary)
+                    }
+                    Spacer()
+                }
+
+                Divider()
+                    .background(Color.secondary.opacity(0.2))
+            }
+
             // User Info Section
             HStack(spacing: 12) {
                 // Avatar placeholder

@@ -98,6 +98,16 @@ class OrderService: ObservableObject {
                     orderData["walletAmountPaid"] = total
                 }
 
+                // MARK: - Branch tagging (Phase 4 — Map module)
+                // Tag the order with the branch the user selected on the Map tab.
+                // Optional: old orders and orders placed without visiting the Map
+                // tab will simply have no branchId field — that is valid.
+                if let branch = OrderEnvironment.shared.selectedBranch {
+                    orderData["branchId"]   = branch.id
+                    orderData["branchName"] = branch.name
+                    AppLog.order.debug("Order tagged with branch: \(branch.name ?? "unknown")")
+                }
+
                 // MARK: - Step 4: Write order — refund if this fails (deduction already happened)
                 do {
                     try await db.collection("orders").document(formattedOrderId).setData(orderData)
