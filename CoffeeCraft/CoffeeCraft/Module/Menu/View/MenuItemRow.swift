@@ -22,17 +22,18 @@ struct MenuItemRow: View {
                     .foregroundColor(.textSecondary)
             }
             Spacer()
-            AsyncImageCard(imageURL: item.imageURL, height: 78, width: 78, corner: 10)
+            AsyncImageCard(imageURL: item.imageURL, height: 78, width: 78, corner: 12)
         }
         .padding(8)
         .frame(height: 90)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.bgSecondary.opacity(0.5))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.border, lineWidth: 1)
-        )
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.surfacePrimary)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                }
+                .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+        }
     }
 }
