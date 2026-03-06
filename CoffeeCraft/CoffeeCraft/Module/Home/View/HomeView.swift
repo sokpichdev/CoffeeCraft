@@ -13,7 +13,6 @@ struct HomeView: View {
     @EnvironmentObject var cardVM: CardViewModel
     @Binding var selectedTab: Tab
     @State private var currentIndex: Int = 0
-    @State private var showTopUp: Bool = false
     private var bannerImages: [String] {
         announcementVM.announcements
             .prefix(4)
@@ -46,9 +45,6 @@ struct HomeView: View {
         })
         .edgesIgnoringSafeArea(.top)
         .background(Color.bgPrimary)
-        .sheet(isPresented: $showTopUp) {
-            TopUpView(walletVM: walletVM)
-        }
         .onAppear {
             if !announcementVM.isAnnouncementsFetched {
                 Task {
@@ -163,8 +159,8 @@ struct HomeView: View {
                     Spacer()
 
                     // Top Up button
-                    Button {
-                        showTopUp = true
+                    PushLink {
+                        TopUpView(walletVM: walletVM)
                     } label: {
                         HStack(spacing: 5) {
                             Image(systemName: "plus.circle.fill")

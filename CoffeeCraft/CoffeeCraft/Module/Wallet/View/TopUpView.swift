@@ -28,39 +28,32 @@ struct TopUpView: View {
 
     @ObservedObject var walletVM: WalletViewModel
     @Environment(\.dismiss) private var dismiss
-
-    @State private var path          = NavigationPath()
+    @Environment(\.pushScreen) private var push
     @State private var selectedUSD: Double?
-    @State private var customInput: String     = ""
+    @State private var customInput: String = ""
     @State private var selectedBank: BankOption?
 
     var body: some View {
-        NavigationStack(path: $path) {
+//        CustomNavigationStack {
             TopUpAmountStep(
                 walletVM: walletVM,
                 selectedUSD: $selectedUSD,
                 customInput: $customInput,
                 selectedBank: $selectedBank,
-                onContinue: { path.append("checkout") }
-            )
-            .navigationDestination(for: String.self) { step in
-                switch step {
-                case "checkout":
+                onContinue: {
                     if let bank = selectedBank, let usd = resolvedUSD {
-                        TopUpCheckoutStep(
+                        push(AnyView(TopUpCheckoutStep(
                             walletVM: walletVM,
                             bank: bank,
                             usdAmount: usd,
                             onSuccess: { dismiss() }
-                        )
+                        )))
                     }
-                default:
-                    EmptyView()
                 }
-            }
-        }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
+            )
+//        }
+//        .presentationDetents([.large])
+//        .presentationDragIndicator(.visible)
     }
     private var resolvedUSD: Double? {
         if let s = selectedUSD { return s }
@@ -91,10 +84,9 @@ private struct TopUpAmountStep: View {
     }
 
     var body: some View {
-        ScrollView {
+        CustomRefreshScrollView( {
             VStack(spacing: 28) {
 
-                // ── Header ────────────────────────────────────────────────
                 VStack(spacing: 8) {
                     ZStack {
                         Circle().fill(Color.accentPrimary.opacity(0.1)).frame(width: 64, height: 64)
@@ -115,7 +107,6 @@ private struct TopUpAmountStep: View {
                 }
                 .padding(.top, 8)
 
-                // ── Preset grid ───────────────────────────────────────────
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Choose Amount").font(.subheadline).fontWeight(.semibold)
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
@@ -133,7 +124,6 @@ private struct TopUpAmountStep: View {
                     }
                 }
 
-                // ── Custom keyboard input ─────────────────────────────────
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Or enter amount (USD)").font(.subheadline).fontWeight(.semibold)
                     HStack(spacing: 10) {
@@ -158,7 +148,6 @@ private struct TopUpAmountStep: View {
                         ))
                 }
 
-                // ── Summary card ──────────────────────────────────────────
                 if let usd = resolvedUSD, usd > 0 {
                     VStack(spacing: 0) {
                         summaryRow(label: "You pay", value: String(format: "$%.2f", usd))
@@ -175,7 +164,6 @@ private struct TopUpAmountStep: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
-                // ── Payment Method ────────────────────────────────────────
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Payment Method").font(.subheadline).fontWeight(.semibold)
                     VStack(spacing: 8) {
@@ -187,7 +175,6 @@ private struct TopUpAmountStep: View {
                     }
                 }
 
-                // ── Continue ──────────────────────────────────────────────
                 CustomCoffeeButton(
                     title: "Continue",
                     buttonImage: "arrow.right.circle.fill",
@@ -202,10 +189,9 @@ private struct TopUpAmountStep: View {
             }
             .padding(.horizontal, 20)
             .animation(.spring(duration: 0.3), value: resolvedUSD != nil)
-        }
+        })
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Top Up")
-        .navigationBarTitleDisplayMode(.inline)
+        .customNavigationBar("Top Up")
     }
 
     private func summaryRow(label: String, value: String, highlight: Bool = false) -> some View {
@@ -333,8 +319,6 @@ private struct TopUpCheckoutStep: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 24) {
-
-                    // ── Bank card ─────────────────────────────────────────
                     VStack(spacing: 0) {
                         ZStack {
                             LinearGradient(colors: [bank.color, bank.color.opacity(0.75)], startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -360,7 +344,6 @@ private struct TopUpCheckoutStep: View {
                     }
                     .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
 
-                    // ── Info note ─────────────────────────────────────────
                     HStack(spacing: 8) {
                         Image(systemName: "info.circle.fill").foregroundStyle(Color.accentPrimary)
                         Text("Balance will be credited instantly after payment is confirmed.")
@@ -373,7 +356,6 @@ private struct TopUpCheckoutStep: View {
                 .padding(20)
             }
 
-            // ── Pay button pinned ─────────────────────────────────────────
             VStack(spacing: 0) {
                 Divider()
                 CustomCoffeeButton(
@@ -387,8 +369,7 @@ private struct TopUpCheckoutStep: View {
             .background(Color(.systemGroupedBackground))
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Checkout")
-        .navigationBarTitleDisplayMode(.inline)
+        .customNavigationBar("Checkout")
     }
 
     private func checkoutRow(label: String, value: String, highlight: Bool = false) -> some View {
