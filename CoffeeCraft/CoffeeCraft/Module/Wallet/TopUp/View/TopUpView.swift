@@ -35,6 +35,7 @@ struct TopUpView: View {
                 .tint(Color.accentPrimary)
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
+                .background(Color.bgSecondary)
             
             switch currentStep {
             case .amount:
@@ -66,7 +67,7 @@ struct TopUpView: View {
                 }
             }
         }
-        .background(.bgPrimary)
+        .background(Color.bgPrimary)
         .customNavigationBar(navigationTitle) {
             ToolBarButton.back {
                 handleBack()

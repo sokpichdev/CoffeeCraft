@@ -16,7 +16,7 @@ struct TopUpBankStep: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Choose your bank")
                         .font(.headline)
-                        .foregroundColor(.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                         .padding(.horizontal, 20)
                     
                     VStack(spacing: 10) {
@@ -35,6 +35,7 @@ struct TopUpBankStep: View {
             
             VStack(spacing: 0) {
                 Divider()
+                    .overlay(Color.border)
                 Button {
                     onContinue()
                 } label: {
@@ -45,14 +46,14 @@ struct TopUpBankStep: View {
                         Image(systemName: "arrow.right")
                             .font(.system(size: 16, weight: .semibold))
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.bgPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
                             .fill(
                                 selectedBank == nil
-                                ? Color.gray.opacity(0.4)
+                                ? Color.textMuted.opacity(0.35)
                                 : Color.accentPrimary
                             )
                     )
@@ -61,7 +62,7 @@ struct TopUpBankStep: View {
                 .disabled(selectedBank == nil)
                 .padding(20)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.bgSecondary)
         }
     }
 }

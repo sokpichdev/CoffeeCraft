@@ -30,12 +30,12 @@ struct TopUpCheckoutStep: View {
                             VStack(spacing: 8) {
                                 Image(systemName: bank.icon)
                                     .font(.system(size: 32, weight: .semibold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.bgPrimary)
                                 
                                 Text(bank.name)
                                     .font(.title3)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.bgPrimary)
                             }
                         }
                         .frame(height: 110)
@@ -43,46 +43,61 @@ struct TopUpCheckoutStep: View {
 
                         VStack(spacing: 0) {
                             checkoutRow(label: "Recipient", value: "CoffeeCraft Wallet")
-                            Divider().padding(.horizontal, 16)
+                            Divider()
+                                .overlay(Color.border)
+                                .padding(.horizontal, 16)
                             checkoutRow(label: "Amount", value: String(format: "$%.2f USD", usdAmount))
-                            Divider().padding(.horizontal, 16)
+                            Divider()
+                                .overlay(Color.border)
+                                .padding(.horizontal, 16)
                             checkoutRow(label: "You receive", value: "+\(usdAmount.currencyFormatted)", highlight: true)
-                            Divider().padding(.horizontal, 16)
+                            Divider()
+                                .overlay(Color.border)
+                                .padding(.horizontal, 16)
                             checkoutRow(label: "Method", value: bank.name)
                         }
-                        .background(Color(.secondarySystemGroupedBackground))
+                        .background(Color.surfacePrimary)
                         .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
                     }
-                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .strokeBorder(Color.border, lineWidth: 1)
+                    )
+                    .shadow(color: Color.coffeeDarkBrown.opacity(0.08), radius: 12, y: 4)
 
                     // Info Note
                     HStack(spacing: 10) {
                         Image(systemName: "info.circle.fill")
-                            .foregroundStyle(Color.accentPrimary)
+                            .foregroundStyle(Color.accentGold)
                             .font(.system(size: 16))
                         
                         Text("Balance will be credited instantly after payment confirmation.")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(14)
-                    .background(Color.accentPrimary.opacity(0.07))
+                    .padding()
+                    .background(Color.parchment.opacity(0.55))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.accentGold.opacity(0.3), lineWidth: 1)
+                    )
                 }
-                .padding(20)
+                .padding()
             }
 
             // Pay Button
             VStack(spacing: 0) {
                 Divider()
+                    .overlay(Color.border)
                 Button {
                     Task { await pay() }
                 } label: {
                     HStack(spacing: 8) {
                         if isLoading {
                             ProgressView()
-                                .tint(.white)
+                                .tint(Color.bgPrimary)
                                 .scaleEffect(0.8)
                         } else {
                             Image(systemName: "lock.fill")
@@ -92,7 +107,7 @@ struct TopUpCheckoutStep: View {
                         Text(isLoading ? "Processing..." : "Pay \(String(format: "$%.2f", usdAmount))")
                             .font(.headline)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.bgPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -105,23 +120,23 @@ struct TopUpCheckoutStep: View {
                     )
                 }
                 .disabled(isLoading)
-                .padding(20)
+                .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.bgSecondary)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
     }
 
     private func checkoutRow(label: String, value: String, highlight: Bool = false) -> some View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.textSecondary)
             Spacer()
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.bold)
-                .foregroundStyle(highlight ? Color.semanticSuccess : .primary)
+                .foregroundStyle(highlight ? Color.semanticSuccess : Color.textPrimary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
