@@ -119,7 +119,7 @@ struct HomeView: View {
             if UserSession.shared.isLoggedIn {
                 HStack(spacing: 10) {
                     PushLink {
-                        FilteredTransactionView(transactions: walletVM.transactions, isLoading: walletVM.isLoading)
+                        WalletView(showWallet: false)
                     } label: {
                         // CC Balance pill
                         HStack(spacing: 5) {
