@@ -9,8 +9,8 @@ import SwiftUI
 struct WalletView: View {
     var showWallet: Bool = true
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pushScreen) private var push
     @StateObject private var vm = WalletViewModel()
-    @State private var showTopUp: Bool = false
 
     var body: some View {
         CustomRefreshScrollView({
@@ -22,7 +22,7 @@ struct WalletView: View {
                         isLoading: vm.isLoading,
                         cardWidth: UIScreen.main.bounds.width - 32
                     ) {
-                        showTopUp = true
+                        push(AnyView(TopUpView(walletVM: vm)))
                     }
                 }
 
@@ -45,9 +45,6 @@ struct WalletView: View {
         .background(Color.bgPrimary)
         .customNavigationBar(showWallet ? "My Wallet" : "My Transactions") {
             ToolBarButton.back { dismiss() }
-        }
-        .sheet(isPresented: $showTopUp) {
-            TopUpView(walletVM: vm)
         }
         .onAppear {
             guard let userId = UserSession.shared.userId else { return }
