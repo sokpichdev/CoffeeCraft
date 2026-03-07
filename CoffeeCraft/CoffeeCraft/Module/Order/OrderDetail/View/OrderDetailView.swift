@@ -56,7 +56,7 @@ struct OrderDetailView: View {
                 .padding(.vertical, 20)
             }
         })
-        .background(.bgSecondary)
+        .background(Color.bgSecondary)
         .customNavigationBar("Order Detail") {
             ToolBarButton.back {
                 dismiss()

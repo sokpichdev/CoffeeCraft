@@ -98,19 +98,19 @@ struct TimelineRow: View {
 
                 Image(systemName: isCompleted && !isCurrent ? "checkmark" : icon)
                     .font(.system(size: 14, weight: isCompleted ? .bold : .regular))
-                    .foregroundColor(isCompleted ? .textPrimary : .commonGray).colorScheme(.dark)
+                    .foregroundColor(isCompleted ? .textPrimary : .textMuted).colorScheme(.dark)
             }
             .frame(width: circleSize, height: circleSize)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 16, weight: isCurrent ? .semibold : .regular))
-                    .foregroundColor(isCompleted ? .textPrimary : .commonGray)
+                    .foregroundColor(isCompleted ? .textPrimary : .textMuted)
 
                 if let subtitle {
                     Text(subtitle)
                         .font(.footnote).bold()
-                        .foregroundColor(.coffeeOliveGreen)
+                        .foregroundColor(.semanticSuccess)
                         .transition(.opacity)
                 }
             }

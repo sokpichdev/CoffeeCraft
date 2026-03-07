@@ -15,7 +15,7 @@ struct InboxView: View {
 
     var body: some View {
         ZStack {
-            Color(.bgPrimary)
+            Color.bgPrimary
                 .ignoresSafeArea()
 
             Group {
@@ -105,7 +105,7 @@ struct InboxView: View {
                                 } label: {
                                     Label("Read", systemImage: "envelope.open")
                                 }
-                                .tint(.brown)
+                                .tint(.accentPrimary)
                             }
                         }
                         .onAppear {
@@ -131,7 +131,7 @@ struct InboxView: View {
 
                 if isPaginating {
                     ProgressView()
-                        .tint(.brown)
+                        .tint(.accentPrimary)
                         .padding()
                 }
             }
@@ -167,7 +167,7 @@ struct InboxView: View {
                     .frame(width: 90, height: 90)
                 Image(systemName: "bell.slash.fill")
                     .font(.system(size: 38))
-                    .foregroundColor(.brown.opacity(0.6))
+                    .foregroundColor(.accentPrimary.opacity(0.6))
             }
             Text("All caught up!")
                 .font(.title3.bold())

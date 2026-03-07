@@ -68,19 +68,19 @@ private struct BranchCard: View {
 
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundStyle(isSelected ? .white : Color.accentPrimary)
+                        .foregroundColor(isSelected ? .white : Color.accentPrimary)
                         .symbolRenderingMode(.hierarchical)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(branch.name)
                         .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundStyle(isSelected ? Color.accentPrimary : Color.textPrimary)
+                        .foregroundColor(isSelected ? Color.accentPrimary : Color.textPrimary)
                         .lineLimit(1)
 
                     Text(branch.address)
                         .font(.system(size: 11, weight: .regular))
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                         .lineLimit(1)
                 }
 
@@ -103,21 +103,21 @@ private struct BranchCard: View {
                         .frame(width: 6, height: 6)
                     Text(branch.isOpen ? "Open" : "Closed")
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundStyle(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
+                        .foregroundColor(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                 }
 
                 if !distance.isEmpty {
                     Text("  ·  ")
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                         .font(.system(size: 11))
 
                     HStack(spacing: 3) {
                         Image(systemName: "location.fill")
                             .font(.system(size: 9))
-                            .foregroundStyle(Color.textMuted)
+                            .foregroundColor(Color.textMuted)
                         Text(distance)
                             .font(.system(size: 11, weight: .regular))
-                            .foregroundStyle(Color.textMuted)
+                            .foregroundColor(Color.textMuted)
                     }
                 }
 
@@ -131,7 +131,7 @@ private struct BranchCard: View {
                         Text(wait == 0 ? "No wait" : "~\(wait) min")
                             .font(.system(size: 10, weight: .semibold, design: .rounded))
                     }
-                    .foregroundStyle(wait == 0 ? Color.semanticSuccess : Color.accentPrimary)
+                    .foregroundColor(wait == 0 ? Color.semanticSuccess : Color.accentPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(
@@ -156,7 +156,7 @@ private struct BranchCard: View {
                             Text(amenity.label)
                                 .font(.system(size: 10, weight: .medium))
                         }
-                        .foregroundStyle(Color.textSecondary)
+                        .foregroundColor(Color.textSecondary)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 4)
                         .background(
@@ -187,7 +187,7 @@ private struct BranchCard: View {
         .overlay {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(
-                    isSelected ? Color.accentPrimary.opacity(0.55) : Color.border.opacity(0.6),
+                    isSelected ? Color.accentPrimary.opacity(0.55) : Color.borderColor.opacity(0.6),
                     lineWidth: isSelected ? 1.5 : 0.5
                 )
         }

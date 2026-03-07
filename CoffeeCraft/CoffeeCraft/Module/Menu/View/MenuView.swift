@@ -43,7 +43,7 @@ struct MenuView: View {
                 HStack(spacing: 0) {
                     categorySidebar
                     Rectangle()
-                        .fill(Color.border)
+                        .fill(Color.borderColor)
                         .frame(width: 0.5)
                         .frame(maxHeight: .infinity)
                         .ignoresSafeArea(edges: .top)
@@ -117,15 +117,15 @@ struct MenuView: View {
             Spacer()
             Image(systemName: "mappin.circle")
                 .font(.system(size: 56))
-                .foregroundStyle(.textMuted)
+                .foregroundColor(.textMuted)
 
             VStack(spacing: 8) {
                 Text("Please select a store")
                     .font(.custom("Nunito-Bold", size: 20))
-                    .foregroundStyle(.textPrimary)
+                    .foregroundColor(.textPrimary)
                 Text("Choose a branch to see its menu and place an order.")
                     .font(.custom("Nunito-Regular", size: 14))
-                    .foregroundStyle(.textMuted)
+                    .foregroundColor(.textMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -139,7 +139,7 @@ struct MenuView: View {
                     Text("Select a Store")
                         .font(.custom("Nunito-Bold", size: 16))
                 }
-                .foregroundStyle(.white)
+                .foregroundColor(.white)
                 .frame(height: 50)
                 .padding(.horizontal, 32)
                 .background(Color.accentPrimary)
@@ -306,7 +306,7 @@ struct MenuView: View {
                         handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
                     } label: {
                         Label("Add new item", systemImage: "plus.circle.fill")
-                            .foregroundColor(.coffeeBrown)
+                            .foregroundColor(.accentPrimary)
                     }
                     .padding(.vertical, 6)
                 }

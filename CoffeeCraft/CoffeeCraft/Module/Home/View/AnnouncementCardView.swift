@@ -28,14 +28,14 @@ struct AnnouncementCardView: View {
 
                 Text(announcement.description ?? "")
                     .font(.subheadline)
-                    .foregroundColor(.commonGray)
+                    .foregroundColor(.textMuted)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
             .padding(.horizontal, 5)
             .padding(.bottom, 10)
         }
-        .background(.surfacePrimary)
+        .background(Color.surfacePrimary)
         .cornerRadius(15)
         .shadow(color: Color.surfacePrimary.opacity(0.2), radius: 5, x: 0, y: 3)
     }
@@ -58,7 +58,7 @@ struct AnnouncementCardShimmerView: View {
             .padding(.horizontal, 5)
             .padding(.bottom, 10)
         }
-        .background(.surfacePrimary)
+        .background(Color.surfacePrimary)
         .cornerRadius(15)
         .shadow(color: Color.surfacePrimary.opacity(0.2), radius: 5, x: 0, y: 3)
     }

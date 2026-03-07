@@ -26,7 +26,7 @@ struct LibraryCategoryCard: View {
                             
                             Image(systemName: isSelected ? "checkmark" : "folder.fill")
                                 .font(.title3)
-                                .foregroundColor(isSelected ? .white : .brown)
+                                .foregroundColor(isSelected ? .white : .accentPrimary)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
@@ -74,7 +74,7 @@ struct LibraryCategoryCard: View {
                             Spacer()
                             Text(String(format: "$%.2f", option.price))
                                 .font(.caption)
-                                .foregroundColor(.brown)
+                                .foregroundColor(.accentPrimary)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(Capsule().fill(Color.accentPrimary.opacity(0.1)))

@@ -47,16 +47,16 @@ struct AlertAction {
         
         var color: Color {
             switch self {
-            case .default: return .coffeeBrown
-            case .cancel: return .coffeeLight
+            case .default: return .accentPrimary
+            case .cancel: return .accentPrimary.opacity(0.6)
             case .destructive: return Color(red: 0.8, green: 0.3, blue: 0.2) // Coffee-toned red
             }
         }
         
         var gradientColors: [Color] {
             switch self {
-            case .default: return [.coffeeBrown, .coffeeLight]
-            case .cancel: return [.coffeeCream.opacity(0.8), .coffeeCream.opacity(0.6)]
+            case .default: return [.accentPrimary, .accentPrimary.opacity(0.6)]
+            case .cancel: return [.surfaceSub.opacity(0.8), .surfaceSub.opacity(0.6)]
             case .destructive: return [Color(red: 0.8, green: 0.3, blue: 0.2), Color(red: 0.7, green: 0.25, blue: 0.15)]
             }
         }
@@ -64,7 +64,7 @@ struct AlertAction {
         var foregroundColor: Color {
             switch self {
             case .default: return .white
-            case .cancel: return .coffeeBrown
+            case .cancel: return .accentPrimary
             case .destructive: return .white
             }
         }

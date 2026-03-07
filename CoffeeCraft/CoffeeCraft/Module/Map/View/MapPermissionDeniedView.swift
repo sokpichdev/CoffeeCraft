@@ -48,7 +48,7 @@ struct MapPermissionDeniedView: View {
 
                     Image(systemName: "location.slash.fill")
                         .font(.system(size: 38, weight: .medium))
-                        .foregroundStyle(Color.accentPrimary)
+                        .foregroundColor(Color.accentPrimary)
                         .symbolRenderingMode(.hierarchical)
                 }
                 .offset(y: appeared ? 0 : 16)
@@ -58,7 +58,7 @@ struct MapPermissionDeniedView: View {
                 // ── Title ───────────────────────────────────────────
                 Text("Location Access Needed")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundColor(Color.textPrimary)
                     .multilineTextAlignment(.center)
                     .offset(y: appeared ? 0 : 10)
                     .opacity(appeared ? 1 : 0)
@@ -67,7 +67,7 @@ struct MapPermissionDeniedView: View {
                 // ── Description ─────────────────────────────────────
                 Text("CoffeeCraft uses your location to show\nnearby branches and deliver right to you.")
                     .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundColor(Color.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 44)
@@ -83,7 +83,7 @@ struct MapPermissionDeniedView: View {
                         Text("Open Settings")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                     }
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
                     .background(

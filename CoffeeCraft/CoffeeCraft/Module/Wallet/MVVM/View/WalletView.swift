@@ -56,11 +56,11 @@ struct WalletView: View {
         HStack(spacing: 10) {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Color.semanticError)
+                .foregroundColor(Color.semanticError)
 
             Text(message)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Color.semanticError)
+                .foregroundColor(Color.semanticError)
 
             Spacer()
 
@@ -69,7 +69,7 @@ struct WalletView: View {
             } label: {
                 Text("Retry")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(Color.semanticError)

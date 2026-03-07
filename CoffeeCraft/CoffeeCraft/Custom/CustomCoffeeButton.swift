@@ -10,7 +10,7 @@ struct CustomCoffeeButton: View {
     var title: String = ""
     var buttonImage: String = ""
     var foregroundColor: Color = .white
-    var bgColors: [Color] = [Color.accentPrimary, Color.coffeeLight]
+    var bgColors: [Color] = [Color.accentPrimary, Color.accentPrimary.opacity(0.6)]
     var contentPlacement: ButtonContentPlacement = .center
     var isDisabled: Bool = false
     var verticalPadding: CGFloat = 12
@@ -36,13 +36,13 @@ struct CustomCoffeeButton: View {
                 }
             }
             .font(.headline).fontWeight(.semibold)
-            .foregroundStyle(!isDisabled ? foregroundColor : .primary)
+            .foregroundColor(!isDisabled ? foregroundColor : .primary)
             .frame(maxWidth: maxWidth)
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horinzontalPadding)
             .background(
                 LinearGradient(
-                    colors: !isDisabled ? bgColors : [.coffeeCream.opacity(0.3)],
+                    colors: !isDisabled ? bgColors : [.surfaceSub.opacity(0.3)],
                     startPoint: .leading,
                     endPoint: .trailing
                 )

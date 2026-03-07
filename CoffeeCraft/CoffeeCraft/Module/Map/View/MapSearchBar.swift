@@ -22,12 +22,12 @@ struct MapSearchBar: View {
             // Search icon — animates to accent when focused
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(isFocused ? Color.accentPrimary : Color.textMuted)
+                .foregroundColor(isFocused ? Color.accentPrimary : Color.textMuted)
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused)
 
             TextField("Search branches…", text: $text)
                 .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundStyle(Color.textPrimary)
+                .foregroundColor(Color.textPrimary)
                 .focused($isFocused)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
@@ -44,7 +44,7 @@ struct MapSearchBar: View {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
-                        .foregroundStyle(Color.textMuted.opacity(0.7))
+                        .foregroundColor(Color.textMuted.opacity(0.7))
                         .symbolRenderingMode(.hierarchical)
                 }
                 .buttonStyle(BounceButtonStyle())

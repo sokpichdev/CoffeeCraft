@@ -27,7 +27,7 @@ struct BranchAnnotationView: View {
             if isSelected {
                 Text(branch.name)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
                     .lineLimit(1)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -68,13 +68,13 @@ struct BranchAnnotationView: View {
                     .overlay {
                         if !isSelected {
                             Circle()
-                                .strokeBorder(Color.border, lineWidth: 1)
+                                .strokeBorder(Color.borderColor, lineWidth: 1)
                         }
                     }
 
                 Image(systemName: "cup.and.saucer.fill")
                     .font(.system(size: isSelected ? 22 : 17, weight: .medium))
-                    .foregroundStyle(isSelected ? .white : Color.accentPrimary)
+                    .foregroundColor(isSelected ? .white : Color.accentPrimary)
                     .symbolRenderingMode(.hierarchical)
 
                 // Closed badge
@@ -85,7 +85,7 @@ struct BranchAnnotationView: View {
                         .overlay {
                             Image(systemName: "xmark")
                                 .font(.system(size: 7, weight: .black))
-                                .foregroundStyle(.white)
+                                .foregroundColor(.white)
                         }
                         .offset(x: size * 0.32, y: -(size * 0.32))
                 }

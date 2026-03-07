@@ -60,7 +60,7 @@ struct LoginView: View {
                     Text("Forgot Password?")
                         .font(.footnote)
                         .fontWeight(.medium)
-                        .foregroundStyle(Color.accentPrimary)
+                        .foregroundColor(Color.accentPrimary)
                 }
             }
             CustomCoffeeButton(title: "Log In", isDisabled: isDisabled) {
@@ -81,7 +81,7 @@ struct LoginView: View {
                     .frame(height: 1)
                 Text("or")
                     .font(.caption)
-                    .foregroundStyle(Color(.tertiaryLabel))
+                    .foregroundColor(Color(.tertiaryLabel))
                     .fixedSize()
                 Rectangle()
                     .fill(Color(.separator).opacity(0.5))
@@ -115,7 +115,7 @@ struct LoginView: View {
                     .font(.subheadline)
                     .fontWeight(.medium)
             }
-            .foregroundStyle(Color(.label))
+            .foregroundColor(Color(.label))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 11, style: .continuous))

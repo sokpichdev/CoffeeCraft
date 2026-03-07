@@ -135,7 +135,7 @@ struct HomeView: View {
                                     .animation(.spring(duration: 0.4), value: walletVM.wallet?.balance)
                             }
                         }
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)
                         .background(Color.accentPrimary.opacity(0.1))
@@ -149,7 +149,7 @@ struct HomeView: View {
                         Text("\(cardVM.activeCard?.points ?? 0) pts")
                             .font(.system(size: 13, weight: .bold))
                     }
-                    .foregroundStyle(Color.accentGold)
+                    .foregroundColor(Color.accentGold)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
                     .background(Color.accentGold.opacity(0.1))
@@ -168,12 +168,12 @@ struct HomeView: View {
                             Text("Top Up")
                                 .font(.system(size: 13, weight: .semibold))
                         }
-                        .foregroundStyle(.textPrimary).colorScheme(.dark)
+                        .foregroundColor(.textPrimary).colorScheme(.dark)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 7)
                         .background(
                             LinearGradient(
-                                colors: [Color.accentPrimary, Color.coffeeLight],
+                                colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.6)],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )

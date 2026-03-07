@@ -35,7 +35,7 @@ struct FavoriteRowItemView: View {
                 .shadow(radius: 2)
         }
         .padding(8)
-        .background(Color(.surfacePrimary))
+        .background(Color.surfacePrimary)
         .cornerRadius(12)
         .shadow(color: Color.surfacePrimary.opacity(0.2), radius: 5, x: 0, y: 2)
     }

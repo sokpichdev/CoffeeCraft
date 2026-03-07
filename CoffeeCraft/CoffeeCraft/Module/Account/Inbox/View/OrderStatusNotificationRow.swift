@@ -15,7 +15,7 @@ struct OrderStatusNotificationRow: View {
         NotificationRowShell(
             notification: notification,
             icon: payload?.statusIcon ?? "clock.fill",
-            iconColor: .coffeeOliveGreen
+            iconColor: .semanticSuccess
         ) {
             Text(notification.title)
                 .font(.subheadline.bold())
@@ -24,7 +24,7 @@ struct OrderStatusNotificationRow: View {
 
             Text(notification.message)
                 .font(.caption)
-                .foregroundColor(Color.textTertiary)
+                .foregroundColor(Color.textMuted)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }

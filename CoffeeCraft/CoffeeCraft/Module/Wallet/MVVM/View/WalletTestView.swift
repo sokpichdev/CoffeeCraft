@@ -68,14 +68,14 @@ struct WalletTestView: View {
     private var warningBanner: some View {
         HStack(spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(Color.semanticWarning)
+                .foregroundColor(Color.semanticWarning)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Dev Only — Delete After Phase 1")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.semanticWarning)
+                    .foregroundColor(Color.semanticWarning)
                 Text("Remove WalletTestView.swift before release.")
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
             }
             Spacer()
         }
@@ -99,7 +99,7 @@ struct WalletTestView: View {
                     .frame(width: 8, height: 8)
                 Text(isLoggedIn ? "Logged in" : "Not logged in — sign in first")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
             }
 
             if isLoggedIn {
@@ -131,16 +131,16 @@ struct WalletTestView: View {
             } else {
                 HStack {
                     Image(systemName: "exclamationmark.circle")
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                     Text("No wallet found — tap Top-Up to create it")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                 }
             }
 
             Text("Last action: \(lastAction)")
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
                 .padding(.top, 4)
         }
         .padding()
@@ -156,7 +156,7 @@ struct WalletTestView: View {
             // Top-Up buttons
             Text("Top-Up (writes to wallets + wallet_transactions)")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
 
             HStack(spacing: 10) {
                 ForEach([50.0, 100.0, 200.0], id: \.self) { amount in
@@ -177,7 +177,7 @@ struct WalletTestView: View {
             // Deduct button
             Text("Deduct (simulates paying for order #TEST01)")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
 
             testButton(
                 title: "Deduct $20",
@@ -198,7 +198,7 @@ struct WalletTestView: View {
             // Refund button
             Text("Refund (simulates cancelling order #TEST01)")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
 
             testButton(
                 title: "Refund $20",
@@ -219,7 +219,7 @@ struct WalletTestView: View {
             // Reward button
             Text("Reward (simulates loyalty milestone)")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
 
             testButton(
                 title: "+ $15 Reward",
@@ -248,12 +248,12 @@ struct WalletTestView: View {
             if transactions.isEmpty {
                 Text("No transactions yet — run a test action above")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
             } else {
                 ForEach(transactions) { tx in
                     HStack(spacing: 10) {
                         Image(systemName: tx.type.icon)
-                            .foregroundStyle(tx.type.color)
+                            .foregroundColor(tx.type.color)
                             .frame(width: 20)
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -261,14 +261,14 @@ struct WalletTestView: View {
                                 .font(.caption.weight(.medium))
                             Text(tx.formattedDate)
                                 .font(.caption2)
-                                .foregroundStyle(.secondary)
+                                .foregroundColor(.secondary)
                         }
 
                         Spacer()
 
                         Text(tx.formattedAmount)
                             .font(.caption.weight(.bold))
-                            .foregroundStyle(tx.isCredit ? Color.semanticSuccess : Color.semanticError)
+                            .foregroundColor(tx.isCredit ? Color.semanticSuccess : Color.semanticError)
                     }
                     .padding(.vertical, 4)
 
@@ -289,7 +289,7 @@ struct WalletTestView: View {
         HStack {
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
                 .frame(width: 90, alignment: .leading)
             Text(value)
                 .font(.caption.weight(.medium))

@@ -39,7 +39,7 @@ struct CardItemView: View {
                 if !item.extras.isEmpty {
                     Text("Extras: \(item.extras.joined(separator: ", "))")
                         .font(.caption2)
-                        .foregroundColor(.textTertiary)
+                        .foregroundColor(.textMuted)
                 }
             }
             Spacer()
@@ -57,7 +57,7 @@ struct CardItemView: View {
             }
         }
         .padding()
-        .background(.surfacePrimary)
+        .background(Color.surfacePrimary)
         .cornerRadius(14)
         .shadow(color: Color.surfacePrimary.opacity(0.05), radius: 4, x: 0, y: 2)
     }

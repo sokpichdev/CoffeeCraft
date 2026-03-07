@@ -90,7 +90,7 @@ struct ProductDetailView: View {
                             
                             Text(product.description)
                                 .font(.body)
-                                .foregroundColor(.textTertiary)
+                                .foregroundColor(.textMuted)
                                 .lineSpacing(3)
                         }
                         .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
@@ -129,7 +129,7 @@ struct ProductDetailView: View {
                         } else {
                             Text("No customization available.")
                                 .font(.subheadline)
-                                .foregroundColor(.textTertiary)
+                                .foregroundColor(.textMuted)
                                 .padding(.horizontal)
                         }
                         
@@ -236,7 +236,7 @@ struct ProductDetailView: View {
                     .foregroundColor(Color.textPrimary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(Color.parchment.opacity(0.92)))
+                    .background(Capsule().fill(Color.surfaceSub.opacity(0.92)))
                     .shadow(color: Color.accentPrimary.opacity(0.15), radius: 6, x: 0, y: 2)
                     .padding(.bottom, 16)
             }
@@ -282,7 +282,7 @@ struct ProductDetailView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
                 .background(Capsule().fill(Color.accentPrimary.opacity(0.07)))
-                .overlay(Capsule().stroke(Color.border, lineWidth: 1))
+                .overlay(Capsule().stroke(Color.borderColor, lineWidth: 1))
                 
                 CustomCoffeeButton(title: cartItem == nil ? "Add to Cart" : "Update Cart") {
                     if UserSession.shared.isLoggedIn {

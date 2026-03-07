@@ -19,7 +19,7 @@ struct ReceiptItemRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(item.name ?? "")
                         .font(.subheadline).fontDesign(.serif)
-                        .foregroundColor(Color.coffeeDarkBrown)
+                        .foregroundColor(Color.accentPrimary)
                     
                     if let selections = item.selections, !selections.isEmpty {
                         SelectionsView(selections: selections)
@@ -32,7 +32,7 @@ struct ReceiptItemRow: View {
                 Spacer()
                 Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                     .font(.subheadline).fontWeight(.medium).fontDesign(.monospaced)
-                    .foregroundColor(Color.coffeeDarkBrown)
+                    .foregroundColor(Color.accentPrimary)
             }
         }
         .opacity(appeared ? 1 : 0)
@@ -60,11 +60,11 @@ struct SelectionsView: View {
                         .font(.caption2)
                         .fontWeight(.semibold)
                         .fontDesign(.monospaced)
-                        .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
+                        .foregroundColor(Color.accentPrimary.opacity(0.4))
                     Text(value)
                         .font(.caption2)
                         .fontDesign(.monospaced)
-                        .foregroundColor(Color.coffeeDarkBrown.opacity(0.7))
+                        .foregroundColor(Color.accentPrimary.opacity(0.7))
                 }
             }
         }
@@ -79,11 +79,11 @@ struct ExtrasView: View {
             Text("Extras:")
                 .font(.caption2)
                 .fontDesign(.monospaced)
-                .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
+                .foregroundColor(Color.accentPrimary.opacity(0.4))
             Text(extras.joined(separator: ", "))
                 .font(.caption2)
                 .fontDesign(.monospaced)
-                .foregroundColor(Color.coffeeDarkBrown.opacity(0.7))
+                .foregroundColor(Color.accentPrimary.opacity(0.7))
         }
     }
 }

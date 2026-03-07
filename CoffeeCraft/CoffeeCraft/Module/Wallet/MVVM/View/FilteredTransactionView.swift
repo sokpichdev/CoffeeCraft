@@ -83,14 +83,14 @@ struct FilteredTransactionView: View {
         HStack(alignment: .firstTextBaseline) {
             Text("Transactions")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.textPrimary)
+                .foregroundColor(Color.textPrimary)
 
             Spacer()
 
             if !isLoading && !transactions.isEmpty {
                 Text("\(filteredTransactions.count) record\(filteredTransactions.count == 1 ? "" : "s")")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color.textMuted)
+                    .foregroundColor(Color.textMuted)
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: filteredTransactions.count)
             }
@@ -129,17 +129,17 @@ struct FilteredTransactionView: View {
         return HStack(spacing: 6) {
             Image(systemName: isPositive ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.system(size: 13))
-                .foregroundStyle(color)
+                .foregroundColor(color)
 
             Text(selectedFilter == .all ? "Net balance change" : "\(selectedFilter.rawValue) total")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Color.textMuted)
+                .foregroundColor(Color.textMuted)
 
             Spacer()
 
             Text((isPositive ? "+" : "") + netTotal.currencyFormatted)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
+                .foregroundColor(color)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -177,7 +177,7 @@ struct FilteredTransactionView: View {
 
                 if tx.id != filteredTransactions.last?.id {
                     Rectangle()
-                        .fill(Color.border)
+                        .fill(Color.borderColor)
                         .frame(height: 0.75)
                         .padding(.leading, 74)
                 }
@@ -185,7 +185,7 @@ struct FilteredTransactionView: View {
         }
         .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color.coffeeDarkBrown.opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.accentPrimary.opacity(0.06), radius: 12, x: 0, y: 4)
         .animation(.easeInOut(duration: 0.28), value: filteredTransactions.map(\.id))
     }
 
@@ -213,7 +213,7 @@ struct FilteredTransactionView: View {
 
                 if i < 4 {
                     Rectangle()
-                        .fill(Color.border)
+                        .fill(Color.borderColor)
                         .frame(height: 0.75)
                         .padding(.leading, 74)
                 }
@@ -221,7 +221,7 @@ struct FilteredTransactionView: View {
         }
         .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color.coffeeDarkBrown.opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.accentPrimary.opacity(0.06), radius: 12, x: 0, y: 4)
     }
     
     var emptyState: some View {
@@ -232,17 +232,17 @@ struct FilteredTransactionView: View {
                     .frame(width: 72, height: 72)
                 Image(systemName: iconForEmpty)
                     .font(.system(size: 30, weight: .medium))
-                    .foregroundStyle(Color.textMuted.opacity(0.6))
+                    .foregroundColor(Color.textMuted.opacity(0.6))
             }
 
             VStack(spacing: 6) {
                 Text(emptyTitle)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundColor(Color.textPrimary)
 
                 Text(emptyMessage)
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.textMuted)
+                    .foregroundColor(Color.textMuted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -251,7 +251,7 @@ struct FilteredTransactionView: View {
         .padding(.vertical, 44)
         .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: Color.coffeeDarkBrown.opacity(0.06), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.accentPrimary.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 
     var iconForEmpty: String {
@@ -297,7 +297,7 @@ struct CoffeeFilterChip: View {
                 if count > 0 {
                     Text("\(count)")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(isSelected ? Color.textSecondary : Color.textMuted)
+                        .foregroundColor(isSelected ? Color.textSecondary : Color.textMuted)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 1)
                         .background(
@@ -311,7 +311,7 @@ struct CoffeeFilterChip: View {
             .background(
                 isSelected
                     ? LinearGradient(
-                        colors: [Color.coffeeDarkBrown, Color.accentPrimary],
+                        colors: [Color.accentPrimary, Color.accentPrimary],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -321,17 +321,17 @@ struct CoffeeFilterChip: View {
                         endPoint: .trailing
                     )
             )
-            .foregroundStyle(isSelected ? .white : Color.textSecondary)
+            .foregroundColor(isSelected ? .white : Color.textSecondary)
             .clipShape(Capsule())
             .overlay(
                 Capsule()
                     .strokeBorder(
-                        isSelected ? Color.clear : Color.border,
+                        isSelected ? Color.clear : Color.borderColor,
                         lineWidth: 1
                     )
             )
             .shadow(
-                color: isSelected ? Color.coffeeDarkBrown.opacity(0.25) : Color.clear,
+                color: isSelected ? Color.accentPrimary.opacity(0.25) : Color.clear,
                 radius: 6, x: 0, y: 3
             )
         }

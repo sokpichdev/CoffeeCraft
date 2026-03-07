@@ -26,7 +26,7 @@ struct CoffeeAmountPill: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
-                            isSelected ? Color.accentPrimary : Color.border,
+                            isSelected ? Color.accentPrimary : Color.borderColor,
                             lineWidth: isSelected ? 2 : 1
                         )
                 )

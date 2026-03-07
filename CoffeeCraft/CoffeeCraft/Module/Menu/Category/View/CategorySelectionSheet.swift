@@ -57,14 +57,14 @@ struct CategorySelectionSheet: View {
                             }) {
                                 HStack {
                                     Text(category)
-                                        .foregroundColor(category == tempSelectedCategory ? .brown : .primary) // Highlight selected text
+                                        .foregroundColor(category == tempSelectedCategory ? .accentPrimary : .primary) // Highlight selected text
                                         .fontWeight(category == tempSelectedCategory ? .semibold : .regular)
                                     
                                     Spacer()
                                     
                                     if category == tempSelectedCategory {
                                         Image(systemName: "checkmark")
-                                            .foregroundColor(.brown)
+                                            .foregroundColor(.accentPrimary)
                                     }
                                 }
                                 .padding()
@@ -79,7 +79,7 @@ struct CategorySelectionSheet: View {
                             VStack(spacing: 12) {
                                 Image(systemName: "magnifyingglass")
                                     .font(.title)
-                                    .foregroundColor(.brown.opacity(0.6))
+                                    .foregroundColor(.accentPrimary.opacity(0.6))
                                 
                                 Text("No category found for “\(searchText)”")
                                     .foregroundColor(.gray)

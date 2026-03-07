@@ -23,14 +23,14 @@ struct CustomTopupAmountField: View {
                 .focused($focused)
                 .font(.title3)
                 .fontWeight(.semibold)
-                .foregroundStyle(Color.textPrimary)
+                .foregroundColor(Color.textPrimary)
             
             if !input.isEmpty {
                 Button {
                     input = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                 }
             }
         }
@@ -43,7 +43,7 @@ struct CustomTopupAmountField: View {
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
-                    focused ? Color.accentPrimary : Color.border,
+                    focused ? Color.accentPrimary : Color.borderColor,
                     lineWidth: focused ? 2 : 1
                 )
         )

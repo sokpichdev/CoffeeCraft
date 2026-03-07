@@ -107,7 +107,7 @@ struct RegisterView: View {
             // MARK: - Terms
             Text("By creating an account, you agree to our **Terms of Service** and **Privacy Policy**.")
                 .font(.caption2)
-                .foregroundStyle(Color(.tertiaryLabel))
+                .foregroundColor(Color(.tertiaryLabel))
                 .multilineTextAlignment(.center)
         }
         .padding(20)

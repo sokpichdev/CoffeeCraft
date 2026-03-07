@@ -22,11 +22,11 @@ struct ForgotPasswordView: View {
             VStack(spacing: 6) {
                 Text("Forgot your password?")
                     .font(.headline)
-                    .foregroundStyle(Color(.label))
+                    .foregroundColor(Color(.label))
 
                 Text("Enter your email and we'll send you a link to reset it.")
                     .font(.subheadline)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .foregroundColor(Color(.secondaryLabel))
                     .multilineTextAlignment(.center)
             }
 
@@ -75,7 +75,7 @@ struct ForgotPasswordView: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
-                .foregroundStyle(Color.accentPrimary)
+                .foregroundColor(Color.accentPrimary)
             }
         }
         .padding(20)

@@ -19,7 +19,7 @@ struct SearchResultRow: View {
         case .category:
             return ("in \(product.category)", .blue)
         case .description:
-            return ("matches description", .coffeeOliveGreen)
+            return ("matches description", .semanticSuccess)
         case .price:
             return ("", .clear)
         }
@@ -55,7 +55,7 @@ struct SearchResultRow: View {
                 
                 Text("$\(product.price, specifier: "%.2f")")
                     .font(.caption)
-                    .foregroundColor(.textTertiary)
+                    .foregroundColor(.textMuted)
                 Spacer(minLength: 0)
             }
             
@@ -67,7 +67,7 @@ struct SearchResultRow: View {
         }
         .padding(12)
         .frame(height: 90)
-        .background(.surfacePrimary)
+        .background(Color.surfacePrimary)
         .cornerRadius(12)
         .shadow(color: Color.surfacePrimary.opacity(0.1), radius: 3, x: 0, y: 1)
     }

@@ -104,19 +104,19 @@ struct MenuBranchSelectionSheet: View {
                     .frame(width: 72, height: 72)
                 Image(systemName: "mappin.slash.circle.fill")
                     .font(.system(size: 34, weight: .medium))
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundColor(Color.accentPrimary)
                     .symbolRenderingMode(.hierarchical)
             }
 
             Text(searchText.isEmpty ? "No Stores Available" : "No Results")
                 .font(.system(size: 17, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.textPrimary)
+                .foregroundColor(Color.textPrimary)
 
             Text(searchText.isEmpty
                  ? "Check back soon — we're expanding."
                  : "Try a different name or address.")
                 .font(.system(size: 14, weight: .regular))
-                .foregroundStyle(Color.textMuted)
+                .foregroundColor(Color.textMuted)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
@@ -155,7 +155,7 @@ struct BranchRowCard: View {
                         .frame(width: 52, height: 52)
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 22, weight: .medium))
-                        .foregroundStyle(branch.isOpen ? Color.accentPrimary : Color.textMuted)
+                        .foregroundColor(branch.isOpen ? Color.accentPrimary : Color.textMuted)
                         .symbolRenderingMode(.hierarchical)
                 }
 
@@ -163,12 +163,12 @@ struct BranchRowCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(branch.name)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                         .lineLimit(1)
 
                     Text(branch.address)
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                         .lineLimit(1)
 
                     HStack(spacing: 8) {
@@ -179,7 +179,7 @@ struct BranchRowCard: View {
                                 .frame(width: 6, height: 6)
                             Text(branch.isOpen ? "Open" : "Closed")
                                 .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                .foregroundStyle(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
+                                .foregroundColor(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                         }
 
                         // Amenity chips (max 2)
@@ -190,7 +190,7 @@ struct BranchRowCard: View {
                                 Text(amenity.label)
                                     .font(.system(size: 10, weight: .medium))
                             }
-                            .foregroundStyle(Color.textSecondary)
+                            .foregroundColor(Color.textSecondary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
                             .background(
@@ -204,7 +204,7 @@ struct BranchRowCard: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.textMuted.opacity(0.5))
+                    .foregroundColor(Color.textMuted.opacity(0.5))
             }
             .padding(14)
             .background {
@@ -212,7 +212,7 @@ struct BranchRowCard: View {
                     .fill(Color.surfacePrimary)
                     .overlay {
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                            .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
                     }
                     .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
             }

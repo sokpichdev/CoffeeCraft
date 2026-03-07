@@ -30,7 +30,7 @@ struct SettingsSection<Content: View>: View {
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.textPrimary)
+                    .foregroundColor(.textPrimary)
             }
             .padding(.leading, 4)
             
@@ -41,7 +41,7 @@ struct SettingsSection<Content: View>: View {
             .padding(.horizontal, 20)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.surfacePrimary))
+                    .fill(Color.surfacePrimary)
 //                    .shadow(color: Color.textPrimary.opacity(0.06), radius: 8, y: 2)
             )
         }

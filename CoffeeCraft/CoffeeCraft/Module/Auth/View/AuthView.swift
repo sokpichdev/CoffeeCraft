@@ -84,9 +84,9 @@ struct AuthView: View {
                         } label: {
                             Group {
                                 Text(screen == .login ? "Don't have an account? " : "Already have an account? ")
-                                    .foregroundStyle(Color(.secondaryLabel)) +
+                                    .foregroundColor(Color(.secondaryLabel)) +
                                 Text(screen == .login ? "Sign Up" : "Log In")
-                                    .foregroundStyle(Color.accentPrimary)
+                                    .foregroundColor(Color.accentPrimary)
                                     .fontWeight(.semibold)
                             }
                             .font(.subheadline)
@@ -121,7 +121,7 @@ struct AuthView: View {
                     .frame(width: 86, height: 86)
                 Image(systemName: "cup.and.saucer.fill")
                     .font(.system(size: 40, weight: .medium))
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundColor(Color.accentPrimary)
             }
             .scaleEffect(heroAppeared ? 1 : 0.65)
             .opacity(heroAppeared ? 1 : 0)
@@ -130,11 +130,11 @@ struct AuthView: View {
             VStack(spacing: 5) {
                 Text("CoffeeCraft")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(.label))
+                    .foregroundColor(Color(.label))
 
                 Text(heroSubtitle)
                     .font(.subheadline)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .foregroundColor(Color(.secondaryLabel))
                     .animation(.easeInOut(duration: 0.2), value: screen)
             }
             .offset(y: heroAppeared ? 0 : 14)

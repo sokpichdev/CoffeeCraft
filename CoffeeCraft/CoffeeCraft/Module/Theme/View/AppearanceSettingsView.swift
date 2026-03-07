@@ -21,7 +21,7 @@ struct AppearanceSettingsView: View {
                         ) {
                             themeManager.setTheme(theme)
                         }
-                        .accentColor(.brown)
+                        .accentColor(.accentPrimary)
                         
                         if index < AppTheme.allCases.count - 1 {
                             DeviderInSectionView()

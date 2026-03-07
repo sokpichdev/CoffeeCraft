@@ -77,7 +77,7 @@ struct AddCardView: View {
             Utilize.hideKeyboard()
         }
         .padding(.horizontal)
-        .background(.bgPrimary)
+        .background(Color.bgPrimary)
         .customNavigationBar("Add Card") {
             ToolBarButton.back {
                 dismiss()

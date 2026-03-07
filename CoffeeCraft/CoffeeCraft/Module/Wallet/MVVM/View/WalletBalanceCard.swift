@@ -49,7 +49,7 @@ struct WalletBalanceCard: View {
         }
         .frame(width: cardWidth, height: cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .shadow(color: Color.coffeeDarkBrown.opacity(0.4), radius: 24, x: 0, y: 12)
+        .shadow(color: Color.accentPrimary.opacity(0.4), radius: 24, x: 0, y: 12)
         .scaleEffect(appear ? 1 : 0.96)
         .opacity(appear ? 1 : 0)
         .onAppear {
@@ -64,7 +64,7 @@ struct WalletBalanceCard: View {
             .fill(
                 LinearGradient(
                     colors: [
-                        Color.coffeeDarkBrown,
+                        Color.accentPrimary,
                         Color.accentPrimary.opacity(0.85),
                         Color.accentPrimary
                     ],
@@ -86,7 +86,7 @@ struct WalletBalanceCard: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
-                    .foregroundStyle(Color.caramelGold.opacity(0.055))
+                    .foregroundColor(Color.accentGold.opacity(0.055))
                     .offset(x: 110, y: -90)
 
                 // Small ring
@@ -105,7 +105,7 @@ struct WalletBalanceCard: View {
                 Text("MY WALLET")
                     .font(.system(size: balanceHeight * 0.2 * 0.3, weight: .bold, design: .rounded))
                     .tracking(2.8)
-                    .foregroundStyle(Color.white.opacity(0.45))
+                    .foregroundColor(Color.white.opacity(0.45))
 
                 Spacer()
             }
@@ -114,7 +114,7 @@ struct WalletBalanceCard: View {
             // Balance
             Text(wallet?.formattedBalance ?? "$0.00")
                 .font(.system(size: balanceHeight * 0.4 * 0.8, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundColor(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.2)
                 .contentTransition(.numericText())
@@ -155,7 +155,7 @@ struct WalletBalanceCard: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(color)
+                .foregroundColor(color)
                 .frame(width: 18, height: 18)
                 .background(color.opacity(0.18))
                 .clipShape(Circle())
@@ -163,10 +163,10 @@ struct WalletBalanceCard: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(value)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
                 Text(label)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.45))
+                    .foregroundColor(Color.white.opacity(0.45))
             }
         }
         .frame(maxWidth: .infinity)
@@ -188,10 +188,10 @@ struct WalletBalanceCard: View {
                 HStack(spacing: 6) {
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Color.caramelGold)
+                        .foregroundColor(Color.accentGold)
                     Text("Quick Top-Up")
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.white.opacity(0.5))
+                        .foregroundColor(Color.white.opacity(0.5))
                 }
 
                 Spacer()
@@ -203,18 +203,18 @@ struct WalletBalanceCard: View {
                     Text("Add Funds")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                 }
-                .foregroundStyle(Color.coffeeDarkBrown)
+                .foregroundColor(Color.accentPrimary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
                     LinearGradient(
-                        colors: [Color.caramelGold.opacity(0.85), Color.caramelGold],
+                        colors: [Color.accentGold.opacity(0.85), Color.accentGold],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
                 .clipShape(Capsule())
-                .shadow(color: Color.caramelGold.opacity(0.5), radius: 5, x: 0, y: 2)
+                .shadow(color: Color.accentGold.opacity(0.5), radius: 5, x: 0, y: 2)
                 .scaleEffect(buttonPressed ? 0.93 : 1.0)
             }
             .padding(.horizontal, horizontalPad)

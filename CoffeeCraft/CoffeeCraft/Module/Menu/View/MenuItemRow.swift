@@ -31,7 +31,7 @@ struct MenuItemRow: View {
                 .fill(Color.surfacePrimary)
                 .overlay {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                        .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
                 }
                 .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
         }

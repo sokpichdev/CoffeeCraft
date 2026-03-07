@@ -33,7 +33,7 @@ struct CustomizationPreviewCard: View {
                     Text("\(category.options.count)")
                         .font(.subheadline)
                         .fontWeight(.bold)
-                        .foregroundColor(.brown)
+                        .foregroundColor(.accentPrimary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(Capsule().fill(Color.accentPrimary.opacity(0.15)))
@@ -71,11 +71,11 @@ struct CustomizationPreviewCard: View {
                                 Text("$\(String(format: "%.2f", option.price))")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.coffeeBrown)
+                                    .foregroundColor(.accentPrimary)
                             } else {
                                 Text("Free")
                                     .font(.subheadline)
-                                    .foregroundColor(.coffeeOliveGreen)
+                                    .foregroundColor(.semanticSuccess)
                             }
                         }
                         .padding(.horizontal, 12)

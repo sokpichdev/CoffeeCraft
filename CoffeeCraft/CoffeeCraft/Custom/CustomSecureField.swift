@@ -15,7 +15,7 @@ struct CustomSecureField: View {
         HStack {
             if !icon.isEmpty {
                 Image(systemName: icon)
-                    .foregroundColor(.brown)
+                    .foregroundColor(.accentPrimary)
             }
             SecureField(title, text: $text)
         }

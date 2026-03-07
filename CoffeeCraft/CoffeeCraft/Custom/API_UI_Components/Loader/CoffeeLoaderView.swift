@@ -22,11 +22,11 @@ struct CoffeeLoaderView: View {
         ZStack {
             // Filled coffee cup (clipped to show fill level with wave)
             Image("custom.cofee.fill")
-                .foregroundColor(.coffeeOliveGreen)
+                .foregroundColor(.semanticSuccess)
             Image("custom.saucer.fill")
-                .foregroundColor(.coffeeBrown)
+                .foregroundColor(.accentPrimary)
             Image("custom.cup.fill")
-                .foregroundColor(.coffeeDarkBrown)
+                .foregroundColor(.accentPrimary)
         }
         .font(.system(size: imageSize))
         .mask(
@@ -56,7 +56,7 @@ struct CoffeeLoaderView: View {
                 Image("custom.cup")
                 Image("custom.saucer.fill")
             }
-            .foregroundColor(.coffeeDarkBrown.opacity(0.5))
+            .foregroundColor(.accentPrimary.opacity(0.5))
             .font(.system(size: imageSize))
         )
         .onChange(of: progress) { _, newValue in
