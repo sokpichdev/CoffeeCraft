@@ -68,14 +68,14 @@ final class PushSlideTransition: NSObject, UIViewControllerAnimatedTransitioning
         shadow.isUserInteractionEnabled = false
         container.insertSubview(shadow, belowSubview: toView)
 
-        let a = UIViewPropertyAnimator(duration: transitionDuration(using: context), curve: .easeOut) {
+        let animator = UIViewPropertyAnimator(duration: transitionDuration(using: context), curve: .easeOut) {
             toView.frame.origin.x   = 0              // arrive at final on-screen position
             fromView.frame.origin.x = -width * 0.3   // parallax: push outgoing left by 30%
             shadow.frame.origin.x   = -shadowWidth    // shadow exits off-screen left
             shadow.backgroundColor  = UIColor.black.withAlphaComponent(0.20)
         }
 
-        a.addCompletion { _ in
+        animator.addCompletion { _ in
             shadow.removeFromSuperview()
             // Restore fromView's position in case the transition was cancelled
             // and UIKit needs to snap everything back.
@@ -83,7 +83,7 @@ final class PushSlideTransition: NSObject, UIViewControllerAnimatedTransitioning
             context.completeTransition(!context.transitionWasCancelled)
         }
 
-        propertyAnimator = a
-        return a
+        propertyAnimator = animator
+        return animator
     }
 }

@@ -90,7 +90,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6AFAC5312EA5E69E00037932 /* Build configuration list for PBXNativeTarget "CoffeeCraft" */;
 			buildPhases = (
-				6AD8D50D2F5AE678008A4B6F /* ShellScript */,
+				6A3143B52F5BCEA700093E05 /* swiftlint */,
 				6AFAC51F2EA5E69C00037932 /* Sources */,
 				6AFAC5202EA5E69C00037932 /* Frameworks */,
 				6AFAC5212EA5E69C00037932 /* Resources */,
@@ -148,6 +148,7 @@
 				6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				6AFAC5B12EA61BCA00037932 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				6A240F942F45C7EA00BB551E /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
+				6A3143B62F5BCFA800093E05 /* XCRemoteSwiftPackageReference "SwiftLint" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AFAC5242EA5E69C00037932 /* Products */;
@@ -170,22 +171,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		6AD8D50D2F5AE678008A4B6F /* ShellScript */ = {
+		6A3143B52F5BCEA700093E05 /* swiftlint */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
 			);
+			name = swiftlint;
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed\"\nfi\n";
+			shellScript = "SWIFTLINT_PATH=\"${BUILD_DIR%Build/*}SourcePackages/artifacts/swiftlint/SwiftLintBinary/SwiftLintBinary.artifactbundle/macos/swiftlint\"\n\nif [ -f \"$SWIFTLINT_PATH\" ]; then\n  \"$SWIFTLINT_PATH\" lint --quiet --force-exclude \"$SRCROOT\"\nelif which swiftlint > /dev/null; then\n  swiftlint lint --quiet --force-exclude \"$SRCROOT\"\nelse\n  echo \"warning: SwiftLint not found\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -278,6 +282,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = K6KHZK67R9;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CoffeeCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
@@ -378,6 +383,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CoffeeCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
@@ -477,6 +483,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CoffeeCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
@@ -576,6 +583,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"CoffeeCraft/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CoffeeCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
@@ -634,6 +642,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 26.0.0;
+			};
+		};
+		6A3143B62F5BCFA800093E05 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.63.2;
 			};
 		};
 		6AFAC5362EA5E88E00037932 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {

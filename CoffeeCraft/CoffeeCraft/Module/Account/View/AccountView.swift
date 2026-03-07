@@ -77,7 +77,9 @@ struct AccountView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.75), Color.accentPrimary.opacity(0.5)],
+                            colors: [Color.accentPrimary,
+                                     Color.accentPrimary.opacity(0.75),
+                                     Color.accentPrimary.opacity(0.5)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -198,7 +200,8 @@ struct AccountView: View {
                 HStack {
                     Button(action: {
                         if userSession.isLoggedIn {
-                            AlertManager.shared.showWarning(title: "Coming Soon", message: "This Feature will be coming soon.")
+                            AlertManager.shared.showWarning(title: "Coming Soon",
+                                                            message: "This Feature will be coming soon.")
                         } else {
                             push(AnyView(AuthView().environmentObject(authVM)))
                         }

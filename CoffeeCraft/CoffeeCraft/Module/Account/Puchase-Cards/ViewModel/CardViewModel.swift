@@ -145,7 +145,8 @@ class CardViewModel: ObservableObject {
         if !failedCardNumbers.isEmpty {
             AppLog.firestore.error("❌ Failed card numbers: \(failedCardNumbers.joined(separator: ", "))")
             if let _ = UserSession.shared.currentUser {
-                AlertManager.shared.showError(message: "Failed to fetch cards: \(failedCardNumbers.joined(separator: ", "))")
+                AlertManager.shared.showError(
+                    message: "Failed to fetch cards: \(failedCardNumbers.joined(separator: ", "))")
             }
         }
     }
@@ -343,7 +344,7 @@ class CardViewModel: ObservableObject {
     
     func createInitialCard(userId: String, userName: String) async throws {
         let cardNumber = generateCardNumber()
-        AppLog.firestore.debug("🆕 createInitialCard — userId: \(userId), userName: \(userName), cardNumber: \(cardNumber)")
+        AppLog.firestore.debug("🆕 createInitialCard userName: \(userName), cardNumber: \(cardNumber)")
         
         try await db.collection("loyalty_cards").document(cardNumber).setData([
             "cardNumber": cardNumber,

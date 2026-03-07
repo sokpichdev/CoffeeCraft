@@ -99,7 +99,10 @@ struct AuthView: View {
                 .padding(.horizontal, 16)
                 .simultaneousGesture(
                     TapGesture().onEnded {
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                                        to: nil,
+                                                        from: nil,
+                                                        for: nil)
                     }
                 )
             })

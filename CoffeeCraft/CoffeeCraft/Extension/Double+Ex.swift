@@ -16,8 +16,8 @@ extension Double {
         if rounded == rounded.rounded(.towardZero) && rounded >= 0 {
             return "$\(Int(rounded))"
         }
-        var s = String(format: "%.2f", rounded)
-        while s.hasSuffix("0") { s.removeLast() }
-        return "$\(s)"
+        var str = String(format: "%.2f", rounded)
+        while str.hasSuffix("0") { str.removeLast() }
+        return "$\(str)"
     }
 }

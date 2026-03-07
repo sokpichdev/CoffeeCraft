@@ -49,10 +49,10 @@ final class AppNavigationController: UINavigationController,
 
         switch gesture.state {
         case .began:
-            let t = UIPercentDrivenInteractiveTransition()
-            t.wantsInteractiveStart = true
-            t.completionCurve = .linear
-            interactiveTransition = t
+            let tran = UIPercentDrivenInteractiveTransition()
+            tran.wantsInteractiveStart = true
+            tran.completionCurve = .linear
+            interactiveTransition = tran
             popViewController(animated: true)
 
         case .changed:
@@ -62,7 +62,11 @@ final class AppNavigationController: UINavigationController,
             let velocity = gesture.velocity(in: view).x
             let shouldFinish = progress > 0.4 || velocity > 800
             interactiveTransition?.completionSpeed = 0.9
-            shouldFinish ? interactiveTransition?.finish() : interactiveTransition?.cancel()
+            if shouldFinish {
+                interactiveTransition?.finish()
+            } else {
+                interactiveTransition?.cancel()
+            }
             interactiveTransition = nil
 
         case .cancelled:

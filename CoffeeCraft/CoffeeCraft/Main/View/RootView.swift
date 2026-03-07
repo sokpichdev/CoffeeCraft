@@ -99,9 +99,11 @@ struct RootView: View {
         .onChange(of: NetworkMonitor.shared.isConnected) { _, isConnected in
             guard !AlertManager.shared.showAlert else { return }
             if !isConnected {
-                AlertManager.shared.showWarning(title: "No Internet", message: "You're offline. Some features may not be available.")
+                AlertManager.shared.showWarning(title: "No Internet",
+                                                message: "You're offline. Some features may not be available.")
             } else {
-                AlertManager.shared.showSuccess(title: "Back Online", message: "Your connection has been restored.")
+                AlertManager.shared.showSuccess(title: "Back Online",
+                                                message: "Your connection has been restored.")
             }
         }
     }

@@ -100,7 +100,9 @@ class AuthViewModel: ObservableObject {
             guard let data = snapshot.data() else {
                 AppLog.auth.error("❌ fetchUserData — no data found for uid: \(uid)")
                 if showLoader { LoaderManager.shared.hideLoading() }
-                throw NSError(domain: "UserDataError", code: 404, userInfo: [NSLocalizedDescriptionKey: "User data not found"])
+                throw NSError(domain: "UserDataError",
+                              code: 404,
+                              userInfo: [NSLocalizedDescriptionKey: "User data not found"])
             }
 
             let name = data["name"] as? String ?? ""
@@ -338,7 +340,8 @@ extension AuthViewModel {
         } else if !password.containsNumber() {
             passwordValidation = .init(isValid: false, message: "Password must contain at least one number")
         } else if !password.containsSpecialCharacter() {
-            passwordValidation = .init(isValid: false, message: "Password must contain at least one special character (!@#$%^&*)")
+            passwordValidation = .init(isValid: false,
+                                       message: "Password must contain at least one special character (!@#$%^&*)")
         } else if password.contains(" ") {
             passwordValidation = .init(isValid: false, message: "Password cannot contain spaces")
         } else {

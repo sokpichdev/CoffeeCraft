@@ -116,7 +116,9 @@ struct AllCardsView: View {
             // buttons
             HStack(spacing: 12) {
                 if !card.isActiveForCurrentUser {
-                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle", bgColors: [Color.accentPrimary, Color.coffeeLight]) {
+                    CustomCoffeeButton(title: "Activate",
+                                       buttonImage: "checkmark.circle",
+                                       bgColors: [Color.accentPrimary, Color.coffeeLight]) {
                         Task {
                             try await cardVM.setActiveCard(card)
                         }

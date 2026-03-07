@@ -53,11 +53,11 @@ class AlertManager: ObservableObject {
     
     // Convenience methods for two button alerts
     func showConfirmation(title: String,
-                         message: String,
-                         type: AlertType = .warning,
-                         confirmTitle: String = "Confirm",
-                         cancelTitle: String = "Cancel",
-                         onConfirm: @escaping () -> Void) {
+                          message: String,
+                          type: AlertType = .warning,
+                          confirmTitle: String = "Confirm",
+                          cancelTitle: String = "Cancel",
+                          onConfirm: @escaping () -> Void) {
         let confirmAction = AlertAction(title: confirmTitle, style: .default) {
             onConfirm()
             self.dismiss()
@@ -70,10 +70,10 @@ class AlertManager: ObservableObject {
     }
     
     func showDestructive(title: String,
-                        message: String,
-                        destructiveTitle: String = "Delete",
-                        cancelTitle: String = "Cancel",
-                        onDestructive: @escaping () -> Void) {
+                         message: String,
+                         destructiveTitle: String = "Delete",
+                         cancelTitle: String = "Cancel",
+                         onDestructive: @escaping () -> Void) {
         let destructiveAction = AlertAction(title: destructiveTitle, style: .destructive) {
             onDestructive()
             self.dismiss()
@@ -82,7 +82,9 @@ class AlertManager: ObservableObject {
             self.dismiss()
         }
         
-        show(title: title, message: message, type: .error, primaryAction: destructiveAction, secondaryAction: cancelAction)
+        show(title: title, message: message, type: .error,
+             primaryAction: destructiveAction,
+             secondaryAction: cancelAction)
     }
     
     func dismiss() {

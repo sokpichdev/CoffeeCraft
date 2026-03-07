@@ -41,7 +41,8 @@ struct CustomMultipleSelectionView: View {
                                 }
                                 Text(option)
                                     .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                                    .foregroundColor(isSelected ? Color.textPrimary : Color.coffeeDarkBrown).colorScheme(.dark)
+                                    .foregroundColor(isSelected ? Color.textPrimary
+                                                     : Color.coffeeDarkBrown).colorScheme(.dark)
                             }
                             .padding(.vertical, 9)
                             .padding(.horizontal, 18)
