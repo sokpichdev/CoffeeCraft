@@ -14,7 +14,7 @@ struct LoaderManagerView: View {
             Group {
                 ZStack {
                     // Dim background
-                    Color.textPrimary.opacity(0.3)
+                    Color.black.opacity(0.3)
                         .ignoresSafeArea()
                     
                     CoffeeLoaderView()
