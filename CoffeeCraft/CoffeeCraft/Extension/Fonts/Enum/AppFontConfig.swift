@@ -58,7 +58,7 @@ enum AppFont {
     case montserrat
     case nunito // body, button, text, Prices
     case playfairDisplay
-    case LibreBaskerville // Big Title, Header
+    case libreBaskerville // Big Title, Header
     
     private var family: String {
         switch self {
@@ -69,7 +69,7 @@ enum AppFont {
         case .montserrat:  return "Montserrat"
         case .nunito:      return "Nunito"
         case .playfairDisplay: return "PlayfairDisplay"
-        case .LibreBaskerville: return "LibreBaskerville"
+        case .libreBaskerville: return "LibreBaskerville"
         }
     }
     

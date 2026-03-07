@@ -109,14 +109,14 @@ class AdminOrdersViewModel: ObservableObject {
                             if !self.allOrders.contains(where: { $0.id == newOrder.id }) {
                                 self.allOrders.insert(newOrder, at: 0)
                                 self.totalAllOrdersCount += 1
-                                AppLog.order.debug("➕ setupAllOrdersListener — new order inserted: \(newOrder.id ?? "nil"), total: \(self.totalAllOrdersCount)")
+                                AppLog.order.debug("new order added: \(newOrder.id ?? "nil"), total: \(self.totalAllOrdersCount)")
                             }
                         }
                     } else if change.type == .modified {
                         if let updatedOrder = try? change.document.data(as: Order.self),
                            let index = self.allOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
                             self.allOrders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupAllOrdersListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
+                            AppLog.order.debug("order updated — id: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
                         }
                     }
                 }
