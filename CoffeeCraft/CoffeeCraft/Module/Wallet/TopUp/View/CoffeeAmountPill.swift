@@ -16,22 +16,22 @@ struct CoffeeAmountPill: View {
         Button(action: action) {
             Text("$\(Int(amount))")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(isSelected ? .white : .accentPrimary)
+                .foregroundColor(isSelected ? Color.bgPrimary : Color.accentPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.08))
+                        .fill(isSelected ? Color.accentPrimary : Color.surfaceSub)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(
-                            isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.25),
+                            isSelected ? Color.accentPrimary : Color.border,
                             lineWidth: isSelected ? 2 : 1
                         )
                 )
                 .shadow(
-                    color: isSelected ? Color.accentPrimary.opacity(0.3) : .clear,
+                    color: isSelected ? Color.accentPrimary.opacity(0.28) : .clear,
                     radius: 8, x: 0, y: 4
                 )
         }

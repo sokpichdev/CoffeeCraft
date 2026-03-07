@@ -28,7 +28,11 @@ struct TopUpAmountStep: View {
                 VStack(spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(Color.accentPrimary.opacity(0.12))
+                            .fill(Color.accentPrimary.opacity(0.1))
+                            .frame(width: 72, height: 72)
+                        
+                        Circle()
+                            .strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1.5)
                             .frame(width: 72, height: 72)
                         
                         Image(systemName: "plus.circle.fill")
@@ -39,10 +43,11 @@ struct TopUpAmountStep: View {
                     Text("Top Up Wallet")
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundStyle(Color.textPrimary)
                     
                     Text("Select an amount to add to your balance")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
@@ -51,7 +56,7 @@ struct TopUpAmountStep: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Select Amount")
                         .font(.headline)
-                        .foregroundColor(.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                     
                     LazyVGrid(
                         columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
@@ -93,6 +98,7 @@ struct TopUpAmountStep: View {
         // Bottom Action
         VStack(spacing: 0) {
             Divider()
+                .overlay(Color.border)
             Button {
                 onContinue()
             } label: {
@@ -103,14 +109,14 @@ struct TopUpAmountStep: View {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(Color.bgPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
                         .fill(
                             resolvedAmount == nil
-                            ? Color.gray.opacity(0.4)
+                            ? Color.textMuted.opacity(0.35)
                             : Color.accentPrimary
                         )
                 )
@@ -119,7 +125,7 @@ struct TopUpAmountStep: View {
             .disabled(resolvedAmount == nil)
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgSecondary)
     }
     
     private func summaryCard(amount: Double) -> some View {
@@ -127,22 +133,24 @@ struct TopUpAmountStep: View {
             HStack {
                 Text("Amount to add")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
                 Spacer()
                 Text("$\(String(format: "%.2f", amount))")
                     .font(.subheadline)
                     .fontWeight(.semibold)
+                    .foregroundStyle(Color.textPrimary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             
             Divider()
+                .overlay(Color.border)
                 .padding(.horizontal, 16)
             
             HStack {
                 Text("Payment method")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textSecondary)
                 Spacer()
                 Text("Bank Transfer")
                     .font(.subheadline)
@@ -152,8 +160,12 @@ struct TopUpAmountStep: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
         }
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.surfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.border, lineWidth: 1)
+        )
         .padding(.horizontal, 20)
     }
 }

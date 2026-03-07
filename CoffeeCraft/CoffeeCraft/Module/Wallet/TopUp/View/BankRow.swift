@@ -28,10 +28,11 @@ struct BankRow: View {
                     Text(bank.name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
+                        .foregroundStyle(Color.textPrimary)
                     
                     Text(bank.description)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                         .lineLimit(1)
                 }
                 
@@ -39,7 +40,10 @@ struct BankRow: View {
                 
                 ZStack {
                     Circle()
-                        .strokeBorder(isSelected ? Color.accentPrimary : Color.secondary.opacity(0.3), lineWidth: 2)
+                        .strokeBorder(
+                            isSelected ? Color.accentPrimary : Color.border,
+                            lineWidth: 2
+                        )
                         .frame(width: 22, height: 22)
                     
                     if isSelected {
@@ -53,18 +57,18 @@ struct BankRow: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(isSelected ? Color.accentPrimary.opacity(0.06) : Color(.secondarySystemGroupedBackground))
+                    .fill(isSelected ? Color.accentPrimary.opacity(0.06) : Color.surfacePrimary)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .strokeBorder(
-                        isSelected ? Color.accentPrimary.opacity(0.4) : Color.clear,
+                        isSelected ? Color.accentPrimary.opacity(0.4) : Color.border.opacity(0.6),
                         lineWidth: 1.5
                     )
             )
             .shadow(
-                color: isSelected ? Color.accentPrimary.opacity(0.1) : .clear,
-                radius: 4, y: 2
+                color: isSelected ? Color.accentPrimary.opacity(0.12) : Color.coffeeDarkBrown.opacity(0.04),
+                radius: isSelected ? 6 : 2, y: 2
             )
         }
         .buttonStyle(.plain)

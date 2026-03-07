@@ -16,20 +16,21 @@ struct CustomTopupAmountField: View {
             Text("$")
                 .font(.title3)
                 .fontWeight(.bold)
-                .foregroundColor(focused ? .accentPrimary : .textSecondary)
+                .foregroundColor(focused ? Color.accentPrimary : Color.textMuted)
             
             TextField("Custom amount", text: $input)
                 .keyboardType(.decimalPad)
                 .focused($focused)
                 .font(.title3)
                 .fontWeight(.semibold)
+                .foregroundStyle(Color.textPrimary)
             
             if !input.isEmpty {
                 Button {
                     input = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                 }
             }
         }
@@ -37,12 +38,12 @@ struct CustomTopupAmountField: View {
         .padding(.vertical, 14)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .fill(Color.surfacePrimary)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
-                    focused ? Color.accentPrimary : Color.accentPrimary.opacity(0.2),
+                    focused ? Color.accentPrimary : Color.border,
                     lineWidth: focused ? 2 : 1
                 )
         )
