@@ -69,7 +69,7 @@ final class InteractiveSlideTransition: NSObject, UIViewControllerAnimatedTransi
         shadow.isUserInteractionEnabled = false
         container.insertSubview(shadow, aboveSubview: toView)
 
-        let a = UIViewPropertyAnimator(duration: transitionDuration(using: context), curve: .easeOut) {
+        let animator = UIViewPropertyAnimator(duration: transitionDuration(using: context), curve: .easeOut) {
             fromView.frame.origin.x = width          // slide outgoing screen off-right
             toView.frame.origin.x   = 0              // incoming screen arrives at 0
             // Shadow stays glued to the right edge of toView as it slides in,
@@ -78,14 +78,14 @@ final class InteractiveSlideTransition: NSObject, UIViewControllerAnimatedTransi
             shadow.backgroundColor  = UIColor.black.withAlphaComponent(0.25)
         }
 
-        a.addCompletion { _ in
+        animator.addCompletion { _ in
             shadow.removeFromSuperview()
             // completeTransition(false) if the gesture was cancelled — UIKit
             // restores original view positions automatically.
             context.completeTransition(!context.transitionWasCancelled)
         }
 
-        propertyAnimator = a
-        return a
+        propertyAnimator = animator
+        return animator
     }
 }

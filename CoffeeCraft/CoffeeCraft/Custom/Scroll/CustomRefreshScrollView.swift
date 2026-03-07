@@ -147,8 +147,8 @@ struct CustomRefreshScrollView<Content: View>: View {
                 // Horizontal drags are ignored — those belong to the
                 // UIScreenEdgePanGestureRecognizer in SwipeBackCoordinator.
                 DragGesture(minimumDistance: 5)
-                    .onChanged { v in
-                        guard abs(v.translation.height) > abs(v.translation.width) else { return }
+                    .onChanged { value in
+                        guard abs(value.translation.height) > abs(value.translation.width) else { return }
                         if !isDragging { isDragging = true; hasTriggered = false }
                     }
                     .onEnded { _ in

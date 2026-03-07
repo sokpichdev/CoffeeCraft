@@ -26,10 +26,14 @@ struct AddCardView: View {
                     Spacer()
                 }
                 
-                Text("The card owner must add your email **\(UserSession.shared.userEmail ?? "")** as an authorized user before you can add their card.")
-                    .font(.subheadline)
-                    .foregroundColor(.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                (
+                    Text("The card owner must add your email ") +
+                    Text(UserSession.shared.userEmail ?? "").bold() +
+                    Text(" as an authorized user before you can add their card.")
+                )
+                .font(.subheadline)
+                .foregroundColor(.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding()
             .background(Color.accentGold.opacity(0.1))

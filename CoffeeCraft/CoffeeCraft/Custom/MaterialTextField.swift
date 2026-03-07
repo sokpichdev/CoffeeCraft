@@ -327,7 +327,10 @@ public class MaterialTextFeild: UITextField {
     
     private func floatingLabelSize(with placeholder: String, maxWidth: CGFloat, font: UIFont) -> CGSize {
         let fittingSize = CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
-        var rect = (placeholder as NSString).boundingRect(with: fittingSize, options: .usesLineFragmentOrigin, attributes: [.font: font], context: nil)
+        var rect = (placeholder as NSString).boundingRect(with: fittingSize,
+                                                          options: .usesLineFragmentOrigin,
+                                                          attributes: [.font: font],
+                                                          context: nil)
         rect.size.height = font.lineHeight
         return rect.size
     }

@@ -30,7 +30,9 @@ struct RoundedCorner: Shape {
 // MARK: - Navigation
 extension View {
     // MARK: - Function Overloading
-    func customNavigationBar(_ title: String, displayMode: NavigationBarItem.TitleDisplayMode = .inline, hideBackBtn: Bool = true
+    func customNavigationBar(_ title: String,
+                             displayMode: NavigationBarItem.TitleDisplayMode = .inline,
+                             hideBackBtn: Bool = true
     ) -> some View {
         self.navigationTitle(title).foregroundColor(.textPrimary)
             .navigationBarTitleDisplayMode(displayMode)

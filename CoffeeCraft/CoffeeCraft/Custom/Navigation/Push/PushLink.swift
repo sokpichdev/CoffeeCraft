@@ -87,9 +87,9 @@ struct PushLink<Destination: View, Label: View>: View {
             // Wrap in AnyView here — the one and only place in the codebase
             // that needs to know about type erasure for navigation.
             push(AnyView(destination()))
-        }) {
+        }, label: {
             label()
-        }
+        })
         // Plain style so the label renders exactly as designed,
         // without any default Button chrome (highlight, tint, etc.).
         .buttonStyle(.plain)

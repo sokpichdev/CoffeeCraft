@@ -94,7 +94,9 @@ struct LoginView: View {
 //            }
         }
         .padding(20)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(
+            Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+        )
         .shadow(color: Color(.label).opacity(0.06), radius: 12, y: 4)
         .offset(y: appeared ? 0 : 20)
         .opacity(appeared ? 1 : 0)

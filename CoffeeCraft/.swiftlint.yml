@@ -8,7 +8,6 @@ disabled_rules:
 # MARK: - Enabled Optional Rules
 opt_in_rules:
   - closure_spacing
-  - empty_count
   - explicit_init
   - first_where
   - sorted_imports
@@ -72,8 +71,8 @@ cyclomatic_complexity:
 
 # MARK: - Large Tuples
 large_tuple:
-  warning: 3
-  error: 4
+  warning: 5
+  error: 7
 
 # MARK: - Force Cast
 force_cast:

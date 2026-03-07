@@ -66,7 +66,11 @@ struct CustomTextField1<TrailingView: View>: View {
                     }
                 }
                 .frame(height: 45)
-                .background(RoundedRectangle(cornerRadius: 10).inset(by: 0.5).fill(isReadOnly ? .disableTextfieldBG : (backgroundColor ?? .textfieldBG)))
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .inset(by: 0.5)
+                        .fill(isReadOnly ? .disableTextfieldBG : (backgroundColor ?? .textfieldBG))
+                )
                 .simultaneousGesture(
                     TapGesture()
                         .onEnded {

@@ -18,6 +18,9 @@ struct CartView: View {
     @StateObject private var orderService = OrderService()
     @StateObject private var productVM = ProductViewModel()
 
+    private var isDisableButton: Bool {
+        cartManager.items.isEmpty || !cartManager.canCheckout(walletBalance: walletVM.wallet?.balance)
+    }
     var body: some View {
         CustomNavigationStack {
             ZStack(alignment: .bottom) {
@@ -60,7 +63,7 @@ struct CartView: View {
                         CustomCoffeeButton(
                             title: "Checkout",
                             bgColors: [Color.coffeeOliveGreen.opacity(0.85), Color.coffeeOliveGreen],
-                            isDisabled: cartManager.items.isEmpty || !cartManager.canCheckout(walletBalance: walletVM.wallet?.balance)
+                            isDisabled: isDisableButton
                         ) {
                             confirmAndPlaceOrder()
                         }

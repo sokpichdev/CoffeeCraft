@@ -21,7 +21,8 @@ class InboxViewModel: ObservableObject {
     deinit { listener?.remove() }
 
     // MARK: - Fetch (paginated)
-    func fetchNotifications(pageNum: Int, completion: ((Bool) -> Void)? = nil) {
+    func fetchNotifications(pageNum: Int,
+                            completion: ((Bool) -> Void)? = nil) {
         guard let userId = Auth.auth().currentUser?.uid else {
             AppLog.menu.warning("⚠️ fetchNotifications — no authenticated user, skipping")
             completion?(false)
@@ -95,13 +96,13 @@ class InboxViewModel: ObservableObject {
                 }
 
                 Task { @MainActor in
+                    
                     let existingIds = Set(self.notifications.compactMap { $0.id })
-                    let unique = newNotifications.filter { n in
-                        guard let id = n.id else { return false }
+                    let unique = newNotifications.filter { noti in
+                        guard let id = noti.id else { return false }
                         return !existingIds.contains(id)
                     }
                     self.notifications.append(contentsOf: unique)
-                    AppLog.menu.debug("✅ appended \(unique.count) on page \(pageNum), total loaded: \(self.notifications.count)")
                     AppLog.printList(self.notifications, label: "Notifications")
                 }
 

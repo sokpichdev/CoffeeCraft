@@ -79,10 +79,10 @@ final class SwipeBackCoordinator: NSObject,
         case .began:
             // wantsInteractiveStart = true: transition starts paused, waiting for update().
             // completionCurve = .linear: finger position maps 1:1 to animation progress.
-            let t = UIPercentDrivenInteractiveTransition()
-            t.wantsInteractiveStart = true
-            t.completionCurve = .linear
-            interactiveTransition = t
+            let tran = UIPercentDrivenInteractiveTransition()
+            tran.wantsInteractiveStart = true
+            tran.completionCurve = .linear
+            interactiveTransition = tran
             // Start the pop — the delegate will be asked for the interaction controller.
             nav.popViewController(animated: true)
 
@@ -96,7 +96,11 @@ final class SwipeBackCoordinator: NSObject,
             let velocity = gesture.velocity(in: nav.view).x
             let shouldFinish = progress > 0.4 || velocity > 800
             interactiveTransition?.completionSpeed = 0.9
-            shouldFinish ? interactiveTransition?.finish() : interactiveTransition?.cancel()
+            if shouldFinish {
+                interactiveTransition?.finish()
+            } else {
+                interactiveTransition?.cancel()
+            }
             interactiveTransition = nil
 
         case .cancelled:

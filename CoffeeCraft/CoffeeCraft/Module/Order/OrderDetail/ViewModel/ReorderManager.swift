@@ -154,7 +154,8 @@ class ReorderManager: ObservableObject {
         // Warn about unavailable items (non-blocking)
         if !notFoundNames.isEmpty {
             let names = notFoundNames.joined(separator: ", ")
-            AlertManager.shared.showError(title: "Some items unavailable", message: "\(names) could not be found and \(notFoundNames.count == 1 ? "was" : "were") skipped.")
+            AlertManager.shared.showError(title: "Some items unavailable",
+                                          message: "\(names) could not be found and \(notFoundNames.count == 1 ? "was" : "were") skipped.")
         }
 
         guard !additions.isEmpty || !toMerge.isEmpty else { return }
