@@ -29,112 +29,191 @@ class OrderService: ObservableObject {
             AppLog.order.info("Placing order — items: \(cartItems.count), total: \(total), payment: \(paymentMethod.rawValue)")
 
             do {
-                guard let userId = Auth.auth().currentUser?.uid else {
-                    throw NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
-                }
+                let userId = try getUserId()
 
-                // MARK: - Step 1: Generate order number
-                let counterId = String.todayCounterId
-                let counterRef = db.collection("counters").document(counterId)
-
-                let result = try await db.runTransaction { transaction, errorPointer -> Any? in
-                    do {
-                        let snapshot = try transaction.getDocument(counterRef)
-                        if !snapshot.exists {
-                            transaction.setData(["current": 1], forDocument: counterRef)
-                            return 1
-                        }
-                        let current = snapshot.data()?["current"] as? Int ?? 0
-                        let next = current + 1
-                        transaction.updateData(["current": next], forDocument: counterRef)
-                        return next
-                    } catch {
-                        errorPointer?.pointee = error as NSError
-                        return nil
-                    }
-                }
-
-                guard let orderNumber = result as? Int else {
-                    throw NSError(domain: "OrderService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to generate order number"])
-                }
-
+                let orderNumber = try await generateOrderNumber()
                 let formattedOrderId = orderNumber.formattedDailyOrderId
 
-                // MARK: - Step 2: Deduct wallet — real orderId is now known
-                if paymentMethod == .wallet {
-                    AppLog.order.debug("Deducting \(total) from wallet — userId: \(userId), orderId: \(formattedOrderId)")
-                    try await WalletService.shared.deductForOrder(
-                        userId: userId,
-                        amount: total,
-                        orderId: formattedOrderId
-                    )
-                    AppLog.order.debug("Wallet deduction successful — ledger linked to orderId: \(formattedOrderId)")
-                }
-
-                // MARK: - Step 3: Build order document
-                var orderData: [String: Any] = [
-                    "orderId": orderNumber,
-                    "userId": userId,
-                    "timestamp": Timestamp(date: Date()),
-                    "totalPrice": total,
-                    "status": "Pending",
-                    "paymentMethod": paymentMethod.rawValue,
-                    "items": cartItems.map { item -> [String: Any] in
-                        var dict: [String: Any] = [
-                            "productId": item.product.id,
-                            "name": item.product.name,
-                            "price": item.totalPrice,
-                            "imageURL": item.product.imageURL,
-                            "quantity": item.quantity
-                        ]
-                        if !item.selections.isEmpty { dict["selections"] = item.selections }
-                        if !item.extras.isEmpty { dict["extras"]     = item.extras     }
-                        return dict
-                    }
-                ]
-
-                // Store wallet amount paid so Phase 5 can refund the exact amount
-                if paymentMethod == .wallet {
-                    orderData["walletAmountPaid"] = total
-                }
-
-                // MARK: - Branch tagging (Phase 4 — Map module)
-                // Tag the order with the branch the user selected on the Map tab.
-                // Optional: old orders and orders placed without visiting the Map
-                // tab will simply have no branchId field — that is valid.
-                if let branch = OrderEnvironment.shared.selectedBranch {
-                    orderData["branchId"]   = branch.id
-                    orderData["branchName"] = branch.name
-                    AppLog.order.debug("Order tagged with branch: \(branch.name)")
-                }
-
-                // MARK: - Step 4: Write order — refund if this fails (deduction already happened)
-                do {
-                    try await db.collection("orders").document(formattedOrderId).setData(orderData)
-                } catch {
-                    // Order write failed — refund wallet if we already deducted
-                    if paymentMethod == .wallet {
-                        AppLog.order.error("Order write failed after wallet deduction — issuing refund")
-                        try? await WalletService.shared.refund(userId: userId, amount: total, orderId: formattedOrderId)
-                    }
-                    throw error
-                }
-
-                AppLog.order.info("Order saved: #\(orderNumber), payment: \(paymentMethod.rawValue)")
-                try await MinimumLoadingTime(2.0).waitIfNeeded()
-                LoaderManager.shared.hideLoading()
-
-                AlertManager.shared.showSuccess(
-                    title: "Order placed",
-                    message: "Your order #\(orderNumber) is being prepared."
+                try await handleWalletPayment(
+                    paymentMethod: paymentMethod,
+                    userId: userId,
+                    total: total,
+                    orderId: formattedOrderId
                 )
 
+                let orderData = buildOrderData(
+                    cartItems: cartItems,
+                    total: total,
+                    paymentMethod: paymentMethod,
+                    userId: userId,
+                    orderNumber: orderNumber
+                )
+
+                try await writeOrder(
+                    orderData: orderData,
+                    paymentMethod: paymentMethod,
+                    userId: userId,
+                    total: total,
+                    orderId: formattedOrderId
+                )
+
+                try await finalizeSuccess(orderNumber: orderNumber)
+
                 await onSuccess?()
+
             } catch {
                 LoaderManager.shared.hideLoading()
                 AppLog.order.error("Order failed: \(error.localizedDescription)")
                 AlertManager.shared.showError(title: "Order failed", message: error.localizedDescription)
             }
         }
+    }
+    
+    private func getUserId() throws -> String {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(
+                domain: "Auth",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "User not logged in"]
+            )
+        }
+        return userId
+    }
+    
+    private func generateOrderNumber() async throws -> Int {
+        let counterId = String.todayCounterId
+        let counterRef = db.collection("counters").document(counterId)
+
+        let result = try await db.runTransaction { transaction, errorPointer -> Any? in
+            do {
+                let snapshot = try transaction.getDocument(counterRef)
+
+                if !snapshot.exists {
+                    transaction.setData(["current": 1], forDocument: counterRef)
+                    return 1
+                }
+
+                let current = snapshot.data()?["current"] as? Int ?? 0
+                let next = current + 1
+                transaction.updateData(["current": next], forDocument: counterRef)
+                return next
+
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+        }
+
+        guard let orderNumber = result as? Int else {
+            throw NSError(
+                domain: "OrderService",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to generate order number"]
+            )
+        }
+
+        return orderNumber
+    }
+    
+    private func handleWalletPayment(
+        paymentMethod: PaymentMethod,
+        userId: String,
+        total: Double,
+        orderId: String
+    ) async throws {
+
+        guard paymentMethod == .wallet else { return }
+
+        AppLog.order.debug("Deducting \(total) from wallet — userId: \(userId), orderId: \(orderId)")
+
+        try await WalletService.shared.deductForOrder(
+            userId: userId,
+            amount: total,
+            orderId: orderId
+        )
+
+        AppLog.order.debug("Wallet deduction successful — ledger linked to orderId: \(orderId)")
+    }
+    
+    private func buildOrderData(
+        cartItems: [CartItem],
+        total: Double,
+        paymentMethod: PaymentMethod,
+        userId: String,
+        orderNumber: Int
+    ) -> [String: Any] {
+
+        var orderData: [String: Any] = [
+            "orderId": orderNumber,
+            "userId": userId,
+            "timestamp": Timestamp(date: Date()),
+            "totalPrice": total,
+            "status": "Pending",
+            "paymentMethod": paymentMethod.rawValue,
+            "items": cartItems.map { item -> [String: Any] in
+                var dict: [String: Any] = [
+                    "productId": item.product.id,
+                    "name": item.product.name,
+                    "price": item.totalPrice,
+                    "imageURL": item.product.imageURL,
+                    "quantity": item.quantity
+                ]
+
+                if !item.selections.isEmpty { dict["selections"] = item.selections }
+                if !item.extras.isEmpty { dict["extras"] = item.extras }
+
+                return dict
+            }
+        ]
+
+        if paymentMethod == .wallet {
+            orderData["walletAmountPaid"] = total
+        }
+
+        if let branch = OrderEnvironment.shared.selectedBranch {
+            orderData["branchId"] = branch.id
+            orderData["branchName"] = branch.name
+            AppLog.order.debug("Order tagged with branch: \(branch.name)")
+        }
+
+        return orderData
+    }
+    
+    private func writeOrder(
+        orderData: [String: Any],
+        paymentMethod: PaymentMethod,
+        userId: String,
+        total: Double,
+        orderId: String
+    ) async throws {
+
+        do {
+            try await db.collection("orders").document(orderId).setData(orderData)
+        } catch {
+            if paymentMethod == .wallet {
+                AppLog.order.error("Order write failed after wallet deduction — issuing refund")
+
+                try? await WalletService.shared.refund(
+                    userId: userId,
+                    amount: total,
+                    orderId: orderId
+                )
+            }
+
+            throw error
+        }
+    }
+    private func finalizeSuccess(orderNumber: Int) async throws {
+
+        AppLog.order.info("Order saved: #\(orderNumber)")
+
+        try await MinimumLoadingTime(2.0).waitIfNeeded()
+
+        LoaderManager.shared.hideLoading()
+
+        AlertManager.shared.showSuccess(
+            title: "Order placed",
+            message: "Your order #\(orderNumber) is being prepared."
+        )
     }
 }
