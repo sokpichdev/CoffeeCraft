@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct WalletView: View {
-
+    var showWallet: Bool = true
     @Environment(\.dismiss) private var dismiss
     @StateObject private var vm = WalletViewModel()
     @State private var showTopUp: Bool = false
@@ -16,12 +16,14 @@ struct WalletView: View {
         CustomRefreshScrollView({
             VStack(spacing: 20) {
 
-                WalletBalanceCard(
-                    wallet: vm.wallet,
-                    isLoading: vm.isLoading,
-                    cardWidth: UIScreen.main.bounds.width - 32
-                ) {
-                    showTopUp = true
+                if showWallet {
+                    WalletBalanceCard(
+                        wallet: vm.wallet,
+                        isLoading: vm.isLoading,
+                        cardWidth: UIScreen.main.bounds.width - 32
+                    ) {
+                        showTopUp = true
+                    }
                 }
 
                 if let error = vm.errorMessage {
@@ -41,7 +43,7 @@ struct WalletView: View {
             await vm.refresh()
         })
         .background(Color.bgPrimary)
-        .customNavigationBar("My Wallet") {
+        .customNavigationBar(showWallet ? "My Wallet" : "My Transactions") {
             ToolBarButton.back { dismiss() }
         }
         .sheet(isPresented: $showTopUp) {
