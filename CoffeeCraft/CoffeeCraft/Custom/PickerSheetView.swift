@@ -24,7 +24,7 @@ struct PickerSheetView: View {
                             HStack {
                                 Text(option)
                                     .font(.headline)
-                                    .foregroundStyle(.primary)
+                                    .foregroundColor(.primary)
                                 
                                 Spacer()
                                 
@@ -50,7 +50,7 @@ struct PickerSheetView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.brown)
+                    .foregroundColor(.accentPrimary)
                 }
             }
             .background(Color(.systemGroupedBackground))

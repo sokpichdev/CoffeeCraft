@@ -62,7 +62,7 @@ struct CartView: View {
 
                         CustomCoffeeButton(
                             title: "Checkout",
-                            bgColors: [Color.coffeeOliveGreen.opacity(0.85), Color.coffeeOliveGreen],
+                            bgColors: [Color.semanticSuccess.opacity(0.85), Color.semanticSuccess],
                             isDisabled: isDisableButton
                         ) {
                             confirmAndPlaceOrder()
@@ -71,7 +71,7 @@ struct CartView: View {
                     }
                 }
             }
-            .background(.bgPrimary)
+            .background(Color.bgPrimary)
             .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
                 CustomNavigationStack {
@@ -121,7 +121,7 @@ struct CartView: View {
                     if method == .wallet && UserSession.shared.isLoggedIn {
                         Text(walletVM.formattedBalance)
                             .font(.system(size: 10))
-                            .foregroundStyle(canAfford ? Color.semanticSuccess : Color.semanticError)
+                            .foregroundColor(canAfford ? Color.semanticSuccess : Color.semanticError)
                     }
                 }
             }
@@ -129,7 +129,7 @@ struct CartView: View {
             .frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 10)
                 .fill(isSelected ? Color.accentPrimary : Color(.secondarySystemGroupedBackground)))
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundColor(isSelected ? .white : .primary)
             .overlay(RoundedRectangle(cornerRadius: 10)
                 .strokeBorder(isSelected ? Color.accentPrimary : Color.accentPrimary.opacity(0.2), lineWidth: 1))
         }
@@ -141,18 +141,18 @@ struct CartView: View {
 
     private var insufficientBalanceBanner: some View {
         HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Color.semanticError)
+            Image(systemName: "exclamationmark.circle.fill").foregroundColor(Color.semanticError)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Insufficient balance")
-                    .font(.caption.weight(.semibold)).foregroundStyle(Color.semanticError)
+                    .font(.caption.weight(.semibold)).foregroundColor(Color.semanticError)
                 Text("Need \(cartManager.total.currencyFormatted) · have \(walletVM.formattedBalance)")
-                    .font(.caption2).foregroundStyle(.secondary)
+                    .font(.caption2).foregroundColor(.secondary)
             }
             Spacer()
             Button {
                 ToastManager.shared.show(message: "Top up your wallet first", type: .warning)
             } label: {
-                Text("Top Up").font(.caption.weight(.bold)).foregroundStyle(Color.accentPrimary)
+                Text("Top Up").font(.caption.weight(.bold)).foregroundColor(Color.accentPrimary)
             }
         }
         .padding(10)
@@ -210,22 +210,22 @@ struct CartBranchInfoCard: View {
                     .frame(width: 44, height: 44)
                 Image(systemName: "mappin.circle.fill")
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(.accentPrimary)
+                    .foregroundColor(.accentPrimary)
             }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Ordering from")
                     .font(.custom("Nunito-Regular", size: 11))
-                    .foregroundStyle(.textMuted)
+                    .foregroundColor(.textMuted)
                     .textCase(.uppercase)
                     .tracking(0.4)
                 Text(branch.name)
                     .font(.custom("Nunito-Bold", size: 15))
-                    .foregroundStyle(.textPrimary)
+                    .foregroundColor(.textPrimary)
                     .lineLimit(1)
                 Text(branch.address)
                     .font(.custom("Nunito-Regular", size: 12))
-                    .foregroundStyle(.textSecondary)
+                    .foregroundColor(.textSecondary)
                     .lineLimit(1)
             }
 
@@ -237,7 +237,7 @@ struct CartBranchInfoCard: View {
                     .frame(width: 7, height: 7)
                 Text(branch.isOpen ? "Open" : "Closed")
                     .font(.custom("Nunito-SemiBold", size: 12))
-                    .foregroundStyle(branch.isOpen ? .semanticSuccess : .semanticError)
+                    .foregroundColor(branch.isOpen ? .semanticSuccess : .semanticError)
             }
         }
         .padding(14)

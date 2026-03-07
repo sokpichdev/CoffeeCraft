@@ -15,7 +15,7 @@ struct LoginPromptView: View {
 
             Image(systemName: "cup.and.saucer.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.brown)
+                .foregroundColor(.accentPrimary)
 
             Text("Sign in to continue")
                 .font(.title3)

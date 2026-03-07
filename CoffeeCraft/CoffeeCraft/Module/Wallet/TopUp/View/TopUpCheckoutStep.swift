@@ -30,12 +30,12 @@ struct TopUpCheckoutStep: View {
                             VStack(spacing: 8) {
                                 Image(systemName: bank.icon)
                                     .font(.system(size: 32, weight: .semibold))
-                                    .foregroundStyle(Color.bgPrimary)
+                                    .foregroundColor(Color.bgPrimary)
                                 
                                 Text(bank.name)
                                     .font(.title3)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(Color.bgPrimary)
+                                    .foregroundColor(Color.bgPrimary)
                             }
                         }
                         .frame(height: 110)
@@ -44,15 +44,15 @@ struct TopUpCheckoutStep: View {
                         VStack(spacing: 0) {
                             checkoutRow(label: "Recipient", value: "CoffeeCraft Wallet")
                             Divider()
-                                .overlay(Color.border)
+                                .overlay(Color.borderColor)
                                 .padding(.horizontal, 16)
                             checkoutRow(label: "Amount", value: String(format: "$%.2f USD", usdAmount))
                             Divider()
-                                .overlay(Color.border)
+                                .overlay(Color.borderColor)
                                 .padding(.horizontal, 16)
                             checkoutRow(label: "You receive", value: "+\(usdAmount.currencyFormatted)", highlight: true)
                             Divider()
-                                .overlay(Color.border)
+                                .overlay(Color.borderColor)
                                 .padding(.horizontal, 16)
                             checkoutRow(label: "Method", value: bank.name)
                         }
@@ -61,23 +61,23 @@ struct TopUpCheckoutStep: View {
                     }
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(Color.border, lineWidth: 1)
+                            .strokeBorder(Color.borderColor, lineWidth: 1)
                     )
-                    .shadow(color: Color.coffeeDarkBrown.opacity(0.08), radius: 12, y: 4)
+                    .shadow(color: Color.accentPrimary.opacity(0.08), radius: 12, y: 4)
 
                     // Info Note
                     HStack(spacing: 10) {
                         Image(systemName: "info.circle.fill")
-                            .foregroundStyle(Color.accentGold)
+                            .foregroundColor(Color.accentGold)
                             .font(.system(size: 16))
                         
                         Text("Balance will be credited instantly after payment confirmation.")
                             .font(.caption)
-                            .foregroundStyle(Color.textSecondary)
+                            .foregroundColor(Color.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding()
-                    .background(Color.parchment.opacity(0.55))
+                    .background(Color.surfaceSub.opacity(0.55))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
@@ -90,7 +90,7 @@ struct TopUpCheckoutStep: View {
             // Pay Button
             VStack(spacing: 0) {
                 Divider()
-                    .overlay(Color.border)
+                    .overlay(Color.borderColor)
                 Button {
                     Task { await pay() }
                 } label: {
@@ -131,12 +131,12 @@ struct TopUpCheckoutStep: View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(Color.textSecondary)
+                .foregroundColor(Color.textSecondary)
             Spacer()
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.bold)
-                .foregroundStyle(highlight ? Color.semanticSuccess : Color.textPrimary)
+                .foregroundColor(highlight ? Color.semanticSuccess : Color.textPrimary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)

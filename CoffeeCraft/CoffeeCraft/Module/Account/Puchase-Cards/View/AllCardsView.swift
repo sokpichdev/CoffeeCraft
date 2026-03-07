@@ -96,14 +96,14 @@ struct AllCardsView: View {
                 HStack(spacing: 8) {
                     // Active Card Badge
                     if card.isActiveForCurrentUser {
-                        StatusBadgeView(icon: "checkmark.circle.fill", text: "Active", bgColor: .coffeeOliveGreen)
+                        StatusBadgeView(icon: "checkmark.circle.fill", text: "Active", bgColor: .semanticSuccess)
                     }
                     
                     // Ownership Status Badge
                     if card.isOwnedByCurrentUser {
                         StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.accentPrimary)
                     } else {
-                        StatusBadgeView(icon: "person.2.fill", text: "Shared", bgColor: Color.border)
+                        StatusBadgeView(icon: "person.2.fill", text: "Shared", bgColor: Color.borderColor)
                     }
                     Spacer()
                 }
@@ -118,7 +118,7 @@ struct AllCardsView: View {
                 if !card.isActiveForCurrentUser {
                     CustomCoffeeButton(title: "Activate",
                                        buttonImage: "checkmark.circle",
-                                       bgColors: [Color.accentPrimary, Color.coffeeLight]) {
+                                       bgColors: [Color.accentPrimary, Color.accentPrimary.opacity(0.6)]) {
                         Task {
                             try await cardVM.setActiveCard(card)
                         }
@@ -131,7 +131,7 @@ struct AllCardsView: View {
                         title: card.isActiveForCurrentUser ? "Share" : "",
                         buttonImage: "square.and.arrow.up",
                         foregroundColor: .textPrimary,
-                        bgColors: [Color(.surfaceSub)],
+                        bgColors: [Color.surfaceSub],
                         horinzontalPadding: card.isActiveForCurrentUser ? 0 : 16,
                         maxWidth: card.isActiveForCurrentUser ? .infinity : nil
                     ) {
@@ -170,7 +170,7 @@ struct CardEmptyView: View {
         VStack(spacing: 16) {
             Image(systemName: "creditcard")
                 .font(.system(size: 60))
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
                 .opacity(0.6)
 
             Text(title)
@@ -183,7 +183,7 @@ struct CardEmptyView: View {
                 .strokeBorder(
                     style: StrokeStyle(lineWidth: 2, dash: [8])
                 )
-                .foregroundColor(.coffeeBrown.opacity(0.4))
+                .foregroundColor(.accentPrimary.opacity(0.4))
         )
         .contentShape(Rectangle())
     }

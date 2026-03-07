@@ -52,7 +52,7 @@ struct OrdersView: View {
         VStack(spacing: 16) {
             Image(systemName: "cup.and.saucer.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.brown.opacity(0.7))
+                .foregroundColor(.accentPrimary.opacity(0.7))
             Text("No Orders Yet")
                 .font(.title3)
                 .fontWeight(.semibold)

@@ -39,7 +39,7 @@ struct OrderHeaderCard: View {
                 HStack(spacing: 10) {
                     Image(systemName: "mappin.circle.fill")
                         .font(.system(size: 18))
-                        .foregroundStyle(.accentPrimary)
+                        .foregroundColor(.accentPrimary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Branch")
                             .font(.caption)
@@ -64,7 +64,7 @@ struct OrderHeaderCard: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [.brown.opacity(0.8), .brown],
+                                colors: [.accentPrimary.opacity(0.8), .accentPrimary],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -153,10 +153,10 @@ struct StatusBadge: View {
         switch status {
         case "Pending": return .orange
         case "In Progress", "InProgress": return .blue
-        case "Ready": return .coffeeOliveGreen
-        case "Done", "Completed": return .brown
+        case "Ready": return .semanticSuccess
+        case "Done", "Completed": return .accentPrimary
         case "Cancelled": return .semanticError   // Phase 5
-        default: return .brown
+        default: return .accentPrimary
         }
     }
 }

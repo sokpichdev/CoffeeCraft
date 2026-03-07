@@ -11,7 +11,7 @@ struct EmptyCustomizationsCard: View {
         VStack(spacing: 12) {
             Image(systemName: "slider.horizontal.3")
                 .font(.system(size: 40))
-                .foregroundColor(.brown.opacity(0.6))
+                .foregroundColor(.accentPrimary.opacity(0.6))
             
             Text("No Customizations Yet")
                 .font(.headline)

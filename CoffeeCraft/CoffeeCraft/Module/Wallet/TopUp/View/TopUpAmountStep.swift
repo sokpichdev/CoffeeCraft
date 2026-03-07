@@ -37,17 +37,17 @@ struct TopUpAmountStep: View {
                         
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 36))
-                            .foregroundStyle(Color.accentPrimary)
+                            .foregroundColor(Color.accentPrimary)
                     }
                     
                     Text("Top Up Wallet")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                     
                     Text("Select an amount to add to your balance")
                         .font(.subheadline)
-                        .foregroundStyle(Color.textSecondary)
+                        .foregroundColor(Color.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
@@ -98,7 +98,7 @@ struct TopUpAmountStep: View {
         // Bottom Action
         VStack(spacing: 0) {
             Divider()
-                .overlay(Color.border)
+                .overlay(Color.borderColor)
             Button {
                 onContinue()
             } label: {
@@ -133,29 +133,29 @@ struct TopUpAmountStep: View {
             HStack {
                 Text("Amount to add")
                     .font(.subheadline)
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundColor(Color.textSecondary)
                 Spacer()
                 Text("$\(String(format: "%.2f", amount))")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundColor(Color.textPrimary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             
             Divider()
-                .overlay(Color.border)
+                .overlay(Color.borderColor)
                 .padding(.horizontal, 16)
             
             HStack {
                 Text("Payment method")
                     .font(.subheadline)
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundColor(Color.textSecondary)
                 Spacer()
                 Text("Bank Transfer")
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundColor(Color.accentPrimary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -164,7 +164,7 @@ struct TopUpAmountStep: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.border, lineWidth: 1)
+                .strokeBorder(Color.borderColor, lineWidth: 1)
         )
         .padding(.horizontal, 20)
     }

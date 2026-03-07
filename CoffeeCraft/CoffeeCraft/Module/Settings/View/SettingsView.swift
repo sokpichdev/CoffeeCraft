@@ -81,7 +81,7 @@ struct SettingsView: View {
                 
                 Text("Version 1.0.0")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
                     .padding(.top, 12)
             }
             .padding()

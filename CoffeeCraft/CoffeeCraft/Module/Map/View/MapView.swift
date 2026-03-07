@@ -131,7 +131,7 @@ struct MapView: View {
             .overlay(alignment: .top) {
                 // Subtle top edge line
                 Capsule()
-                    .fill(Color.border.opacity(0.4))
+                    .fill(Color.borderColor.opacity(0.4))
                     .frame(width: 40, height: 3)
                     .padding(.top, 8)
             }
@@ -145,12 +145,12 @@ struct MapView: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.textMuted)
+                .foregroundColor(Color.textMuted)
             Text(viewModel.hasActiveSearchOrFilter
                  ? "No branches match your search."
                  : "No branches available.")
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.textMuted)
+                .foregroundColor(Color.textMuted)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
@@ -193,7 +193,7 @@ struct MapView: View {
             Text("Offline — showing saved branches")
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
         }
-        .foregroundStyle(.white)
+        .foregroundColor(.white)
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
         .background(
@@ -211,7 +211,7 @@ struct MapView: View {
             HStack(spacing: 6) {
                 Image(systemName: "location.fill")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundColor(Color.accentPrimary)
             }
             .frame(width: 44, height: 44)
             .background(
@@ -219,7 +219,7 @@ struct MapView: View {
                     .fill(.regularMaterial)
                     .overlay {
                         Circle()
-                            .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                            .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
                     }
                     .shadow(color: .black.opacity(0.14), radius: 10, x: 0, y: 4)
             )

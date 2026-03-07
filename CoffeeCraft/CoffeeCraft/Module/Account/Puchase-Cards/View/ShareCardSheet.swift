@@ -29,7 +29,7 @@ struct ShareCardSheet: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Share with")
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(.secondary)
 //                        CustomProductTextField(title: "Enter User ID", text: $enteredUserEmail, icon: "person.text.rectangle")
 //                            .disabled(isSharing)
                         CustomTextField1(text: $authVM.email,
@@ -62,7 +62,7 @@ struct ShareCardSheet: View {
                     if let error = shareError {
                         Text(error)
                             .font(.caption)
-                            .foregroundStyle(.red)
+                            .foregroundColor(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     

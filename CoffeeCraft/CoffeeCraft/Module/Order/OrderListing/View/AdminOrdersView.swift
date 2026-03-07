@@ -17,7 +17,7 @@ struct AdminOrdersView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.coffeeDarkBrown.opacity(0.75), Color.coffeeDarkBrown.opacity(0.5), Color(.systemBackground)],
+                colors: [Color.accentPrimary.opacity(0.75), Color.accentPrimary.opacity(0.5), Color(.systemBackground)],
                 startPoint: .top, endPoint: .bottom
             )
             .cornerRadius(36, corners: [.topLeft, .topRight])
@@ -86,7 +86,7 @@ struct ActiveOrdersContent: View {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.brown.opacity(0.8))
+                        .foregroundColor(.accentPrimary.opacity(0.8))
                     Text("No Active Orders")
                         .font(.title3)
                         .fontWeight(.semibold)
@@ -130,7 +130,7 @@ struct ActiveOrdersContent: View {
                                             .disabled(order.status != "Ready")
                                         }
                                             .buttonStyle(.borderedProminent)
-                                            .tint(.brown)
+                                            .tint(.accentPrimary)
                                     )},
                                 onNavigate: {
                                     push(AnyView(OrderDetailView(order: order, isActive: true).environmentObject(cartManager)))
@@ -192,7 +192,7 @@ struct MyOrdersContent: View {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.brown.opacity(0.7))
+                        .foregroundColor(.accentPrimary.opacity(0.7))
                     Text("No Orders Yet")
                         .font(.title3)
                         .fontWeight(.semibold)

@@ -27,10 +27,14 @@ struct CoffeeCraftApp: App {
                 RootView()
                     .environmentObject(session)
                     .environmentObject(authVM)
-                    .preferredColorScheme(themeManager.theme.colorScheme)
                     .environmentObject(orderVM)
                     .environmentObject(coordinator)
                     .environmentObject(walletVM)
+                    .environmentObject(themeManager)
+                    .preferredColorScheme(themeManager.theme.colorScheme)
+                    // Forces full re-render when palette changes so all
+                    // Color.accentPrimary / Color.bgPrimary etc. re-evaluate.
+                    .id(themeManager.palette.rawValue)
             }
         }
     }

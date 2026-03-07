@@ -21,7 +21,7 @@ struct CustomizationLibrarySheet: View {
                     VStack(spacing: 16) {
                         Image(systemName: "tray.fill")
                             .font(.system(size: 60))
-                            .foregroundColor(.brown.opacity(0.4))
+                            .foregroundColor(.accentPrimary.opacity(0.4))
                         
                         Text("No Customizations Available")
                             .font(.title2)

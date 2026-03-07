@@ -21,7 +21,7 @@ struct StatusBadgeView: View {
                     .font(.caption)
                     .foregroundColor(textColor).colorScheme(.dark)
         }
-        .foregroundStyle(.white)
+        .foregroundColor(.white)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(

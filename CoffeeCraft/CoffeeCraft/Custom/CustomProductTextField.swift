@@ -16,7 +16,7 @@ struct CustomProductTextField: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.coffeeBrown)
+                .foregroundColor(.accentPrimary)
             TextField(title, text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .padding(10)
@@ -29,7 +29,7 @@ struct CustomProductTextField: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.border, lineWidth: 0.5)
+                .stroke(Color.borderColor, lineWidth: 0.5)
         )
         .shadow(
             color: colorScheme == .dark ? Color.clear : Color.textPrimary.opacity(0.05),

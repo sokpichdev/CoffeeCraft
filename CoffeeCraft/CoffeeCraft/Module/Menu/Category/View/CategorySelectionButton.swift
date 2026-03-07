@@ -18,7 +18,7 @@ struct CategorySelectionButton: View {
         Button(action: action) {
             HStack(spacing: 16) {
                 Image(systemName: icon)
-                    .foregroundColor(.coffeeBrown)
+                    .foregroundColor(.accentPrimary)
                     .frame(width: 20)
 
                 Text(category.isEmpty ? "Select \(title)..." : category)
@@ -34,7 +34,7 @@ struct CategorySelectionButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .tint(.brown)
+        .tint(.accentPrimary)
         .padding(.horizontal)
         .background(
             RoundedRectangle(cornerRadius: 10)
@@ -42,7 +42,7 @@ struct CategorySelectionButton: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.border, lineWidth: 0.5)
+                .stroke(Color.borderColor, lineWidth: 0.5)
         )
         .shadow(
             color: colorScheme == .dark ? Color.clear : Color.textPrimary.opacity(0.05),

@@ -142,10 +142,10 @@ struct ProfileView: View {
                 } label: {
                     Text(gender.isEmpty ? "Select" : gender)
                         .font(.headline)
-                        .foregroundStyle(gender.isEmpty ? .secondary : .primary)
+                        .foregroundColor(gender.isEmpty ? .secondary : .primary)
                     Image(systemName: "chevron.right")
                         .font(.headline)
-                        .foregroundColor(.brown)
+                        .foregroundColor(.accentPrimary)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -176,10 +176,10 @@ struct ProfileView: View {
                 } label: {
                     Text(city.isEmpty ? "Select" : city)
                         .font(.headline)
-                        .foregroundStyle(city.isEmpty ? .secondary : .primary)
+                        .foregroundColor(city.isEmpty ? .secondary : .primary)
                     Image(systemName: "chevron.right")
                         .font(.headline)
-                        .foregroundColor(.brown)
+                        .foregroundColor(.accentPrimary)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -188,7 +188,7 @@ struct ProfileView: View {
         .padding(.horizontal, 20)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.surfacePrimary))
+                .fill(Color.surfacePrimary)
         )
     }
     
@@ -210,18 +210,18 @@ struct ProfileView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 55, height: 55)
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
             }
             
             VStack(spacing: 6) {
                 Text(authVM.currentUser?.name ?? "User")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundStyle(.textPrimary)
+                    .foregroundColor(.textPrimary)
                 
                 Text("Coffee Enthusiast")
                     .font(.subheadline)
-                    .foregroundStyle(.textSecondary)
+                    .foregroundColor(.textSecondary)
             }
         }
         .padding(.top, 12)

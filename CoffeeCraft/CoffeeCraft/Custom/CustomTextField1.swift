@@ -98,7 +98,7 @@ struct CustomTextField1<TrailingView: View>: View {
                         } label: {
                             Text(countryText ?? "")
                                 .font(.subheadline)
-                                .foregroundColor(.commonText)
+                                .foregroundColor(Color.textPrimary)
                                 .padding(.leading, leadingIcon == nil ? 8 : 20)
                             
                             Image(.arrowDown)
@@ -109,7 +109,7 @@ struct CustomTextField1<TrailingView: View>: View {
                             
                             Divider()
                                 .frame(height: 20)
-                                .background(.commonGray)
+                                .background(Color.textMuted)
                         }
                         .padding()
                         .background(Color.clear)
@@ -138,7 +138,7 @@ struct CustomTextField1<TrailingView: View>: View {
             if showValidate {
                 Text(validateText)
                     .font(.caption)
-                    .foregroundColor(Color.textFieldError)
+                    .foregroundColor(Color.semanticError)
             }
         }
         .onChange(of: isValidate) {

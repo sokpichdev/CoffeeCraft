@@ -26,19 +26,19 @@ struct WalletTransactionRow: View {
 
                 Image(systemName: transaction.type.icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(transaction.type.color)
+                    .foregroundColor(transaction.type.color)
             }
 
             // label + date
             VStack(alignment: .leading, spacing: 3) {
                 Text(transaction.description)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundColor(Color.textPrimary)
                     .lineLimit(1)
 
                 Text(transaction.formattedDate)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Color.textMuted)
+                    .foregroundColor(Color.textMuted)
             }
 
             Spacer()
@@ -46,13 +46,13 @@ struct WalletTransactionRow: View {
             VStack(alignment: .trailing, spacing: 3) {
                 Text(transaction.formattedAmount)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundStyle(transaction.isCredit ? Color.semanticSuccess : Color.semanticError)
+                    .foregroundColor(transaction.isCredit ? Color.semanticSuccess : Color.semanticError)
 
                 // Type
                 Text(transaction.type.rawValue.capitalized)
                     .font(.system(size: 9, weight: .semibold))
                     .tracking(0.5)
-                    .foregroundStyle(transaction.type.color.opacity(0.8))
+                    .foregroundColor(transaction.type.color.opacity(0.8))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(transaction.type.color.opacity(0.1))

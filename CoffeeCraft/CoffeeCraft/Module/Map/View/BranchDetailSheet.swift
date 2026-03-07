@@ -84,7 +84,7 @@ struct BranchDetailSheet: View {
 
     private var dragHandle: some View {
         Capsule()
-            .fill(Color.border.opacity(0.8))
+            .fill(Color.borderColor.opacity(0.8))
             .frame(width: 36, height: 4)
             .padding(.top, 10)
             .frame(maxWidth: .infinity)
@@ -102,18 +102,18 @@ struct BranchDetailSheet: View {
 
                 Image(systemName: "cup.and.saucer.fill")
                     .font(.system(size: 26, weight: .medium))
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundColor(Color.accentPrimary)
                     .symbolRenderingMode(.hierarchical)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(branch.name)
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.textPrimary)
+                    .foregroundColor(Color.textPrimary)
 
                 Text(branch.address)
                     .font(.system(size: 12, weight: .regular))
-                    .foregroundStyle(Color.textMuted)
+                    .foregroundColor(Color.textMuted)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -124,7 +124,7 @@ struct BranchDetailSheet: View {
                         .frame(width: 7, height: 7)
                     Text(branch.isOpen ? "Open Now" : "Closed")
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
+                        .foregroundColor(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                 }
                 .padding(.top, 1)
             }
@@ -135,7 +135,7 @@ struct BranchDetailSheet: View {
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.textMuted)
+                    .foregroundColor(Color.textMuted)
                     .frame(width: 30, height: 30)
                     .background(
                         Circle().fill(Color.surfaceSub)
@@ -160,7 +160,7 @@ struct BranchDetailSheet: View {
                         Text(dist)
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
                     }
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundColor(Color.textSecondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(
@@ -197,9 +197,9 @@ struct BranchDetailSheet: View {
                     Spacer()
                     Text("Est. wait")
                         .font(.system(size: 11, weight: .regular))
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                 }
-                .foregroundStyle(
+                .foregroundColor(
                     branch.estimatedWaitMinutes == 0 ? Color.semanticSuccess : Color.accentPrimary
                 )
                 .padding(.horizontal, 14)
@@ -225,7 +225,7 @@ struct BranchDetailSheet: View {
             Text(title)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
         }
-        .foregroundStyle(Color.accentPrimary)
+        .foregroundColor(Color.accentPrimary)
         .padding(.horizontal, 13)
         .padding(.vertical, 8)
         .background(
@@ -240,7 +240,7 @@ struct BranchDetailSheet: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Amenities")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.textPrimary)
+                .foregroundColor(Color.textPrimary)
 
             HStack(spacing: 10) {
                 ForEach(branch.amenityIcons, id: \.label) { amenity in
@@ -251,12 +251,12 @@ struct BranchDetailSheet: View {
                                 .frame(width: 46, height: 46)
                             Image(systemName: amenity.icon)
                                 .font(.system(size: 19, weight: .medium))
-                                .foregroundStyle(Color.accentPrimary)
+                                .foregroundColor(Color.accentPrimary)
                                 .symbolRenderingMode(.hierarchical)
                         }
                         Text(amenity.label)
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(Color.textMuted)
+                            .foregroundColor(Color.textMuted)
                     }
                 }
                 Spacer()
@@ -268,7 +268,7 @@ struct BranchDetailSheet: View {
                 .fill(Color.surfacePrimary)
                 .overlay {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                        .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
                 }
         )
     }
@@ -285,14 +285,14 @@ struct BranchDetailSheet: View {
                 HStack {
                     Image(systemName: "clock")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color.accentPrimary)
+                        .foregroundColor(Color.accentPrimary)
                     Text("Opening Hours")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                     Spacer()
                     Image(systemName: "chevron.down")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                         .rotationEffect(.degrees(showHours ? 180 : 0))
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showHours)
                 }
@@ -302,7 +302,7 @@ struct BranchDetailSheet: View {
                         .fill(Color.surfacePrimary)
                         .overlay {
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                                .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
                         }
                 )
             }
@@ -338,7 +338,7 @@ struct BranchDetailSheet: View {
                 Text(branch.isOpen ? "Order from Here" : "Branch Closed")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
             }
-            .foregroundStyle(.white)
+            .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 54)
             .background {

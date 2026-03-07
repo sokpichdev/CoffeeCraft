@@ -35,7 +35,7 @@ struct TopUpBankStep: View {
             
             VStack(spacing: 0) {
                 Divider()
-                    .overlay(Color.border)
+                    .overlay(Color.borderColor)
                 Button {
                     onContinue()
                 } label: {

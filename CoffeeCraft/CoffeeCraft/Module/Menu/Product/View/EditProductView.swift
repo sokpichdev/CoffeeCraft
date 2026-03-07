@@ -51,7 +51,7 @@ struct EditProductView: View {
                         if !isURLValid {
 //                            CustomAttributedStringText(TextSegment(text: "No Image URL?", color: .red, font: .caption),
 //                                                       TextSegment(text: "Click Here to get!",
-//                                                                   color: .coffeeBrown,
+//                                                                   color: .accentPrimary,
 //                                                                   font: .caption,
 //                                                                   link: URL(string: "https://postimages.org/")!,
 //                                                                  underline: true))
@@ -65,7 +65,7 @@ struct EditProductView: View {
                                 HStack {
                                     (
                                         Text("No Image URL?").foregroundColor(.red).font(.caption) +
-                                        Text(" Click Here to get!").foregroundColor(.coffeeBrown).font(.caption)
+                                        Text(" Click Here to get!").foregroundColor(.accentPrimary).font(.caption)
                                     )
                                 }
                                 .padding(.leading)
@@ -82,7 +82,7 @@ struct EditProductView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Label("Basic Info", systemImage: "info.circle")
                         .font(.headline)
-                        .foregroundColor(.coffeeBrown)
+                        .foregroundColor(.accentPrimary)
                         .padding(.bottom, 4)
 
                     VStack(spacing: 12) {
@@ -102,7 +102,7 @@ struct EditProductView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Label("Product Options", systemImage: "slider.horizontal.3")
                         .font(.headline)
-                        .foregroundColor(.coffeeBrown)
+                        .foregroundColor(.accentPrimary)
                         .padding(.bottom, 4)
                     
                     CustomizationEditorButton(customizations: $tempCustomizations)
@@ -125,11 +125,11 @@ struct EditProductView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Status", systemImage: "checkmark.circle")
                         .font(.headline)
-                        .foregroundColor(.coffeeBrown)
+                        .foregroundColor(.accentPrimary)
                         .padding(.bottom, 4)
                     
                     Toggle("Available for order", isOn: $tempAvailable)
-                        .toggleStyle(SwitchToggleStyle(tint: .coffeeBrown))
+                        .toggleStyle(SwitchToggleStyle(tint: .accentPrimary))
                 }
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 16).fill(Color.surfacePrimary))

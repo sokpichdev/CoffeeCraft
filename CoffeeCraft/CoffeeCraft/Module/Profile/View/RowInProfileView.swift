@@ -21,7 +21,7 @@ struct RowInProfileView<Content: View>: View {
                 Circle()
                     .fill(
                         isEditing && (editType == .phone || editType == .email) ?
-                        Color(.surfacePrimary).opacity(0.5) : Color(.surfacePrimary)
+                        Color.surfacePrimary.opacity(0.5) : Color.surfacePrimary
                     )
                     .frame(width: 36, height: 36)
                 
@@ -36,7 +36,7 @@ struct RowInProfileView<Content: View>: View {
                     Text(label)
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundStyle(.textSecondary)
+                        .foregroundColor(.textSecondary)
                 }
                 
                 if isEditing {
@@ -44,23 +44,23 @@ struct RowInProfileView<Content: View>: View {
                     case .name:
                         TextField("", text: $title)
                             .font(.headline)
-                            .foregroundStyle(.textPrimary)
+                            .foregroundColor(.textPrimary)
 
                     case .email, .phone:
                         // Email is NOT editable, but color changes when editing
                         Text(title)
                             .font(.headline)
-                            .foregroundStyle(.textMuted)
+                            .foregroundColor(.textMuted)
 
                     default:
                         Text(previousTitle)
                             .font(.headline)
-                            .foregroundStyle(.textSecondary.opacity(0.5))
+                            .foregroundColor(.textSecondary.opacity(0.5))
                     }
                 } else {
                     Text(title)
                         .font(.headline)
-                        .foregroundStyle(.textPrimary)
+                        .foregroundColor(.textPrimary)
                 }
             }
             

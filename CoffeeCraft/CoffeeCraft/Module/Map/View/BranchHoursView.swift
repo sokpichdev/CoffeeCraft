@@ -53,13 +53,13 @@ struct BranchHoursView: View {
                     // Day label
                     Text(entry.shortDay)
                         .font(.system(size: 13, weight: entry.isToday ? .bold : .regular, design: .rounded))
-                        .foregroundStyle(entry.isToday ? Color.accentPrimary : Color.textSecondary)
+                        .foregroundColor(entry.isToday ? Color.accentPrimary : Color.textSecondary)
                         .frame(width: 30, alignment: .leading)
 
                     // Hours
                     Text(entry.hours)
                         .font(.system(size: 13, weight: entry.isToday ? .semibold : .regular))
-                        .foregroundStyle(entry.isToday ? Color.textPrimary : Color.textMuted)
+                        .foregroundColor(entry.isToday ? Color.textPrimary : Color.textMuted)
 
                     Spacer()
 
@@ -67,7 +67,7 @@ struct BranchHoursView: View {
                     if entry.isToday {
                         Text("Today")
                             .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                            .foregroundColor(.white)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(
@@ -96,7 +96,7 @@ struct BranchHoursView: View {
         )
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
         }
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }

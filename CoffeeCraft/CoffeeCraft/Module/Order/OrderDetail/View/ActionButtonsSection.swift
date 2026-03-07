@@ -35,17 +35,17 @@ struct ActionButtonsSection: View {
                         onUpdateStatus?("InProgress") }
                 } else if order.status == "InProgress" {
                     CustomCoffeeButton(title: isUpdating ? "Updating..." : "Mark as Ready",
-                        buttonImage: "cup.and.saucer.fill", bgColors: [.coffeeOliveGreen], isDisabled: isUpdating) {
+                        buttonImage: "cup.and.saucer.fill", bgColors: [.semanticSuccess], isDisabled: isUpdating) {
                         onUpdateStatus?("Ready") }
                 } else if order.status == "Ready" {
                     CustomCoffeeButton(title: isUpdating ? "Updating..." : "Complete Order",
-                        buttonImage: "checkmark.circle.fill", bgColors: [.coffeeDarkBrown], isDisabled: isUpdating) {
+                        buttonImage: "checkmark.circle.fill", bgColors: [.accentPrimary], isDisabled: isUpdating) {
                         onUpdateStatus?("Completed") }
                 }
             }
 
             if isCompleted {
-                CustomCoffeeButton(title: "Reorder", buttonImage: "arrow.clockwise", bgColors: [.brown]) {
+                CustomCoffeeButton(title: "Reorder", buttonImage: "arrow.clockwise", bgColors: [.accentPrimary]) {
                     onReorder?() }
             }
 
@@ -61,11 +61,11 @@ struct ActionButtonsSection: View {
 
             if isCancelled {
                 HStack(spacing: 10) {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Color.semanticError.opacity(0.8))
+                    Image(systemName: "xmark.circle.fill").foregroundColor(Color.semanticError.opacity(0.8))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Order Cancelled").font(.subheadline.weight(.semibold)).foregroundStyle(Color.semanticError)
+                        Text("Order Cancelled").font(.subheadline.weight(.semibold)).foregroundColor(Color.semanticError)
                         if order.wasWalletPayment, let amount = order.walletAmountPaid {
-                            Text("+\(amount.currencyFormatted) refunded to your wallet").font(.caption).foregroundStyle(.secondary)
+                            Text("+\(amount.currencyFormatted) refunded to your wallet").font(.caption).foregroundColor(.secondary)
                         }
                     }
                     Spacer()

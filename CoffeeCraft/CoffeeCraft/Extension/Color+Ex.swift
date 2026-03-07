@@ -2,13 +2,15 @@
 //  Color+Ex.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 12/29/25.
-//  Updated: Full adaptive token system (light + dark mode)
+//  Updated: Full adaptive token system — palette-aware + light/dark mode.
+//  All semantic tokens now read from ThemeManager.shared.palette so
+//  switching palette re-renders the entire app automatically.
 //
 
 import SwiftUI
 
 // MARK: - Hex Init & Random
+
 extension Color {
     init(hex: String) {
         var hexSanitized = hex
@@ -16,118 +18,140 @@ extension Color {
         let scanner = Scanner(string: hexSanitized)
         var rgbValue: UInt64 = 0
         scanner.scanHexInt64(&rgbValue)
-        let red = (rgbValue & 0xff0000) >> 16
-        let green = (rgbValue & 0xff00) >> 8
-        let blue = rgbValue & 0xff
-        self.init(red: CGFloat(red) / 0xff, green: CGFloat(green) / 0xff, blue: CGFloat(blue) / 0xff)
+        let red   = (rgbValue & 0xFF0000) >> 16
+        let green = (rgbValue & 0x00FF00) >> 8
+        let blue  =  rgbValue & 0x0000FF
+        self.init(
+            red:   CGFloat(red)   / 255,
+            green: CGFloat(green) / 255,
+            blue:  CGFloat(blue)  / 255
+        )
     }
 
     static func random(randomOpacity: Bool = false) -> Color {
-        Color(red: .random(in: 0...1), green: .random(in: 0...1),
-              blue: .random(in: 0...1), opacity: randomOpacity ? .random(in: 0...1) : 1)
+        Color(
+            red:     .random(in: 0...1),
+            green:   .random(in: 0...1),
+            blue:    .random(in: 0...1),
+            opacity: randomOpacity ? .random(in: 0...1) : 1
+        )
     }
 }
 
-// MARK: - Semantic Design Tokens  (Adaptive Light / Dark)
+// MARK: - Palette-Aware Semantic Design Tokens
 //
-//  Token map:
-//  ┌─────────────────────┬──────────────┬──────────────┐
-//  │ Token               │ Light        │ Dark         │
-//  ├─────────────────────┼──────────────┼──────────────┤
-//  │ bgPrimary           │ #F5EDE4      │ #1A0F0A      │
-//  │ bgSecondary         │ #FDF6EF      │ #231510      │
-//  │ surfacePrimary      │ #FFFFFF      │ #2E1C14      │
-//  │ surfaceSub          │ #F0E6DA      │ #3A241A      │
-//  │ borderColor         │ #E2D3C4      │ #4A2E22      │
-//  │ textPrimary         │ #1E110A      │ #F5E8DC      │
-//  │ textSecondary       │ #6B4E3D      │ #D4A882      │
-//  │ textMuted           │ #A0856E      │ #8C6652      │
-//  │ accentPrimary       │ #6F4E37      │ #9E6B4F      │
-//  │ accentGold          │ #C8860A      │ #E8A020      │
-//  │ semanticSuccess     │ #5A8A3C      │ #72B048      │
-//  │ semanticWarning     │ #C97C1A      │ #E89F40      │
-//  │ semanticError       │ #B03A2A      │ #E05040      │
-//  └─────────────────────┴──────────────┴──────────────┘
+//  How it works:
+//  ┌──────────────────────────────────────────────────────────────────┐
+//  │  Each token calls ThemeManager.shared.palette.dynamicColor(...)  │
+//  │  UIColor(dynamicProvider:) handles light ↔ dark switching.       │
+//  │  When the user changes the palette, ThemeManager publishes a      │
+//  │  change → root @StateObject re-renders → all tokens re-evaluate. │
+//  └──────────────────────────────────────────────────────────────────┘
 
-// extension Color {
-//
-//    // ── Backgrounds ──────────────────────────────────────────────
-//    /// Main app background. Warm cream (light) / Deep espresso (dark).
-//    static let bgPrimary      = Color("bgPrimary")
-//    /// Secondary background for grouped list sections.
-//    static let bgSecondary    = Color("bgSecondary")
-//
-//    // ── Surfaces / Cards ─────────────────────────────────────────
-//    /// Primary card / sheet surface.
-//    static let surfacePrimary = Color("surfacePrimary")
-//    /// Sub-surface for nested rows, chips, tag backgrounds.
-//    static let surfaceSub     = Color("surfaceSub")
-//    /// Dividers, card strokes, input borders in idle state.
-//    static let borderColor    = Color("borderColor")
-//
-//    // ── Typography ───────────────────────────────────────────────
-//    /// Body copy, titles — highest contrast.
-//    static let textPrimary    = Color("textPrimary")
-//    /// Subtitles, secondary labels.
-//    static let textSecondary  = Color("textSecondary")
-//    /// Placeholders, timestamps, muted captions.
-//    static let textMuted      = Color("textMuted")
-//
-//    // ── Brand Accents ─────────────────────────────────────────────
-//    /// Primary CTA: buttons, tab highlights, active states.
-//    static let accentPrimary  = Color("accentPrimary")
-//    /// Rewards / Points / premium CTAs only.
-//    static let accentGold     = Color("accentGold")
-//
-//    // ── Semantic Status ───────────────────────────────────────────
-//    /// Completed, success, active states.
-//    static let semanticSuccess = Color("semanticSuccess")
-//    /// Pending, in-progress, coming soon.
-//    static let semanticWarning = Color("semanticWarning")
-//    /// Errors, cancellations, form failures.
-//    static let semanticError   = Color("semanticError")
-// }
-//
-//// MARK: - Legacy Coffee Brand Tokens  (backward compat — now all adaptive)
-// extension Color {
-//    static let coffeeBrown      = Color("coffeeBrown")
-//    static let coffeeLight      = Color("coffeeLight")
-//    static let coffeeDarkBrown  = Color("coffeeDarkBrown")
-//    static let coffeeCream      = Color("coffeeCream")
-//    static let coffeeWarmBrown  = Color("coffeeWarmBrown")
-//    static let coffeeOliveGreen = Color("coffeeOliveGreen")
-//
-//    static let caramelGold   = Color("caramelGold")
-//    static let cinnamonSpice = Color("cinnamonSpice")
-//    static let mochaRose     = Color("mochaRose")
-//    static let vanillaYellow = Color("vanillaYellow")
-//
-//    static let leafGreen    = Color("leafGreen")
-//    static let warningAmber = Color("warningAmber")
-//    static let errorRed     = Color("errorRed")
-//
-//    static let mainCreamBg   = Color("mainCreamBg")
-//    static let ashWood       = Color("ashWood")
-//    static let creamWhite    = Color("creamWhite")
-//    static let espressoBlack = Color("espressoBlack")
-//    static let parchment     = Color("parchment")
-// }
+extension Color {
+
+    // ── Backgrounds ───────────────────────────────────────────────────
+    /// Main app background.
+    static var bgPrimary: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.bgPrimary))
+    }
+    /// Secondary background for grouped list sections.
+    static var bgSecondary: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.bgSecondary))
+    }
+
+    // ── Surfaces / Cards ─────────────────────────────────────────────
+    /// Primary card / sheet surface.
+    static var surfacePrimary: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.surfacePrimary))
+    }
+    /// Sub-surface for nested rows, chips, tag backgrounds.
+    static var surfaceSub: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.surfaceSub))
+    }
+    /// Dividers, card strokes, input borders.
+    static var borderColor: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.borderColor))
+    }
+
+    // ── Typography ───────────────────────────────────────────────────
+    /// Body copy, titles — highest contrast.
+    static var textPrimary: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.textPrimary))
+    }
+    /// Subtitles, secondary labels.
+    static var textSecondary: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.textSecondary))
+    }
+    /// Placeholders, timestamps, muted captions.
+    static var textMuted: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.textMuted))
+    }
+
+    // ── Brand Accents ────────────────────────────────────────────────
+    /// Primary CTA: buttons, tab highlights, active states.
+    static var accentPrimary: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.accentPrimary))
+    }
+    /// Rewards / Points / premium CTAs.
+    static var accentGold: Color {
+        Color(ThemeManager.shared.palette.dynamicColor(\.accentGold))
+    }
+
+    // ── Semantic Status (unchanged across palettes) ───────────────────
+//    static var semanticSuccess: Color { Color("semanticSuccess") }
+//    static var semanticWarning: Color { Color("semanticWarning") }
+//    static var semanticError:   Color { Color("semanticError")   }
+
+    // ── Legacy named colors (kept for backward compat) ─────────────────
+    static var commonGray: Color { Color("CommonGray") }
+    static var coffeeBrown: Color { Color("coffeeBrown") }
+    static var coffeeLight: Color { Color("coffeeLight") }
+    static var coffeeDarkBrown: Color { Color("coffeeDarkBrown") }
+    static var coffeeCream: Color { Color("coffeeCream") }
+    static var coffeeWarmBrown: Color { Color("coffeeWarmBrown") }
+    static var coffeeOliveGreen: Color { Color("coffeeOliveGreen")}
+    static var caramelGold: Color { Color("caramelGold") }
+    static var cinnamonSpice: Color { Color("cinnamonSpice") }
+    static var mochaRose: Color { Color("mochaRose") }
+    static var vanillaYellow: Color { Color("vanillaYellow")   }
+    static var leafGreen: Color { Color("leafGreen") }
+    static var warningAmber: Color { Color("warningAmber") }
+    static var errorRed: Color { Color("errorRed") }
+    static var mainCreamBg: Color { Color("mainCreamBg") }
+    static var ashWood: Color { Color("ashWood") }
+    static var creamWhite: Color { Color("creamWhite") }
+    static var espressoBlack: Color { Color("espressoBlack") }
+    static var parchment: Color { Color("parchment") }
+}
 
 // MARK: - Gradient Helpers
 extension LinearGradient {
     /// Primary brand gradient: coffee brown → light.
     static let brandPrimary = LinearGradient(
-        colors: [Color.accentPrimary, Color.coffeeLight],
+        colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.6)],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
     /// Gold reward gradient.
     static let brandGold = LinearGradient(
-        colors: [Color.accentGold, Color.coffeeLight],
+        colors: [Color.accentGold, Color.accentPrimary.opacity(0.6)],
         startPoint: .leading, endPoint: .trailing
     )
     /// Wallet card: rich espresso → caramel.
     static let walletCard = LinearGradient(
-        colors: [Color.coffeeDarkBrown, Color.coffeeBrown, Color.accentGold],
+        colors: [Color.accentPrimary, Color.accentPrimary, Color.accentGold],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
+}
+
+// MARK: - UIColor Extensions for Palette Tokens
+// Makes our palette tokens available as UIColor for UIKit components
+
+extension UIColor {
+    static var textPrimaryUI: UIColor    { ThemeManager.shared.palette.dynamicColor(\.textPrimary) }
+    static var textSecondaryUI: UIColor  { ThemeManager.shared.palette.dynamicColor(\.textSecondary) }
+    static var accentPrimaryUI: UIColor  { ThemeManager.shared.palette.dynamicColor(\.accentPrimary) }
+    static var bgPrimaryUI: UIColor      { ThemeManager.shared.palette.dynamicColor(\.bgPrimary) }
+    static var surfacePrimaryUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.surfacePrimary) }
+    static var borderColorUI: UIColor    { ThemeManager.shared.palette.dynamicColor(\.borderColor) }
 }

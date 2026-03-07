@@ -38,7 +38,7 @@ struct NotificationRowShell<Content: View>: View {
             // Unread dot
             if !notification.isRead {
                 Circle()
-                    .fill(Color.coffeeOliveGreen)
+                    .fill(Color.semanticSuccess)
                     .frame(width: 12, height: 12)
                     .padding(.top, 6)
             }
@@ -47,7 +47,7 @@ struct NotificationRowShell<Content: View>: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.surfacePrimary))
+                .fill(Color.surfacePrimary)
                 .shadow(
                     color: Color.textPrimary.opacity(notification.isRead ? 0.04 : 0.08),
                     radius: notification.isRead ? 2 : 4,

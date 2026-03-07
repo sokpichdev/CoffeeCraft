@@ -59,7 +59,7 @@ struct OrderItemRow: View {
                         if let qty = item.quantity, qty > 1 {
                             Text("×\(qty)")
                                 .font(.body).fontWeight(.semibold)
-                                .foregroundColor(.brown)
+                                .foregroundColor(.accentPrimary)
                         }
                         Text(item.name ?? "")
                             .font(.body).fontWeight(.semibold)

@@ -21,18 +21,18 @@ struct BankRow: View {
                     
                     Image(systemName: bank.icon)
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(bank.color)
+                        .foregroundColor(bank.color)
                 }
                 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(bank.name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(Color.textPrimary)
                     
                     Text(bank.description)
                         .font(.caption)
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                         .lineLimit(1)
                 }
                 
@@ -41,7 +41,7 @@ struct BankRow: View {
                 ZStack {
                     Circle()
                         .strokeBorder(
-                            isSelected ? Color.accentPrimary : Color.border,
+                            isSelected ? Color.accentPrimary : Color.borderColor,
                             lineWidth: 2
                         )
                         .frame(width: 22, height: 22)
@@ -62,12 +62,12 @@ struct BankRow: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .strokeBorder(
-                        isSelected ? Color.accentPrimary.opacity(0.4) : Color.border.opacity(0.6),
+                        isSelected ? Color.accentPrimary.opacity(0.4) : Color.borderColor.opacity(0.6),
                         lineWidth: 1.5
                     )
             )
             .shadow(
-                color: isSelected ? Color.accentPrimary.opacity(0.12) : Color.coffeeDarkBrown.opacity(0.04),
+                color: isSelected ? Color.accentPrimary.opacity(0.12) : Color.accentPrimary.opacity(0.04),
                 radius: isSelected ? 6 : 2, y: 2
             )
         }

@@ -21,17 +21,17 @@ struct AsyncImageCard: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: corner)
-                .fill(Color.commonGray.opacity(0.2))
+                .fill(Color.textMuted.opacity(0.2))
             
             if !isURLValid || (imageURL ?? "").isEmpty {
                 VStack(spacing: height * 0.05) {
                     Image(systemName: "photo.on.rectangle.angled")
                         .font(.system(size: iconSize))
-                        .foregroundColor(.commonGray)
+                        .foregroundColor(.textMuted)
                     
                     Text(placeholderText)
                         .font(.system(size: textSize))
-                        .foregroundColor(.commonGray)
+                        .foregroundColor(.textMuted)
                         .minimumScaleFactor(0.7)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

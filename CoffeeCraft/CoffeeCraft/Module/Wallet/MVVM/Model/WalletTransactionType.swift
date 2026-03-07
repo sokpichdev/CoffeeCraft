@@ -49,7 +49,7 @@ enum WalletTransactionType: String, Codable, CaseIterable {
         case .topup:   return .semanticSuccess
         case .payment: return .semanticError
         case .refund:  return Color("activeTF")
-        case .reward:  return Color("vanillaYellow")
+        case .reward:  return Color.accentGold
         }
     }
 }

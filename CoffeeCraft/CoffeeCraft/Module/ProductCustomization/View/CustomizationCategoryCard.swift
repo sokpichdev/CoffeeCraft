@@ -22,7 +22,7 @@ struct CustomizationCategoryCard: View {
             }) {
                 HStack {
                     Image(systemName: "folder.fill")
-                        .foregroundColor(.brown)
+                        .foregroundColor(.accentPrimary)
                         .font(.title3)
                     
                     TextField("Category name", text: $category.name)

@@ -43,7 +43,7 @@ struct CustomSingleSelectionview: View {
                             Text(option)
                                 .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
                                 .foregroundColor(isSelected ? Color.textPrimary
-                                                 : Color.coffeeDarkBrown).colorScheme(.dark)
+                                                 : Color.accentPrimary).colorScheme(.dark)
                                 .padding(.vertical, 9)
                                 .padding(.horizontal, 18)
                                 .background(
@@ -52,21 +52,21 @@ struct CustomSingleSelectionview: View {
                                 )
                                 .overlay(
                                     Capsule()
-                                        .stroke(Color.border.opacity(isSelected ? 0 : 1), lineWidth: 1)
+                                        .stroke(Color.borderColor.opacity(isSelected ? 0 : 1), lineWidth: 1)
                                 )
                                 .shadow(
-                                    color: isSelected ? Color.border.opacity(0.3) : .clear,
+                                    color: isSelected ? Color.borderColor.opacity(0.3) : .clear,
                                     radius: 6, x: 0, y: 3
                                 )
 
                             if price > 0 {
                                 Text("+$\(price, specifier: "%.2f")")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(isSelected ? Color.accentPrimary : .commonGray)
+                                    .foregroundColor(isSelected ? Color.accentPrimary : .textMuted)
                             } else {
                                 Text("Included")
                                     .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.commonGray.opacity(0.6))
+                                    .foregroundColor(.textMuted.opacity(0.6))
                             }
                         }
                     }

@@ -13,7 +13,7 @@ struct GenericNotificationRow: View { // for fallback
         NotificationRowShell(
             notification: notification,
             icon: "bell.fill",
-            iconColor: .brown
+            iconColor: .accentPrimary
         ) {
             Text(notification.title)
                 .font(.subheadline.bold())

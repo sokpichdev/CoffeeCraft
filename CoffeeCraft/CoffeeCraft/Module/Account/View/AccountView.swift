@@ -90,7 +90,7 @@ struct AccountView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
             }
             .shadow(color: Color.surfacePrimary.opacity(0.3), radius: 8, y: 4)
             
@@ -98,7 +98,7 @@ struct AccountView: View {
                 Text(UserSession.shared.userName ?? "")
                     .font(.title2)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.textPrimary)
+                    .foregroundColor(.textPrimary)
                 
                 PushLink {
                     if userSession.isLoggedIn {
@@ -115,7 +115,7 @@ struct AccountView: View {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.headline)
                     }
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundColor(Color.accentPrimary)
                 }
             }
         }
@@ -124,7 +124,7 @@ struct AccountView: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.surfacePrimary))
+                .fill(Color.surfacePrimary)
 //                .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
         )
     }
@@ -148,7 +148,7 @@ struct AccountView: View {
                 Text("My Cards")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.textPrimary)
+                    .foregroundColor(.textPrimary)
             }
             .padding(.leading, 4)
             
@@ -183,7 +183,7 @@ struct AccountView: View {
                         VStack {
                             ZStack {
                                 Circle()
-                                    .fill(Color(.surfacePrimary))
+                                    .fill(Color.surfacePrimary)
                                     .frame(width: 50, height: 50)
                                     .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
                                 
@@ -209,7 +209,7 @@ struct AccountView: View {
                         VStack {
                             ZStack {
                                 Circle()
-                                    .fill(Color(.brown))
+                                    .fill(Color.accentPrimary)
                                     .frame(width: 50, height: 50)
                                 
                                 Image(systemName: "cart.badge.plus")
@@ -231,7 +231,7 @@ struct AccountView: View {
                         VStack {
                             ZStack {
                                 Circle()
-                                    .fill(Color(.surfacePrimary))
+                                    .fill(Color.surfacePrimary)
                                     .frame(width: 50, height: 50)
                                     .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
                                 
@@ -257,6 +257,10 @@ struct AccountView: View {
                 } else {
                     push(AnyView(AuthView().environmentObject(authVM)))
                 }
+            }
+            DeviderInSectionView(padding: 44)
+            RowInSectionView(title: "Color Theme", systemImage: "paintpalette.fill") {
+                push(AnyView(ColorThemePickerView()))
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
@@ -308,7 +312,7 @@ struct AccountView: View {
             Text("Stay connected with us")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundStyle(.textSecondary)
+                .foregroundColor(.textSecondary)
             
             HStack(spacing: 20) {
                 SocialMediaButton(icon: "play.rectangle.fill", url: "")
@@ -350,12 +354,12 @@ struct RowInSectionView: View {
                     if let label = label {
                         Text(label)
                             .font(.caption)
-                            .foregroundStyle(.textSecondary)
+                            .foregroundColor(.textSecondary)
                     }
                     
                     Text(title)
                         .font(.subheadline)
-                        .foregroundStyle(.textPrimary)
+                        .foregroundColor(.textPrimary)
                 }
                 
                 Spacer()
@@ -364,7 +368,7 @@ struct RowInSectionView: View {
                     Text("\(count)")
                         .font(.caption)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(
@@ -384,7 +388,7 @@ struct RowInSectionView: View {
             .padding(.vertical, 12)
         }
         .disabled(onClicked == nil)
-        .foregroundStyle(.textPrimary)
+        .foregroundColor(.textPrimary)
     }
 }
 
@@ -405,7 +409,7 @@ struct SocialMediaButton: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(Color(.surfacePrimary))
+                    .fill(Color.surfacePrimary)
                     .frame(width: 44, height: 44)
                 
                 Image(systemName: icon)

@@ -105,7 +105,7 @@ private struct FilterChip: View {
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .tracking(0.1)
             }
-            .foregroundStyle(isActive ? .white : Color.accentPrimary)
+            .foregroundColor(isActive ? .white : Color.accentPrimary)
             .padding(.horizontal, 13)
             .padding(.vertical, 8)
             .background {

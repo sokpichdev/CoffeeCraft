@@ -38,18 +38,18 @@ struct BranchWaitTimeEditor: View {
                             .frame(width: 60, height: 60)
                         Image(systemName: "clock.badge.fill")
                             .font(.system(size: 26, weight: .medium))
-                            .foregroundStyle(Color.accentPrimary)
+                            .foregroundColor(Color.accentPrimary)
                             .symbolRenderingMode(.hierarchical)
                     }
                     .padding(.top, 12)
 
                     Text(branch.name)
                         .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(Color.textPrimary)
 
                     Text("Set estimated wait time for customers")
                         .font(.system(size: 13, weight: .regular))
-                        .foregroundStyle(Color.textMuted)
+                        .foregroundColor(Color.textMuted)
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -59,7 +59,7 @@ struct BranchWaitTimeEditor: View {
                 HStack {
                     Text("Estimated Wait")
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.textSecondary)
+                        .foregroundColor(Color.textSecondary)
                     Spacer()
                 }
                 .padding(.horizontal, 20)
@@ -92,7 +92,7 @@ struct BranchWaitTimeEditor: View {
                         Text(err)
                             .font(.system(size: 13, weight: .regular))
                     }
-                    .foregroundStyle(Color.semanticError)
+                    .foregroundColor(Color.semanticError)
                     .padding(.horizontal, 20)
                     .padding(.top, 14)
                 }
@@ -118,7 +118,7 @@ struct BranchWaitTimeEditor: View {
                             Text(isSaving ? "Saving…" : "Save Wait Time")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                         }
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
                         .background {
@@ -136,7 +136,7 @@ struct BranchWaitTimeEditor: View {
                     } label: {
                         Text("Clear Wait Time")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.textMuted)
+                            .foregroundColor(Color.textMuted)
                             .frame(maxWidth: .infinity)
                             .frame(height: 44)
                     }
@@ -193,13 +193,13 @@ private struct WaitOption: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                         .transition(.scale.combined(with: .opacity))
                 }
 
                 Text(label)
                     .font(.system(size: 12, weight: isSelected ? .bold : .regular, design: .rounded))
-                    .foregroundStyle(isSelected ? .white : Color.textPrimary)
+                    .foregroundColor(isSelected ? .white : Color.textPrimary)
                     .minimumScaleFactor(0.8)
                     .lineLimit(1)
             }
@@ -211,7 +211,7 @@ private struct WaitOption: View {
                     .overlay {
                         if !isSelected {
                             RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .strokeBorder(Color.border.opacity(0.5), lineWidth: 0.5)
+                                .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
                         }
                     }
                     .shadow(

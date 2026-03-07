@@ -85,7 +85,7 @@ struct HeaderSection: View {
             VStack(spacing: 4) {
                 Text("Order Confirmed")
                     .font(.system(size: 22, weight: .bold, design: .serif))
-                    .foregroundColor(Color.coffeeDarkBrown)
+                    .foregroundColor(Color.accentPrimary)
                 Text("Your coffee is on its way ☕")
                     .font(.system(size: 13))
                     .foregroundColor(.textSecondary)
@@ -126,7 +126,7 @@ struct ReceiptPaper: View {
                     Text("OFFICIAL RECEIPT")
                         .font(.system(size: 9, weight: .heavy, design: .monospaced))
                         .tracking(3)
-                        .foregroundColor(Color.coffeeDarkBrown.opacity(0.35))
+                        .foregroundColor(Color.accentPrimary.opacity(0.35))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -165,7 +165,7 @@ struct ReceiptPaper: View {
             RoundedRectangle(cornerRadius: 4)
                 .fill(Color.surfaceSub.opacity(0.35))
         )
-        .shadow(color: Color.coffeeDarkBrown.opacity(0.10), radius: 16, x: 0, y: 6)
+        .shadow(color: Color.accentPrimary.opacity(0.10), radius: 16, x: 0, y: 6)
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 20)
         .onAppear {
@@ -207,14 +207,14 @@ struct MetaRow: View {
             Text(label)
                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
                 .tracking(1.5)
-                .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
+                .foregroundColor(Color.accentPrimary.opacity(0.4))
                 .frame(width: 80, alignment: .leading)
 
             Text(value)
                 .font(mono
                       ? .system(size: 13, weight: .semibold, design: .monospaced)
                       : .system(size: 13, weight: .medium))
-                .foregroundColor(Color.coffeeDarkBrown)
+                .foregroundColor(Color.accentPrimary)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
@@ -235,7 +235,7 @@ struct ItemsSection: View {
             Text("ITEMS")
                 .font(.system(size: 9, weight: .heavy, design: .monospaced))
                 .tracking(3)
-                .foregroundColor(Color.coffeeDarkBrown.opacity(0.4))
+                .foregroundColor(Color.accentPrimary.opacity(0.4))
             
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 ReceiptItemRow(
@@ -246,7 +246,7 @@ struct ItemsSection: View {
                 
                 if index < items.count - 1 {
                     Rectangle()
-                        .fill(Color.coffeeDarkBrown.opacity(0.07))
+                        .fill(Color.accentPrimary.opacity(0.07))
                         .frame(height: 1)
                 }
             }
@@ -267,7 +267,7 @@ struct TotalSection: View {
             Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                 .font(.system(size: 22, weight: .bold, design: .monospaced))
         }
-        .foregroundColor(Color.coffeeDarkBrown)
+        .foregroundColor(Color.accentPrimary)
     }
 }
 
@@ -279,7 +279,7 @@ struct BarcodeStrip: View {
                 ForEach(0..<60, id: \.self) { i in
                     let widths: [CGFloat] = [1, 2, 1, 3, 1, 2, 2, 1]
                     Rectangle()
-                        .fill(Color.coffeeDarkBrown.opacity(i % 2 == 0 ? 0.6 : 0))
+                        .fill(Color.accentPrimary.opacity(i % 2 == 0 ? 0.6 : 0))
                         .frame(width: widths[i % widths.count])
                 }
             }

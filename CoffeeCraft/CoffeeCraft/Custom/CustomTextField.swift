@@ -16,7 +16,7 @@ struct CustomTextField: View {
         HStack {
             if !icon.isEmpty {
                 Image(systemName: icon)
-                    .foregroundColor(.brown)
+                    .foregroundColor(.accentPrimary)
             }
             TextField(title, text: $text)
                 .keyboardType(keyboardType)

@@ -122,7 +122,7 @@ struct FlippableCardView: View {
                             Image(systemName: "circle.fill")
                                 .resizable()
                                 .frame(width: width * 0.03, height: width * 0.03)
-                                .foregroundStyle(.white.opacity(0.05))
+                                .foregroundColor(.white.opacity(0.05))
                         }
                     }
                     .padding(.top, cardHeight * 0.1)
@@ -136,15 +136,15 @@ struct FlippableCardView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: width * 0.12, height: width * 0.12)
-                            .foregroundStyle(.white)
+                            .foregroundColor(.white)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("CRAFT CAFÉ")
                                 .font(.system(size: width * 0.055, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
+                                .foregroundColor(.white)
                             Text("Loyalty Card")
                                 .font(.system(size: width * 0.028, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundColor(.white.opacity(0.8))
                         }
                         
                         Spacer()
@@ -154,14 +154,14 @@ struct FlippableCardView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: width * 0.08)
-                            .foregroundStyle(Color.accentGold.opacity(0.9))
+                            .foregroundColor(Color.accentGold.opacity(0.9))
                     }
                     
                     Spacer()
                     
                     Text(formatCardNumber(card.cardNumber))
                         .font(.system(size: width * 0.045, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                         .tracking(width * 0.008)
                     
                     // Member info - Dynamic from active card
@@ -169,10 +169,10 @@ struct FlippableCardView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("MEMBER")
                                 .font(.system(size: width * 0.022, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.6))
+                                .foregroundColor(.white.opacity(0.6))
                             Text(card.ownerName)
                                 .font(.system(size: width * 0.035, weight: .semibold))
-                                .foregroundStyle(.white)
+                                .foregroundColor(.white)
                         }
                         
                         Spacer()
@@ -180,10 +180,10 @@ struct FlippableCardView: View {
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("MEMBER SINCE")
                                 .font(.system(size: width * 0.022, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.6))
+                                .foregroundColor(.white.opacity(0.6))
                             Text(card.memberSince)
                                 .font(.system(size: width * 0.035, weight: .semibold))
-                                .foregroundStyle(.white)
+                                .foregroundColor(.white)
                         }
                     }
                 }
@@ -206,7 +206,7 @@ struct FlippableCardView: View {
                 VStack(spacing: 0) {
                     // Magnetic stripe
                     Rectangle()
-                        .fill(Color.coffeeDarkBrown)
+                        .fill(Color.accentPrimary)
                         .frame(height: cardHeight * 0.12)
                         .frame(maxWidth: .infinity)
                     
@@ -215,7 +215,7 @@ struct FlippableCardView: View {
                         VStack(alignment: .leading, spacing: cardHeight * 0.03) {
                             Text("REWARDS TRACKER")
                                 .font(.system(size: width * 0.028, weight: .semibold))
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundColor(.white.opacity(0.8))
                             
                             // Coffee stamp grid - Uses card.points
                             VStack(spacing: cardHeight * 0.025) {
@@ -233,7 +233,7 @@ struct FlippableCardView: View {
                                                         .resizable()
                                                         .scaledToFit()
                                                         .frame(width: width * 0.035)
-                                                        .foregroundStyle(Color.accentGold)
+                                                        .foregroundColor(Color.accentGold)
                                                 }
                                             }
                                         }
@@ -243,7 +243,7 @@ struct FlippableCardView: View {
                             
                             Text("\(10 - (card.points % 10)) more for a FREE drink!")
                                 .font(.system(size: width * 0.028, weight: .medium))
-                                .foregroundStyle(Color.accentGold)
+                                .foregroundColor(Color.accentGold)
                         }
                         
                         // Barcode
@@ -252,7 +252,7 @@ struct FlippableCardView: View {
                             HStack(spacing: 1) {
                                 ForEach(0..<30) { i in
                                     Rectangle()
-                                        .fill(Color.coffeeDarkBrown)
+                                        .fill(Color.accentPrimary)
                                         .frame(width: i % 3 == 0 ? 2 : 1.5, height: cardHeight * 0.1)
                                 }
                             }
@@ -261,7 +261,7 @@ struct FlippableCardView: View {
                             
                             Text("1029384756102938")
                                 .font(.system(size: width * 0.023, weight: .medium, design: .monospaced))
-                                .foregroundStyle(.white.opacity(0.7))
+                                .foregroundColor(.white.opacity(0.7))
                         }
                         
                         // Customer service
@@ -278,7 +278,7 @@ struct FlippableCardView: View {
                             Text("Craftcafe.com")
                                 .font(.system(size: width * 0.023, weight: .medium))
                         }
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundColor(.white.opacity(0.6))
                     }
                     .padding(.horizontal, width * 0.08)
                     .padding(.vertical, cardHeight * 0.06)

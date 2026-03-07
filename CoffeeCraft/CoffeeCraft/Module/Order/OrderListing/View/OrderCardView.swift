@@ -163,7 +163,7 @@ struct OrderCardView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
-                .foregroundColor(.coffeeBrown)
+                .foregroundColor(.accentPrimary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Capsule().fill(Color.accentPrimary.opacity(0.1)))
@@ -197,7 +197,7 @@ struct OrderCardView: View {
 
                 Text("$\(order.totalPrice ?? 0.0, specifier: "%.2f")")
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
-                    .foregroundColor(.coffeeBrown)
+                    .foregroundColor(.accentPrimary)
             }
 
             Spacer()
@@ -222,7 +222,7 @@ struct OrderCardView: View {
             } else {
                 Image(systemName: "chevron.right")
                     .font(.headline).fontWeight(.semibold)
-                    .foregroundColor(.coffeeBrown.opacity(0.4))
+                    .foregroundColor(.accentPrimary.opacity(0.4))
             }
         }
         .padding()
@@ -232,9 +232,9 @@ struct OrderCardView: View {
         switch status {
         case "Pending": return .orange
         case "In Progress", "InProgress": return .blue
-        case "Ready": return .coffeeOliveGreen
-        case "Done", "Completed": return .brown
-        default: return .brown
+        case "Ready": return .semanticSuccess
+        case "Done", "Completed": return .accentPrimary
+        default: return .accentPrimary
         }
     }
 }
@@ -283,7 +283,7 @@ struct DetailItemRow: View {
                 if let extras = item.extras, !extras.isEmpty {
                     Text(extras.joined(separator: ", "))
                         .font(.caption2)
-                        .foregroundColor(.textTertiary.opacity(0.8))
+                        .foregroundColor(.textMuted.opacity(0.8))
                         .lineLimit(1)
                 }
             }
