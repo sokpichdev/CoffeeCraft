@@ -112,43 +112,36 @@ class CardViewModel: ObservableObject {
     }
 
     private func fetchAccessibleCards(_ cardNumbers: [String]) async {
-        AppLog.firestore.debug("🔍 Fetching \(cardNumbers.count) accessible card(s): \(cardNumbers)")
-        
-        var fetchedCards: [LoyaltyCard] = []
-        var failedCardNumbers: [String] = []
+        guard !cardNumbers.isEmpty else { return }
+        AppLog.firestore.debug("🔍 Batch-fetching \(cardNumbers.count) accessible card(s): \(cardNumbers)")
 
-        for cardNumber in cardNumbers {
+        // Firestore `in` supports up to 30 values per query — chunk if needed.
+        // Most users will have 1–3 cards so this will almost always be one request.
+        let chunks = stride(from: 0, to: cardNumbers.count, by: 30).map {
+            Array(cardNumbers[$0..<min($0 + 30, cardNumbers.count)])
+        }
+
+        var fetchedCards: [LoyaltyCard] = []
+
+        for chunk in chunks {
             do {
-                let cardDoc = try await db.collection("loyalty_cards")
-                    .document(cardNumber)
-                    .getDocument()
-                
-                if let card = try? cardDoc.data(as: LoyaltyCard.self) {
-                    fetchedCards.append(card)
-                } else {
-                    AppLog.firestore.warning("⚠️ Could not decode card: \(cardNumber)")
-                }
+                let snapshot = try await db.collection("loyalty_cards")
+                    .whereField("cardNumber", in: chunk)
+                    .getDocuments()
+
+                let decoded = snapshot.documents.compactMap { try? $0.data(as: LoyaltyCard.self) }
+                fetchedCards.append(contentsOf: decoded)
+
+                AppLog.firestore.debug("✅ Batch chunk fetched \(decoded.count)/\(chunk.count) card(s)")
             } catch {
-                AppLog.firestore.error("❌ Failed to fetch card \(cardNumber): \(error.localizedDescription)")
-                failedCardNumbers.append(cardNumber)
+                AppLog.firestore.error("❌ Batch fetch failed for chunk \(chunk): \(error.localizedDescription)")
+                AlertManager.shared.showError(message: "Failed to fetch cards: \(error.localizedDescription)")
             }
         }
-        
-        let finalCards = fetchedCards
-        await MainActor.run {
-            self.cards = finalCards
-            self.cards.sort { $0.createdAt > $1.createdAt }
-        }
-        
-        AppLog.printList(finalCards, label: "Accessible Cards", logger: AppLog.firestore)
-        
-        if !failedCardNumbers.isEmpty {
-            AppLog.firestore.error("❌ Failed card numbers: \(failedCardNumbers.joined(separator: ", "))")
-            if let _ = UserSession.shared.currentUser {
-                AlertManager.shared.showError(
-                    message: "Failed to fetch cards: \(failedCardNumbers.joined(separator: ", "))")
-            }
-        }
+
+        // Already @MainActor — no MainActor.run wrapper needed
+        cards = fetchedCards.sorted { $0.createdAt > $1.createdAt }
+        AppLog.printList(cards, label: "Accessible Cards", logger: AppLog.firestore)
     }
     
     func addCard(cardNumber: String) async throws {

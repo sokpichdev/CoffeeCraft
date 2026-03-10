@@ -6,8 +6,8 @@
 //
 
 import FirebaseAuth
-import SwiftUI
 import FirebaseFirestore
+import SwiftUI
 // MARK: - ReviewSortOrder
 
 enum ReviewSortOrder: String, CaseIterable, Identifiable {
