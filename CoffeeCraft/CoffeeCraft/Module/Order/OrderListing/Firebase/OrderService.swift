@@ -68,7 +68,9 @@ class OrderService: ObservableObject {
             }
         }
     }
-    
+
+    // MARK: - Private helpers
+
     private func getUserId() throws -> String {
         guard let userId = Auth.auth().currentUser?.uid else {
             throw NSError(
@@ -79,7 +81,7 @@ class OrderService: ObservableObject {
         }
         return userId
     }
-    
+
     private func generateOrderNumber() async throws -> Int {
         let counterId = String.todayCounterId
         let counterRef = db.collection("counters").document(counterId)
@@ -143,24 +145,29 @@ class OrderService: ObservableObject {
         orderNumber: Int
     ) -> [String: Any] {
 
+        // MARK: Phase 7 — Flat productIds array for arrayContains proof-of-purchase query.
+        // compactMap drops any item whose product.id is nil (shouldn't happen in practice).
+        let productIds: [String] = cartItems.compactMap { $0.product.id }
+
         var orderData: [String: Any] = [
-            "orderId": orderNumber,
-            "userId": userId,
-            "timestamp": Timestamp(date: Date()),
-            "totalPrice": total,
-            "status": "Pending",
+            "orderId":      orderNumber,
+            "userId":       userId,
+            "timestamp":    Timestamp(date: Date()),
+            "totalPrice":   total,
+            "status":       "Pending",
             "paymentMethod": paymentMethod.rawValue,
+            "productIds":   productIds,          // ← Phase 7 addition
             "items": cartItems.map { item -> [String: Any] in
                 var dict: [String: Any] = [
                     "productId": item.product.id,
-                    "name": item.product.name,
-                    "price": item.totalPrice,
-                    "imageURL": item.product.imageURL,
-                    "quantity": item.quantity
+                    "name":      item.product.name,
+                    "price":     item.totalPrice,
+                    "imageURL":  item.product.imageURL,
+                    "quantity":  item.quantity
                 ]
 
                 if !item.selections.isEmpty { dict["selections"] = item.selections }
-                if !item.extras.isEmpty { dict["extras"] = item.extras }
+                if !item.extras.isEmpty     { dict["extras"]     = item.extras }
 
                 return dict
             }
@@ -171,14 +178,14 @@ class OrderService: ObservableObject {
         }
 
         if let branch = OrderEnvironment.shared.selectedBranch {
-            orderData["branchId"] = branch.id
+            orderData["branchId"]   = branch.id
             orderData["branchName"] = branch.name
             AppLog.order.debug("Order tagged with branch: \(branch.name)")
         }
 
         return orderData
     }
-    
+
     private func writeOrder(
         orderData: [String: Any],
         paymentMethod: PaymentMethod,
@@ -203,6 +210,7 @@ class OrderService: ObservableObject {
             throw error
         }
     }
+
     private func finalizeSuccess(orderNumber: Int) async throws {
 
         AppLog.order.info("Order saved: #\(orderNumber)")
