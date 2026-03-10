@@ -75,7 +75,7 @@ struct ProductSeeder {
                 "Milk": ["Whole": 0.0, "Soy": 0.5, "Oat": 0.5],
                 "Extras": ["Whipped Cream": 0.5, "Chocolate Drizzle": 0.5]
             ]
-        ],
+        ]
 
         // (All the rest of your products stay exactly here)
         // Green Tea, Black Tea, Matcha Latte, Hot Chocolate,
@@ -85,4 +85,3 @@ struct ProductSeeder {
 
     ]
 }
-

@@ -232,8 +232,8 @@ extension ReviewViewModel {
         do {
             let result = try await service.fetchReviews(
                 productId: productId,
-                limit:     pageSize,
-                after:     lastDocument   // RatingService casts to DocumentSnapshot internally
+                limit: pageSize,
+                after: lastDocument   // RatingService casts to DocumentSnapshot internally
             )
             reviews.append(contentsOf: result.reviews)
             lastDocument = result.lastDocument

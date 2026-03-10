@@ -60,7 +60,6 @@ class OrderService: ObservableObject {
                 try await finalizeSuccess(orderNumber: orderNumber)
 
                 await onSuccess?()
-
             } catch {
                 LoaderManager.shared.hideLoading()
                 AppLog.order.error("Order failed: \(error.localizedDescription)")
@@ -99,7 +98,6 @@ class OrderService: ObservableObject {
                 let next = current + 1
                 transaction.updateData(["current": next], forDocument: counterRef)
                 return next
-
             } catch {
                 errorPointer?.pointee = error as NSError
                 return nil
@@ -150,24 +148,24 @@ class OrderService: ObservableObject {
         let productIds: [String] = cartItems.compactMap { $0.product.id }
 
         var orderData: [String: Any] = [
-            "orderId":      orderNumber,
-            "userId":       userId,
-            "timestamp":    Timestamp(date: Date()),
-            "totalPrice":   total,
-            "status":       "Pending",
+            "orderId": orderNumber,
+            "userId": userId,
+            "timestamp": Timestamp(date: Date()),
+            "totalPrice": total,
+            "status": "Pending",
             "paymentMethod": paymentMethod.rawValue,
-            "productIds":   productIds,          // ← Phase 7 addition
+            "productIds": productIds,          // ← Phase 7 addition
             "items": cartItems.map { item -> [String: Any] in
                 var dict: [String: Any] = [
                     "productId": item.product.id,
-                    "name":      item.product.name,
-                    "price":     item.totalPrice,
-                    "imageURL":  item.product.imageURL,
-                    "quantity":  item.quantity
+                    "name": item.product.name,
+                    "price": item.totalPrice,
+                    "imageURL": item.product.imageURL,
+                    "quantity": item.quantity
                 ]
 
                 if !item.selections.isEmpty { dict["selections"] = item.selections }
-                if !item.extras.isEmpty     { dict["extras"]     = item.extras }
+                if !item.extras.isEmpty { dict["extras"]     = item.extras }
 
                 return dict
             }

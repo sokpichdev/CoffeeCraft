@@ -224,7 +224,7 @@ extension RatingService {
                 AppLog.firestore.debug("📊 avg update: \(oldAvg) × \(oldCount) + \(score) → \(rounded) (\(newCount) ratings)")
 
                 transaction.updateData([
-                    "avgRating":   rounded,
+                    "avgRating": rounded,
                     "ratingCount": newCount
                 ], forDocument: productRef)
 
@@ -240,8 +240,8 @@ extension RatingService {
         // MARK: Step 2 — Write ratings/{userId}
         let now = Timestamp(date: Date())
         let ratingData: [String: Any] = [
-            "score":     score,
-            "orderId":   orderId,
+            "score": score,
+            "orderId": orderId,
             "createdAt": now
             // reviewId intentionally omitted — patched in Step 4 if body provided
         ]
