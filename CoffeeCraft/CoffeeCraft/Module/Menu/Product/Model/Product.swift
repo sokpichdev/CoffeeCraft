@@ -17,9 +17,32 @@ struct Product: Identifiable, Hashable, Codable, Equatable {
     var available: Bool = true
     var customizations: [String: [String: Double]]?
 
+    // MARK: Phase 7 — Ratings
+    /// Running average of all submitted star scores (1.0 – 5.0).
+    /// nil on products created before Phase 7. Display as 0 or hide widget.
+    var avgRating: Double?
+
+    /// Total number of ratings submitted for this product.
+    /// nil on legacy products — treat as 0.
+    var ratingCount: Int?
+
+    // MARK: Computed helpers
+
+    /// Safe display value — falls back to 0.0 when no ratings yet.
+    var displayRating: Double { avgRating ?? 0.0 }
+
+    /// Safe count — falls back to 0 when no ratings yet.
+    var displayRatingCount: Int { ratingCount ?? 0 }
+
+    /// True when at least one rating has been submitted.
+    var hasRatings: Bool { (ratingCount ?? 0) > 0 }
+
+    // MARK: Hashable / Equatable
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
     static func == (lhs: Product, rhs: Product) -> Bool { lhs.id == rhs.id }
 
     static func empty(in category: String) -> Product {
@@ -31,7 +54,7 @@ struct Product: Identifiable, Hashable, Codable, Equatable {
             imageURL: "",
             category: category,
             available: true,
-            customizations: [:],
+            customizations: [:]
         )
     }
 }
