@@ -7,9 +7,6 @@ import FirebaseFirestore
 //
 import Foundation
 
-import FirebaseFirestore
-import Foundation
-
 struct CustomizationSeeder {
 
     static func seedCustomizations() async {

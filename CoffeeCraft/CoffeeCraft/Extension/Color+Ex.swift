@@ -22,17 +22,17 @@ extension Color {
         let green = (rgbValue & 0x00FF00) >> 8
         let blue  =  rgbValue & 0x0000FF
         self.init(
-            red:   CGFloat(red)   / 255,
+            red: CGFloat(red)   / 255,
             green: CGFloat(green) / 255,
-            blue:  CGFloat(blue)  / 255
+            blue: CGFloat(blue)  / 255
         )
     }
 
     static func random(randomOpacity: Bool = false) -> Color {
         Color(
-            red:     .random(in: 0...1),
-            green:   .random(in: 0...1),
-            blue:    .random(in: 0...1),
+            red: .random(in: 0...1),
+            green: .random(in: 0...1),
+            blue: .random(in: 0...1),
             opacity: randomOpacity ? .random(in: 0...1) : 1
         )
     }
@@ -148,10 +148,10 @@ extension LinearGradient {
 // Makes our palette tokens available as UIColor for UIKit components
 
 extension UIColor {
-    static var textPrimaryUI: UIColor    { ThemeManager.shared.palette.dynamicColor(\.textPrimary) }
-    static var textSecondaryUI: UIColor  { ThemeManager.shared.palette.dynamicColor(\.textSecondary) }
-    static var accentPrimaryUI: UIColor  { ThemeManager.shared.palette.dynamicColor(\.accentPrimary) }
-    static var bgPrimaryUI: UIColor      { ThemeManager.shared.palette.dynamicColor(\.bgPrimary) }
+    static var textPrimaryUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.textPrimary) }
+    static var textSecondaryUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.textSecondary) }
+    static var accentPrimaryUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.accentPrimary) }
+    static var bgPrimaryUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.bgPrimary) }
     static var surfacePrimaryUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.surfacePrimary) }
-    static var borderColorUI: UIColor    { ThemeManager.shared.palette.dynamicColor(\.borderColor) }
+    static var borderColorUI: UIColor { ThemeManager.shared.palette.dynamicColor(\.borderColor) }
 }

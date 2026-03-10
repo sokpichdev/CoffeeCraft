@@ -9,7 +9,7 @@ import FirebaseFirestore
 //
 //  WalletTransaction.swift
 //  CoffeeCraft
-//import Foundation
+// import Foundation
 import SwiftUI
 
 // MARK: - WalletTransactionType

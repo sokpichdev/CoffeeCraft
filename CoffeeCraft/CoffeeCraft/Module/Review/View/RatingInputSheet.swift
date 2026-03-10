@@ -16,7 +16,7 @@ struct RatingInputSheet: View {
     @ObservedObject var vm: ReviewViewModel
 
     let productName: String
-    let imageURL:    String
+    let imageURL: String
 
     // MARK: Local state
 
@@ -78,9 +78,9 @@ private extension RatingInputSheet {
         HStack(spacing: 14) {
             AsyncImageCard(
                 imageURL: imageURL,
-                height:   56,
-                width:    56,
-                corner:   14
+                height: 56,
+                width: 56,
+                corner: 14
             )
 
             VStack(alignment: .leading, spacing: 4) {
@@ -309,9 +309,9 @@ private extension RatingInputSheet {
                 .ignoresSafeArea()
                 .sheet(isPresented: $show) {
                     RatingInputSheet(
-                        vm:          vm,
+                        vm: vm,
                         productName: "Caramel Macchiato",
-                        imageURL:    "https://i.postimg.cc/VNK61H8p/capp.jpg"
+                        imageURL: "https://i.postimg.cc/VNK61H8p/capp.jpg"
                     )
                 }
                 .task {
@@ -333,9 +333,9 @@ private extension RatingInputSheet {
                 .ignoresSafeArea()
                 .sheet(isPresented: $show) {
                     RatingInputSheet(
-                        vm:          vm,
+                        vm: vm,
                         productName: "Matcha Latte",
-                        imageURL:    "https://i.postimg.cc/VNK61H8p/capp.jpg"
+                        imageURL: "https://i.postimg.cc/VNK61H8p/capp.jpg"
                     )
                 }
                 .task {
