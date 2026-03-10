@@ -17,27 +17,31 @@ class WalletViewModel: ObservableObject {
     @Published var isRefreshing: Bool = false
     @Published var errorMessage: String?
 
-    private let service = WalletService.shared
+    private let db = Firestore.firestore()
     private var walletListener: ListenerRegistration?
+    private var transactionsListener: ListenerRegistration?
     private var currentUserId: String?
 
+    /// Call once on view appear. Attaches both listeners — balance and transactions
+    /// both update in real time without any further fetches or pull-to-refresh.
     func setup(userId: String, isRefresh: Bool = false) {
         currentUserId = userId
         if isRefresh { isRefreshing = true } else { isLoading = true }
         AppLog.firestore.debug("🔌 WalletViewModel.setup — uid: \(userId)")
         attachWalletListener(userId: userId)
-        Task { await loadTransactions(userId: userId) }
+        attachTransactionsListener(userId: userId)
     }
+
+    // MARK: - Balance listener
 
     private func attachWalletListener(userId: String) {
         walletListener?.remove()
-        walletListener = Firestore.firestore()
-            .collection("wallets")
+        walletListener = db.collection("wallets")
             .document(userId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
                 if let error {
-                    AppLog.firestore.error("❌ WalletViewModel listener: \(error.localizedDescription)")
+                    AppLog.firestore.error("❌ WalletViewModel walletListener: \(error.localizedDescription)")
                     self.errorMessage = "Could not load wallet. Pull down to retry."
                     self.isLoading = false
                     self.isRefreshing = false
@@ -51,22 +55,55 @@ class WalletViewModel: ObservableObject {
             }
     }
 
-    func loadTransactions(userId: String) async {
-        do {
-            transactions = try await service.fetchTransactions(userId: userId)
-            errorMessage = nil
-        } catch {
-            AppLog.firestore.error("❌ WalletViewModel.loadTransactions: \(error.localizedDescription)")
-            errorMessage = "Could not load transactions. Pull down to retry."
-        }
+    // MARK: - Transactions listener
+
+    /// Listens to the 50 most recent transactions. Because wallet_transactions is
+    /// append-only (top-up, payment, refund, reward) we only handle .added —
+    /// existing entries never change so .modified can be safely ignored.
+    /// New entries appear instantly without a pull-to-refresh.
+    private func attachTransactionsListener(userId: String) {
+        transactionsListener?.remove()
+        AppLog.firestore.debug("🔌 WalletViewModel.attachTransactionsListener — uid: \(userId)")
+
+        transactionsListener = db.collection("wallet_transactions")
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "timestamp", descending: true)
+            .limit(to: 50)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self else { return }
+
+                if let error {
+                    AppLog.firestore.error("❌ WalletViewModel transactionsListener: \(error.localizedDescription)")
+                    self.errorMessage = "Could not load transactions. Pull down to retry."
+                    return
+                }
+
+                guard let changes = snapshot?.documentChanges else { return }
+
+                for change in changes where change.type == .added {
+                    if let tx = try? change.document.data(as: WalletTransaction.self),
+                       !self.transactions.contains(where: { $0.id == tx.id }) {
+                        self.transactions.insert(tx, at: 0)
+                        AppLog.firestore.debug("➕ transactionsListener — new tx: \(tx.id ?? "nil"), type: \(tx.type.rawValue)")
+                    }
+                }
+            }
     }
 
+    // MARK: - Refresh
+
+    /// Re-attaches both listeners — picks up any changes missed while offline.
+    /// Clears transactions first so the list rebuilds cleanly from the listener's
+    /// initial snapshot rather than accumulating duplicates.
     func refresh() async {
         guard let userId = currentUserId else { return }
         isRefreshing = true
-        await loadTransactions(userId: userId)
-        isRefreshing = false
+        transactions = []
+        attachWalletListener(userId: userId)
+        attachTransactionsListener(userId: userId)
     }
+
+    // MARK: - Helpers
 
     func canAfford(_ amount: Double) -> Bool {
         wallet?.canAfford(amount) ?? false
@@ -78,5 +115,8 @@ class WalletViewModel: ObservableObject {
 
     var hasWallet: Bool { wallet != nil }
 
-    deinit { walletListener?.remove() }
+    deinit {
+        walletListener?.remove()
+        transactionsListener?.remove()
+    }
 }

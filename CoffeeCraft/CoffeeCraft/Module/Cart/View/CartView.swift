@@ -183,9 +183,6 @@ struct CartView: View {
                     if let activeCard = cardVM.activeCard {
                         try? await cardVM.addPoints(to: activeCard, amount: 1)
                     }
-                    if payment == .wallet, let userId = UserSession.shared.userId {
-                        await walletVM.loadTransactions(userId: userId)
-                    }
                 }
                 cartManager.clearCart(userId: UserSession.shared.userId ?? "")
                 orderEnv.clear()   // Phase 4 — reset selected branch after order

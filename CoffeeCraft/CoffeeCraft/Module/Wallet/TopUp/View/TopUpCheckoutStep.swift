@@ -151,7 +151,8 @@ struct TopUpCheckoutStep: View {
         isLoading = true
         do {
             try await WalletService.shared.topUp(userId: userId, amount: usdAmount)
-            await walletVM.loadTransactions(userId: userId)
+            // No manual fetch needed — transactionsListener in WalletViewModel
+            // picks up the new entry via .added the moment topUp() writes to Firestore.
             ToastManager.shared.show(message: "+\(usdAmount.currencyFormatted) added to your wallet", type: .success)
             onSuccess()
         } catch {
