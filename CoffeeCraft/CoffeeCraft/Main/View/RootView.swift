@@ -79,7 +79,9 @@ struct RootView: View {
                 .ignoresSafeArea(edges: .bottom)
                 .onAppear {
                     if UserSession.shared.currentUser != nil {
-                        inboxVM.fetchNotifications(pageNum: 1)
+                        Task {
+                            await inboxVM.fetchNotifications(pageNum: 1)
+                        }
                     }
                     if let userId = UserSession.shared.userId {
                         walletVM.setup(userId: userId)
