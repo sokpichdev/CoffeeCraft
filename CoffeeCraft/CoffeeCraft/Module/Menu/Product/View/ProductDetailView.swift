@@ -11,63 +11,64 @@ struct ProductDetailView: View {
     @EnvironmentObject var favVM: FavoriteViewModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.pushScreen) private var push
+
     let product: Product
-    var cartItem: CartItem? // optional cart item for editing
+    var cartItem: CartItem?
     var onUpdate: (() -> Void)?
     var allProducts: [Product] = []
-    
+
+    // Phase 7 — rating state
+    @StateObject private var reviewVM     = ReviewViewModel()
+    @State private var showRatingSheet    = false
+
     @State private var selectedExtras: [String]
-    @State private var selections: [String: String] // now initialized from cartItem
+    @State private var selections: [String: String]
     @State private var quantity: Int
 
-    init(product: Product, cartItem: CartItem? = nil, onUpdate: (() -> Void)? = nil, allProducts: [Product] = []) {
-        self.product = product
-        self.cartItem = cartItem
-        self.onUpdate = onUpdate
+    init(
+        product: Product,
+        cartItem: CartItem?    = nil,
+        onUpdate: (() -> Void)? = nil,
+        allProducts: [Product]   = []
+    ) {
+        self.product     = product
+        self.cartItem    = cartItem
+        self.onUpdate    = onUpdate
         self.allProducts = allProducts
-        // Restore ALL three pieces of state from the existing cart item when editing.
-        // Previously only extras & quantity were restored — leaving selections empty —
-        // which caused wrong option display and incorrect price in the edit sheet.
-        _selectedExtras = State(initialValue: cartItem?.extras ?? [])
-        _selections = State(initialValue: cartItem?.selections ?? [:])
-        _quantity = State(initialValue: cartItem?.quantity ?? 1)
+        _selectedExtras  = State(initialValue: cartItem?.extras      ?? [])
+        _selections      = State(initialValue: cartItem?.selections  ?? [:])
+        _quantity        = State(initialValue: cartItem?.quantity    ?? 1)
     }
-    
+
+    // MARK: - Computed helpers
+
     private var relatedProducts: [Product] {
         allProducts.filter { $0.category == product.category && $0.id != product.id }
     }
-    
+
     private func bindingFor(_ category: String) -> Binding<String> {
         Binding<String>(
             get: { selections[category] ?? "" },
             set: { selections[category] = $0 }
         )
     }
-    
-    // MARK: - Subtotal calculation
+
     private var subtotal: Double {
         var total = product.price
-        
         if let customizations = product.customizations {
             for (category, options) in customizations {
                 guard category.lowercased() != "extras" else { continue }
-                if let selectedOption = selections[category],
-                   let price = options[selectedOption] {
+                if let selected = selections[category], let price = options[selected] {
                     total += price
                 }
             }
-            
-            // multiple-selection extras
             if let extrasDict = customizations["Extras"] {
-                for extra in selectedExtras {
-                    total += extrasDict[extra] ?? 0
-                }
+                for extra in selectedExtras { total += extrasDict[extra] ?? 0 }
             }
         }
-        
         return total * Double(quantity)
     }
-    
+
     private var customizationHash: String {
         favVM.buildCustomizationHash(
             favVM.currentCustomizationForFavorite(
@@ -76,7 +77,9 @@ struct ProductDetailView: View {
             )
         )
     }
-    
+
+    // MARK: - Body
+
     var body: some View {
         ZStack(alignment: .bottom) {
             CustomRefreshScrollView({
@@ -87,7 +90,15 @@ struct ProductDetailView: View {
                             Text(product.name)
                                 .font(.system(size: 24, weight: .bold, design: .serif))
                                 .foregroundColor(.textPrimary)
-                            
+
+                            if product.hasRatings {
+                                StarRatingView.summary(
+                                    average: product.displayRating,
+                                    count: product.displayRatingCount,
+                                    size: 14
+                                )
+                            }
+
                             Text(product.description)
                                 .font(.body)
                                 .foregroundColor(.textMuted)
@@ -103,7 +114,6 @@ struct ProductDetailView: View {
                         if let customizations = product.customizations, !customizations.isEmpty {
                             ForEach(Array(customizations.keys.sorted()), id: \.self) { category in
                                 let options = customizations[category] ?? [:]
-                                
                                 Group {
                                     if category == "Extras" {
                                         CustomMultipleSelectionView(
@@ -138,7 +148,22 @@ struct ProductDetailView: View {
                             relatedProductsSection
                                 .padding(.top)
                         }
-                        
+
+                        ReviewSectionView(
+                            vm: reviewVM,
+                            product: product,
+                            onWriteReview: {
+                                reviewVM.prepareForEditing(
+                                    existingReview: reviewVM.reviews.first {
+                                        $0.userId == UserSession.shared.userId
+                                    }
+                                )
+                                showRatingSheet = true
+                            }
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.top, 24)
+
                         Spacer(minLength: 180)
                     }
                 }
@@ -154,8 +179,18 @@ struct ProductDetailView: View {
                 selectedExtras: selectedExtras
             )
         }
+        .task(id: product.id) {
+            await reviewVM.loadInitialState(productId: product.id)
+        }
         .onDisappear { favVM.resetFavoriteState() }
         .ignoresSafeArea(edges: .bottom)
+        .sheet(isPresented: $showRatingSheet) {
+            RatingInputSheet(
+                vm: reviewVM,
+                productName: product.name,
+                imageURL: product.imageURL
+            )
+        }
         .customNavigationBar(product.name) {
             if cartItem != nil {
                 ToolBarButton(placement: .topBarLeading, buttonType: .icon("xmark")) {
