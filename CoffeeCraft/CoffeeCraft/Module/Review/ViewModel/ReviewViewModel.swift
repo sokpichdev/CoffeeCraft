@@ -7,7 +7,7 @@
 
 import FirebaseAuth
 import SwiftUI
-
+import FirebaseFirestore
 // MARK: - ReviewSortOrder
 
 enum ReviewSortOrder: String, CaseIterable, Identifiable {
@@ -26,6 +26,9 @@ final class ReviewViewModel: ObservableObject {
 
     // MARK: - Review list state
 
+    /// product ratings snapshot
+    @Published var latestProductRatings: (avg: Double, count: Int, distribution: [String: Int])?
+    
     /// Visible, non-hidden reviews for the current product (paginated).
     @Published var reviews: [Review] = []
 
@@ -346,10 +349,10 @@ extension ReviewViewModel {
             // Refresh both the user's rating doc and page 1 of reviews
             await refreshAfterSubmit()
         } catch let error as RatingError {
-            AppLog.firestore.error("❌ submitOrEdit RatingError: \(error.localizedDescription ?? "")")
+            AppLog.firestore.error("❌ submitOrEdit RatingError: \(error.localizedDescription)")
             AlertManager.shared.showError(
                 title: "Couldn't submit review",
-                message: error.localizedDescription ?? "Something went wrong."
+                message: error.localizedDescription
             )
         } catch {
             AppLog.firestore.error("❌ submitOrEdit error: \(error.localizedDescription)")
@@ -365,9 +368,21 @@ extension ReviewViewModel {
     private func refreshAfterSubmit() async {
         async let ratingRefresh: Void = fetchUserRating(productId: productId)
         async let reviewRefresh: Void = loadReviews(productId: productId, reset: true)
-        _ = await (ratingRefresh, reviewRefresh)
+        async let productRefresh: Void = refreshProductRatings()
+        _ = await (ratingRefresh, reviewRefresh, productRefresh)
     }
-
+    
+    private func refreshProductRatings() async {
+        do {
+            let doc = try await Firestore.firestore()
+                .collection("products").document(productId).getDocument()
+            let avg = doc.data()?["avgRating"] as? Double ?? 0.0
+            let count = doc.data()?["ratingCount"] as? Int ?? 0
+            let dist = doc.data()?["ratingDistribution"] as? [String: Int] ?? [:]
+            latestProductRatings = (avg, count, dist)
+        } catch { /* non-fatal */ }
+    }
+    
     /// Called when the user taps "Edit" on their existing review card.
     /// Pre-fills draftBody from the review text so the sheet opens with it populated.
     func prepareForEditing(existingReview: Review?) {

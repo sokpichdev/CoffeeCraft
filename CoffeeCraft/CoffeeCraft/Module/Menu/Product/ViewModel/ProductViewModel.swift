@@ -103,7 +103,10 @@ class ProductViewModel: ObservableObject {
             imageURL: data["imageURL"] as? String ?? "",
             category: data["category"] as? String ?? "Others",
             available: data["available"] as? Bool ?? true,
-            customizations: data["customizations"] as? [String: [String: Double]] ?? [:]
+            customizations: data["customizations"] as? [String: [String: Double]] ?? [:],
+            avgRating: data["avgRating"] as? Double,
+            ratingCount: data["ratingCount"] as? Int,
+            ratingDistribution: data["ratingDistribution"] as? [String: Int]
         )
         return product
     }
