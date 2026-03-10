@@ -80,6 +80,10 @@ struct Review: Identifiable, Codable {
     /// Kept in sync by RatingService whenever the user edits their rating.
     var rating: Int
 
+    /// Optional headline for the review — mirrors App Store style.
+    /// Max 60 characters enforced at the UI layer (RatingInputSheet).
+    var title: String?
+
     /// The written review text. Optional — nil when the user only submitted stars.
     /// Max 280 characters enforced at the UI layer (RatingInputSheet).
     var body: String?
@@ -104,6 +108,12 @@ struct Review: Identifiable, Codable {
     var isHidden: Bool
 
     // MARK: - Computed helpers
+
+    /// True when this review has a non-empty title.
+    var hasTitle: Bool {
+        guard let title else { return false }
+        return !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     /// True when this review has a non-empty text body.
     var hasBody: Bool {
@@ -162,13 +172,15 @@ extension Review {
         userName: String,
         orderId: String,
         rating: Int,
-        body: String?
+        title: String? = nil,
+        body: String? = nil
     ) -> Review {
         Review(
             userId: userId,
             userName: userName,
             orderId: orderId,
             rating: rating,
+            title: title,
             body: body,
             helpfulCount: 0,
             helpfulBy: [],

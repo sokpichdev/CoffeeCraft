@@ -17,9 +17,8 @@ struct ProductDetailView: View {
     var onUpdate: (() -> Void)?
     var allProducts: [Product] = []
 
-    // Phase 7 — rating state
-    @StateObject private var reviewVM     = ReviewViewModel()
-    @State private var showRatingSheet    = false
+    @StateObject private var reviewVM = ReviewViewModel()
+    @State private var showRatingSheet = false
 
     @State private var selectedExtras: [String]
     @State private var selections: [String: String]
@@ -27,17 +26,17 @@ struct ProductDetailView: View {
 
     init(
         product: Product,
-        cartItem: CartItem?    = nil,
+        cartItem: CartItem? = nil,
         onUpdate: (() -> Void)? = nil,
-        allProducts: [Product]   = []
+        allProducts: [Product] = []
     ) {
-        self.product     = product
-        self.cartItem    = cartItem
-        self.onUpdate    = onUpdate
+        self.product = product
+        self.cartItem = cartItem
+        self.onUpdate = onUpdate
         self.allProducts = allProducts
-        _selectedExtras  = State(initialValue: cartItem?.extras      ?? [])
-        _selections      = State(initialValue: cartItem?.selections  ?? [:])
-        _quantity        = State(initialValue: cartItem?.quantity    ?? 1)
+        _selectedExtras = State(initialValue: cartItem?.extras ?? [])
+        _selections = State(initialValue: cartItem?.selections ?? [:])
+        _quantity = State(initialValue: cartItem?.quantity ?? 1)
     }
 
     // MARK: - Computed helpers
@@ -152,6 +151,22 @@ struct ProductDetailView: View {
                         ReviewSectionView(
                             vm: reviewVM,
                             product: product,
+                            onSeeAll: {
+                                push(AnyView(RatingsReviewsView(
+                                    vm: reviewVM,
+                                    product: product,
+                                    onWriteReview: {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                            reviewVM.prepareForEditing(
+                                                existingReview: reviewVM.reviews.first {
+                                                    $0.userId == UserSession.shared.userId
+                                                }
+                                            )
+                                            showRatingSheet = true
+                                        }
+                                    }
+                                )))
+                            },
                             onWriteReview: {
                                 reviewVM.prepareForEditing(
                                     existingReview: reviewVM.reviews.first {

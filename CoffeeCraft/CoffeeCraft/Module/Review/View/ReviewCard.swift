@@ -27,6 +27,11 @@ struct ReviewCard: View {
             starRow
                 .padding(.bottom, review.hasBody ? 10 : 0)
 
+            if review.hasTitle, let title = review.title {
+                reviewTitle(title)
+                    .padding(.bottom, review.hasBody ? 4 : 12)
+            }
+
             if review.hasBody, let body = review.body {
                 bodyText(body)
                     .padding(.bottom, 12)
@@ -135,6 +140,13 @@ private extension ReviewCard {
 // MARK: - Body Text
 
 private extension ReviewCard {
+
+    func reviewTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundColor(.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
 
     func bodyText(_ body: String) -> some View {
         Text(body)
