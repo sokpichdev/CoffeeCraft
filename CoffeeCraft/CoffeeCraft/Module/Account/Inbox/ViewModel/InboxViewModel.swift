@@ -11,122 +11,112 @@ import UserNotifications
 class InboxViewModel: ObservableObject {
     @Published var notifications: [AppNotification] = []
     @Published var isLoading = false
-    @Published var totalNotificationCount = 0
-    @Published var unreadCount = 0  // Firestore-sourced, not derived from loaded pages
+    @Published var hasMore = true
+    @Published var unreadCount = 0
 
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
     private let pageSize = 10
 
+    /// Cursor pointing to the last document fetched.
+    /// The next page query starts *after* this snapshot.
+    private var lastDocument: DocumentSnapshot?
+
     deinit { listener?.remove() }
 
-    // MARK: - Fetch (paginated)
-    func fetchNotifications(pageNum: Int,
-                            completion: ((Bool) -> Void)? = nil) {
+    // MARK: - Fetch (cursor-based pagination)
+
+    func fetchNotifications(pageNum: Int) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             AppLog.menu.warning("⚠️ fetchNotifications — no authenticated user, skipping")
-            completion?(false)
-            return
-        }
-        guard pageNum != 1 || listener == nil else {
-            completion?(true)
             return
         }
 
-        let offset = (pageNum - 1) * pageSize
-        AppLog.menu.debug("📋 fetchNotifications — uid: \(userId), page: \(pageNum), offset: \(offset)")
+        guard pageNum > 1 || notifications.isEmpty else { return }
+        guard hasMore || pageNum == 1 else { return }
 
-        // On first page: fetch total count + true unread count from Firestore
+        AppLog.menu.debug("📋 fetchNotifications — uid: \(userId), page: \(pageNum), cursor: \(self.lastDocument?.documentID ?? "none")")
+
         if pageNum == 1 {
-            db.collection("users").document(userId).collection("notifications")
-                .getDocuments { [weak self] snapshot, _ in
-                    Task { @MainActor in
-                        self?.totalNotificationCount = snapshot?.documents.count ?? 0
-                        AppLog.menu.debug("📊 totalCount: \(self?.totalNotificationCount ?? 0)")
-                    }
-                }
-
-            db.collection("users").document(userId).collection("notifications")
-                .whereField("isRead", isEqualTo: false)
-                .getDocuments { [weak self] snapshot, _ in
-                    Task { @MainActor in
-                        let count = snapshot?.documents.count ?? 0
-                        self?.unreadCount = count
-                        self?.syncAppIconBadge(count)
-                        AppLog.menu.debug("🔴 unreadCount from Firestore: \(count)")
-                    }
-                }
+            isLoading = true
+            // Use count() aggregation — returns a number without downloading any documents.
+            // Replaces the two full getDocuments() count calls from before.
+            await fetchUnreadCount(userId: userId)
         }
 
-        db.collection("users")
-            .document(userId)
-            .collection("notifications")
-            .order(by: "createdAt", descending: true)
-            .getDocuments { [weak self] snapshot, error in
-                guard let self else {
-                    completion?(false)
-                    return
-                }
+        do {
+            var query: Query = db.collection("users")
+                .document(userId)
+                .collection("notifications")
+                .order(by: "createdAt", descending: true)
+                .limit(to: pageSize)
 
-                if let error {
-                    AppLog.menu.error("❌ fetchNotifications — error: \(error.localizedDescription)")
-                    Task { @MainActor in
-                        AlertManager.shared.showError(message: error.localizedDescription)
-                    }
-                    completion?(false)
-                    return
-                }
-
-                guard let documents = snapshot?.documents else {
-                    AppLog.menu.warning("⚠️ fetchNotifications — snapshot has no documents")
-                    completion?(false)
-                    return
-                }
-
-                let endIndex = min(offset + self.pageSize, documents.count)
-                guard offset < documents.count else {
-                    AppLog.menu.debug("📋 offset \(offset) beyond docs.count \(documents.count), no more pages")
-                    completion?(true)
-                    return
-                }
-
-                let pageDocuments = Array(documents[offset..<endIndex])
-                let newNotifications = pageDocuments.compactMap {
-                    try? $0.data(as: AppNotification.self)
-                }
-
-                Task { @MainActor in
-                    
-                    let existingIds = Set(self.notifications.compactMap { $0.id })
-                    let unique = newNotifications.filter { noti in
-                        guard let id = noti.id else { return false }
-                        return !existingIds.contains(id)
-                    }
-                    self.notifications.append(contentsOf: unique)
-                    AppLog.printList(self.notifications, label: "Notifications")
-                }
-
-                // Attach realtime listener on first page only
-                if pageNum == 1 {
-                    Task { @MainActor in
-                        self.setupRealtimeListener(userId: userId)
-                    }
-                }
-
-                completion?(true)
+            if pageNum > 1, let cursor = lastDocument {
+                query = query.start(afterDocument: cursor)
             }
+
+            let snapshot = try await query.getDocuments()
+            let newNotifications = snapshot.documents.compactMap {
+                try? $0.data(as: AppNotification.self)
+            }
+
+            lastDocument = snapshot.documents.last
+            hasMore = snapshot.documents.count == pageSize
+
+            let existingIds = Set(notifications.compactMap { $0.id })
+            let unique = newNotifications.filter { !existingIds.contains($0.id ?? "") }
+            notifications.append(contentsOf: unique)
+
+            AppLog.printList(unique, label: "Notifications Page \(pageNum)")
+            AppLog.menu.debug("✅ fetchNotifications — appended \(unique.count), total: \(self.notifications.count), hasMore: \(self.hasMore)")
+
+            if pageNum == 1 { isLoading = false }
+
+            // Re-attach after every page so the listener window grows with
+            // what's on screen — same fix as AdminOrdersViewModel.
+            // Without this, .modified events for notifications beyond position 10
+            // are never delivered.
+            setupRealtimeListener(userId: userId)
+        } catch {
+            isLoading = false
+            AppLog.menu.error("❌ fetchNotifications error: \(error.localizedDescription)")
+            AlertManager.shared.showError(message: error.localizedDescription)
+        }
     }
 
-    // MARK: - Realtime listener (new + updated notifications, page 1 window)
+    // MARK: - Unread count via aggregation
+
+    /// Fetches the unread count using Firestore's count() aggregation.
+    /// No notification documents are downloaded — only a single integer is returned.
+    private func fetchUnreadCount(userId: String) async {
+        do {
+            let query = db.collection("users")
+                .document(userId)
+                .collection("notifications")
+                .whereField("isRead", isEqualTo: false)
+
+            let snapshot = try await query.count.getAggregation(source: .server)
+            unreadCount = Int(truncating: snapshot.count)
+            syncAppIconBadge(unreadCount)
+            AppLog.menu.debug("🔴 unreadCount from aggregation: \(self.unreadCount)")
+        } catch {
+            AppLog.menu.error("❌ fetchUnreadCount error: \(error.localizedDescription)")
+        }
+    }
+
     private func setupRealtimeListener(userId: String) {
         listener?.remove()
-        AppLog.menu.debug("🔌 setupRealtimeListener — attaching for uid: \(userId)")
+
+        // Limit grows with every loaded page so all visible notifications
+        // receive .added and .modified events in real time.
+        let listenLimit = max(notifications.count, pageSize)
+        AppLog.menu.debug("🔌 setupRealtimeListener — uid: \(userId), limit: \(listenLimit)")
 
         listener = db.collection("users")
             .document(userId)
             .collection("notifications")
             .order(by: "createdAt", descending: true)
-            .limit(to: pageSize)
+            .limit(to: listenLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
 
@@ -143,7 +133,6 @@ class InboxViewModel: ObservableObject {
                         if let n = try? change.document.data(as: AppNotification.self),
                            !self.notifications.contains(where: { $0.id == n.id }) {
                             self.notifications.insert(n, at: 0)
-                            self.totalNotificationCount += 1
                             if !n.isRead {
                                 self.unreadCount += 1
                                 self.syncAppIconBadge(self.unreadCount)
@@ -173,14 +162,16 @@ class InboxViewModel: ObservableObject {
     }
 
     // MARK: - Refresh
-    func refreshNotifications(completion: ((Bool) -> Void)? = nil) {
+
+    func refreshNotifications() async {
         AppLog.menu.debug("🔄 refreshNotifications — clearing and re-fetching from page 1")
         listener?.remove()
         listener = nil
         notifications = []
-        totalNotificationCount = 0
+        lastDocument = nil
+        hasMore = true
         unreadCount = 0
-        fetchNotifications(pageNum: 1, completion: completion)
+        await fetchNotifications(pageNum: 1)
     }
 
     // MARK: - Stop listening (e.g. on sign-out)
@@ -225,15 +216,15 @@ class InboxViewModel: ObservableObject {
         AppLog.menu.debug("✅ Marking \(unread.count) notification(s) as read")
 
         // Optimistic update for all loaded pages
-        for i in notifications.indices where !notifications[i].isRead {
-            applyLocalUpdate(id: notifications[i].id ?? "", isRead: true)
+        for idx in notifications.indices where !notifications[idx].isRead {
+            applyLocalUpdate(id: notifications[idx].id ?? "", isRead: true)
         }
         unreadCount = 0
         syncAppIconBadge(0)
 
         let batch = db.batch()
-        for n in unread {
-            guard let id = n.id else { continue }
+        for noti in unread {
+            guard let id = noti.id else { continue }
             let ref = db.collection("users")
                 .document(userId)
                 .collection("notifications")
@@ -259,7 +250,6 @@ class InboxViewModel: ObservableObject {
             syncAppIconBadge(unreadCount)
         }
         notifications.removeAll { $0.id == id }
-        totalNotificationCount = max(0, totalNotificationCount - 1)
 
         do {
             try await db.collection("users")

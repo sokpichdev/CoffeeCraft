@@ -40,15 +40,11 @@ struct InboxView: View {
                 }
             }
         }
-//        .onAppear {
-//            inboxVM.fetchNotifications(pageNum: 1)
-//        }
     }
 
     // MARK: - List
     private var notificationList: some View {
         CustomRefreshScrollView({
-            // Unread count pill
             Group {
                 if inboxVM.unreadCount > 0 {
                     HStack {
@@ -75,7 +71,7 @@ struct InboxView: View {
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 4)
-            
+
             LazyVStack(spacing: 10) {
                 ForEach(inboxVM.notifications) { notification in
                     NotificationRow(notification: notification)
@@ -109,7 +105,7 @@ struct InboxView: View {
                             }
                         }
                         .onAppear {
-                            guard inboxVM.notifications.count < inboxVM.totalNotificationCount,
+                            guard inboxVM.hasMore,
                                   notification.id == inboxVM.notifications.last?.id,
                                   !isPaginating
                             else { return }
@@ -120,11 +116,8 @@ struct InboxView: View {
                             Task {
                                 let timer = MinimumLoadingTime(0.5)
                                 try? await timer.waitIfNeeded()
-                                await MainActor.run {
-                                    inboxVM.fetchNotifications(pageNum: pageNum) { _ in
-                                        isPaginating = false
-                                    }
-                                }
+                                await inboxVM.fetchNotifications(pageNum: pageNum)
+                                isPaginating = false
                             }
                         }
                 }
@@ -139,9 +132,7 @@ struct InboxView: View {
         }, onRefresh: {
             pageNum = 1
             isPaginating = false
-            await withCheckedContinuation { continuation in
-                inboxVM.refreshNotifications { _ in continuation.resume() }
-            }
+            await inboxVM.refreshNotifications()
         })
     }
 
