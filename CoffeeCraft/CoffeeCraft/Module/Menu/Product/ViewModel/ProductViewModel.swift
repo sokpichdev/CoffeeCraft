@@ -82,14 +82,16 @@ class ProductViewModel: ObservableObject {
 
     // MARK: - Refresh
     func refreshProducts() async {
-        AppLog.menu.debug("🔄 Refreshing products...")
+        AppLog.menu.debug("🔄 Refreshing products — re-attaching listener")
         listener?.remove()
         listener = nil
-        
-        await fetchProducts()
+        products = []
+        sections = []
+
+        // listenProducts() is sufficient on its own — Firestore fires the first
+        // snapshot immediately on attach with the current collection state.
+        // Calling fetchProducts() here too would download the same data twice.
         listenProducts()
-        
-        AppLog.menu.debug("✅ Products refreshed and listener re-attached")
     }
 
     // MARK: - Parse Product
