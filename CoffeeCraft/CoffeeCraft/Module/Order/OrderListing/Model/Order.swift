@@ -35,6 +35,13 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
     /// the correct name even if the branch is renamed later.
     var branchName: String?
 
+    // MARK: Phase 7 — Ratings (proof of purchase)
+    /// Flat array of productIds from all items in this order.
+    /// Written at checkout by OrderService. Enables single-query proof-of-
+    /// purchase check: .whereField("productIds", arrayContains: productId)
+    /// nil on orders placed before Phase 7 — treated as unverifiable (deny rating).
+    var productIds: [String]?
+
     // MARK: Computed helpers
 
     var wasWalletPayment: Bool {
