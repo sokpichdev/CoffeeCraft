@@ -190,7 +190,7 @@ private struct ItemRatingPrompt: View {
         .buttonStyle(.plain)
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
-                .onChanged { _ in isPressed = true         }
+                .onChanged { _ in isPressed = true }
                 .onEnded { _ in isPressed = false }
         )
     }

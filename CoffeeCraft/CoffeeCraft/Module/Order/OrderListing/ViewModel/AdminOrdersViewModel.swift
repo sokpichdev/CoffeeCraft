@@ -12,71 +12,68 @@ import SwiftUI
 class AdminOrdersViewModel: ObservableObject {
     @Published var allOrders: [Order] = []
     @Published var myOrders: [Order] = []
-    @Published var totalAllOrdersCount = 0
-    @Published var totalMyOrdersCount = 0
+    @Published var hasMoreAllOrders = true
+    @Published var hasMoreMyOrders = true
     @Published var isLoadingAllOrders = false
     @Published var isLoadingMyOrders = false
-    
-    var allOrdersPage = 1  // ← persists across tab switches
+
+    var allOrdersPage = 1
     var myOrdersPage = 1
-    
+
     private let db = Firestore.firestore()
     private var allOrdersListener: ListenerRegistration?
     private var myOrdersListener: ListenerRegistration?
     private let pageSize = 10
-    
+
+    private var lastAllOrdersDocument: DocumentSnapshot?
+    private var lastMyOrdersDocument: DocumentSnapshot?
+
     deinit {
         allOrdersListener?.remove()
         myOrdersListener?.remove()
     }
 
+    // MARK: - All Orders
+
     func fetchAllOrders(pageNum: Int) async {
         guard pageNum > 1 || allOrders.isEmpty else { return }
+        guard hasMoreAllOrders || pageNum == 1 else { return }
 
-        let offset = (pageNum - 1) * pageSize
-        AppLog.order.debug("📋 fetchAllOrders — page: \(pageNum)")
+        AppLog.order.debug("📋 fetchAllOrders — page: \(pageNum), cursor: \(self.lastAllOrdersDocument?.documentID ?? "none")")
+
+        if pageNum == 1 { isLoadingAllOrders = true }
 
         do {
-            if pageNum == 1 {
-                isLoadingAllOrders = true
-
-                let countSnapshot = try await db.collection("orders")
-                    .getDocuments()
-
-                totalAllOrdersCount = countSnapshot.documents.count
-            }
-
-            let snapshot = try await db.collection("orders")
+            var query: Query = db.collection("orders")
                 .order(by: "timestamp", descending: true)
-                .getDocuments()
+                .limit(to: pageSize)
 
-            let docs = snapshot.documents
-
-            let endIndex = min(offset + pageSize, docs.count)
-            guard offset < docs.count else {
-                isLoadingAllOrders = false
-                return
+            if pageNum > 1, let cursor = lastAllOrdersDocument {
+                query = query.start(afterDocument: cursor)
             }
 
-            let pageDocuments = Array(docs[offset..<endIndex])
+            let snapshot = try await query.getDocuments()
+            let newOrders = snapshot.documents.compactMap { try? $0.data(as: Order.self) }
 
-            let newOrders = pageDocuments.compactMap {
-                try? $0.data(as: Order.self)
-            }
+            lastAllOrdersDocument = snapshot.documents.last
+            hasMoreAllOrders = snapshot.documents.count == pageSize
 
             let existingIds = Set(allOrders.compactMap { $0.id })
-            let uniqueNewOrders = newOrders.filter {
-                guard let id = $0.id else { return false }
-                return !existingIds.contains(id)
-            }
+            let unique = newOrders.filter { !existingIds.contains($0.id ?? "") }
+            allOrders.append(contentsOf: unique)
 
-            allOrders.append(contentsOf: uniqueNewOrders)
-            AppLog.printList(uniqueNewOrders, label: "All Orders Page \(pageNum)", logger: AppLog.order)
+            AppLog.printList(unique, label: "All Orders Page \(pageNum)", logger: AppLog.order)
+            AppLog.order.debug("✅ fetchAllOrders — appended \(unique.count), total: \(self.allOrders.count), hasMore: \(self.hasMoreAllOrders)")
+
             if pageNum == 1 {
                 try await MinimumLoadingTime(0.5).waitIfNeeded()
                 isLoadingAllOrders = false
-                setupAllOrdersListener()
             }
+
+            // Re-attach after every page so the listener window always covers
+            // all loaded orders. If we only attached on page 1 (limit = 10),
+            // a status change on order 11 would never fire .modified on admin2.
+            setupAllOrdersListener()
         } catch {
             isLoadingAllOrders = false
             AppLog.order.error("❌ fetchAllOrders error: \(error.localizedDescription)")
@@ -86,43 +83,49 @@ class AdminOrdersViewModel: ObservableObject {
             )
         }
     }
+
     private func setupAllOrdersListener() {
         allOrdersListener?.remove()
-        AppLog.order.debug("🔌 setupAllOrdersListener — attaching real-time listener")
-        
+
+        let listenLimit = max(allOrders.count, pageSize)
+        AppLog.order.debug("🔌 setupAllOrdersListener — limit: \(listenLimit)")
+
         allOrdersListener = db.collection("orders")
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
+            .limit(to: listenLimit)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
+                guard let self else { return }
 
-                if let error = error {
-                    AppLog.order.error("❌ setupAllOrdersListener — listener error: \(error.localizedDescription)")
+                if let error {
+                    AppLog.order.error("❌ setupAllOrdersListener — \(error.localizedDescription)")
                     return
                 }
 
                 guard let changes = snapshot?.documentChanges else { return }
-                
+
                 for change in changes {
-                    if change.type == .added {
-                        if let newOrder = try? change.document.data(as: Order.self) {
-                            if !self.allOrders.contains(where: { $0.id == newOrder.id }) {
-                                self.allOrders.insert(newOrder, at: 0)
-                                self.totalAllOrdersCount += 1
-                                AppLog.order.debug("new order added: \(newOrder.id ?? "nil"), total: \(self.totalAllOrdersCount)")
-                            }
+                    switch change.type {
+                    case .added:
+                        if let newOrder = try? change.document.data(as: Order.self),
+                           !self.allOrders.contains(where: { $0.id == newOrder.id }) {
+                            self.allOrders.insert(newOrder, at: 0)
+                            AppLog.order.debug("➕ allOrders listener — new order: \(newOrder.id ?? "nil")")
                         }
-                    } else if change.type == .modified {
-                        if let updatedOrder = try? change.document.data(as: Order.self),
-                           let index = self.allOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
-                            self.allOrders[index] = updatedOrder
-                            AppLog.order.debug("order updated — id: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
+                    case .modified:
+                        if let updated = try? change.document.data(as: Order.self),
+                           let index = self.allOrders.firstIndex(where: { $0.id == updated.id }) {
+                            self.allOrders[index] = updated
+                            AppLog.order.debug("✏️ allOrders listener — updated: \(updated.id ?? "nil"), status: \(updated.status ?? "")")
                         }
+                    default:
+                        break
                     }
                 }
             }
     }
-    
+
+    // MARK: - My Orders
+
     func fetchMyOrders(pageNum: Int) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             AppLog.order.warning("⚠️ fetchMyOrders — no authenticated user")
@@ -130,56 +133,43 @@ class AdminOrdersViewModel: ObservableObject {
         }
 
         guard pageNum > 1 || myOrders.isEmpty else { return }
+        guard hasMoreMyOrders || pageNum == 1 else { return }
 
-        let offset = (pageNum - 1) * pageSize
-//        AppLog.order.debug("📋 fetchMyOrders — uid: \(userId), page: \(pageNum), offset: \(offset)")
+        AppLog.order.debug("📋 fetchMyOrders — uid: \(userId), page: \(pageNum), cursor: \(self.lastMyOrdersDocument?.documentID ?? "none")")
+
+        if pageNum == 1 { isLoadingMyOrders = true }
 
         do {
-            if pageNum == 1 {
-                isLoadingMyOrders = true
-                
-                let countSnapshot = try await db.collection("orders")
-                    .whereField("userId", isEqualTo: userId)
-                    .getDocuments()
-                
-                totalMyOrdersCount = countSnapshot.documents.count
-                AppLog.order.debug("📊 totalMyOrdersCount: \(self.totalMyOrdersCount)")
-            }
-
-            let snapshot = try await db.collection("orders")
+            var query: Query = db.collection("orders")
                 .whereField("userId", isEqualTo: userId)
                 .order(by: "timestamp", descending: true)
-                .getDocuments()
+                .limit(to: pageSize)
 
-            let docs = snapshot.documents
-            
-            let endIndex = min(offset + pageSize, docs.count)
-            guard offset < docs.count else {
-                AppLog.order.debug("📋 No more pages")
-                isLoadingMyOrders = false
-                return
+            if pageNum > 1, let cursor = lastMyOrdersDocument {
+                query = query.start(afterDocument: cursor)
             }
 
-            let pageDocuments = Array(docs[offset..<endIndex])
+            let snapshot = try await query.getDocuments()
+            let newOrders = snapshot.documents.compactMap { try? $0.data(as: Order.self) }
 
-            let newOrders = pageDocuments.compactMap {
-                try? $0.data(as: Order.self)
-            }
+            lastMyOrdersDocument = snapshot.documents.last
+            hasMoreMyOrders = snapshot.documents.count == pageSize
 
             let existingIds = Set(myOrders.compactMap { $0.id })
-            let uniqueNewOrders = newOrders.filter {
-                guard let id = $0.id else { return false }
-                return !existingIds.contains(id)
-            }
+            let unique = newOrders.filter { !existingIds.contains($0.id ?? "") }
+            myOrders.append(contentsOf: unique)
 
-            myOrders.append(contentsOf: uniqueNewOrders)
-            AppLog.printList(uniqueNewOrders, label: "My Orders Page \(pageNum)", logger: AppLog.order)
+            AppLog.printList(unique, label: "My Orders Page \(pageNum)", logger: AppLog.order)
+            AppLog.order.debug("✅ fetchMyOrders — appended \(unique.count), total: \(self.myOrders.count), hasMore: \(self.hasMoreMyOrders)")
 
             if pageNum == 1 {
                 try await MinimumLoadingTime(0.5).waitIfNeeded()
                 isLoadingMyOrders = false
-                setupMyOrdersListener(userId: userId)
             }
+
+            // Same growing-window pattern — re-attach after every page so
+            // order11, order12... all receive live status updates.
+            setupMyOrdersListener(userId: userId)
         } catch {
             isLoadingMyOrders = false
             AppLog.order.error("❌ fetchMyOrders error: \(error.localizedDescription)")
@@ -189,60 +179,71 @@ class AdminOrdersViewModel: ObservableObject {
             )
         }
     }
-    
+
     private func setupMyOrdersListener(userId: String) {
         myOrdersListener?.remove()
-        AppLog.order.debug("🔌 setupMyOrdersListener — attaching real-time listener for uid: \(userId)")
-        
+
+        let listenLimit = max(myOrders.count, pageSize)
+        AppLog.order.debug("🔌 setupMyOrdersListener — uid: \(userId), limit: \(listenLimit)")
+
         myOrdersListener = db.collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize)
+            .limit(to: listenLimit)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
+                guard let self else { return }
 
-                if let error = error {
-                    AppLog.order.error("❌ setupMyOrdersListener — listener error: \(error.localizedDescription)")
+                if let error {
+                    AppLog.order.error("❌ setupMyOrdersListener — \(error.localizedDescription)")
                     return
                 }
 
                 guard let changes = snapshot?.documentChanges else { return }
-                
+
                 for change in changes {
-                    if change.type == .added {
-                        if let newOrder = try? change.document.data(as: Order.self) {
-                            if !self.myOrders.contains(where: { $0.id == newOrder.id }) {
-                                self.myOrders.insert(newOrder, at: 0)
-                                self.totalMyOrdersCount += 1
-                                AppLog.order.debug("➕ setupMyOrdersListener — new order inserted: \(newOrder.id ?? "nil"), total: \(self.totalMyOrdersCount)")
-                            }
+                    switch change.type {
+                    case .added:
+                        if let newOrder = try? change.document.data(as: Order.self),
+                           !self.myOrders.contains(where: { $0.id == newOrder.id }) {
+                            self.myOrders.insert(newOrder, at: 0)
+                            AppLog.order.debug("➕ myOrders listener — new order: \(newOrder.id ?? "nil")")
                         }
-                    } else if change.type == .modified {
-                        if let updatedOrder = try? change.document.data(as: Order.self),
-                           let index = self.myOrders.firstIndex(where: { $0.id == updatedOrder.id }) {
-                            self.myOrders[index] = updatedOrder
-                            AppLog.order.debug("✏️ setupMyOrdersListener — order updated: \(updatedOrder.id ?? "nil"), status: \(updatedOrder.status ?? "")")
+                    case .modified:
+                        if let updated = try? change.document.data(as: Order.self),
+                           let index = self.myOrders.firstIndex(where: { $0.id == updated.id }) {
+                            self.myOrders[index] = updated
+                            AppLog.order.debug("✏️ myOrders listener — updated: \(updated.id ?? "nil"), status: \(updated.status ?? "")")
                         }
+                    default:
+                        break
                     }
                 }
             }
     }
-    
+
+    // MARK: - Refresh
+
     func refreshMyOrders() async {
         AppLog.order.debug("🔄 refreshMyOrders")
         myOrdersListener?.remove()
+        myOrdersListener = nil
         myOrders = []
-        totalMyOrdersCount = 0
+        lastMyOrdersDocument = nil
+        hasMoreMyOrders = true
         await fetchMyOrders(pageNum: 1)
     }
 
     func refreshAllOrders() async {
         AppLog.order.debug("🔄 refreshAllOrders")
         allOrdersListener?.remove()
+        allOrdersListener = nil
         allOrders = []
-        totalAllOrdersCount = 0
+        lastAllOrdersDocument = nil
+        hasMoreAllOrders = true
         await fetchAllOrders(pageNum: 1)
     }
+
+    // MARK: - Update Status
 
     func updateOrderStatus(order: Order, status: String) async -> Bool {
         guard let orderId = order.id else { return false }
@@ -256,7 +257,7 @@ class AdminOrdersViewModel: ObservableObject {
             return true
         } catch {
             AppLog.order.error("❌ updateOrderStatus error: \(error.localizedDescription)")
-        AlertManager.shared.showError(
+            AlertManager.shared.showError(
                 title: "Error updating status",
                 message: error.localizedDescription
             )
@@ -265,7 +266,6 @@ class AdminOrdersViewModel: ObservableObject {
     }
 
     func applyLocalStatusChange(orderId: String, status: String) {
-        // Update in allOrders
         if let index = allOrders.firstIndex(where: { $0.id == orderId }) {
             if status == "Completed" {
                 allOrders.remove(at: index)
@@ -276,7 +276,6 @@ class AdminOrdersViewModel: ObservableObject {
             }
         }
 
-        // Update in myOrders if needed
         if let index = myOrders.firstIndex(where: { $0.id == orderId }) {
             if status == "Completed" {
                 myOrders.remove(at: index)
