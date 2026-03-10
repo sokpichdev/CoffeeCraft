@@ -40,7 +40,7 @@ struct HomeView: View {
             }
         }, onRefresh: {
             Task {
-                try? await announcementVM.fetchAnnouncements()
+                await announcementVM.fetchAnnouncements()
             }
         })
         .edgesIgnoringSafeArea(.top)
@@ -48,7 +48,7 @@ struct HomeView: View {
         .onAppear {
             if !announcementVM.isAnnouncementsFetched {
                 Task {
-                    try? await announcementVM.fetchAnnouncements()
+                    await announcementVM.fetchAnnouncements()
                 }
             }
         }

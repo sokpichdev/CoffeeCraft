@@ -17,10 +17,9 @@ class AnnouncementViewModel: ObservableObject {
     @Published var announcements: [Announcement] = []
     @Published var isLoading: Bool = false
     @Published var isAnnouncementsFetched: Bool = false
-    @Published var isRefreshing: Bool = false
     
     // MARK: - Fetch All Announcements
-    func fetchAnnouncements() async throws -> [Announcement] {
+    func fetchAnnouncements() async {
         isLoading = true
         isAnnouncementsFetched = false
         
@@ -36,24 +35,17 @@ class AnnouncementViewModel: ObservableObject {
             }
             
             AppLog.printList(fetchedAnnouncements, label: "Announcements")
-            
             try await MinimumLoadingTime(0.5).waitIfNeeded()
-            
-            await MainActor.run {
-                self.announcements = fetchedAnnouncements
-                self.isAnnouncementsFetched = true
-                self.isLoading = false
-            }
-            
-            return fetchedAnnouncements
+
+            // Already @MainActor — no MainActor.run wrapper needed
+            announcements = fetchedAnnouncements
+            isAnnouncementsFetched = true
+            isLoading = false
         } catch {
             AppLog.menu.error("❌ Failed to fetch announcements: \(error.localizedDescription)")
-            await MainActor.run {
-                self.isAnnouncementsFetched = true
-                self.isLoading = false
-                AlertManager.shared.showError(message: error.localizedDescription)
-            }
-            throw error
+            isAnnouncementsFetched = true
+            isLoading = false
+            AlertManager.shared.showError(message: error.localizedDescription)
         }
     }
     
@@ -105,32 +97,5 @@ class AnnouncementViewModel: ObservableObject {
             AppLog.menu.error("❌ Failed to delete announcement id \(id): \(error.localizedDescription)")
             throw error
         }
-    }
-    
-    // MARK: - Real-time Listener
-    func listenToAnnouncements(completion: @escaping ([Announcement]) -> Void) -> ListenerRegistration {
-        AppLog.menu.debug("👂 Starting real-time listener for announcements...")
-        return db.collection(collection)
-            .order(by: "createdDate", descending: true)
-            .addSnapshotListener { snapshot, error in
-                if let error = error {
-                    AppLog.menu.error("❌ Listener error: \(error.localizedDescription)")
-                    AlertManager.shared.showError(title: "Error fetching announcements.", message: error.localizedDescription)
-                    return
-                }
-                
-                guard let documents = snapshot?.documents else {
-                    AppLog.menu.warning("⚠️ Snapshot is nil or has no documents")
-                    AlertManager.shared.showError(title: "Error fetching announcements.", message: "Unknown Error")
-                    return
-                }
-                
-                let announcements = documents.compactMap { document -> Announcement? in
-                    try? document.data(as: Announcement.self)
-                }
-                
-                AppLog.menu.debug("✅ Listener received \(documents.count) announcement(s), decoded \(announcements.count)")
-                completion(announcements)
-            }
     }
 }
