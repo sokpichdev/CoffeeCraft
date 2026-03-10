@@ -13,241 +13,218 @@ struct ReviewSectionView: View {
 
     @ObservedObject var vm: ReviewViewModel
     let product: Product
-
-    /// Called when the user taps "Write a Review" or "Edit your review".
-    /// Parent is responsible for presenting RatingInputSheet.
+    let onSeeAll: () -> Void
     let onWriteReview: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionHeader
-            ratingSummaryHeader
-            reviewContent
+            seeAllHeader
+            ratingRow
+            previewScroll
+            tapToRateBlock
         }
     }
 }
 
-// MARK: - Section Header
+// MARK: - "Ratings & Reviews >" header
 
 private extension ReviewSectionView {
 
-    var sectionHeader: some View {
-        SectionHeader(title: "Reviews", icon: "bubble.left.and.bubble.right.fill")
+    var seeAllHeader: some View {
+        Button(action: onSeeAll) {
+            HStack(spacing: 4) {
+                Text("Ratings & Reviews")
+                    .font(.system(size: 17, weight: .semibold, design: .serif))
+                    .foregroundColor(.textPrimary)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.textSecondary)
+
+                Spacer()
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 
-// MARK: - Rating Summary Header
+// MARK: - Avg score row
 
 private extension ReviewSectionView {
 
-    /// Shows the aggregate rating row + the Write / Edit CTA button.
-    var ratingSummaryHeader: some View {
-        HStack(alignment: .center, spacing: 0) {
+    var ratingRow: some View {
+        HStack(alignment: .center, spacing: 20) {
 
-            // Aggregate stars + count
-            if product.hasRatings {
-                VStack(alignment: .leading, spacing: 4) {
-                    StarRatingView.summary(
-                        average: product.displayRating,
-                        count: product.displayRatingCount,
-                        size: 18
-                    )
-                    Text("Based on \(product.displayRatingCount) rating\(product.displayRatingCount == 1 ? "" : "s")")
-                        .font(.caption)
-                        .foregroundColor(.textMuted)
-                }
-            } else {
-                Text("No reviews yet")
-                    .font(.subheadline)
+            // Left — large numeric score
+            VStack(alignment: .leading, spacing: 2) {
+                Text(product.hasRatings
+                     ? String(format: "%.1f", product.displayRating)
+                     : "–")
+                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                    .foregroundColor(.textPrimary)
+                    .monospacedDigit()
+
+                Text("out of 5")
+                    .font(.caption)
                     .foregroundColor(.textMuted)
             }
 
             Spacer()
 
-            // CTA — only shown when eligible or already reviewed
-            if vm.canSubmitNewRating || vm.canEditRating {
-                writeEditButton
+            // Right — stars + count
+            VStack(alignment: .trailing, spacing: 6) {
+                StarRatingView(
+                    mode: .readOnly(average: product.displayRating),
+                    size: 20
+                )
+
+                if product.hasRatings {
+                    Text("\(product.displayRatingCount.formatted()) Ratings")
+                        .font(.caption)
+                        .foregroundColor(.textMuted)
+                }
             }
         }
-        .padding(16)
-        .background(Color.surfacePrimary)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.borderColor.opacity(0.4), lineWidth: 1)
-        )
+    }
+}
+
+// MARK: - Horizontal preview scroll
+
+private extension ReviewSectionView {
+
+    @ViewBuilder
+    var previewScroll: some View {
+        if vm.isLoadingReviews {
+            shimmerRow
+        } else if vm.reviews.isEmpty {
+            noReviewsLabel
+        } else {
+            reviewCardsScroll
+        }
     }
 
-    var writeEditButton: some View {
-        Button(action: onWriteReview) {
-            HStack(spacing: 6) {
-                Image(systemName: vm.canEditRating
-                      ? "pencil.circle.fill"
-                      : "star.bubble.fill")
-                    .font(.system(size: 13, weight: .semibold))
-
-                Text(vm.canEditRating ? "Edit review" : "Write a review")
-                    .font(.system(size: 13, weight: .semibold))
+    var shimmerRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(0..<2, id: \.self) { _ in
+                    ReviewCardShimmer()
+                        .frame(width: 280)
+                }
             }
-            .foregroundColor(.white)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 9)
-            .background(
-                Capsule()
-                    .fill(LinearGradient.brandPrimary)
-                    .shadow(color: Color.accentPrimary.opacity(0.3), radius: 6, y: 3)
+            .padding(.horizontal, 1)
+        }
+    }
+
+    var noReviewsLabel: some View {
+        Text("No reviews yet — be the first!")
+            .font(.subheadline)
+            .foregroundColor(.textMuted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    var reviewCardsScroll: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .top, spacing: 12) {
+                ForEach(vm.reviews.prefix(3)) { review in
+                    ReviewCard(review: review, vm: vm)
+                        .frame(width: 280)
+                }
+
+                if vm.reviews.count >= 3 {
+                    seeAllCard
+                }
+            }
+            .padding(.horizontal, 1)
+            .padding(.vertical, 4)
+        }
+    }
+
+    var seeAllCard: some View {
+        Button(action: onSeeAll) {
+            VStack(spacing: 8) {
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.accentPrimary)
+
+                Text("See All\nReviews")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.accentPrimary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(width: 100, height: 120)
+            .background(Color.surfacePrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
     }
 }
 
-// MARK: - Review Content
+// MARK: - Tap to Rate block
 
 private extension ReviewSectionView {
 
-    @ViewBuilder
-    var reviewContent: some View {
-        if vm.isLoadingReviews {
-            loadingSkeletons
-        } else if vm.reviews.isEmpty && vm.existingRating == nil {
-            emptyState
-        } else {
-            reviewList
-        }
-    }
-
-    // MARK: Loading skeletons
-
-    var loadingSkeletons: some View {
+    var tapToRateBlock: some View {
         VStack(spacing: 12) {
-            ForEach(0..<3, id: \.self) { _ in
-                ReviewCardShimmer()
-            }
-        }
-    }
+            Divider().opacity(0.5)
 
-    // MARK: Empty state
-
-    var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bubble.left.and.bubble.right")
-                .font(.system(size: 36))
-                .foregroundColor(.textMuted.opacity(0.5))
-
-            Text("No reviews yet")
+            Text("Tap to Rate")
                 .font(.subheadline.weight(.medium))
                 .foregroundColor(.textSecondary)
 
-            if vm.canSubmitNewRating {
-                Text("Be the first to share your experience!")
-                    .font(.caption)
-                    .foregroundColor(.textMuted)
-                    .multilineTextAlignment(.center)
+            QuickRateStars(vm: vm, onTap: onWriteReview)
+
+            if vm.canSubmitNewRating || vm.canEditRating {
+                writeReviewButton
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 36)
     }
 
-    // MARK: Review list
-
-    var reviewList: some View {
-        VStack(spacing: 12) {
-
-            // ── User's own review — pinned at top ────────────────────
-            if let ownReview = ownReview {
-                ReviewCard(
-                    review: ownReview,
-                    vm: vm,
-                    isOwn: true
-                )
-                .transition(.opacity.combined(with: .move(edge: .top)))
-
-                if !otherReviews.isEmpty {
-                    dividerWithLabel("Other reviews")
-                }
-            }
-
-            // ── Other reviews ────────────────────────────────────────
-            ForEach(otherReviews) { review in
-                ReviewCard(review: review, vm: vm)
-                    .transition(.opacity)
-            }
-
-            // ── Load More ────────────────────────────────────────────
-            if vm.canLoadMore {
-                loadMoreButton
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: vm.reviews.count)
-    }
-
-    // MARK: Helpers
-
-    /// The current user's own review from the list, if present.
-    var ownReview: Review? {
-        guard let userId = UserSession.shared.userId else { return nil }
-        return vm.reviews.first { $0.userId == userId }
-    }
-
-    /// All reviews except the current user's own.
-    var otherReviews: [Review] {
-        guard let userId = UserSession.shared.userId else { return vm.reviews }
-        return vm.reviews.filter { $0.userId != userId }
-    }
-
-    func dividerWithLabel(_ label: String) -> some View {
-        HStack(spacing: 8) {
-            Rectangle()
-                .fill(Color.borderColor.opacity(0.5))
-                .frame(height: 1)
-
-            Text(label)
-                .font(.caption)
-                .foregroundColor(.textMuted)
-                .fixedSize()
-
-            Rectangle()
-                .fill(Color.borderColor.opacity(0.5))
-                .frame(height: 1)
-        }
-        .padding(.vertical, 4)
-    }
-
-    // MARK: Load More button
-
-    var loadMoreButton: some View {
-        Button {
-            Task { await vm.loadMoreReviews() }
-        } label: {
-            HStack(spacing: 8) {
-                if vm.isLoadingMore {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .scaleEffect(0.8)
-                        .tint(.accentPrimary)
-                } else {
-                    Image(systemName: "arrow.down.circle")
-                        .font(.system(size: 14, weight: .medium))
-                }
-
-                Text(vm.isLoadingMore ? "Loading…" : "Load more reviews")
-                    .font(.subheadline.weight(.medium))
+    var writeReviewButton: some View {
+        Button(action: onWriteReview) {
+            HStack(spacing: 6) {
+                Image(systemName: vm.canEditRating ? "pencil.circle.fill" : "square.and.pencil")
+                    .font(.system(size: 13, weight: .semibold))
+                Text(vm.canEditRating ? "Edit your review" : "Write a Review")
+                    .font(.system(size: 13, weight: .semibold))
             }
             .foregroundColor(.accentPrimary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(.vertical, 11)
             .background(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: 12)
                     .fill(Color.accentPrimary.opacity(0.08))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.accentPrimary.opacity(0.25), lineWidth: 1)
                     )
             )
         }
         .buttonStyle(.plain)
-        .disabled(vm.isLoadingMore)
+    }
+}
+
+// MARK: - QuickRateStars
+
+private struct QuickRateStars: View {
+    @ObservedObject var vm: ReviewViewModel
+    let onTap: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ForEach(1...5, id: \.self) { score in
+                Image(systemName: score <= (vm.existingRating?.score ?? 0) ? "star.fill" : "star")
+                    .font(.system(size: 30))
+                    .foregroundColor(.accentGold)
+                    .onTapGesture {
+                        vm.draftScore = score
+                        onTap()
+                    }
+            }
+        }
     }
 }

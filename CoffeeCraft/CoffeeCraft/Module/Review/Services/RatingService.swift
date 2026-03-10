@@ -80,22 +80,43 @@ extension RatingService {
     func checkProofOfPurchase(userId: String, productId: String) async throws -> String? {
         AppLog.firestore.debug("🔍 RatingService.checkProofOfPurchase — userId: \(userId), productId: \(productId)")
 
-        let snapshot = try await ordersRef()
+        // ── Primary: fast indexed query on productIds flat array ─────────────
+        // Works for orders placed after Phase 7's OrderService changes.
+        let fastSnapshot = try await ordersRef()
             .whereField("userId", isEqualTo: userId)
             .whereField("status", isEqualTo: "Completed")
             .whereField("productIds", arrayContains: productId)
             .limit(to: 1)
             .getDocuments()
 
-        let orderId = snapshot.documents.first?.documentID
-
-        if let orderId {
-            AppLog.firestore.debug("✅ Proof of purchase found — orderId: \(orderId)")
-        } else {
-            AppLog.firestore.debug("⚠️ No qualifying order found for productId: \(productId)")
+        if let orderId = fastSnapshot.documents.first?.documentID {
+            AppLog.firestore.debug("✅ Proof of purchase found (fast path) — orderId: \(orderId)")
+            return orderId
         }
 
-        return orderId
+        AppLog.firestore.debug("⚠️ Fast path empty — trying legacy fallback for productId: \(productId)")
+
+        // ── Fallback: scan recent completed orders, check items client-side ──
+        // Covers orders placed before productIds was added to the order doc.
+        // Reads up to 30 orders — fine for a coffee shop context.
+        let legacySnapshot = try await ordersRef()
+            .whereField("userId", isEqualTo: userId)
+            .whereField("status", isEqualTo: "Completed")
+            .order(by: "createdAt", descending: true)
+            .limit(to: 30)
+            .getDocuments()
+
+        for doc in legacySnapshot.documents {
+            let items = doc.data()["items"] as? [[String: Any]] ?? []
+            let containsProduct = items.contains { $0["productId"] as? String == productId }
+            if containsProduct {
+                AppLog.firestore.debug("✅ Proof of purchase found (legacy fallback) — orderId: \(doc.documentID)")
+                return doc.documentID
+            }
+        }
+
+        AppLog.firestore.debug("⚠️ No qualifying order found for productId: \(productId)")
+        return nil
     }
 }
 
@@ -131,15 +152,27 @@ extension RatingService {
     func fetchReviews(
         productId: String,
         limit: Int = 10,
+        sort: ReviewSortOrder = .mostHelpful,
         after cursor: Any? = nil
     ) async throws -> (reviews: [Review], lastDocument: DocumentSnapshot?) {
 
         AppLog.firestore.debug("🔍 RatingService.fetchReviews — productId: \(productId), limit: \(limit), hasCursor: \(cursor != nil)")
 
-        var query: Query = reviewsRef(productId: productId)
-            .whereField("isHidden", isEqualTo: false)
-            .order(by: "createdAt", descending: true)
-            .limit(to: limit)
+        // Build sort — mostHelpful: helpfulCount DESC + createdAt tiebreaker
+        //              newest:      createdAt DESC only (no duplicate field)
+        var query: Query
+        if sort == .mostHelpful {
+            query = reviewsRef(productId: productId)
+                .whereField("isHidden", isEqualTo: false)
+                .order(by: "helpfulCount", descending: true)
+                .order(by: "createdAt", descending: true)
+                .limit(to: limit)
+        } else {
+            query = reviewsRef(productId: productId)
+                .whereField("isHidden", isEqualTo: false)
+                .order(by: "createdAt", descending: true)
+                .limit(to: limit)
+        }
 
         // Attach pagination cursor for pages beyond the first.
         // cursor is typed as Any? so callers (ReviewViewModel) don't need a
@@ -184,6 +217,7 @@ extension RatingService {
         userName: String,
         orderId: String,
         score: Int,
+        title: String? = nil,
         body: String?
     ) async throws {
         guard (1...5).contains(score) else {
@@ -225,7 +259,8 @@ extension RatingService {
 
                 transaction.updateData([
                     "avgRating": rounded,
-                    "ratingCount": newCount
+                    "ratingCount": newCount,
+                    "ratingDistribution.\(score)": FieldValue.increment(Int64(1))
                 ], forDocument: productRef)
 
                 return nil
@@ -260,6 +295,7 @@ extension RatingService {
             userName: userName,
             orderId: orderId,
             rating: score,
+            title: title,
             body: body
         )
 
@@ -303,7 +339,8 @@ extension RatingService {
         userId: String,
         userName: String,
         newScore: Int,
-        newBody: String?
+        newTitle: String? = nil,
+        newBody: String? = nil
     ) async throws {
         guard (1...5).contains(newScore) else {
             AppLog.firestore.error("❌ editRating — invalid score: \(newScore)")
@@ -351,7 +388,9 @@ extension RatingService {
                     AppLog.firestore.debug("📊 avg edit: \(oldAvg) × \(count) − \(oldScore) + \(newScore) → \(rounded)")
 
                     transaction.updateData([
-                        "avgRating": max(1.0, min(5.0, rounded)) // clamp to valid range
+                        "avgRating": max(1.0, min(5.0, rounded)),
+                        "ratingDistribution.\(oldScore)": FieldValue.increment(Int64(-1)),
+                        "ratingDistribution.\(newScore)": FieldValue.increment(Int64(1))
                     ], forDocument: productRef)
 
                     return nil
@@ -380,9 +419,8 @@ extension RatingService {
                 "rating": newScore,
                 "updatedAt": now
             ]
-            if let newBody {
-                reviewUpdate["body"] = newBody
-            }
+            if let newTitle { reviewUpdate["title"] = newTitle }
+            if let newBody { reviewUpdate["body"]  = newBody  }
             try await reviewRef.updateData(reviewUpdate)
 
             AppLog.firestore.debug("✅ reviews/\(reviewId) updated")
@@ -394,6 +432,7 @@ extension RatingService {
                 userName: userName,
                 orderId: orderId,
                 rating: newScore,
+                title: newTitle,
                 body: newBody
             )
             let reviewRef = reviewsRef(productId: productId).document()
@@ -439,9 +478,9 @@ extension RatingService {
 
         try await db.runTransaction { transaction, errorPointer -> Any? in
             do {
-                let snap = try transaction.getDocument(reviewRef)
-                let helpfulBy = snap.data()?["helpfulBy"] as? [String] ?? []
-                let alreadyIn = helpfulBy.contains(userId)
+                let snap       = try transaction.getDocument(reviewRef)
+                let helpfulBy  = snap.data()?["helpfulBy"] as? [String] ?? []
+                let alreadyIn  = helpfulBy.contains(userId)
 
                 if alreadyIn {
                     // Remove: un-helpful

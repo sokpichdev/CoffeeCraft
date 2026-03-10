@@ -8,6 +8,14 @@
 import FirebaseAuth
 import SwiftUI
 
+// MARK: - ReviewSortOrder
+
+enum ReviewSortOrder: String, CaseIterable, Identifiable {
+    case newest      = "Newest"
+    case mostHelpful = "Most Helpful"
+    var id: String { rawValue }
+}
+
 @MainActor
 final class ReviewViewModel: ObservableObject {
 
@@ -58,6 +66,12 @@ final class ReviewViewModel: ObservableObject {
     /// The text currently typed in the review body field.
     /// Pre-filled from existingRating's review body when editing.
     @Published var draftBody: String = ""
+
+    /// The headline typed in the review title field (max 60 chars).
+    @Published var draftTitle: String = ""
+
+    /// Current sort order for the review list. Changing this triggers a reload.
+    @Published var sortOrder: ReviewSortOrder = .mostHelpful
 
     /// True while a submit or edit write is in flight.
     @Published var isSubmitting: Bool = false
@@ -184,7 +198,7 @@ extension ReviewViewModel {
 
     // MARK: Review list load (shared by first page and refresh)
 
-    private func loadReviews(productId: String, reset: Bool) async {
+    private func loadReviews(productId: String, reset: Bool, sort: ReviewSortOrder? = nil) async {
         isLoadingReviews = true
         defer { isLoadingReviews = false }
 
@@ -198,6 +212,7 @@ extension ReviewViewModel {
             let result = try await service.fetchReviews(
                 productId: productId,
                 limit: pageSize,
+                sort: sort ?? sortOrder,
                 after: nil
             )
             reviews      = result.reviews
@@ -212,6 +227,19 @@ extension ReviewViewModel {
                 message: error.localizedDescription
             )
         }
+    }
+}
+
+// MARK: - Sort
+
+extension ReviewViewModel {
+
+    /// Called when the user picks a different sort from the picker.
+    /// Resets to page 1 and reloads with the new sort order.
+    func changeSortOrder(to order: ReviewSortOrder) async {
+        guard order != sortOrder else { return }
+        sortOrder = order
+        await loadReviews(productId: productId, reset: true, sort: order)
     }
 }
 
@@ -233,7 +261,8 @@ extension ReviewViewModel {
             let result = try await service.fetchReviews(
                 productId: productId,
                 limit: pageSize,
-                after: lastDocument   // RatingService casts to DocumentSnapshot internally
+                sort: sortOrder,
+                after: lastDocument
             )
             reviews.append(contentsOf: result.reviews)
             lastDocument = result.lastDocument
@@ -275,12 +304,16 @@ extension ReviewViewModel {
 
                 AppLog.firestore.info("⭐ submitOrEdit — submitting new rating: \(self.draftScore)")
 
+                let trimmedTitle = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                let titleToWrite = trimmedTitle.isEmpty ? nil : trimmedTitle
+
                 try await service.submitRating(
                     productId: productId,
                     userId: userId,
                     userName: currentUserName,
                     orderId: orderId,
                     score: draftScore,
+                    title: titleToWrite,
                     body: bodyToWrite
                 )
 
@@ -292,11 +325,15 @@ extension ReviewViewModel {
                 // MARK: Edit existing rating
                 AppLog.firestore.info("✏️ submitOrEdit — editing rating: \(self.draftScore)")
 
+                let trimmedTitle2 = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                let titleToWrite2 = trimmedTitle2.isEmpty ? nil : trimmedTitle2
+
                 try await service.editRating(
                     productId: productId,
                     userId: userId,
                     userName: currentUserName,
                     newScore: draftScore,
+                    newTitle: titleToWrite2,
                     newBody: bodyToWrite
                 )
 
@@ -309,10 +346,10 @@ extension ReviewViewModel {
             // Refresh both the user's rating doc and page 1 of reviews
             await refreshAfterSubmit()
         } catch let error as RatingError {
-            AppLog.firestore.error("❌ submitOrEdit RatingError: \(error.localizedDescription)")
+            AppLog.firestore.error("❌ submitOrEdit RatingError: \(error.localizedDescription ?? "")")
             AlertManager.shared.showError(
                 title: "Couldn't submit review",
-                message: error.localizedDescription
+                message: error.localizedDescription ?? "Something went wrong."
             )
         } catch {
             AppLog.firestore.error("❌ submitOrEdit error: \(error.localizedDescription)")
@@ -335,12 +372,14 @@ extension ReviewViewModel {
     /// Pre-fills draftBody from the review text so the sheet opens with it populated.
     func prepareForEditing(existingReview: Review?) {
         draftScore = existingRating?.score ?? 0
-        draftBody  = existingReview?.body ?? ""
+        draftTitle = existingReview?.title ?? ""
+        draftBody  = existingReview?.body  ?? ""
     }
 
     /// Resets draft state — called when the input sheet is dismissed without saving.
     func resetDraft() {
         draftScore = existingRating?.score ?? 0
+        draftTitle = ""
         draftBody  = ""
     }
 }

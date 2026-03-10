@@ -27,6 +27,7 @@ struct RatingInputSheet: View {
 
     private let maxBodyLength = 280
     private let warningThreshold = 260
+    private let maxTitleLength = 60
 
     // MARK: Body
 
@@ -38,6 +39,7 @@ struct RatingInputSheet: View {
                 VStack(spacing: 28) {
                     productHeader
                     starSection
+                    titleSection
                     bodySection
                     submitButton
                 }
@@ -162,6 +164,44 @@ private extension RatingInputSheet {
         case 4: return "😊  Great"
         case 5: return "🤩  Amazing!"
         default: return ""
+        }
+    }
+}
+
+// MARK: - Review Title Section
+
+private extension RatingInputSheet {
+
+    var titleSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Title")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.textPrimary)
+                Text("(optional)")
+                    .font(.caption)
+                    .foregroundColor(.textMuted)
+                Spacer()
+                Text("\(maxTitleLength - vm.draftTitle.count)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(vm.draftTitle.count >= maxTitleLength ? .errorRed : .textMuted)
+            }
+
+            TextField("e.g. Best latte in town", text: $vm.draftTitle)
+                .font(.subheadline)
+                .foregroundColor(.textPrimary)
+                .padding(12)
+                .background(Color.surfacePrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 1)
+                )
+                .onChange(of: vm.draftTitle) { _, newValue in
+                    if newValue.count > maxTitleLength {
+                        vm.draftTitle = String(newValue.prefix(maxTitleLength))
+                    }
+                }
         }
     }
 }
@@ -295,55 +335,4 @@ private extension RatingInputSheet {
         .disabled(!vm.isInputValid || vm.isSubmitting)
         .buttonStyle(.plain)
     }
-}
-
-// MARK: - Preview
-
-#Preview("New rating") {
-    struct PreviewWrapper: View {
-        @StateObject var vm = ReviewViewModel()
-        @State var show = true
-
-        var body: some View {
-            Color.bgSecondary
-                .ignoresSafeArea()
-                .sheet(isPresented: $show) {
-                    RatingInputSheet(
-                        vm: vm,
-                        productName: "Caramel Macchiato",
-                        imageURL: "https://i.postimg.cc/VNK61H8p/capp.jpg"
-                    )
-                }
-                .task {
-                    // Simulate eligible, no existing rating
-                    vm.proofOrderId = "order_001"
-                }
-        }
-    }
-    return PreviewWrapper()
-}
-
-#Preview("Edit existing") {
-    struct PreviewWrapper: View {
-        @StateObject var vm = ReviewViewModel()
-        @State var show = true
-
-        var body: some View {
-            Color.bgSecondary
-                .ignoresSafeArea()
-                .sheet(isPresented: $show) {
-                    RatingInputSheet(
-                        vm: vm,
-                        productName: "Matcha Latte",
-                        imageURL: "https://i.postimg.cc/VNK61H8p/capp.jpg"
-                    )
-                }
-                .task {
-                    // Simulate existing rating
-                    vm.draftScore = 4
-                    vm.draftBody  = "Really smooth, not too sweet."
-                }
-        }
-    }
-    return PreviewWrapper()
 }
