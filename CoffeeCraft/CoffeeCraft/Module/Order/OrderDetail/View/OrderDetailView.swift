@@ -13,6 +13,11 @@ struct OrderDetailView: View {
     var isActive: Bool = false
     
     @StateObject private var vm: OrderDetailViewModel
+
+    @StateObject private var reviewVM = ReviewViewModel()
+    @State private var selectedItemForRating: CartItemData?
+    @State private var ratedProductIds: Set<String> = []
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var cartManager: CartManager
     @State private var showReceipt = false
@@ -30,9 +35,17 @@ struct OrderDetailView: View {
                     OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
                     
                     StatusTimelineView(status: vm.order.status ?? "")
-                    
-                    OrderItemsCard(items: vm.order.items as? [CartItemData] ?? [])
-                    
+
+                    // passes rating context when order is Completed
+                    OrderItemsCard(
+                        items: vm.order.items as? [CartItemData] ?? [],
+                        orderStatus: vm.order.status,
+                        ratedProductIds: ratedProductIds,
+                        onRateItem: { item in
+                            selectedItemForRating = item
+                        }
+                    )
+
                     PricingCard(
                         totalPrice: vm.order.totalPrice ?? 0.0,
                         items: vm.order.items as? [CartItemData] ?? [],
@@ -68,6 +81,31 @@ struct OrderDetailView: View {
         .sheet(isPresented: $showReceipt) {
             OrderReceiptView(order: vm.order, userName: vm.userName)
         }
+        .sheet(item: $selectedItemForRating) { item in
+            RatingInputSheet(
+                vm: reviewVM,
+                productName: item.name    ?? "Item",
+                imageURL: item.imageURL ?? ""
+            )
+            .onAppear {
+                // Load proof-of-purchase + any existing rating for this product
+                if let productId = item.productId {
+                    Task {
+                        await reviewVM.loadInitialState(productId: productId)
+                        // Pre-seed the proof orderId from the order we're already on
+                        if reviewVM.proofOrderId == nil, let orderId = vm.order.id {
+                            reviewVM.proofOrderId = orderId
+                        }
+                    }
+                }
+            }
+            .onDisappear {
+                // If the user just submitted, mark that product as rated locally
+                if let productId = item.productId, reviewVM.existingRating != nil {
+                    ratedProductIds.insert(productId)
+                }
+            }
+        }
         .onAppear {
             if let orderId = vm.order.id {
                 vm.startListening(orderId: orderId)
@@ -75,13 +113,50 @@ struct OrderDetailView: View {
             if let userId = vm.order.userId, !userId.isEmpty {
                 vm.fetchUserInfo(userId: userId)
             }
+            // pre-load which items the user has already rated
+            loadRatedProductIds()
         }
         .onDisappear {
             vm.stopListening()
         }
     }
-    
-    // MARK: - Cancel (Phase 5)
+
+    /// Queries Firestore for any products in this order that the current user
+    /// has already rated, so prompts show the correct "Rated / Rate" state
+    /// immediately without waiting for each item's sheet to open.
+    private func loadRatedProductIds() {
+        guard
+            let userId     = UserSession.shared.userId,
+            let productIds = vm.order.productIds,
+            !productIds.isEmpty,
+            isCompletedOrder
+        else { return }
+
+        Task {
+            var rated = Set<String>()
+            await withTaskGroup(of: (String, Bool).self) { group in
+                for productId in productIds {
+                    group.addTask {
+                        let existing = try? await RatingService.shared.fetchUserRating(
+                            userId: userId,
+                            productId: productId
+                        )
+                        return (productId, existing != nil)
+                    }
+                }
+                for await (productId, hasRating) in group {
+                    if hasRating { rated.insert(productId) }
+                }
+            }
+            await MainActor.run { ratedProductIds = rated }
+        }
+    }
+
+    private var isCompletedOrder: Bool {
+        let s = vm.order.status?.lowercased() ?? ""
+        return s == "completed" || s == "done"
+    }
+
     private func confirmCancel() {
         AlertManager.shared.showDestructive(
             title: "Cancel Order?",
