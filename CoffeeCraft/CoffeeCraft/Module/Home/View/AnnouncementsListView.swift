@@ -49,7 +49,7 @@ struct AnnouncementsListView: View {
                 }
             }
         }, onRefresh: {
-            _ = try? await announcementVM.fetchAnnouncements()
+            await announcementVM.fetchAnnouncements()
         })
         .background(Color.bgPrimary)
         .customNavigationBar("Announcements") {
