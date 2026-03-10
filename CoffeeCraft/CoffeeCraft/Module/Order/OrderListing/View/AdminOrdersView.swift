@@ -137,7 +137,7 @@ struct ActiveOrdersContent: View {
                                 }
                             )
                             .onAppear {
-                                guard vm.allOrders.count < vm.totalAllOrdersCount else { return }
+                                guard vm.hasMoreAllOrders else { return }
                                 guard order.id == vm.allOrders.last?.id else { return }
                                 guard !isPaginating else { return }
 
@@ -215,7 +215,7 @@ struct MyOrdersContent: View {
                                 }
                             )
                             .onAppear {
-                                guard vm.myOrders.count < vm.totalMyOrdersCount else { return }
+                                guard vm.hasMoreMyOrders else { return }
                                 guard order.id == vm.myOrders.last?.id else { return }
                                 guard !isPaginating else { return }
                                 
