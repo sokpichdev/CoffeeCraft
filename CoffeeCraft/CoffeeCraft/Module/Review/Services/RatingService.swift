@@ -11,11 +11,11 @@ import Foundation
 // MARK: - RatingError
 
 enum RatingError: LocalizedError {
-    case notEligible            // no completed order containing this product
-    case alreadySubmitted       // tried to call submitRating() when rating exists
-    case noRatingToEdit         // tried to call editRating() before any submission
-    case invalidScore           // score outside 1–5
-    case productNotFound        // product doc missing from Firestore
+    case notEligible // no completed order containing this product
+    case alreadySubmitted // tried to call submitRating() when rating exists
+    case noRatingToEdit // tried to call editRating() before any submission
+    case invalidScore // score outside 1–5
+    case productNotFound // product doc missing from Firestore
     case unknown(Error)
 
     var errorDescription: String? {
@@ -81,8 +81,8 @@ extension RatingService {
         AppLog.firestore.debug("🔍 RatingService.checkProofOfPurchase — userId: \(userId), productId: \(productId)")
 
         let snapshot = try await ordersRef()
-            .whereField("userId",     isEqualTo: userId)
-            .whereField("status",     isEqualTo: "Completed")
+            .whereField("userId", isEqualTo: userId)
+            .whereField("status", isEqualTo: "Completed")
             .whereField("productIds", arrayContains: productId)
             .limit(to: 1)
             .getDocuments()
@@ -131,7 +131,7 @@ extension RatingService {
     func fetchReviews(
         productId: String,
         limit: Int = 10,
-        after cursor: DocumentSnapshot? = nil
+        after cursor: Any? = nil
     ) async throws -> (reviews: [Review], lastDocument: DocumentSnapshot?) {
 
         AppLog.firestore.debug("🔍 RatingService.fetchReviews — productId: \(productId), limit: \(limit), hasCursor: \(cursor != nil)")
@@ -141,9 +141,11 @@ extension RatingService {
             .order(by: "createdAt", descending: true)
             .limit(to: limit)
 
-        // Attach pagination cursor for pages beyond the first
-        if let cursor {
-            query = query.start(afterDocument: cursor)
+        // Attach pagination cursor for pages beyond the first.
+        // cursor is typed as Any? so callers (ReviewViewModel) don't need a
+        // FirebaseFirestore import — we safely cast here where it's already imported.
+        if let snapshot = cursor as? DocumentSnapshot {
+            query = query.start(afterDocument: snapshot)
         }
 
         let snapshot = try await query.getDocuments()
@@ -178,11 +180,11 @@ extension RatingService {
     ///   - body:      Optional review text (max 280 chars enforced in UI).
     func submitRating(
         productId: String,
-        userId:    String,
-        userName:  String,
-        orderId:   String,
-        score:     Int,
-        body:      String?
+        userId: String,
+        userName: String,
+        orderId: String,
+        score: Int,
+        body: String?
     ) async throws {
         guard (1...5).contains(score) else {
             AppLog.firestore.error("❌ submitRating — invalid score: \(score)")
@@ -254,11 +256,11 @@ extension RatingService {
         }
 
         let review = Review.create(
-            userId:   userId,
+            userId: userId,
             userName: userName,
-            orderId:  orderId,
-            rating:   score,
-            body:     body
+            orderId: orderId,
+            rating: score,
+            body: body
         )
 
         let reviewRef = reviewsRef(productId: productId).document()
@@ -298,10 +300,10 @@ extension RatingService {
     ///   - newBody:   Updated review text. Pass nil to leave existing text unchanged.
     func editRating(
         productId: String,
-        userId:    String,
-        userName:  String,
-        newScore:  Int,
-        newBody:   String?
+        userId: String,
+        userName: String,
+        newScore: Int,
+        newBody: String?
     ) async throws {
         guard (1...5).contains(newScore) else {
             AppLog.firestore.error("❌ editRating — invalid score: \(newScore)")
@@ -365,7 +367,7 @@ extension RatingService {
         // MARK: Step 3 — Update ratings/{userId}
         let now = Timestamp(date: Date())
         try await ratingRef.updateData([
-            "score":     newScore,
+            "score": newScore,
             "updatedAt": now
         ])
 
@@ -375,7 +377,7 @@ extension RatingService {
         if let reviewId = existing.reviewId {
             let reviewRef = reviewsRef(productId: productId).document(reviewId)
             var reviewUpdate: [String: Any] = [
-                "rating":    newScore,
+                "rating": newScore,
                 "updatedAt": now
             ]
             if let newBody {
@@ -388,11 +390,11 @@ extension RatingService {
         // MARK: Step 5 — No prior review but new body provided → create review now
         } else if let newBody, !newBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let review = Review.create(
-                userId:   userId,
+                userId: userId,
                 userName: userName,
-                orderId:  orderId,
-                rating:   newScore,
-                body:     newBody
+                orderId: orderId,
+                rating: newScore,
+                body: newBody
             )
             let reviewRef = reviewsRef(productId: productId).document()
             try await reviewRef.setData(try Firestore.Encoder().encode(review))
@@ -426,8 +428,8 @@ extension RatingService {
     @discardableResult
     func toggleHelpful(
         productId: String,
-        reviewId:  String,
-        userId:    String
+        reviewId: String,
+        userId: String
     ) async throws -> Bool {
 
         AppLog.firestore.debug("👍 RatingService.toggleHelpful — reviewId: \(reviewId), userId: \(userId)")
@@ -437,14 +439,14 @@ extension RatingService {
 
         try await db.runTransaction { transaction, errorPointer -> Any? in
             do {
-                let snap       = try transaction.getDocument(reviewRef)
-                let helpfulBy  = snap.data()?["helpfulBy"] as? [String] ?? []
-                let alreadyIn  = helpfulBy.contains(userId)
+                let snap = try transaction.getDocument(reviewRef)
+                let helpfulBy = snap.data()?["helpfulBy"] as? [String] ?? []
+                let alreadyIn = helpfulBy.contains(userId)
 
                 if alreadyIn {
                     // Remove: un-helpful
                     transaction.updateData([
-                        "helpfulBy":    FieldValue.arrayRemove([userId]),
+                        "helpfulBy": FieldValue.arrayRemove([userId]),
                         "helpfulCount": FieldValue.increment(Int64(-1))
                     ], forDocument: reviewRef)
                     nowHelpful = false
@@ -452,7 +454,7 @@ extension RatingService {
                 } else {
                     // Add: mark helpful
                     transaction.updateData([
-                        "helpfulBy":    FieldValue.arrayUnion([userId]),
+                        "helpfulBy": FieldValue.arrayUnion([userId]),
                         "helpfulCount": FieldValue.increment(Int64(1))
                     ], forDocument: reviewRef)
                     nowHelpful = true
