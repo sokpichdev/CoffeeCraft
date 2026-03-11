@@ -4,8 +4,14 @@
 //
 //  Created by Sok Pich on 10/20/25.
 //
+//  Sprint 2: Firestore + Auth.auth() removed — all data access goes through
+//  AuthRepositoryProtocol. FCM token handling and UserSession management
+//  stay here as they are not repository concerns.
+//  Performance trace added on login() (auth_login).
+//
 
 import FirebaseAuth
+import FirebaseCrashlytics
 import FirebaseFirestore
 import FirebaseMessaging
 import SwiftUI
@@ -26,129 +32,78 @@ class AuthViewModel: ObservableObject {
     // MARK: - UI State
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
-    // Access user through singleton instead of storing locally
-    var currentUser: User? {
-        return UserSession.shared.currentUser
-    }
-    
-    private let db = Firestore.firestore()
+
+    var currentUser: User? { UserSession.shared.currentUser }
+
+    private let authRepo: AuthRepositoryProtocol
     private var fcmTokenObserver: NSObjectProtocol?
 
-    init() {
+    init(authRepo: AuthRepositoryProtocol = FirebaseAuthRepository()) {
+        self.authRepo = authRepo
         checkUser()
-        
-        // Listen for FCM token updates
+
         fcmTokenObserver = NotificationCenter.default.addObserver(
             forName: Notification.Name("FCMToken"),
             object: nil,
             queue: .main
         ) { notification in
             if let token = notification.userInfo?["token"] as? String {
-                AppLog.auth.debug("🔄 FCM token updated via NotificationCenter: \(token)")
+                AppLog.auth.debug("🔄 FCM token updated: \(token)")
             }
         }
     }
-    
+
     deinit {
         if let observer = fcmTokenObserver {
             NotificationCenter.default.removeObserver(observer)
         }
     }
 
+    // MARK: - Session Restore
+
     func checkUser() {
         isLoading = true
-
-        guard let user = Auth.auth().currentUser else {
-            AppLog.auth.debug("👤 checkUser — no authenticated user found, skipping fetch")
+        // FirebaseAuth.Auth.auth().currentUser is a fast local check — no Firestore call
+        guard let uid = FirebaseAuth.Auth.auth().currentUser?.uid else {
+            AppLog.auth.debug("👤 checkUser — no session, skipping")
             isLoading = false
             return
         }
-
-        AppLog.auth.debug("👤 checkUser — existing session found for uid: \(user.uid)")
-
+        AppLog.auth.debug("👤 checkUser — restoring session for uid: \(uid)")
         Task {
             do {
-                try await fetchUserData(uid: user.uid)
-                AppLog.auth.debug("✅ checkUser — user data fetched successfully")
+                try await fetchUserData(uid: uid)
                 isLoading = false
             } catch {
-                AppLog.auth.error("❌ checkUser — failed to fetch user data: \(error.localizedDescription)")
                 isLoading = false
                 UserSession.shared.clearUser()
-                AlertManager.shared.showError(
-                    title: "Session Error",
-                    message: "Failed to load user data"
-                )
+                AlertManager.shared.showError(title: "Session Error", message: "Failed to load user data")
             }
         }
     }
-    
+
+    // MARK: - Fetch User (shared between restore + login)
+
     func fetchUserData(uid: String, showLoader: Bool = false) async throws {
-        AppLog.auth.debug("🔍 fetchUserData — uid: \(uid), showLoader: \(showLoader)")
-        
-        if showLoader {
-            LoaderManager.shared.showLoading()
-        }
-        
+        AppLog.auth.debug("🔍 fetchUserData — uid: \(uid)")
+        if showLoader { LoaderManager.shared.showLoading() }
+
         do {
-            let snapshot = try await db
-                .collection("users")
-                .document(uid)
-                .getDocument()
-
-            guard let data = snapshot.data() else {
-                AppLog.auth.error("❌ fetchUserData — no data found for uid: \(uid)")
-                if showLoader { LoaderManager.shared.hideLoading() }
-                throw NSError(domain: "UserDataError",
-                              code: 404,
-                              userInfo: [NSLocalizedDescriptionKey: "User data not found"])
-            }
-
-            let name = data["name"] as? String ?? ""
-            let email = data["email"] as? String ?? ""
-            let roleString = data["role"] as? String ?? "customer"
-            let role = UserRole(rawValue: roleString) ?? .customer
-
-            let phoneNumber = data["phoneNumber"] as? String
-            let gender = data["gender"] as? String
-            let city = data["city"] as? String
-
-            var dateOfBirth: Date?
-            if let dobTimestamp = data["dateOfBirth"] as? Timestamp {
-                dateOfBirth = dobTimestamp.dateValue()
-            }
-
-            let user = User(
-                id: uid,
-                name: name,
-                email: email,
-                role: role,
-                phoneNumber: phoneNumber,
-                gender: gender,
-                dateOfBirth: dateOfBirth,
-                city: city
-            )
-
+            let user = try await authRepo.fetchUser(uid: uid)
             UserSession.shared.setUser(user)
             AppLog.printItem(user, label: "Fetched User", logger: AppLog.auth)
-
-            if showLoader {
-                LoaderManager.shared.hideLoading()
-                AlertManager.shared.showSuccess(message: "User data loaded successfully")
-            }
+            if showLoader { LoaderManager.shared.hideLoading() }
         } catch {
-            AppLog.auth.error("❌ fetchUserData — error: \(error.localizedDescription)")
+            AppLog.auth.error("❌ fetchUserData error: \(error.localizedDescription)")
             if showLoader {
                 LoaderManager.shared.hideLoading()
-                AlertManager.shared.showError(
-                    title: "Failed to Load User Data",
-                    message: error.localizedDescription
-                )
+                AlertManager.shared.showError(title: "Failed to Load User Data", message: error.localizedDescription)
             }
             throw error
         }
     }
+
+    // MARK: - Sign Up
 
     func signUp(
         name: String,
@@ -157,162 +112,131 @@ class AuthViewModel: ObservableObject {
         role: UserRole,
         completion: @escaping (Result<User, Error>) -> Void
     ) async {
-        AppLog.auth.debug("📝 signUp — attempting for email: \(email), role: \(role.rawValue)")
+        AppLog.auth.debug("📝 signUp — email: \(email)")
         LoaderManager.shared.showLoading(autoHide: true)
+
         do {
-            let result = try await Auth.auth().createUser(withEmail: email, password: password)
-            let uid = result.user.uid
-            
+            let uid  = try await authRepo.createUser(email: email, password: password)
             let user = User(id: uid, name: name, email: email, role: role)
-            
-            try await db.collection("users").document(uid).setData([
-                "name": name,
-                "email": email,
-                "role": role.rawValue
-            ])
-            
-            await MainActor.run {
-                UserSession.shared.setUser(user)
-            }
-            
-            AppLog.auth.debug("✅ signUp — success, uid: \(uid), email: \(email)")
-            AppLog.printItem(user, label: "Signed Up User", logger: AppLog.auth)
-            
+            try await authRepo.saveUser(user, uid: uid)
+
+            UserSession.shared.setUser(user)
+            AnalyticsService.shared.log(.signup)
+
+            AppLog.auth.debug("✅ signUp — uid: \(uid)")
             completion(.success(user))
             LoaderManager.shared.hideLoading()
             ToastManager.shared.show(message: "Signed Up Successfully", type: .success)
         } catch {
-            AppLog.auth.error("❌ signUp — failed for email: \(email): \(error.localizedDescription)")
+            Crashlytics.crashlytics().record(error: error)
+            AppLog.auth.error("❌ signUp failed: \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             AlertManager.shared.showError(title: "Sign Up Error", message: error.localizedDescription)
             completion(.failure(error))
         }
     }
-    
+
+    // MARK: - Login
+
     func login(email: String, password: String) async -> Bool {
-        AppLog.auth.debug("🔐 login — attempting for email: \(email)")
-        
+        AppLog.auth.debug("🔐 login — email: \(email)")
+        isLoading = true
+        LoaderManager.shared.showLoading()
+
         do {
-            isLoading = true
-            LoaderManager.shared.showLoading()
-
-            let result = try await Auth.auth().signIn(withEmail: email, password: password)
-
-            AppLog.auth.debug("✅ login — Firebase sign-in success, uid: \(result.user.uid)")
-            
+            let uid = try await PerformanceService.shared.trace(.authLogin) {
+                try await authRepo.signIn(email: email, password: password)
+            }
+            AppLog.auth.debug("✅ Firebase sign-in success, uid: \(uid)")
             handleSuccessfulLogin()
-            try await fetchUserData(uid: result.user.uid)
+            try await fetchUserData(uid: uid)
             try await MinimumLoadingTime(2).waitIfNeeded()
-            
+
             LoaderManager.shared.hideLoading()
             isLoading = false
-
-            AppLog.auth.debug("✅ login — fully completed for uid: \(result.user.uid)")
+            AnalyticsService.shared.log(.login(method: "email"))
             AlertManager.shared.showSuccess(message: "Logged in successfully")
             return true
         } catch {
-            AppLog.auth.error("❌ login — failed for email: \(email): \(error.localizedDescription)")
+            Crashlytics.crashlytics().record(error: error)
+            AppLog.auth.error("❌ login failed: \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             isLoading = false
-            AlertManager.shared.showError(
-                title: "Login Error",
-                message: error.localizedDescription
-            )
+            AlertManager.shared.showError(title: "Login Error", message: error.localizedDescription)
             return false
         }
     }
 
     func handleSuccessfulLogin() {
-        AppLog.auth.debug("🔑 handleSuccessfulLogin — requesting FCM token")
-        
         Messaging.messaging().token { token, error in
-            if let error = error {
-                AppLog.auth.error("❌ handleSuccessfulLogin — FCM token fetch failed: \(error.localizedDescription)")
-            } else if let token = token {
-                AppLog.auth.debug("🔑 handleSuccessfulLogin — FCM token retrieved: \(token)")
+            if let error {
+                AppLog.auth.error("❌ FCM token fetch failed: \(error.localizedDescription)")
+            } else if let token {
                 FCMTokenService.shared.saveFCMToken(token)
             }
         }
     }
-    
+
+    // MARK: - Password Reset
+
     func sendPasswordReset(email: String) async throws {
-        AppLog.auth.debug("📧 sendPasswordReset — sending to: \(email)")
+        AppLog.auth.debug("📧 sendPasswordReset — \(email)")
         do {
-            try await Auth.auth().sendPasswordReset(withEmail: email)
-            AppLog.auth.debug("✅ sendPasswordReset — email sent to: \(email)")
+            try await authRepo.sendPasswordReset(email: email)
+            AppLog.auth.debug("✅ Password reset email sent to: \(email)")
         } catch {
-            AppLog.auth.error("❌ sendPasswordReset — failed for \(email): \(error.localizedDescription)")
+            AppLog.auth.error("❌ sendPasswordReset failed: \(error.localizedDescription)")
             throw error
         }
     }
-    
+
+    // MARK: - Logout
+
     func logout(onResult: @escaping (Bool) -> Void) {
         AppLog.auth.debug("🚪 logout — attempting sign out")
-
         Task {
-            // ✅ AWAIT token removal BEFORE signing out.
-            // removeFCMToken() is async — if we don't await it,
-            // Auth.signOut() fires first and the Firestore write
-            // never completes, leaving the old token in the
-            // previous user's document.
             await FCMTokenService.shared.removeFCMToken()
-
             do {
-                try Auth.auth().signOut()
+                try authRepo.signOut()
                 UserSession.shared.clearUser()
-                AppLog.auth.debug("✅ logout — token removed, sign out successful")
+                AnalyticsService.shared.log(.logout)
+                AppLog.auth.debug("✅ logout — successful")
                 onResult(true)
-            } catch let error as NSError {
-                AppLog.auth.error("❌ logout — sign out failed: \(error.localizedDescription)")
+            } catch {
+                Crashlytics.crashlytics().record(error: error)
+                AppLog.auth.error("❌ logout failed: \(error.localizedDescription)")
                 AlertManager.shared.showError(title: "Error signing out", message: error.localizedDescription)
                 onResult(false)
             }
         }
     }
-    
+
+    // MARK: - Update Profile
+
     func updateProfile(user: User) async -> Bool {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            AppLog.auth.error("❌ updateProfile — no authenticated user found")
+        guard let uid = FirebaseAuth.Auth.auth().currentUser?.uid else {
+            AppLog.auth.error("❌ updateProfile — no authenticated user")
             return false
         }
-
-        AppLog.auth.debug("✏️ updateProfile — updating uid: \(uid)")
-        AppLog.printItem(user, label: "Profile Update Payload", logger: AppLog.auth)
-
+        AppLog.auth.debug("✏️ updateProfile — uid: \(uid)")
         do {
             LoaderManager.shared.showLoading()
-
-            var data: [String: Any] = [
-                "name": user.name,
-                "email": user.email
-            ]
-
-            if let phone = user.phoneNumber { data["phoneNumber"] = phone }
-            if let gender = user.gender { data["gender"] = gender }
-            if let dob = user.dateOfBirth { data["dateOfBirth"] = Timestamp(date: dob) }
-            if let city = user.city { data["city"] = city }
-
-            try await db
-                .collection("users")
-                .document(uid)
-                .setData(data, merge: true)
-
+            try await authRepo.updateUser(user, uid: uid)
             try await fetchUserData(uid: uid)
-
             LoaderManager.shared.hideLoading()
-            AppLog.auth.debug("✅ updateProfile — profile updated successfully for uid: \(uid)")
+            AppLog.auth.debug("✅ updateProfile — success")
             return true
         } catch {
-            AppLog.auth.error("❌ updateProfile — failed for uid: \(uid): \(error.localizedDescription)")
+            Crashlytics.crashlytics().record(error: error)
+            AppLog.auth.error("❌ updateProfile failed: \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
-            AlertManager.shared.showError(
-                title: "Update Failed",
-                message: error.localizedDescription
-            )
+            AlertManager.shared.showError(title: "Update Failed", message: error.localizedDescription)
             return false
         }
     }
 }
+
+// MARK: - Form Validation (unchanged)
 
 extension AuthViewModel {
 
@@ -340,15 +264,14 @@ extension AuthViewModel {
         } else if !password.containsNumber() {
             passwordValidation = .init(isValid: false, message: "Password must contain at least one number")
         } else if !password.containsSpecialCharacter() {
-            passwordValidation = .init(isValid: false,
-                                       message: "Password must contain at least one special character (!@#$%^&*)")
+            passwordValidation = .init(isValid: false, message: "Password must contain at least one special character (!@#$%^&*)")
         } else if password.contains(" ") {
             passwordValidation = .init(isValid: false, message: "Password cannot contain spaces")
         } else {
             passwordValidation = .init()
         }
     }
-    
+
     func validatePassword() {
         if password.isEmpty {
             passwordValidation = .init(isValid: false, message: "Password is required")
@@ -362,7 +285,7 @@ extension AuthViewModel {
             passwordValidation = .init()
         }
     }
-    
+
     func checkUsername() {
         if name.isEmpty {
             nameValidation = .init(isValid: false, message: "Name cannot be empty")
@@ -387,15 +310,11 @@ extension AuthViewModel {
         checkUsername()
         validateEmail()
         validatePassword()
-        return nameValidation.isValid &&
-               emailValidation.isValid &&
-               passwordValidation.isValid
+        return nameValidation.isValid && emailValidation.isValid && passwordValidation.isValid
     }
-    
+
     func resetForm(isResetEmail: Bool = false) {
-        if isResetEmail {
-            email = ""
-        }
+        if isResetEmail { email = "" }
         password = ""
         name = ""
         role = .customer

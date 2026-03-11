@@ -3,7 +3,9 @@ import FirebaseFirestore
 //  ProductViewModel.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 10/20/25.
+//  Sprint 2: Firestore removed — all data access goes through ProductRepositoryProtocol.
+//  Inject FirestoreProductRepository in production; MockProductRepository in tests.
+//  Performance trace added on fetchProducts() (menu_fetch).
 //
 import Foundation
 
@@ -13,27 +15,28 @@ class ProductViewModel: ObservableObject {
     @Published var sections: [SectionData] = []
     @Published var isLoading = false
 
-    private let db = Firestore.firestore()
-    private var listener: ListenerRegistration?
+    private let repository: ProductRepositoryProtocol
+    private var cancelListener: (() -> Void)?
+
+    init(repository: ProductRepositoryProtocol = FirestoreProductRepository()) {
+        self.repository = repository
+    }
 
     deinit {
-        listener?.remove()
+        cancelListener?()
     }
 
     // MARK: - Fetch Once
+
     func fetchProducts() async {
         isLoading = true
-        
         AppLog.menu.debug("📡 Fetching all products...")
-        
+
         do {
-            let snapshot = try await db.collection("products").getDocuments()
-            products = snapshot.documents.map { doc in
-                parseProduct(doc: doc)
+            products = try await PerformanceService.shared.trace(.menuFetch) {
+                try await repository.fetchAll()
             }
-            
             AppLog.printList(products, label: "Products", logger: AppLog.menu)
-            
             computeSections()
             try await MinimumLoadingTime(0.2).waitIfNeeded()
         } catch {
@@ -44,135 +47,81 @@ class ProductViewModel: ObservableObject {
     }
 
     // MARK: - Listen for real-time updates
+
     func listenProducts() {
-        guard listener == nil else {
+        guard cancelListener == nil else {
             AppLog.menu.debug("👂 listenProducts — already active, skipping")
             return
         }
-        
+
         AppLog.menu.debug("👂 Starting real-time listener for products...")
         isLoading = true
-        
-        listener = db.collection("products")
-            .order(by: "category")
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    AppLog.menu.error("❌ Listener error: \(error.localizedDescription)")
-                    LoaderManager.shared.hideLoading()
-                    AlertManager.shared.showError(message: error.localizedDescription)
-                    return
-                }
-                
-                guard let docs = snapshot?.documents else {
-                    AppLog.menu.warning("⚠️ Snapshot is nil or has no documents")
-                    return
-                }
 
-                self.products = docs.compactMap { self.parseProduct(doc: $0) }
-                
-                AppLog.menu.debug("✅ Listener received \(docs.count) product(s), decoded \(self.products.count)")
-                AppLog.printList(self.products, label: "Products (Live)", logger: AppLog.menu)
-                
-                self.computeSections()
-                isLoading  = false
-            }
+        cancelListener = repository.listen { [weak self] products in
+            guard let self else { return }
+            self.products = products
+            AppLog.menu.debug("✅ Listener received \(products.count) product(s)")
+            AppLog.printList(products, label: "Products (Live)", logger: AppLog.menu)
+            self.computeSections()
+            self.isLoading = false
+        }
     }
 
     // MARK: - Refresh
+
     func refreshProducts() async {
         AppLog.menu.debug("🔄 Refreshing products — re-attaching listener")
-        listener?.remove()
-        listener = nil
+        cancelListener?()
+        cancelListener = nil
         products = []
         sections = []
-
-        // listenProducts() is sufficient on its own — Firestore fires the first
-        // snapshot immediately on attach with the current collection state.
-        // Calling fetchProducts() here too would download the same data twice.
         listenProducts()
     }
 
-    // MARK: - Parse Product
-    private func parseProduct(doc: QueryDocumentSnapshot) -> Product {
-        let data = doc.data()
-        let product = Product(
-            id: doc.documentID,
-            name: data["name"] as? String ?? "",
-            description: data["description"] as? String ?? "",
-            price: data["price"] as? Double ?? 0.0,
-            imageURL: data["imageURL"] as? String ?? "",
-            category: data["category"] as? String ?? "Others",
-            available: data["available"] as? Bool ?? true,
-            customizations: data["customizations"] as? [String: [String: Double]] ?? [:],
-            avgRating: data["avgRating"] as? Double,
-            ratingCount: data["ratingCount"] as? Int,
-            ratingDistribution: data["ratingDistribution"] as? [String: Int]
-        )
-        return product
-    }
-
     // MARK: - Compute Sections
+
     func computeSections() {
         sections = Dictionary(grouping: products, by: { $0.category })
-            .map { category, items in
-                SectionData(name: category, items: items)
-            }
+            .map { category, items in SectionData(name: category, items: items) }
             .sorted { $0.name < $1.name }
-        
         AppLog.menu.debug("📂 Computed \(self.sections.count) section(s): \(self.sections.map { $0.name }.joined(separator: ", "))")
     }
 
     // MARK: - Save Product (Create / Update)
+
     func saveProduct(_ product: Product) async {
-        let isNewProduct = product.id.isEmpty
+        let isNew = product.id.isEmpty
         var productToSave = product
 
-        if isNewProduct {
+        if isNew {
             productToSave.id = productToSave.name.generateProductID()
-            AppLog.menu.debug("📡 Creating new product: \(productToSave.name) with id: \(productToSave.id)")
+            AppLog.menu.debug("📡 Creating product: \(productToSave.name) id: \(productToSave.id)")
         } else {
-            AppLog.menu.debug("📡 Updating product: \(productToSave.name) with id: \(productToSave.id)")
+            AppLog.menu.debug("📡 Updating product: \(productToSave.name) id: \(productToSave.id)")
         }
 
-        let data: [String: Any] = [
-            "name": productToSave.name,
-            "description": productToSave.description,
-            "price": productToSave.price,
-            "imageURL": productToSave.imageURL,
-            "category": productToSave.category,
-            "available": productToSave.available,
-            "customizations": productToSave.customizations ?? [:]
-        ]
-
         do {
-            try await db.collection("products")
-                .document(productToSave.id)
-                .setData(data)
-
+            try await repository.save(productToSave)
             if let index = products.firstIndex(where: { $0.id == productToSave.id }) {
                 products[index] = productToSave
-                AppLog.menu.debug("✅ Product updated locally: \(productToSave.name)")
             } else {
                 products.append(productToSave)
-                AppLog.menu.debug("✅ Product added locally: \(productToSave.name)")
             }
             computeSections()
+            AppLog.menu.debug("✅ Product saved: \(productToSave.name)")
         } catch {
             AppLog.menu.error("❌ Failed to save product \(productToSave.name): \(error.localizedDescription)")
         }
     }
 
     // MARK: - Delete Product
+
     func deleteProduct(_ product: Product) async {
         AppLog.menu.debug("📡 Deleting product: \(product.name) id: \(product.id)")
         do {
-            try await db.collection("products").document(product.id).delete()
-            if let index = products.firstIndex(of: product) {
-                products.remove(at: index)
-                computeSections()
-            }
+            try await repository.delete(product)
+            products.removeAll { $0.id == product.id }
+            computeSections()
             AppLog.menu.debug("✅ Product deleted: \(product.name)")
         } catch {
             AppLog.menu.error("❌ Failed to delete product \(product.name): \(error.localizedDescription)")
@@ -180,10 +129,11 @@ class ProductViewModel: ObservableObject {
     }
 
     // MARK: - Mark Unavailable
+
     func markUnavailable(_ product: Product) async {
-        AppLog.menu.debug("📡 Marking product unavailable: \(product.name)")
+        AppLog.menu.debug("📡 Marking unavailable: \(product.name)")
         do {
-            try await db.collection("products").document(product.id).updateData(["available": false])
+            try await repository.markUnavailable(product)
             if let index = products.firstIndex(of: product) {
                 products[index].available = false
                 computeSections()

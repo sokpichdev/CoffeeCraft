@@ -32,6 +32,12 @@ class CartManager: ObservableObject {
     func addToCart(userId: String, product: Product, selections: [String: String], extras: [String], quantity: Int) {
         let item = CartItem(id: UUID(), product: product, selections: selections, extras: extras, quantity: quantity)
         items.append(item)
+        AnalyticsService.shared.log(.addToCart(
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            category: product.category
+        ))
         saveCartToFirestore(userId: userId) {
             ToastManager.shared.show(message: "Your cart was added successfully", type: .success)
         }
@@ -39,6 +45,10 @@ class CartManager: ObservableObject {
 
     func removeFromCart(userId: String, item: CartItem) {
         items.removeAll { $0.id == item.id }
+        AnalyticsService.shared.log(.removeFromCart(
+            id: item.product.id,
+            name: item.product.name
+        ))
         saveCartToFirestore(userId: userId) {
             ToastManager.shared.show(message: "Your cart was removed successfully", type: .success)
         }

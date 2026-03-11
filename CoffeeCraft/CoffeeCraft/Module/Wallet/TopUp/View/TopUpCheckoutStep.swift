@@ -144,6 +144,12 @@ struct TopUpCheckoutStep: View {
 
     @MainActor
     private func pay() async {
+        guard NetworkMonitor.shared.isConnected else {
+            AlertManager.shared.showNoInternet()
+            AppLog.order.warning("⚠️ Topup blocked — device is offline")
+            return
+        }
+    
         guard let userId = UserSession.shared.userId else {
             AlertManager.shared.showError(message: WalletError.userNotAuthenticated.localizedDescription)
             return

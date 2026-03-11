@@ -6,6 +6,7 @@
 //
 
 import Combine
+import FirebaseCrashlytics
 import Foundation
 
 class UserSession: ObservableObject {
@@ -27,12 +28,26 @@ class UserSession: ObservableObject {
     func setUser(_ user: User) {
         self.currentUser = user
         self.isLoggedIn = true
+
+        // Crashlytics — user id + role key appear on every crash report
+        Crashlytics.crashlytics().setUserID(user.id)
+        Crashlytics.crashlytics().setCustomValue(user.role.rawValue, forKey: "user_role")
+
+        // Analytics — id + role property attached to all subsequent events
+        AnalyticsService.shared.setUser(id: user.id, role: user.role.rawValue)
+
+        AppLog.auth.debug("👤 UserSession.setUser — identity set for uid: \(user.id)")
     }
     
     /// Clear the current user and update login status
     func clearUser() {
         self.currentUser = nil
         self.isLoggedIn = false
+
+        Crashlytics.crashlytics().setUserID("")
+        AnalyticsService.shared.clearUser()
+
+        AppLog.auth.debug("👤 UserSession.clearUser — Crashlytics + Analytics identity cleared")
     }
     
     /// Update user information
