@@ -1,4 +1,5 @@
 import FirebaseAuth
+import FirebaseCrashlytics
 import FirebaseFirestore
 //
 //  OrderService.swift
@@ -24,9 +25,28 @@ class OrderService: ObservableObject {
         onSuccess: (() async -> Void)? = nil
     ) {
         Task {
+            // Block order placement while offline — Firestore would queue the
+            // write silently, risking duplicate submissions on reconnect.
+            guard NetworkMonitor.shared.isConnected else {
+                AlertManager.shared.showError(
+                    title: "No Connection",
+                    message: "Please check your internet connection and try again."
+                )
+                AppLog.order.warning("⚠️ placeOrder blocked — device is offline")
+                return
+            }
+
             LoaderManager.shared.showLoading()
 
             AppLog.order.info("Placing order — items: \(cartItems.count), total: \(total), payment: \(paymentMethod.rawValue)")
+
+            // Analytics — begin_checkout fires before the async work so we
+            // capture intent even if the order ultimately fails.
+            AnalyticsService.shared.log(.beginCheckout(
+                total: total,
+                itemCount: cartItems.count,
+                paymentMethod: paymentMethod.rawValue
+            ))
 
             do {
                 let userId = try getUserId()
@@ -57,10 +77,11 @@ class OrderService: ObservableObject {
                     orderId: formattedOrderId
                 )
 
-                try await finalizeSuccess(orderNumber: orderNumber)
+                try await finalizeSuccess(orderNumber: orderNumber, total: total, paymentMethod: paymentMethod)
 
                 await onSuccess?()
             } catch {
+                Crashlytics.crashlytics().record(error: error)
                 LoaderManager.shared.hideLoading()
                 AppLog.order.error("Order failed: \(error.localizedDescription)")
                 AlertManager.shared.showError(title: "Order failed", message: error.localizedDescription)
@@ -209,9 +230,16 @@ class OrderService: ObservableObject {
         }
     }
 
-    private func finalizeSuccess(orderNumber: Int) async throws {
+    private func finalizeSuccess(orderNumber: Int, total: Double, paymentMethod: PaymentMethod) async throws {
 
         AppLog.order.info("Order saved: #\(orderNumber)")
+
+        // Analytics — purchase event with the confirmed order id and total
+        AnalyticsService.shared.log(.purchase(
+            orderId: String(orderNumber),
+            total: total,
+            paymentMethod: paymentMethod.rawValue
+        ))
 
         try await MinimumLoadingTime(2.0).waitIfNeeded()
 

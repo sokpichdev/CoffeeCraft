@@ -6,6 +6,7 @@
 //
 
 import FirebaseAuth
+import FirebaseCrashlytics
 import FirebaseFirestore
 import FirebaseMessaging
 import SwiftUI
@@ -177,11 +178,12 @@ class AuthViewModel: ObservableObject {
             
             AppLog.auth.debug("✅ signUp — success, uid: \(uid), email: \(email)")
             AppLog.printItem(user, label: "Signed Up User", logger: AppLog.auth)
-            
+            AnalyticsService.shared.log(.signup)
             completion(.success(user))
             LoaderManager.shared.hideLoading()
             ToastManager.shared.show(message: "Signed Up Successfully", type: .success)
         } catch {
+            Crashlytics.crashlytics().record(error: error)
             AppLog.auth.error("❌ signUp — failed for email: \(email): \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             AlertManager.shared.showError(title: "Sign Up Error", message: error.localizedDescription)
@@ -208,9 +210,11 @@ class AuthViewModel: ObservableObject {
             isLoading = false
 
             AppLog.auth.debug("✅ login — fully completed for uid: \(result.user.uid)")
+            AnalyticsService.shared.log(.login(method: "email"))
             AlertManager.shared.showSuccess(message: "Logged in successfully")
             return true
         } catch {
+            Crashlytics.crashlytics().record(error: error)
             AppLog.auth.error("❌ login — failed for email: \(email): \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             isLoading = false
@@ -260,9 +264,11 @@ class AuthViewModel: ObservableObject {
             do {
                 try Auth.auth().signOut()
                 UserSession.shared.clearUser()
+                AnalyticsService.shared.log(.logout)
                 AppLog.auth.debug("✅ logout — token removed, sign out successful")
                 onResult(true)
             } catch let error as NSError {
+                Crashlytics.crashlytics().record(error: error)
                 AppLog.auth.error("❌ logout — sign out failed: \(error.localizedDescription)")
                 AlertManager.shared.showError(title: "Error signing out", message: error.localizedDescription)
                 onResult(false)
@@ -303,6 +309,7 @@ class AuthViewModel: ObservableObject {
             AppLog.auth.debug("✅ updateProfile — profile updated successfully for uid: \(uid)")
             return true
         } catch {
+            Crashlytics.crashlytics().record(error: error)
             AppLog.auth.error("❌ updateProfile — failed for uid: \(uid): \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
             AlertManager.shared.showError(
