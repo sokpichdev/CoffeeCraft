@@ -64,5 +64,6 @@ struct CustomNavigationStack<Content: View>: View {
         .withLoaderManager()
         .withLowerToastManager()
         .withUpperToastManager()
+        .offlineBanner()
     }
 }

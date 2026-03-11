@@ -106,6 +106,5 @@ struct RootView: View {
                                                 message: "Your connection has been restored.")
             }
         }
-        .offlineBanner()
     }
 }
