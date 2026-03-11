@@ -219,10 +219,14 @@ extension AppDelegate {
     /// previously-fetched data while offline. Writes made offline are queued
     /// and flushed automatically when connectivity is restored.
     private func configureFirestorePersistence() {
+        // persistent cache (disk + offline persistence)
+        let persistentCache = PersistentCacheSettings(sizeBytes: 200 * 1024 * 1024 as NSNumber)
+        
         let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
-        settings.cacheSizeBytes = 200 * 1024 * 1024 // 200 MB
+        settings.cacheSettings = persistentCache
+
         Firestore.firestore().settings = settings
+
         AppLog.firestore.debug("💾 Firestore persistence enabled (200 MB cache)")
     }
 
