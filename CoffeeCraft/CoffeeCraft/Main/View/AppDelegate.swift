@@ -1,11 +1,21 @@
-import FirebaseCore
-import FirebaseMessaging
 //
 //  AppDelegate.swift
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 2/5/26.
 //
+//  Sprint 1 additions:
+//    • Crashlytics — enabled for SIT / UAT / Prod; disabled in Dev
+//    • Firestore offline persistence — 200 MB disk cache
+//    • SDWebImage — memory + disk cache limits, scale-down large images,
+//                   memory-warning flush
+//
+
+import FirebaseCore
+import FirebaseCrashlytics
+import FirebaseFirestore
+import FirebaseMessaging
+import SDWebImage
 import UIKit
 import UserNotifications
 
@@ -18,8 +28,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         // Configure Firebase
         configureFirebase(for: currentEnv)
-        
-        // Setup notifications
+
+        // Crashlytics — collect in all envs except Dev
+        configureCrashlytics()
+
+        // Firestore offline persistence
+        configureFirestorePersistence()
+
+        // SDWebImage caching
+        configureImageCache(application)
+
+        // Push notifications
         setupNotifications(application)
         
         return true
@@ -126,7 +145,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 userInfo: ["orderId": orderId]
             )
         }
-        
         completionHandler()
     }
 }
@@ -180,5 +198,67 @@ extension AppDelegate {
         
         FirebaseApp.configure(options: options)
         AppLog.firestore.debug("Firebase configured for \(env) with bundle ID: \(options.bundleID)")
+    }
+}
+
+extension AppDelegate {
+
+    // MARK: Crashlytics
+
+    /// Enables crash collection for SIT / UAT / Prod.
+    /// Disabled in Dev so local crashes stay in Xcode, not the Firebase console.
+    private func configureCrashlytics() {
+        let enabled = currentEnv != .dev
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(enabled)
+        AppLog.firestore.debug("🔥 Crashlytics collection \(enabled ? "enabled" : "disabled") for env: \(self.currentEnv)")
+    }
+
+    // MARK: Firestore Persistence
+
+    /// Turns on Firestore's built-in local disk cache so the app can display
+    /// previously-fetched data while offline. Writes made offline are queued
+    /// and flushed automatically when connectivity is restored.
+    private func configureFirestorePersistence() {
+        // persistent cache (disk + offline persistence)
+        let persistentCache = PersistentCacheSettings(sizeBytes: 200 * 1024 * 1024 as NSNumber)
+        
+        let settings = FirestoreSettings()
+        settings.cacheSettings = persistentCache
+
+        Firestore.firestore().settings = settings
+
+        AppLog.firestore.debug("💾 Firestore persistence enabled (200 MB cache)")
+    }
+
+    // MARK: SDWebImage Cache
+
+    /// Caps in-memory cache at 50 MB and on-disk cache at 200 MB / 7 days.
+    /// Large images are scaled down at decode time, reducing RAM pressure.
+    /// The memory cache is flushed on OS memory-pressure warnings.
+    private func configureImageCache(_ application: UIApplication) {
+        SDImageCache.shared.config.maxMemoryCost = 50  * 1024 * 1024   // 50 MB
+        SDImageCache.shared.config.maxDiskSize = 200 * 1024 * 1024   // 200 MB
+        SDImageCache.shared.config.maxDiskAge = 7 * 24 * 60 * 60    // 7 days
+//        SDImageCache.shared.config.shouldDecompressImages = true
+
+        SDWebImageManager.shared.optionsProcessor =
+            SDWebImageOptionsProcessor { _, options, context in
+                var mutableOptions = options
+                mutableOptions.insert(.scaleDownLargeImages)  // thumbnail-safe
+                mutableOptions.insert(.retryFailed)           // retry once on transient error
+                return SDWebImageOptionsResult(options: mutableOptions, context: context)
+            }
+
+        // Flush in-memory cache under OS memory pressure
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            SDImageCache.shared.clearMemory()
+            AppLog.firestore.warning("⚠️ Memory warning — SDWebImage memory cache cleared")
+        }
+
+        AppLog.firestore.debug("🖼️ SDWebImage cache configured (50 MB RAM / 200 MB disk / 7d TTL)")
     }
 }

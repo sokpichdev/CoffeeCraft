@@ -149,6 +149,11 @@ class OrderDetailViewModel: ObservableObject {
     }
     
     func updateOrderStatus(to status: String) async {
+        guard NetworkMonitor.shared.isConnected else {
+            AlertManager.shared.showNoInternet()
+            AppLog.order.warning("⚠️ updateOrderStatus blocked — device is offline")
+            return
+        }
         guard let orderId = order.id else { return }
         isUpdatingStatus = true
         defer { isUpdatingStatus = false }
