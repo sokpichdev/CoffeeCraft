@@ -99,14 +99,13 @@ struct RootView: View {
             selectedTab = .orders
         }
         .onChange(of: NetworkMonitor.shared.isConnected) { _, isConnected in
-            guard !AlertManager.shared.showAlert else { return }
-            if !isConnected {
-                AlertManager.shared.showWarning(title: "No Internet",
-                                                message: "You're offline. Some features may not be available.")
-            } else {
+            // The OfflineBannerModifier handles the offline state visually.
+            // We only show an alert when the connection is restored so the user knows their queued actions will now complete.
+            if isConnected {
                 AlertManager.shared.showSuccess(title: "Back Online",
                                                 message: "Your connection has been restored.")
             }
         }
+        .offlineBanner()
     }
 }
