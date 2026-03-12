@@ -67,8 +67,19 @@ struct LiveOrderItem: Identifiable {
     let timestamp: Date
     let itemCount: Int
 
-    var timeAgo: String { timestamp.timeAgoShort }
     var totalFormatted: String { totalPrice.asCurrency }
+
+    /// Returns a human-readable relative time string relative to `now`.
+    /// Pass the view's current tick date so SwiftUI re-renders correctly
+    /// as time passes, rather than computing once and freezing.
+    func timeAgo(relativeTo now: Date = Date()) -> String {
+        let diff = now.timeIntervalSince(timestamp)
+        if diff < 60 { return "Just now" }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short          // "5 min. ago", "2 hr. ago"
+        formatter.dateTimeStyle = .named       // prefers "yesterday" over "-1 day"
+        return formatter.localizedString(for: timestamp, relativeTo: now)
+    }
 }
 
 // MARK: - KPI Period Selector
@@ -88,14 +99,5 @@ private extension Double {
         formatter.currencySymbol = "$"
         formatter.maximumFractionDigits = 2
         return formatter.string(from: NSNumber(value: self)) ?? "$0.00"
-    }
-}
-
-private extension Date {
-    var timeAgoShort: String {
-        let diff = Int(Date().timeIntervalSince(self))
-        if diff < 60 { return "\(diff)s ago" }
-        if diff < 3600 { return "\(diff / 60)m ago" }
-        return "\(diff / 3600)h ago"
     }
 }
