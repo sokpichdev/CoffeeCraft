@@ -17,6 +17,7 @@
 //    3. Call AnalyticsService.shared.log(.yourEvent(...)) at the call site.
 //
 
+import Firebase
 import FirebaseAnalytics
 import Foundation
 
@@ -125,6 +126,7 @@ enum AnalyticsEvent {
 final class AnalyticsService {
 
     static let shared = AnalyticsService()
+    let db = Firestore.firestore()
     private init() {}
 
     // MARK: - Public API
