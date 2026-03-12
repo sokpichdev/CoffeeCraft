@@ -88,7 +88,7 @@ struct CartView: View {
             .customNavigationBar("My Cart") {
                 ToolBarButton.back { dismiss() }
             }
-            .task { await productVM.fetchProducts() }
+//            .task { await productVM.fetchProducts() }
         }
         .applyApiUIComponents()
     }
