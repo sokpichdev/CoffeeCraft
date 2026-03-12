@@ -36,11 +36,7 @@ struct CoffeeCraftApp: App {
                     // Color.accentPrimary / Color.bgPrimary etc. re-evaluate.
                     .id(themeManager.palette.rawValue)
             }
-            .withAlertManager()
-            .withLoaderManager()
-            .withLowerToastManager()
-            .withUpperToastManager()
-            .offlineBanner()
+            .applyApiUIComponents()
         }
     }
 }
