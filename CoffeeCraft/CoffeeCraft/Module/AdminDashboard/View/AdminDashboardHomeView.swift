@@ -22,6 +22,7 @@ struct AdminDashboardHomeView: View {
                 headerSection
                 revenuePeriodPicker
                 kpiGrid
+                quickLinksSection
                 liveActivitySection
 
             }
@@ -246,6 +247,31 @@ struct AdminDashboardHomeView: View {
         )
     }
 
+    private var quickLinksSection: some View {
+        VStack(spacing: 0) {
+            NavigationLink(destination: SalesAnalyticsView()) {
+                HStack {
+                    Image(systemName: "chart.xyaxis.line")
+                        .font(.subheadline)
+                        .foregroundColor(.accentPrimary)
+                        .frame(width: 28)
+                    Text("Sales Analytics")
+                        .font(.subheadline)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+            }
+            Divider().padding(.leading, 16 + 28 + 8)
+     
+            // Future: Product Performance, User Management links go here
+        }
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+    
     // MARK: - Activity List (paginated)
 
     private var activityList: some View {
