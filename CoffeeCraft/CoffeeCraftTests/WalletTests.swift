@@ -5,8 +5,8 @@
 //  Comprehensive unit tests for Wallet model and PaymentMethod enum
 //
 
-import XCTest
 @testable import CoffeeCraft
+import XCTest
 
 final class WalletTests: XCTestCase {
     

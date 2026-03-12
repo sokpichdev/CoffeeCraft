@@ -7,8 +7,8 @@
 //  Comprehensive unit tests for the CartItem model and price calculations
 //
 
-import XCTest
 @testable import CoffeeCraft
+import XCTest
 
 final class CartItemTests: XCTestCase {
     

@@ -7,8 +7,8 @@
 //  Comprehensive unit tests for the Product model
 //
 
-import XCTest
 @testable import CoffeeCraft
+import XCTest
 
 final class ProductTests: XCTestCase {
     

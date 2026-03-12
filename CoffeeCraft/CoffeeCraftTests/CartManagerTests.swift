@@ -7,8 +7,8 @@
 //  Comprehensive unit tests for CartManager ViewModel
 //
 
-import XCTest
 @testable import CoffeeCraft
+import XCTest
 
 @MainActor
 final class CartManagerTests: XCTestCase {
