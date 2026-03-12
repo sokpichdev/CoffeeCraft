@@ -112,3 +112,20 @@ extension View {
         }
     }
 }
+
+extension View {
+    func applyApiUIComponents() -> some View {
+        modifier(ApiUIComponent())
+    }
+}
+struct ApiUIComponent: ViewModifier {
+    
+    func body(content: Content) -> some View {
+        content
+            .withAlertManager()
+            .withLoaderManager()
+            .withLowerToastManager()
+            .withUpperToastManager()
+            .offlineBanner()
+    }
+}

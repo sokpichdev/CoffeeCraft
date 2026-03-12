@@ -90,6 +90,7 @@ struct CartView: View {
             }
             .task { await productVM.fetchProducts() }
         }
+        .applyApiUIComponents()
     }
 
     // MARK: - Payment Toggle
