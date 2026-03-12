@@ -32,14 +32,14 @@ final class DashboardHomeViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    @Published var summary:        DashboardSummary?
+    @Published var summary: DashboardSummary?
     @Published var selectedPeriod: DashboardPeriod = .today
-    @Published var isLoading:      Bool = false
-    @Published var isLoadingMore:  Bool = false
-    @Published var hasMorePages:   Bool = true
+    @Published var isLoading: Bool = false
+    @Published var isLoadingMore: Bool = false
+    @Published var hasMorePages: Bool = true
 
     /// Top-10 from the real-time listener (always newest).
-    @Published private(set) var liveItems:       [LiveOrderItem] = []
+    @Published private(set) var liveItems: [LiveOrderItem] = []
     /// Cursor-paginated older history (page 2+).
     @Published private(set) var historicalItems: [LiveOrderItem] = []
 
@@ -52,7 +52,7 @@ final class DashboardHomeViewModel: ObservableObject {
 
     // MARK: - Private
 
-    private let service  = AnalyticsService.shared
+    private let service = AnalyticsService.shared
     private let pageSize = 10
     private var liveListener: ListenerRegistration?
 
@@ -65,9 +65,9 @@ final class DashboardHomeViewModel: ObservableObject {
     var displayRevenue: String {
         guard let summary else { return "$0.00" }
         switch selectedPeriod {
-        case .today:  return summary.revenue.todayFormatted
-        case .week:   return summary.revenue.thisWeekFormatted
-        case .month:  return summary.revenue.thisMonthFormatted
+        case .today: return summary.revenue.todayFormatted
+        case .week: return summary.revenue.thisWeekFormatted
+        case .month: return summary.revenue.thisMonthFormatted
         }
     }
     var displayRevenueLabel: String { selectedPeriod.rawValue }
@@ -88,17 +88,17 @@ final class DashboardHomeViewModel: ObservableObject {
     // MARK: - Initial Load
 
     func loadSummary() async {
-        isLoading       = true
+        isLoading = true
         historicalItems = []
-        lastDocument    = nil
-        hasMorePages    = true
+        lastDocument = nil
+        hasMorePages = true
 
         do {
             // Run KPI summary AND page-1 activity fetch in parallel.
             // fetchFirstActivityPage() returns ActivityPage which includes the
             // DocumentSnapshot cursor — this is the critical fix.
             async let summaryResult = service.fetchDashboardSummary()
-            async let firstPage     = service.fetchFirstActivityPage(pageSize: pageSize)
+            async let firstPage = service.fetchFirstActivityPage(pageSize: pageSize)
 
             let (fetchedSummary, page) = try await (summaryResult, firstPage)
 
