@@ -5,8 +5,8 @@
 //  Comprehensive unit tests for the Order and CartItemData models
 //
 
-import XCTest
 @testable import CoffeeCraft
+import XCTest
 
 final class OrderTests: XCTestCase {
     

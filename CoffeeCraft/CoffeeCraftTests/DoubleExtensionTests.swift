@@ -7,8 +7,8 @@
 //  Comprehensive unit tests for extension methods
 //
 
-import XCTest
 @testable import CoffeeCraft
+import XCTest
 
 // MARK: - Double Extension Tests
 
