@@ -11,7 +11,7 @@ struct OrdersView: View {
     @EnvironmentObject var orderVM: OrderViewModel
     @EnvironmentObject var coordinator: NotificationCoordinator
     @EnvironmentObject var cartManager: CartManager
-    @Environment(\.pushScreen) private var push
+    @State private var selectedOrder: Order?
 
     var body: some View {
         ZStack {
@@ -27,6 +27,10 @@ struct OrdersView: View {
             }
         }
         .customNavigationBar("My Orders")
+        .navigationDestination(item: $selectedOrder) { order in
+            OrderDetailView(order: order)
+                .environmentObject(cartManager)
+        }
         .onAppear {
             Task { await orderVM.fetchOrders() }
             handleDeepLink()
@@ -123,10 +127,7 @@ struct OrdersView: View {
     // MARK: - Navigation
 
     private func navigateToDetail(order: Order) {
-        push(AnyView(
-            OrderDetailView(order: order)
-                .environmentObject(cartManager)
-        ))
+        selectedOrder = order
     }
 
     // MARK: - Deep Link

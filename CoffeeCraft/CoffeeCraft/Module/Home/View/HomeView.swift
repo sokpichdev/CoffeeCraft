@@ -118,7 +118,7 @@ struct HomeView: View {
             // Balance + Points + Top Up row
             if UserSession.shared.isLoggedIn {
                 HStack(spacing: 10) {
-                    PushLink {
+                    NavigationLink {
                         WalletView(showWallet: false)
                     } label: {
                         // CC Balance pill
@@ -159,7 +159,7 @@ struct HomeView: View {
                     Spacer()
 
                     // Top Up button
-                    PushLink {
+                    NavigationLink {
                         TopUpView(walletVM: walletVM)
                     } label: {
                         HStack(spacing: 5) {
@@ -245,7 +245,7 @@ struct HomeView: View {
                     .padding(.vertical, 40)
             } else {
                 ForEach(announcementVM.announcements.prefix(3)) { ann in
-                    PushLink {
+                    NavigationLink {
                         if UserSession.shared.isLoggedIn {
                             AnnouncementDetailView(announcement: ann)
                         } else {
@@ -256,7 +256,7 @@ struct HomeView: View {
                     }
                 }
 
-                PushLink {
+                NavigationLink {
                     if UserSession.shared.isLoggedIn {
                         AnnouncementsListView().environmentObject(announcementVM)
                     } else {

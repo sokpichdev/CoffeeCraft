@@ -12,7 +12,7 @@ struct CustomizationLibrarySheet: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             ZStack {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()

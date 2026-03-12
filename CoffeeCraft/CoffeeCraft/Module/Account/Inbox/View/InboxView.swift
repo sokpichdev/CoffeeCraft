@@ -9,9 +9,9 @@ import SwiftUI
 struct InboxView: View {
     @EnvironmentObject var inboxVM: InboxViewModel
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
     @State private var pageNum = 1
+    @State private var selectedOrder: Order?
 
     var body: some View {
         ZStack {
@@ -39,6 +39,9 @@ struct InboxView: View {
                     Task { await inboxVM.markAllAsRead() }
                 }
             }
+        }
+        .navigationDestination(item: $selectedOrder) { order in
+            OrderDetailView(order: order)
         }
     }
 
@@ -81,7 +84,7 @@ struct InboxView: View {
                                 if notification.type == .orderStatus,
                                    let orderId = notification.payload?["orderId"] {
                                     if let order = await inboxVM.fetchOrder(orderId: orderId) {
-                                        push(AnyView(OrderDetailView(order: order)))
+                                        selectedOrder = order
                                     }
                                 }
                                 await inboxVM.markAsRead(notification)

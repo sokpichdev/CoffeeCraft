@@ -11,7 +11,6 @@ struct TopUpView: View {
     
     @ObservedObject var walletVM: WalletViewModel
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.pushScreen) private var push
     
     @State private var currentStep: TopUpStep = .amount
     @State private var selectedAmount: Double?

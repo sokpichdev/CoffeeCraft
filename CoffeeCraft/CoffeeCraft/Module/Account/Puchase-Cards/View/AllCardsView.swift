@@ -67,7 +67,7 @@ struct AllCardsView: View {
             }
         }
         .sheet(isPresented: $isNavigateToAddOtherCard) {
-            CustomNavigationStack {
+            NavigationStack {
                 AddCardView()
                     .environmentObject(cardVM)
             }

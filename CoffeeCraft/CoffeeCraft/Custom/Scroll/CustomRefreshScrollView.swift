@@ -11,8 +11,8 @@ import UIKit
 // MARK: - CustomRefreshScrollView
 // ============================================================
 // A pull-to-refresh scroll container. Navigation logic is completely
-// absent here — that responsibility belongs to CustomNavigationStack
-// and SwipeBackCoordinator.
+// absent here — NavigationStack handles this at the root level
+
 //
 // How it works:
 //   A GeometryReader inside the ScrollView measures how far the content
@@ -145,7 +145,7 @@ struct CustomRefreshScrollView<Content: View>: View {
                 // Runs alongside the ScrollView's built-in pan gesture.
                 // We only care about downward vertical drags (isDragging flag).
                 // Horizontal drags are ignored — those belong to the
-                // UIScreenEdgePanGestureRecognizer in SwipeBackCoordinator.
+                // SwiftUI NavigationStack handles the interactive pop gesture natively.
                 DragGesture(minimumDistance: 5)
                     .onChanged { value in
                         guard abs(value.translation.height) > abs(value.translation.width) else { return }

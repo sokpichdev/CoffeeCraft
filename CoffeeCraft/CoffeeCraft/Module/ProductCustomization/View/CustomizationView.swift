@@ -17,7 +17,7 @@ struct CustomizationView: View {
     @State private var newCategoryName = ""
     
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             ZStack {
                 // Background gradient
                 Color(.systemGroupedBackground)

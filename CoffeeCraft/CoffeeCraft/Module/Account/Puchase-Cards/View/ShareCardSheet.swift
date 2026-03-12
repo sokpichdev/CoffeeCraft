@@ -18,7 +18,7 @@ struct ShareCardSheet: View {
     @State private var shareError: String?
     @State private var foundUserId: String = ""
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             VStack(spacing: 32) {
                 // Card Preview
                 FlippableCardView(card: card, width: UIScreen.main.bounds.width - 32)

@@ -216,7 +216,7 @@ struct EditProductView: View {
             .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showWebView) {
-            CustomNavigationStack {
+            NavigationStack {
                 if let url = webViewURL {
                     WebView(url: url)
                         .customNavigationBar("Get Image") {

@@ -22,7 +22,7 @@ struct CartView: View {
         cartManager.items.isEmpty || !cartManager.canCheckout(walletBalance: walletVM.wallet?.balance)
     }
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             ZStack(alignment: .bottom) {
                 CustomRefreshScrollView({
                     VStack(spacing: 12) {
@@ -74,7 +74,7 @@ struct CartView: View {
             .background(Color.bgPrimary)
             .ignoresSafeArea(edges: .bottom)
             .sheet(item: $editingItem) { item in
-                CustomNavigationStack {
+                NavigationStack {
                     ProductDetailView(
                         product: item.product,
                         cartItem: item,
