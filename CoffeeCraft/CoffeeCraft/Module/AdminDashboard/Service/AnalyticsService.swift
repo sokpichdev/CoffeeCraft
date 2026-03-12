@@ -26,17 +26,19 @@ extension AnalyticsService {
 
     // MARK: - Dashboard Summary
 
+    /// Fetches KPI stats only. Live activity is fetched separately in the
+    /// view-model via `fetchFirstActivityPage()` so the Firestore cursor
+    /// (lastDocument) is captured on the initial load — identical to how
+    /// OrderViewModel.fetchOrders() sets `lastDocument` on page 1.
     func fetchDashboardSummary() async throws -> DashboardSummary {
-        async let revenue      = fetchRevenueSummary()
-        async let orders       = fetchOrderSummary()
-        async let customers    = fetchCustomerSummary()
-        async let liveActivity = fetchLiveActivity()
+        async let revenue   = fetchRevenueSummary()
+        async let orders    = fetchOrderSummary()
+        async let customers = fetchCustomerSummary()
 
         return try await DashboardSummary(
-            revenue: revenue,
-            orders: orders,
-            customers: customers,
-            liveActivity: liveActivity
+            revenue:   revenue,
+            orders:    orders,
+            customers: customers
         )
     }
 
@@ -124,16 +126,16 @@ extension AnalyticsService {
 
     // MARK: - Live Activity Feed
 
-    func fetchLiveActivity() async throws -> [LiveOrderItem] {
-        let snapshot = try await db.collection("orders")
-            .order(by: "timestamp", descending: true)
-            .limit(to: 10)
-            .getDocuments()
-
-        return snapshot.documents.compactMap(mapToLiveOrderItem)
+    /// Page-1 fetch that also captures the Firestore cursor, so the VM can
+    /// immediately do `fetchMoreActivity(after: lastDocument)` on scroll.
+    /// Mirrors OrderViewModel.fetchOrders() which sets lastDocument on page 1.
+    func fetchFirstActivityPage(pageSize: Int = 10) async throws -> ActivityPage {
+        return try await fetchMoreActivity(after: nil, pageSize: pageSize)
     }
 
-    /// Cursor-based next page — pass `cursor: nil` for page 1.
+    /// Cursor-based next page. Always pass a non-nil cursor obtained from
+    /// a previous page's `lastDocument`. Use fetchFirstActivityPage() for
+    /// the very first load.
     func fetchMoreActivity(after cursor: DocumentSnapshot?, pageSize: Int = 10) async throws -> ActivityPage {
         var query: Query = db.collection("orders")
             .order(by: "timestamp", descending: true)
