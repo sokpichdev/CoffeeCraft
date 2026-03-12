@@ -158,7 +158,13 @@ class OrderDetailViewModel: ObservableObject {
         isUpdatingStatus = true
         defer { isUpdatingStatus = false }
         do {
-            try await db.collection("orders").document(orderId).updateData(["status": status])
+            var fields: [String: Any] = ["status": status]
+            if status == "Completed" {
+                // Write server-side timestamp so avg fulfillment time in
+                // the Order Funnel is calculated from a reliable clock.
+                fields["completedAt"] = FieldValue.serverTimestamp()
+            }
+            try await db.collection("orders").document(orderId).updateData(fields)
             AppLog.order.debug("updateOrderStatus — \(orderId) → \(status)")
         } catch {
             AppLog.order.error("updateOrderStatus error: \(error.localizedDescription)")
