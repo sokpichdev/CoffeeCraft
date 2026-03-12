@@ -2,12 +2,26 @@
 //  DashboardHomeViewModel.swift
 //  CoffeeCraft
 //
-//  Pagination aligned with OrderViewModel / AdminOrdersViewModel pattern:
+//  Pagination fix — root cause of "sometimes works":
+//
+//  Before: loadSummary() seeded liveItems from summary.liveActivity but
+//          NEVER set lastDocument. So loadMoreActivity()'s first call used
+//          cursor = nil → fetched the same top-10 → all deduped → zero items
+//          added → cursor finally set, but the .onAppear trigger on the last
+//          row was already consumed and never fires again.
+//
+//  Fix:    loadSummary() calls fetchFirstActivityPage() in parallel with the
+//          KPI summary fetch. This returns an ActivityPage which includes the
+//          DocumentSnapshot cursor, so lastDocument is set BEFORE the first
+//          scroll event — identical to how OrderViewModel.fetchOrders() works.
+//
+//  Strategy (mirrors OrderViewModel / AdminOrdersViewModel exactly):
 //  ┌──────────────────────────────────────────────────────────────────┐
-//  │  loadSummary()     → seeds liveItems (top-10) + resets cursor   │
-//  │  loadMoreActivity()→ cursor-based next page, dedupes vs live    │
-//  │  refresh()         → full reset + re-fetch                      │
-//  │  attachLiveListener→ real-time top-10; grows window on load     │
+//  │  loadSummary()      → KPIs + page 1 in parallel                 │
+//  │                       sets lastDocument from page-1 cursor ✓    │
+//  │  loadMoreActivity() → cursor-based page 2, 3… dedupes vs live   │
+//  │  refresh()          → full reset + re-fetch                     │
+//  │  liveListener       → growing-window; re-attaches after page    │
 //  └──────────────────────────────────────────────────────────────────┘
 
 import Foundation
@@ -18,34 +32,35 @@ final class DashboardHomeViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    @Published var summary: DashboardSummary?
+    @Published var summary:        DashboardSummary?
     @Published var selectedPeriod: DashboardPeriod = .today
-    @Published var isLoading: Bool = false
-    @Published var isLoadingMore: Bool = false
-    @Published var hasMorePages: Bool = true          // mirrors OrderViewModel naming
+    @Published var isLoading:      Bool = false
+    @Published var isLoadingMore:  Bool = false
+    @Published var hasMorePages:   Bool = true
 
-    /// Live top-10 from the real-time listener.
-    @Published private(set) var liveItems: [LiveOrderItem] = []
-    /// Cursor-paginated history (page 2+).
+    /// Top-10 from the real-time listener (always newest).
+    @Published private(set) var liveItems:       [LiveOrderItem] = []
+    /// Cursor-paginated older history (page 2+).
     @Published private(set) var historicalItems: [LiveOrderItem] = []
 
-    /// Unified feed: live top-10 + deduplicated older pages, newest first.
+    /// Unified feed: live top-10 + deduplicated older pages.
     var allActivity: [LiveOrderItem] {
         let liveIds = Set(liveItems.map(\.id))
-        let olderOnly = historicalItems.filter { !liveIds.contains($0.id) }
-        return liveItems + olderOnly
+        let older   = historicalItems.filter { !liveIds.contains($0.id) }
+        return liveItems + older
     }
 
     // MARK: - Private
 
-    private let service     = AnalyticsService.shared
-    private let pageSize    = 10
+    private let service  = AnalyticsService.shared
+    private let pageSize = 10
     private var liveListener: ListenerRegistration?
 
-    /// Cursor for the next history page — nil means "start from beginning".
+    /// Firestore cursor pointing at the last document fetched.
+    /// Set during loadSummary() (page 1), advanced on every loadMoreActivity().
     private var lastDocument: DocumentSnapshot?
 
-    // MARK: - Computed — Revenue for selected period
+    // MARK: - Computed
 
     var displayRevenue: String {
         guard let summary else { return "$0.00" }
@@ -55,14 +70,12 @@ final class DashboardHomeViewModel: ObservableObject {
         case .month:  return summary.revenue.thisMonthFormatted
         }
     }
-
     var displayRevenueLabel: String { selectedPeriod.rawValue }
 
     // MARK: - Lifecycle
 
     func onAppear() {
-        // Guard against re-fetching on tab-switch (mirrors OrderViewModel)
-        guard summary == nil else { return }
+        guard summary == nil else { return }   // skip re-fetch on tab switch
         Task { await loadSummary() }
         attachLiveListener()
     }
@@ -75,17 +88,26 @@ final class DashboardHomeViewModel: ObservableObject {
     // MARK: - Initial Load
 
     func loadSummary() async {
-        isLoading = true
-        // Full reset — mirrors refreshOrders() in OrderViewModel
-        historicalItems  = []
-        lastDocument     = nil
-        hasMorePages     = true
+        isLoading       = true
+        historicalItems = []
+        lastDocument    = nil
+        hasMorePages    = true
 
         do {
-            summary  = try await service.fetchDashboardSummary()
-            liveItems = summary?.liveActivity ?? []
+            // Run KPI summary AND page-1 activity fetch in parallel.
+            // fetchFirstActivityPage() returns ActivityPage which includes the
+            // DocumentSnapshot cursor — this is the critical fix.
+            async let summaryResult = service.fetchDashboardSummary()
+            async let firstPage     = service.fetchFirstActivityPage(pageSize: pageSize)
 
-            AppLog.dashboard.debug("✅ loadSummary — live items: \(self.liveItems.count)")
+            let (fetchedSummary, page) = try await (summaryResult, firstPage)
+
+            summary      = fetchedSummary
+            liveItems    = page.items         // seed the visible feed
+            lastDocument = page.lastDocument  // ← cursor set on load, not on first scroll
+            hasMorePages = page.hasMore
+
+            AppLog.dashboard.debug("✅ loadSummary — items: \(page.items.count), hasMore: \(page.hasMore), cursor: \(page.lastDocument?.documentID ?? "nil")")
         } catch {
             AlertManager.shared.showConfirmation(
                 title: "Failed to load dashboard",
@@ -108,41 +130,32 @@ final class DashboardHomeViewModel: ObservableObject {
         attachLiveListener()
     }
 
-    // MARK: - Infinite-Scroll Pagination (mirrors loadMore in OrderViewModel)
+    // MARK: - Infinite Scroll (mirrors OrderViewModel.loadMore exactly)
 
-    /// Called when the last visible row triggers `.onAppear`.
-    /// Fetches the next page using the stored Firestore cursor.
+    /// Triggered when the last visible row calls `.onAppear`.
+    /// `lastDocument` is guaranteed non-nil after loadSummary() succeeds,
+    /// so the guard will always pass on the first real scroll event.
     func loadMoreActivity() async {
-        guard !isLoadingMore, hasMorePages else { return }
-        // If no cursor yet we haven't finished the initial load — skip
-        guard lastDocument != nil || liveItems.isEmpty == false else { return }
+        guard !isLoadingMore, hasMorePages, let cursor = lastDocument else { return }
 
-        AppLog.dashboard.debug("📋 loadMoreActivity — cursor: \(self.lastDocument?.documentID ?? "none")")
+        AppLog.dashboard.debug("📋 loadMoreActivity — cursor: \(cursor.documentID), loaded: \(self.allActivity.count)")
         isLoadingMore = true
 
         do {
-            let page = try await service.fetchMoreActivity(
-                after: lastDocument,
-                pageSize: pageSize
-            )
+            let page = try await service.fetchMoreActivity(after: cursor, pageSize: pageSize)
 
-            // Deduplicate against liveItems (same pattern as AdminOrdersViewModel)
-            let liveIds = Set(liveItems.map(\.id))
-            let existingHistoricalIds = Set(historicalItems.map(\.id))
-            let newItems = page.items.filter {
-                !liveIds.contains($0.id) && !existingHistoricalIds.contains($0.id)
-            }
+            // Deduplicate against the full current feed
+            let existingIds = Set(allActivity.map(\.id))
+            let newItems    = page.items.filter { !existingIds.contains($0.id) }
 
             historicalItems.append(contentsOf: newItems)
             lastDocument = page.lastDocument
             hasMorePages = page.hasMore
 
-            AppLog.dashboard.debug("✅ loadMoreActivity — appended \(newItems.count), total historical: \(self.historicalItems.count), hasMore: \(page.hasMore)")
+            AppLog.dashboard.debug("✅ loadMoreActivity — added \(newItems.count), total: \(self.allActivity.count), hasMore: \(page.hasMore)")
 
-            // Re-attach live listener so its window grows to cover all loaded items
-            // (same growing-window pattern as AdminOrdersViewModel.setupAllOrdersListener)
+            // Grow the listener window to cover all loaded orders
             reattachLiveListener()
-
         } catch {
             AppLog.dashboard.error("❌ loadMoreActivity: \(error.localizedDescription)")
         }
@@ -154,17 +167,16 @@ final class DashboardHomeViewModel: ObservableObject {
 
     private func attachLiveListener() {
         liveListener?.remove()
-        let listenLimit = max(allActivity.count, pageSize)
-        AppLog.dashboard.debug("🔌 attachLiveListener — limit: \(listenLimit)")
+        let limit = max(allActivity.count, pageSize)
+        AppLog.dashboard.debug("🔌 attachLiveListener — limit: \(limit)")
 
-        liveListener = service.listenToLiveActivity(limit: listenLimit) { [weak self] items in
+        liveListener = service.listenToLiveActivity(limit: limit) { [weak self] items in
             Task { @MainActor [weak self] in
                 self?.liveItems = items
             }
         }
     }
 
-    /// Re-attaches with updated limit after each page load.
     private func reattachLiveListener() {
         attachLiveListener()
     }
