@@ -17,7 +17,6 @@ final class DashboardHomeViewModel: ObservableObject {
     @Published var liveActivity: [LiveOrderItem] = []
     @Published var selectedPeriod: DashboardPeriod = .today
     @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
 
     // MARK: - Private
 
@@ -53,13 +52,21 @@ final class DashboardHomeViewModel: ObservableObject {
 
     func loadSummary() async {
         isLoading = true
-        errorMessage = nil
         do {
             summary = try await service.fetchDashboardSummary()
             // Seed liveActivity from summary on first load
             liveActivity = summary?.liveActivity ?? []
         } catch {
-            errorMessage = "Failed to load dashboard: \(error.localizedDescription)"
+            AlertManager.shared.showConfirmation(title: "Failed to load dashboard",
+                                                 message: error.localizedDescription,
+                                                 type: .error,
+                                                 confirmTitle: "Retry",
+                                                 cancelTitle: "Dimiss",
+                                                 onConfirm: {
+                Task {
+                    await self.loadSummary()
+                }
+            })
             AppLog.dashboard.error("DashboardHomeViewModel \(error.localizedDescription)")
         }
         isLoading = false
