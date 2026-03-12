@@ -10,16 +10,16 @@ import Foundation
 // so it captures the Firestore DocumentSnapshot cursor on page 1.
 
 struct DashboardSummary {
-    let revenue:   RevenueSummary
-    let orders:    OrderSummary
+    let revenue: RevenueSummary
+    let orders: OrderSummary
     let customers: CustomerSummary
 }
 
 // MARK: - Revenue Summary
 
 struct RevenueSummary {
-    let today:     Double
-    let thisWeek:  Double
+    let today: Double
+    let thisWeek: Double
     let thisMonth: Double
 
     var todayFormatted:    String { today.asCurrency }
@@ -30,9 +30,9 @@ struct RevenueSummary {
 // MARK: - Order Summary
 
 struct OrderSummary {
-    let todayCount:     Int
+    let todayCount: Int
     let yesterdayCount: Int
-    let activeCount:    Int
+    let activeCount: Int
 
     var dailyChangePct: Double {
         guard yesterdayCount > 0 else { return todayCount > 0 ? 100 : 0 }
@@ -52,18 +52,18 @@ struct OrderSummary {
 
 struct CustomerSummary {
     let newThisWeek: Int
-    let totalCount:  Int
+    let totalCount: Int
 }
 
 // MARK: - Live Activity
 
 struct LiveOrderItem: Identifiable {
-    let id:           String
+    let id: String
     let customerName: String
-    let totalPrice:   Double
-    let status:       String
-    let timestamp:    Date
-    let itemCount:    Int
+    let totalPrice: Double
+    let status: String
+    let timestamp: Date
+    let itemCount: Int
 
     var totalFormatted: String { totalPrice.asCurrency }
 
@@ -86,13 +86,12 @@ enum DashboardPeriod: String, CaseIterable {
 }
 
 // MARK: - Helpers
-
-private extension Double {
+extension Double {
     var asCurrency: String {
-        let f = NumberFormatter()
-        f.numberStyle         = .currency
-        f.currencySymbol      = "$"
-        f.maximumFractionDigits = 2
-        return f.string(from: NSNumber(value: self)) ?? "$0.00"
+        let ft = NumberFormatter()
+        ft.numberStyle = .currency
+        ft.currencySymbol = "$"
+        ft.maximumFractionDigits = 2
+        return ft.string(from: NSNumber(value: self)) ?? "$0.00"
     }
 }
