@@ -26,10 +26,15 @@ struct TabBarView: View {
 private struct TabsLayoutView: View {
     @Binding var selectedTab: Tab
     @Namespace var namespace
-    
+
+    /// Only managers see the Dashboard tab; customers see 4 tabs.
+    private var visibleTabs: [Tab] {
+        Tab.visible(for: UserSession.shared.currentUser?.role)
+    }
+
     var body: some View {
         HStack {
-            ForEach(Tab.allCases) { tab in
+            ForEach(visibleTabs) { tab in
                 TabButton(tab: tab, selectedTab: $selectedTab, namespace: namespace)
             }
         }
@@ -103,6 +108,7 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
         lhs.rawValue < rhs.rawValue
     }
 
+    case dashboard  // Manager only
     case home       // Home / Featured
     case menu       // Coffee menu + branch selection
     case orders     // Past orders
@@ -110,8 +116,15 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
 
     var id: Int { rawValue }
 
+    /// Returns the tabs visible for a given role.
+    /// Managers see all 5 tabs; customers see 4 (no Dashboard).
+    static func visible(for role: UserRole?) -> [Tab] {
+        role == .manager ? Tab.allCases : Tab.allCases.filter { $0 != .dashboard }
+    }
+
     var icon: String {
         switch self {
+        case .dashboard: return "square.grid.2x2"
         case .home:    return "house.fill"
         case .menu:    return "list.bullet.rectangle.portrait.fill"
         case .orders:  return "clock.fill"
@@ -121,6 +134,7 @@ enum Tab: Int, Identifiable, CaseIterable, Comparable {
 
     var title: String {
         switch self {
+        case .dashboard: return "Dashboard"
         case .home:    return "Home"
         case .menu:    return "Menu"
         case .orders:  return "Orders"

@@ -14,9 +14,7 @@ struct AdminDashboardHomeView: View {
     @StateObject private var vm = DashboardHomeViewModel()
 
     var body: some View {
-        CustomRefreshScrollView(onRefresh: {
-            await vm.refresh()
-        }) {
+        CustomRefreshScrollView( {
             VStack(alignment: .leading, spacing: 20) {
 
                 headerSection
@@ -27,20 +25,13 @@ struct AdminDashboardHomeView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 24)
-        }
+        }, onRefresh: {
+            await vm.refresh()
+        })
         .navigationTitle("Dashboard")
         .navigationBarTitleDisplayMode(.large)
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
-        .alert("Error", isPresented: Binding(
-            get: { vm.errorMessage != nil },
-            set: { if !$0 { vm.errorMessage = nil } }
-        )) {
-            Button("Retry") { Task { await vm.loadSummary() } }
-            Button("Dismiss", role: .cancel) { vm.errorMessage = nil }
-        } message: {
-            Text(vm.errorMessage ?? "")
-        }
     }
 
     // MARK: - Header

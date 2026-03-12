@@ -31,6 +31,8 @@ struct RootView: View {
             } else {
                 VStack(spacing: 0) {
                         switch selectedTab {
+                        case .dashboard:
+                            AdminDashboardHomeView()
                         case .home:
                             HomeView(selectedTab: $selectedTab)
                                 .environmentObject(announcementVM)
@@ -91,6 +93,9 @@ struct RootView: View {
                     if let userId = newUser?.id {
                         walletVM.setup(userId: userId)
                     }
+                    // Reset to home whenever the account switches.
+                    // Prevents a customer from inheriting .dashboard if a manager was logged in before.
+                    selectedTab = .home
                 }
             }
         }
