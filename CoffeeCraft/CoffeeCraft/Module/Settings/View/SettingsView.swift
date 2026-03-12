@@ -9,7 +9,9 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.pushScreen) var push
+    @State private var showAppearance = false
+    @State private var showWalletTest = false
+    @State private var showAuth = false
     var body: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
@@ -25,7 +27,7 @@ struct SettingsView: View {
                 
                 SettingsSection(title: "Preferences", icon: "paintbrush.fill") {
                     RowInSectionView(title: "Appearance", systemImage: "sparkles") {
-                        push(AnyView(AppearanceSettingsView()))
+                        showAppearance = true
                     }
                     DeviderInSectionView()
                     RowInSectionView(title: "Languages", systemImage: "globe")
@@ -47,7 +49,7 @@ struct SettingsView: View {
                 
                 SettingsSection(title: "Testing Feature", icon: "flask.fill") {
                     RowInSectionView(title: "Wallet Phase 1 Test", systemImage: "flask.fill") {
-                        push(AnyView(WalletTestView()))
+                        showWalletTest = true
                     }
                 }
                 
@@ -74,7 +76,7 @@ struct SettingsView: View {
                                        buttonImage: "rectangle.portrait.and.arrow.right.fill",
                                        bgColors: [Color.semanticSuccess, Color.semanticSuccess.opacity(0.85)],
                                        contentPlacement: .leading) {
-                        push(AnyView(AuthView().environmentObject(authVM)))
+                        showAuth = true
                     }
                     .padding(.top, 8)
                 }
@@ -92,5 +94,8 @@ struct SettingsView: View {
                 dismiss()
             }
         }
+        .navigationDestination(isPresented: $showAppearance) { AppearanceSettingsView() }
+        .navigationDestination(isPresented: $showWalletTest) { WalletTestView() }
+        .navigationDestination(isPresented: $showAuth) { AuthView().environmentObject(authVM) }
     }
 }

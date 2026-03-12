@@ -23,7 +23,7 @@ struct CoffeeCraftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            CustomNavigationStack {
+            NavigationStack {
                 RootView()
                     .environmentObject(session)
                     .environmentObject(authVM)
@@ -36,6 +36,11 @@ struct CoffeeCraftApp: App {
                     // Color.accentPrimary / Color.bgPrimary etc. re-evaluate.
                     .id(themeManager.palette.rawValue)
             }
+            .withAlertManager()
+            .withLoaderManager()
+            .withLowerToastManager()
+            .withUpperToastManager()
+            .offlineBanner()
         }
     }
 }

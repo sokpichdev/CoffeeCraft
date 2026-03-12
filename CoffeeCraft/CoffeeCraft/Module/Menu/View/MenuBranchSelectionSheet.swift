@@ -11,7 +11,6 @@ struct MenuBranchSelectionSheet: View {
 
     @EnvironmentObject private var orderEnv: OrderEnvironment
     @Environment(\.dismiss)  private var dismiss
-    @Environment(\.pushScreen) var push
     @State private var branches: [Branch]  = []
     @State private var isLoading = true
     @State private var searchText = ""

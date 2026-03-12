@@ -16,7 +16,7 @@ struct OrderReceiptView: View {
     @State private var isExporting = false
 
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             ZStack {
                 Color(.systemGroupedBackground).ignoresSafeArea()
                 CustomRefreshScrollView({

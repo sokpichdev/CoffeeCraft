@@ -25,7 +25,7 @@ struct CategorySelectionSheet: View {
     }
     
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             VStack(spacing: 0) {
                 TextField("Search Categories", text: $searchText)
                     .padding(8)

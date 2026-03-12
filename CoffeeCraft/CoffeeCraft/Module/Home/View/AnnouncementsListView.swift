@@ -37,7 +37,7 @@ struct AnnouncementsListView: View {
                 } else {
                     VStack {
                         ForEach(announcementVM.announcements) { ann in
-                            PushLink {
+                            NavigationLink {
                                 AnnouncementDetailView(announcement: ann)
                             } label: {
                                 AnnouncementCardView(announcement: ann)

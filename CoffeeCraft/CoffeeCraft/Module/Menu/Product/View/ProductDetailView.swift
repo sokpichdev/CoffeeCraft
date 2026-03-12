@@ -10,7 +10,6 @@ struct ProductDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var favVM: FavoriteViewModel
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.pushScreen) private var push
 
     let product: Product
     var cartItem: CartItem?
@@ -19,6 +18,9 @@ struct ProductDetailView: View {
 
     @StateObject private var reviewVM = ReviewViewModel()
     @State private var showRatingSheet = false
+    @State private var showRatingsReview = false
+    @State private var showAuth = false
+    @State private var selectedRelated: Product?
 
     @State private var selectedExtras: [String]
     @State private var selections: [String: String]
@@ -152,20 +154,7 @@ struct ProductDetailView: View {
                             vm: reviewVM,
                             product: product,
                             onSeeAll: {
-                                push(AnyView(RatingsReviewsView(
-                                    vm: reviewVM,
-                                    product: product,
-                                    onWriteReview: {
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                            reviewVM.prepareForEditing(
-                                                existingReview: reviewVM.reviews.first {
-                                                    $0.userId == UserSession.shared.userId
-                                                }
-                                            )
-                                            showRatingSheet = true
-                                        }
-                                    }
-                                )))
+                                showRatingsReview = true
                             },
                             onWriteReview: {
                                 reviewVM.prepareForEditing(
@@ -228,9 +217,33 @@ struct ProductDetailView: View {
                         )
                     }
                 } else {
-                    push(AnyView(AuthView().environmentObject(AuthViewModel())))
+                    showAuth = true
                 }
             }
+        }
+        .navigationDestination(isPresented: $showRatingsReview) {
+            RatingsReviewsView(
+                vm: reviewVM,
+                product: product,
+                onWriteReview: {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        reviewVM.prepareForEditing(
+                            existingReview: reviewVM.reviews.first {
+                                $0.userId == UserSession.shared.userId
+                            }
+                        )
+                        showRatingSheet = true
+                    }
+                }
+            )
+        }
+        .navigationDestination(isPresented: $showAuth) {
+            AuthView().environmentObject(AuthViewModel())
+        }
+        .navigationDestination(item: $selectedRelated) { related in
+            ProductDetailView(product: related, allProducts: allProducts)
+                .environmentObject(cartManager)
+                .environmentObject(favVM)
         }
     }
     
@@ -247,13 +260,7 @@ struct ProductDetailView: View {
                         MenuItemRow(item: related)
                             .frame(width: UIScreen.main.bounds.width * 0.72)
                             .onTapGesture {
-                                push(
-                                    AnyView(
-                                        ProductDetailView(product: related, allProducts: allProducts)
-                                            .environmentObject(cartManager)
-                                            .environmentObject(favVM)
-                                    )
-                                )
+                                selectedRelated = related
                             }
                     }
                 }
@@ -355,7 +362,7 @@ struct ProductDetailView: View {
                             )
                         }
                     } else {
-                        push(AnyView(AuthView().environmentObject(AuthViewModel())))
+                        showAuth = true
                     }
                 }
             }

@@ -23,7 +23,6 @@ struct RootView: View {
     @StateObject var announcementVM = AnnouncementViewModel()
     
     @State private var selectedTab: Tab = .home
-    @Environment(\.pushScreen) private var push
 
     var body: some View {
         Group {

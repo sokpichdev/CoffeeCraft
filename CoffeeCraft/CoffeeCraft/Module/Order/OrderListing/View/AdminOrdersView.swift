@@ -64,8 +64,8 @@ struct AdminOrdersView: View {
 struct ActiveOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @EnvironmentObject var cartManager: CartManager
-    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
+    @State private var selectedOrder: Order?
 
     private var filteredOrders: [Order] {
         vm.allOrders
@@ -133,7 +133,7 @@ struct ActiveOrdersContent: View {
                                             .tint(.accentPrimary)
                                     )},
                                 onNavigate: {
-                                    push(AnyView(OrderDetailView(order: order, isActive: true).environmentObject(cartManager)))
+                                    selectedOrder = order
                                 }
                             )
                             .onAppear {
@@ -171,6 +171,10 @@ struct ActiveOrdersContent: View {
         .task {
             await vm.fetchAllOrders(pageNum: 1)
         }
+        .navigationDestination(item: $selectedOrder) { order in
+            OrderDetailView(order: order, isActive: true)
+                .environmentObject(cartManager)
+        }
     }
 }
 
@@ -178,8 +182,8 @@ struct ActiveOrdersContent: View {
 struct MyOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @EnvironmentObject var cartManager: CartManager
-    @Environment(\.pushScreen) private var push
     @State private var isPaginating = false
+    @State private var selectedOrder: Order?
 
     var body: some View {
         Group {
@@ -209,7 +213,7 @@ struct MyOrdersContent: View {
                             OrderCardView(
                                 order: order,
                                 onNavigate: {
-                                    push(AnyView(OrderDetailView(order: order).environmentObject(cartManager)))
+                                    selectedOrder = order
                                 }, onReorder: {
                                     handleReorder(for: order)
                                 }
@@ -248,6 +252,10 @@ struct MyOrdersContent: View {
         }
         .task {
             await vm.fetchMyOrders(pageNum: 1)
+        }
+        .navigationDestination(item: $selectedOrder) { order in
+            OrderDetailView(order: order)
+                .environmentObject(cartManager)
         }
     }
     

@@ -15,8 +15,16 @@ struct AccountView: View {
     @EnvironmentObject var walletVM: WalletViewModel
 
     @EnvironmentObject var userSession: UserSession
-    @Environment(\.pushScreen) var push
     @State var isOpenAddCard: Bool = false
+
+    // Navigation state
+    @State private var showSettings = false
+    @State private var showWallet = false
+    @State private var showInbox = false
+    @State private var showColorTheme = false
+    @State private var showFavorites = false
+    @State private var showAnnouncements = false
+    @State private var showAuth = false
     
     var body: some View {
         CustomRefreshScrollView( {
@@ -43,8 +51,7 @@ struct AccountView: View {
         .background(Color.bgSecondary)
         .customNavigationBar("Account") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("gearshape.fill")) {
-               push(AnyView(SettingsView()
-                .environmentObject(authVM)))
+               showSettings = true
             }
         }
         .onAppear {
@@ -63,10 +70,31 @@ struct AccountView: View {
             }
         }
         .sheet(isPresented: $isOpenAddCard) {
-            CustomNavigationStack {
+            NavigationStack {
                 AddCardView()
                     .environmentObject(cardVM)
             }
+        }
+        .navigationDestination(isPresented: $showSettings) {
+            SettingsView().environmentObject(authVM)
+        }
+        .navigationDestination(isPresented: $showWallet) {
+            WalletView()
+        }
+        .navigationDestination(isPresented: $showInbox) {
+            InboxView().environmentObject(inboxVM)
+        }
+        .navigationDestination(isPresented: $showColorTheme) {
+            ColorThemePickerView()
+        }
+        .navigationDestination(isPresented: $showFavorites) {
+            FavoriteView().environmentObject(favVM)
+        }
+        .navigationDestination(isPresented: $showAnnouncements) {
+            AnnouncementsListView().environmentObject(announcementVM)
+        }
+        .navigationDestination(isPresented: $showAuth) {
+            AuthView().environmentObject(authVM)
         }
     }
     
@@ -100,7 +128,7 @@ struct AccountView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.textPrimary)
                 
-                PushLink {
+                NavigationLink {
                     if userSession.isLoggedIn {
                         ProfileView()
                             .environmentObject(authVM)
@@ -133,7 +161,7 @@ struct AccountView: View {
     var walletSection: some View {
         SettingsSection(title: "My Wallet", icon: "creditcard.fill") {
             RowInSectionView(label: walletVM.formattedBalance, title: "Wallet", systemImage: "creditcard.fill") {
-                push(AnyView(WalletView()))
+                showWallet = true
             }
         }
     }
@@ -164,14 +192,14 @@ struct AccountView: View {
                             FlippableCardView(card: activeCard, width: cardWidth)
                         }
                     } else {
-                        PushLink {
+                        NavigationLink {
                             AuthView().environmentObject(authVM)
                         } label: {
                             CardEmptyView(title: "Log in to see your cards", cardWidth: cardWidth)
                         }
                     }
                     Spacer()
-                    PushLink {
+                    NavigationLink {
                         if userSession.isLoggedIn {
                             AllCardsView()
                                 .environmentObject(cardVM)
@@ -203,7 +231,7 @@ struct AccountView: View {
                             AlertManager.shared.showWarning(title: "Coming Soon",
                                                             message: "This Feature will be coming soon.")
                         } else {
-                            push(AnyView(AuthView().environmentObject(authVM)))
+                            showAuth = true
                         }
                     }, label: {
                         VStack {
@@ -225,7 +253,7 @@ struct AccountView: View {
                         if userSession.isLoggedIn {
                             isOpenAddCard = true
                         } else {
-                            push(AnyView(AuthView().environmentObject(authVM)))
+                            showAuth = true
                         }
                     }, label: {
                         VStack {
@@ -253,24 +281,23 @@ struct AccountView: View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
             RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: inboxVM.unreadCount) {
                 if userSession.isLoggedIn {
-                    push(AnyView(InboxView().environmentObject(inboxVM)))
+                    showInbox = true
                 } else {
-                    push(AnyView(AuthView().environmentObject(authVM)))
+                    showAuth = true
                 }
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Color Theme", systemImage: "paintpalette.fill") {
-                push(AnyView(ColorThemePickerView()))
+                showColorTheme = true
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Favorites", systemImage: "heart.fill") {
                 if userSession.isLoggedIn {
-                    push(AnyView(FavoriteView()
-                        .environmentObject(favVM)))
+                    showFavorites = true
                 } else {
-                    push(AnyView(AuthView().environmentObject(authVM)))
+                    showAuth = true
                 }
             }
             DeviderInSectionView(padding: 44)
@@ -287,9 +314,9 @@ struct AccountView: View {
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Announcements", systemImage: "megaphone.fill") {
                 if userSession.isLoggedIn {
-                    push(AnyView(AnnouncementsListView().environmentObject(announcementVM)))
+                    showAnnouncements = true
                 } else {
-                    push(AnyView(AuthView().environmentObject(authVM)))
+                    showAuth = true
                 }
             }
             DeviderInSectionView(padding: 44)

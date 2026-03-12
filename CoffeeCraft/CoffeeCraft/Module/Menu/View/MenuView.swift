@@ -16,7 +16,14 @@ struct MenuView: View {
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var orderEnv: OrderEnvironment
-    @Environment(\.pushScreen) private var push
+    @State private var showAuth = false
+
+    private struct EditTarget: Identifiable, Hashable {
+        var id: String { product.id + sectionId }
+        let sectionId: String
+        let product: Product
+    }
+    @State private var editTarget: EditTarget?
 
     // MARK: - Scroll Sync State
     @State private var selectedSectionID: String?
@@ -77,7 +84,7 @@ struct MenuView: View {
                 if UserSession.shared.isLoggedIn {
                     showSearchSheet = true
                 } else {
-                    push(AnyView(AuthView().environmentObject(AuthViewModel())))
+                    showAuth = true
                 }
             }
             if let branchName = orderEnv.selectedBranchName {
@@ -101,6 +108,17 @@ struct MenuView: View {
         .sheet(isPresented: $showBranchSheet) {
             MenuBranchSelectionSheet()
             .environmentObject(orderEnv)
+        }
+        .navigationDestination(for: Product.self) { product in
+            ProductDetailView(product: product, allProducts: productVM.products)
+                .environmentObject(cartManager)
+                .environmentObject(favVM)
+        }
+        .navigationDestination(isPresented: $showAuth) {
+            AuthView().environmentObject(AuthViewModel())
+        }
+        .navigationDestination(item: $editTarget) { target in
+            handleNavigateToEditProduct(sectionId: target.sectionId, product: target.product)
         }
     }
 
@@ -281,15 +299,12 @@ struct MenuView: View {
 
             VStack(spacing: 10) {
                 ForEach(section.items) { product in
-                    PushLink(value: product) { product in
-                        ProductDetailView(product: product, allProducts: productVM.products).environmentObject(cartManager)
-                            .environmentObject(favVM)
-                    } label: {
+                    NavigationLink(value: product) {
                         MenuItemRow(item: product)
                             .id("\(section.id)_\(product.id)")
                             .contextMenu(isManager ? ContextMenu(menuItems: {
                                 Button("Edit", systemImage: "pencil") {
-                                    push(AnyView(handleNavigateToEditProduct(sectionId: section.id, product: product)))
+                                    editTarget = EditTarget(sectionId: section.id, product: product)
                                 }
                                 Button("Remove", role: .destructive) {
                                     Task { await productVM.deleteProduct(product) }
@@ -299,10 +314,11 @@ struct MenuView: View {
                                 }
                             }) : nil)
                     }
+                    .buttonStyle(.plain)
                 }
 
                 if isManager {
-                    PushLink {
+                    NavigationLink {
                         handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
                     } label: {
                         Label("Add new item", systemImage: "plus.circle.fill")

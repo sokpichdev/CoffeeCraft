@@ -27,7 +27,7 @@ struct BranchWaitTimeEditor: View {
     }
 
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             VStack(spacing: 0) {
 
                 // ── Header ──────────────────────────────────────────

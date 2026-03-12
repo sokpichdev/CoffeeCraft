@@ -34,7 +34,7 @@ struct SearchView: View {
     }
     
     var body: some View {
-        CustomNavigationStack {
+        NavigationStack {
             CustomRefreshScrollView( {
                 LazyVStack(spacing: 12) {
                     if filteredResults.isEmpty {
@@ -53,15 +53,14 @@ struct SearchView: View {
                         .frame(maxWidth: .infinity)
                     } else {
                         ForEach(filteredResults, id: \.product.id) { result in
-                            PushLink(value: result.product) { product in
-                                ProductDetailView(product: product)
-                            } label: {
+                            NavigationLink(value: result.product) {
                                 SearchResultRow(
                                     product: result.product,
                                     matchType: result.matchType,
                                     searchText: searchText
                                 )
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -74,6 +73,11 @@ struct SearchView: View {
                 ToolBarButton(placement: .navigationBarLeading, buttonType: .icon("xmark")) {
                     dismiss()
                 }
+            }
+            .navigationDestination(for: Product.self) { product in
+                ProductDetailView(product: product)
+                    .environmentObject(cartManager)
+                    .environmentObject(favVM)
             }
         }
     }
