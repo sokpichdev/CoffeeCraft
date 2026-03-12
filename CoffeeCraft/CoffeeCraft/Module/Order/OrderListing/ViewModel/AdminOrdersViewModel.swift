@@ -255,9 +255,15 @@ class AdminOrdersViewModel: ObservableObject {
         guard let orderId = order.id else { return false }
 
         do {
+            var fields: [String: Any] = ["status": status]
+            if status == "Completed" {
+                // Write server-side timestamp so avg fulfillment time in
+                // the Order Funnel is calculated from a reliable clock.
+                fields["completedAt"] = FieldValue.serverTimestamp()
+            }
             try await db.collection("orders")
                 .document(orderId)
-                .updateData(["status": status])
+                .updateData(fields)
 
             applyLocalStatusChange(orderId: orderId, status: status)
             return true
