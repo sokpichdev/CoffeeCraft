@@ -62,6 +62,10 @@ class AuthViewModel: ObservableObject {
     // MARK: - Session Restore
 
     func checkUser() {
+        guard UserSession.shared.currentUser == nil else {
+            AppLog.auth.debug("👤 checkUser — session already active, skipping")
+            return
+        }
         isLoading = true
         // FirebaseAuth.Auth.auth().currentUser is a fast local check — no Firestore call
         guard let uid = FirebaseAuth.Auth.auth().currentUser?.uid else {
@@ -91,7 +95,7 @@ class AuthViewModel: ObservableObject {
         do {
             let user = try await authRepo.fetchUser(uid: uid)
             UserSession.shared.setUser(user)
-            AppLog.printItem(user, label: "Fetched User", logger: AppLog.auth)
+//            AppLog.printItem(user, label: "Fetched User", logger: AppLog.auth)
             if showLoader { LoaderManager.shared.hideLoading() }
         } catch {
             AppLog.auth.error("❌ fetchUserData error: \(error.localizedDescription)")
