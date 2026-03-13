@@ -122,7 +122,7 @@ struct ReviewModerationDashboardView: View {
                             Task { await vm.applyFilter() }
                         }
                         .font(.caption)
-                        .foregroundStyle(.accentPrimary)
+                        .foregroundStyle(Color.accentPrimary)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -377,13 +377,13 @@ struct ReviewModerationDashboardView: View {
             }
             .chartYScale(domain: 1...5.2)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { value in
+                AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { _ in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
                     AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                 }
             }
             .chartYAxis {
-                AxisMarks(values: [1, 2, 3, 4, 5], position: .leading) { value in
+                AxisMarks(position: .leading, values: [1.0, 2.0, 3.0, 4.0, 5.0]) { value in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
