@@ -45,7 +45,7 @@ struct UserManagementView: View {
             }
         }
         .padding(10)
-        .background(Color(UIColor.secondarySystemBackground),
+        .background(Color.surfaceSub,
                     in: RoundedRectangle(cornerRadius: 10))
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -126,7 +126,7 @@ struct UserManagementView: View {
         .foregroundStyle(.secondary)
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(Color.surfaceSub)
     }
 
     // MARK: - Skeleton Loading

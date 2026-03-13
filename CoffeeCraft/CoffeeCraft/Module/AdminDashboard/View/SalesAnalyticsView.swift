@@ -89,7 +89,8 @@ struct SalesAnalyticsView: View {
                     value: vm.analyticsData?.summary.refundRateFormatted ?? "0.0%",
                     icon: "xmark.circle.fill",
                     color: vm.isLoading ? .secondary : cancellationRateColor,
-                    isLoading: vm.isLoading
+                    isLoading: vm.isLoading,
+                    tintBackground: !vm.isLoading
                 )
             }
         }

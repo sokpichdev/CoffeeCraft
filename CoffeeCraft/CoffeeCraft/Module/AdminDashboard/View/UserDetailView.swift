@@ -5,14 +5,6 @@
 //  Created by Sok Pich on 3/13/26.
 //
 
-
-//
-//  UserDetailView.swift
-//  CoffeeCraft
-//
-//  Created by Sok Pich on 3/13/26.
-//
-
 import SwiftUI
 
 // MARK: - User Detail View
@@ -96,7 +88,7 @@ struct UserDetailView: View {
             Spacer()
         }
         .padding(16)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.surfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Stats Row

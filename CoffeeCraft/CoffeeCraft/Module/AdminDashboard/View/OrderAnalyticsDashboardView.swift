@@ -42,7 +42,7 @@ struct OrderAnalyticsDashboardView: View {
         .pickerStyle(.segmented)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color(UIColor.systemBackground))
+        .background(Color.bgPrimary)
     }
 
     // MARK: - Content Area
@@ -139,7 +139,7 @@ struct OrderAnalyticsDashboardView: View {
                 }
             }
             .padding(10)
-            .background(Color(UIColor.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+            .background(Color.surfaceSub, in: RoundedRectangle(cornerRadius: 10))
 
             // Status filter chips
             ScrollView(.horizontal, showsIndicators: false) {
@@ -192,28 +192,30 @@ struct OrderAnalyticsDashboardView: View {
     }
 
     private var historyList: some View {
-        LazyVStack(spacing: 0, pinnedViews: []) {
-            ForEach(vm.historyItems) { item in
-                HistoryOrderRow(item: item, now: now)
-                    .padding(.horizontal, 16)
-                    .onAppear {
-                        if item.id == vm.historyItems.last?.id {
-                            Task { await vm.loadMoreHistory() }
+        ScrollView {
+            LazyVStack(spacing: 0, pinnedViews: []) {
+                ForEach(vm.historyItems) { item in
+                    HistoryOrderRow(item: item, now: now)
+                        .padding(.horizontal, 16)
+                        .onAppear {
+                            if item.id == vm.historyItems.last?.id {
+                                Task { await vm.loadMoreHistory() }
+                            }
                         }
-                    }
-                Divider().padding(.leading, 16 + 9 + 12)
-            }
+                    Divider().padding(.leading, 16 + 9 + 12)
+                }
 
-            if vm.isLoadingMoreHistory {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-            } else if !vm.canLoadMoreHistory && vm.historyItems.count >= 20 {
-                Text("All orders loaded")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                if vm.isLoadingMoreHistory {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                } else if !vm.canLoadMoreHistory && vm.historyItems.count >= 20 {
+                    Text("All orders loaded")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                }
             }
         }
     }
@@ -242,13 +244,15 @@ struct OrderAnalyticsDashboardView: View {
                     title: "Completion Rate",
                     value: vm.funnelData.completionRateFormatted,
                     icon: "checkmark.seal.fill",
-                    color: completionColor
+                    color: completionColor,
+                    tintBackground: true
                 )
                 StatCard(
                     title: "Cancellation Rate",
                     value: vm.funnelData.cancellationRateFormatted,
                     icon: "xmark.seal.fill",
-                    color: cancellationColor
+                    color: cancellationColor,
+                    tintBackground: true
                 )
             }
             HStack(spacing: 12) {
