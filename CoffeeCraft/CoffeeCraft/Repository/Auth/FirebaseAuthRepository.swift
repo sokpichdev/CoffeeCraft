@@ -71,10 +71,9 @@ struct FirebaseAuthRepository: AuthRepositoryProtocol {
 
     func saveUser(_ user: User, uid: String) async throws {
         try await db.collection("users").document(uid).setData([
-            "name":      user.name,
-            "email":     user.email,
-            "role":      user.role.rawValue,
-            "createdAt": FieldValue.serverTimestamp()   // Required by analytics queries
+            "name": user.name,
+            "email": user.email,
+            "role": user.role.rawValue
         ])
     }
 
