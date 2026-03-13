@@ -21,8 +21,7 @@ struct OrderAnalyticsDashboardView: View {
             contentArea
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle("Order Analytics")
-        .navigationBarTitleDisplayMode(.large)
+        .customNavigationBar("Order Analytics", displayMode: .large)
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) {
@@ -58,7 +57,7 @@ struct OrderAnalyticsDashboardView: View {
     // MARK: - QUEUE ─
 
     private var queueSection: some View {
-        ScrollView {
+        CustomRefreshScrollView( {
             LazyVStack(spacing: 12) {
                 if vm.queueItems.isEmpty {
                     DashboardEmptyState(
@@ -88,28 +87,30 @@ struct OrderAnalyticsDashboardView: View {
                 }
             }
             .padding(16)
-        }
+        })
     }
 
     // MARK: ─ HISTORY ─
 
     private var historySection: some View {
-        VStack(spacing: 0) {
-            historyFilterBar
-            Divider().background(Color.borderColor)
+        CustomRefreshScrollView({
+            VStack(spacing: 0) {
+                historyFilterBar
+                Divider().background(Color.borderColor)
 
-            if vm.isLoadingHistory {
-                DashboardLoadingPlaceholder(count: 2).padding(16)
-            } else if vm.historyItems.isEmpty {
-                DashboardEmptyState(
-                    icon: "clock.arrow.circlepath",
-                    title: "No orders found",
-                    message: "Try adjusting your filters."
-                )
-            } else {
-                historyList
+                if vm.isLoadingHistory {
+                    DashboardLoadingPlaceholder(count: 2).padding(16)
+                } else if vm.historyItems.isEmpty {
+                    DashboardEmptyState(
+                        icon: "clock.arrow.circlepath",
+                        title: "No orders found",
+                        message: "Try adjusting your filters."
+                    )
+                } else {
+                    historyList
+                }
             }
-        }
+        })
     }
 
     private var historyFilterBar: some View {
@@ -185,7 +186,6 @@ struct OrderAnalyticsDashboardView: View {
     }
 
     private var historyList: some View {
-        ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(vm.historyItems) { item in
                     HistoryOrderRow(item: item, now: now)
@@ -210,13 +210,12 @@ struct OrderAnalyticsDashboardView: View {
                         .padding(.vertical, 16)
                 }
             }
-        }
     }
 
     // MARK: ─── FUNNEL ────────────────────────────────────────────────────────
 
     private var funnelSection: some View {
-        ScrollView {
+        CustomRefreshScrollView( {
             VStack(spacing: 20) {
                 if vm.isLoadingFunnel {
                     DashboardLoadingPlaceholder(count: 2)
@@ -227,7 +226,7 @@ struct OrderAnalyticsDashboardView: View {
                 }
             }
             .padding(16)
-        }
+        })
     }
 
     private var funnelStatCards: some View {

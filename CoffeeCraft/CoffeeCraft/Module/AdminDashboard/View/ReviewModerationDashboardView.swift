@@ -20,8 +20,7 @@ struct ReviewModerationDashboardView: View {
             content
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle("Review Moderation")
-        .navigationBarTitleDisplayMode(.large)
+        .customNavigationBar("Review Moderation", displayMode: .large)
         .onAppear { vm.onAppear() }
     }
 

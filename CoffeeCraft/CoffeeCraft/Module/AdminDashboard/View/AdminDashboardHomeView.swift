@@ -27,8 +27,7 @@ struct AdminDashboardHomeView: View {
             await vm.refresh()
         })
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle("Dashboard")
-        .navigationBarTitleDisplayMode(.large)
+        .customNavigationBar("Dashboard", displayMode: .large)
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { tick in
@@ -209,23 +208,6 @@ struct AdminDashboardHomeView: View {
             }
         }
     }
-
-    // MARK: - Quick Links (Icon Grid)
-
-    private struct QuickNavItem {
-        let title: String
-        let subtitle: String
-        let icon: String
-        let color: Color
-    }
-
-    private let navItems: [(title: String, subtitle: String, icon: String, color: Color)] = [
-        ("Sales", "Revenue & trends", "chart.xyaxis.line", .accentPrimary),
-        ("Products", "Top sellers", "trophy.fill", .accentGold),
-        ("Orders", "Queue & history", "bag.fill", .orange),
-        ("Users", "Customer accounts", "person.2.fill", .blue),
-        ("Reviews", "Moderation", "bubble.left.and.bubble.right.fill", .semanticSuccess)
-    ]
 
     private var quickLinksSection: some View {
         VStack(alignment: .leading, spacing: 14) {
