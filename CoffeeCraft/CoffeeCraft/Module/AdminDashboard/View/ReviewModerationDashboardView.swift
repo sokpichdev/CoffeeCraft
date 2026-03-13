@@ -35,7 +35,7 @@ struct ReviewModerationDashboardView: View {
         .pickerStyle(.segmented)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color(UIColor.systemBackground))
+        .background(Color.bgPrimary)
     }
 
     // MARK: - Content Router
@@ -500,14 +500,14 @@ private struct ReviewQueueCard: View {
         .padding(14)
         .background(
             review.isHidden
-                ? Color(UIColor.secondarySystemBackground)
-                : Color(UIColor.systemBackground),
+                ? Color.surfaceSub
+                : Color.surfacePrimary,
             in: RoundedRectangle(cornerRadius: 14)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(
-                    review.isHidden ? Color.orange.opacity(0.25) : Color.secondary.opacity(0.12),
+                    review.isHidden ? Color.orange.opacity(0.25) : Color.borderColor,
                     lineWidth: 1
                 )
         )

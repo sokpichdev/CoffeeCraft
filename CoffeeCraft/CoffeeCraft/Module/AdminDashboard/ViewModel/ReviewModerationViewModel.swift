@@ -11,7 +11,7 @@ import FirebaseFirestore
 // MARK: - Section
 
 enum ReviewDashboardSection: String, CaseIterable, Identifiable {
-    case queue     = "Reviews"
+    case queue      = "Reviews"
     case analytics = "Analytics"
     var id: String { rawValue }
     var icon: String {

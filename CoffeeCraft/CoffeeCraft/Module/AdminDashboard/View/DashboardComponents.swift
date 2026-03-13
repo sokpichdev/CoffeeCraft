@@ -2,38 +2,38 @@
 //  DashboardComponents.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 3/12/26.
-//
-//  Shared UI components used across multiple admin dashboard screens.
-//  Extracted from SalesAnalyticsView so 8.3 and future screens reuse
-//  the same visual language without duplication.
-//
-//  ⚠️ ACTION REQUIRED in SalesAnalyticsView.swift:
-//  Remove the two `private struct` declarations for `StatCard` and `ChartCard`
-//  — they now live here as internal structs.
+//  Palette-aware shared components for all Admin Dashboard screens.
+//  Uses semantic Color tokens (Color.surfacePrimary, .textPrimary, etc.)
+//  so every palette (Brown / Strawberry / Matcha / Oreo) and dark mode work
+//  automatically without any hardcoded hex values.
 //
 
 import SwiftUI
 
 // MARK: - Stat Card
 
-/// Small metric card used in the 2×2 summary grid at the top of analytics screens.
+/// 2-column metric card. Pass `tintBackground: true` for health-signal cards
+/// (completion rate, cancellation rate) so the accent colour fills the background
+/// — making green / orange / red immediately readable at a glance.
 struct StatCard: View {
     let title: String
     let value: String
     let icon: String
     let color: Color
     var isLoading: Bool = false
+    /// When true the card background is tinted with `color`. Use for status
+    /// metrics where the colour IS the signal (cancellation rate, etc.).
+    var tintBackground: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.subheadline)
-                    .foregroundStyle(color)
+                    .foregroundStyle(tintBackground ? color : color)
                 Text(title)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(tintBackground ? color.opacity(0.85) : Color.textSecondary)
             }
             if isLoading {
                 ShimmerView()
@@ -42,17 +42,22 @@ struct StatCard: View {
             } else {
                 Text(value)
                     .font(.title3.bold())
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(tintBackground ? color : Color.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+        .background(
+            tintBackground
+                ? color.opacity(0.10)
+                : Color.surfacePrimary,
+            in: RoundedRectangle(cornerRadius: 14)
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(color.opacity(0.15), lineWidth: 1)
+                .stroke(color.opacity(tintBackground ? 0.30 : 0.15), lineWidth: 1)
         )
     }
 }
@@ -67,23 +72,28 @@ struct ChartCard<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.headline)
+                    .foregroundStyle(Color.textPrimary)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textMuted)
             }
             content()
         }
         .padding(16)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.surfacePrimary, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.borderColor, lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 }
 
 // MARK: - Dashboard Loading Placeholder
 
-/// Three shimmer card placeholders — used while any analytics screen is loading.
 struct DashboardLoadingPlaceholder: View {
     var count: Int = 3
 
@@ -92,7 +102,7 @@ struct DashboardLoadingPlaceholder: View {
             ForEach(0..<count, id: \.self) { _ in
                 ShimmerView()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 180)
+                    .frame(height: 120)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
@@ -107,19 +117,25 @@ struct DashboardEmptyState: View {
     var message: String = "Place some orders to see analytics appear here."
 
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 48))
-                .foregroundStyle(.tertiary)
+        VStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentPrimary.opacity(0.08))
+                    .frame(width: 72, height: 72)
+                Image(systemName: icon)
+                    .font(.system(size: 30))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.5))
+            }
             Text(title)
                 .font(.headline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.textSecondary)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color.textMuted)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 48)
+        .padding(.vertical, 52)
+        .padding(.horizontal, 32)
     }
 }
