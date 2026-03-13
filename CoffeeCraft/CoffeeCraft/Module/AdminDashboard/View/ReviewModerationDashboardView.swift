@@ -14,10 +14,20 @@ struct ReviewModerationDashboardView: View {
 
     @StateObject private var vm = ReviewModerationViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showProductSheet = false
     var body: some View {
         VStack(spacing: 0) {
             sectionPicker
             content
+        }
+        .sheet(isPresented: $showProductSheet) {
+            ProductPickerSheet(
+                options: vm.productOptions,
+                selectedId: $vm.selectedProductId,
+                onSelect: { Task { await vm.productChanged() } }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
         .background(Color.bgPrimary.ignoresSafeArea())
         .customNavigationBar("Review Moderation") {
@@ -94,18 +104,26 @@ struct ReviewModerationDashboardView: View {
                     Text("Product:")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(Color.textMuted)
-                    Picker("Product", selection: $vm.filter.productId) {
-                        Text("All Products").tag(String?.none)
-                        ForEach(vm.productOptions) { opt in
-                            Text(opt.name).tag(String?.some(opt.id))
+                    Button {
+                        showProductSheet = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(vm.productOptions.first(where: { $0.id == vm.filter.productId })?.name ?? "All Products")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.accentPrimary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(Color.accentPrimary.opacity(0.7))
                         }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.accentPrimary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.accentPrimary.opacity(0.20), lineWidth: 1)
+                        )
                     }
-                    .pickerStyle(.menu)
-                    .font(.caption)
-                    .foregroundStyle(Color.accentPrimary)
-                    .onChange(of: vm.filter.productId) { _, _ in
-                        Task { await vm.applyFilter() }
-                    }
+                    .buttonStyle(.plain)
                     Spacer()
                     if !vm.filter.isEmpty {
                         Button("Clear") {
@@ -196,8 +214,7 @@ struct ReviewModerationDashboardView: View {
                             ratingOverTimeChart(data: data)
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 32)
+                    .padding()
                 } else if vm.productOptions.isEmpty {
                     DashboardEmptyState(
                         icon: "star.slash",
@@ -209,28 +226,6 @@ struct ReviewModerationDashboardView: View {
                 await vm.loadAnalytics()
             })
         }
-    }
-
-    private var productPickerBar: some View {
-        HStack {
-            Text("Product")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.textMuted)
-            Picker("Product", selection: $vm.selectedProductId) {
-                ForEach(vm.productOptions) { opt in
-                    Text(opt.name).tag(String?.some(opt.id))
-                }
-            }
-            .pickerStyle(.menu)
-            .foregroundStyle(Color.accentPrimary)
-            .onChange(of: vm.selectedProductId) { _, _ in
-                Task { await vm.productChanged() }
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.bgSecondary)
     }
 
     private func analyticsStatCards(data: ReviewAnalyticsData) -> some View {
@@ -298,62 +293,6 @@ struct ReviewModerationDashboardView: View {
                 }
             }
             .padding(.top, 2)
-        }
-    }
-
-    private func ratingOverTimeChart(data: ReviewAnalyticsData) -> some View {
-        ChartCard(title: "Rating Over Time", subtitle: "Weekly average · \(data.productName)") {
-            Chart(data.ratingOverTime) { point in
-                AreaMark(
-                    x: .value("Week", point.weekStart, unit: .weekOfYear),
-                    y: .value("Avg Rating", point.avgRating)
-                )
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color.accentGold.opacity(0.22), Color.accentGold.opacity(0.02)],
-                        startPoint: .top, endPoint: .bottom
-                    )
-                )
-                .interpolationMethod(.catmullRom)
-
-                LineMark(
-                    x: .value("Week", point.weekStart, unit: .weekOfYear),
-                    y: .value("Avg Rating", point.avgRating)
-                )
-                .foregroundStyle(Color.accentGold)
-                .lineStyle(StrokeStyle(lineWidth: 2.5))
-                .interpolationMethod(.catmullRom)
-
-                PointMark(
-                    x: .value("Week", point.weekStart, unit: .weekOfYear),
-                    y: .value("Avg Rating", point.avgRating)
-                )
-                .foregroundStyle(Color.accentGold)
-                .symbolSize(30)
-                .annotation(position: .top, spacing: 4) {
-                    Text(String(format: "%.1f", point.avgRating))
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(Color.textMuted)
-                }
-            }
-            .chartYScale(domain: 1...5.2)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { _ in
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
-                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                }
-            }
-            .chartYAxis {
-                AxisMarks(position: .leading, values: [1.0, 2.0, 3.0, 4.0, 5.0]) { value in
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
-                    AxisValueLabel {
-                        if let v = value.as(Double.self) {
-                            Text(String(format: "%.0f★", v)).font(.caption2)
-                        }
-                    }
-                }
-            }
-            .frame(height: 200)
         }
     }
 
@@ -491,5 +430,193 @@ private struct FilterChip: View {
                 .overlay(Capsule().stroke(color.opacity(isSelected ? 0 : 0.22), lineWidth: 1))
         }
         .buttonStyle(.plain)
+    }
+}
+
+extension ReviewModerationDashboardView {
+    
+    private var productPickerBar: some View {
+        Button {
+            showProductSheet = true
+        } label: {
+            HStack(spacing: 10) {
+                // Icon
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.accentPrimary.opacity(0.10))
+                        .frame(width: 30, height: 30)
+                    Image(systemName: "cup.and.saucer.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.accentPrimary)
+                }
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Analysing product")
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color.textMuted)
+                    Text(vm.productOptions.first(where: { $0.id == vm.selectedProductId })?.name ?? "Select a product")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.textPrimary)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.6))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 11)
+        }
+        .buttonStyle(.plain)
+        .background(Color.bgSecondary)
+        .overlay(alignment: .bottom) {
+            Divider().background(Color.borderColor)
+        }
+    }
+    
+    private func ratingOverTimeChart(data: ReviewAnalyticsData) -> some View {
+        ChartCard(title: "Rating Over Time", subtitle: "Weekly average · \(data.productName)") {
+            Chart(data.ratingOverTime) { point in
+                AreaMark(
+                    x: .value("Week", point.weekStart, unit: .weekOfYear),
+                    y: .value("Avg Rating", point.avgRating)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.accentGold.opacity(0.22), Color.accentGold.opacity(0.02)],
+                        startPoint: .top, endPoint: .bottom
+                    )
+                )
+                .interpolationMethod(.catmullRom)
+
+                LineMark(
+                    x: .value("Week", point.weekStart, unit: .weekOfYear),
+                    y: .value("Avg Rating", point.avgRating)
+                )
+                .foregroundStyle(Color.accentGold)
+                .lineStyle(StrokeStyle(lineWidth: 2.5))
+                .interpolationMethod(.catmullRom)
+
+                PointMark(
+                    x: .value("Week", point.weekStart, unit: .weekOfYear),
+                    y: .value("Avg Rating", point.avgRating)
+                )
+                .foregroundStyle(Color.accentGold)
+                .symbolSize(30)
+                .annotation(position: .top, spacing: 4) {
+                    Text(String(format: "%.1f", point.avgRating))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(Color.textMuted)
+                }
+            }
+            .chartYScale(domain: 1...5.2)
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .weekOfYear, count: 2)) { _ in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .leading, values: [1.0, 2.0, 3.0, 4.0, 5.0]) { value in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
+                    AxisValueLabel {
+                        if let value = value.as(Double.self) {
+                            Text(String(format: "%.0f★", value)).font(.caption2)
+                        }
+                    }
+                }
+            }
+            .frame(height: 200)
+        }
+    }
+}
+
+// MARK: - Product Picker Sheet
+
+private struct ProductPickerSheet: View {
+
+    let options: [ProductOption]
+    @Binding var selectedId: String?
+    let onSelect: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                // "All Products" row — only relevant in queue filter context
+                // (analytics always needs a specific product, but harmless to include)
+                Button {
+                    selectedId = nil
+                    onSelect()
+                    dismiss()
+                } label: {
+                    HStack {
+                        Label("All Products", systemImage: "square.stack.fill")
+                            .foregroundStyle(Color.textPrimary)
+                        Spacer()
+                        if selectedId == nil {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Color.accentPrimary)
+                        }
+                    }
+                }
+                .listRowBackground(Color.surfacePrimary)
+
+                Section {
+                    ForEach(options) { option in
+                        Button {
+                            selectedId = option.id
+                            onSelect()
+                            dismiss()
+                        } label: {
+                            HStack(spacing: 12) {
+                                // Avatar initials circle
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.accentPrimary.opacity(0.10))
+                                        .frame(width: 34, height: 34)
+                                    Text(String(option.name.prefix(1)).uppercased())
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundStyle(Color.accentPrimary)
+                                }
+
+                                Text(option.name)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(Color.textPrimary)
+
+                                Spacer()
+
+                                if selectedId == option.id {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(Color.accentPrimary)
+                                }
+                            }
+                        }
+                        .listRowBackground(Color.surfacePrimary)
+                    }
+                } header: {
+                    Text("Products")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.textMuted)
+                        .textCase(nil)
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.bgPrimary.ignoresSafeArea())
+            .navigationTitle("Select Product")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.accentPrimary)
+                }
+            }
+        }
     }
 }
