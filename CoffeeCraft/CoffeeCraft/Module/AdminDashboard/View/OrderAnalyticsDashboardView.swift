@@ -14,14 +14,18 @@ struct OrderAnalyticsDashboardView: View {
 
     @StateObject private var vm = OrderAnalyticsViewModel()
     @State private var now = Date()
-
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 0) {
             sectionPicker
             contentArea
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .customNavigationBar("Order Analytics", displayMode: .large)
+        .customNavigationBar("Order Analytics") {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
         .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) {

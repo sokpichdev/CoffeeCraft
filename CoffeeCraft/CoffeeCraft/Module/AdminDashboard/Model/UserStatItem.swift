@@ -76,10 +76,10 @@ struct UserOrderItem: Identifiable {
     var totalFormatted: String { totalPrice.asCurrency }
 
     var timestampFormatted: String {
-        let f = DateFormatter()
-        f.dateStyle = .short
-        f.timeStyle = .short
-        return f.string(from: timestamp)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: timestamp)
     }
 
     var statusColor: StatusColor {

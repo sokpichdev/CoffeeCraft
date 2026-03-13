@@ -11,7 +11,7 @@ import SwiftUI
 struct ProductPerformanceView: View {
 
     @StateObject private var vm = ProductPerformanceViewModel()
-
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         CustomRefreshScrollView({
             VStack(alignment: .leading, spacing: 20) {
@@ -39,7 +39,11 @@ struct ProductPerformanceView: View {
             await vm.loadPerformance()
         })
         .background(Color.bgPrimary.ignoresSafeArea())
-        .customNavigationBar("Product Performance", displayMode: .large)
+        .customNavigationBar("Product Performance", displayMode: .large) {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
         .onAppear { vm.onAppear() }
     }
 
@@ -93,7 +97,7 @@ struct ProductPerformanceView: View {
             title: "Best Sellers",
             subtitle: "\(vm.selectedPeriod.rawValue) · Ranked by units sold"
         ) {
-            LazyVStack(spacing: 0) {
+            VStack(spacing: 0) {
                 // Header row
                 HStack {
                     Text("#").frame(width: 22, alignment: .center)
@@ -108,9 +112,10 @@ struct ProductPerformanceView: View {
 
                 Divider().background(Color.borderColor)
 
-                ForEach(vm.performanceData?.topProducts ?? []) { item in
+                let products = vm.performanceData?.topProducts ?? []
+                ForEach(Array(products.enumerated()), id: \.element.id) { index, item in
                     BestSellerRow(item: item, maxUnits: vm.maxUnitsSold)
-                    if item.id != vm.performanceData?.topProducts.last?.id {
+                    if index < products.count - 1 {
                         Divider().padding(.leading, 28).background(Color.borderColor)
                     }
                 }
@@ -257,7 +262,7 @@ struct ProductPerformanceView: View {
 
 // MARK: - Best Seller Row
 
-private struct BestSellerRow: View {
+struct BestSellerRow: View {
     let item: ProductStatItem
     let maxUnits: Int
 
@@ -306,15 +311,14 @@ private struct BestSellerRow: View {
                 .frame(width: 34, alignment: .trailing)
             }
 
-            // Units progress bar
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.surfaceSub)
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.accentPrimary.opacity(0.55))
-                        .frame(width: max(4, geo.size.width * ratio))
-                }
+            // Units progress bar — FIXED: Replaced GeometryReader with layoutPriority
+            HStack(spacing: 0) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.accentPrimary.opacity(0.55))
+                    .layoutPriority(CGFloat(ratio))
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.surfaceSub)
+                    .layoutPriority(CGFloat(1 - ratio))
             }
             .frame(height: 4)
             .padding(.leading, 30)
@@ -322,8 +326,8 @@ private struct BestSellerRow: View {
         .padding(.vertical, 8)
     }
 
-    private var ratio: CGFloat {
-        maxUnits > 0 ? CGFloat(item.unitsSold) / CGFloat(maxUnits) : 0
+    private var ratio: Double {
+        maxUnits > 0 ? Double(item.unitsSold) / Double(maxUnits) : 0
     }
 
     private var rankColor: Color {

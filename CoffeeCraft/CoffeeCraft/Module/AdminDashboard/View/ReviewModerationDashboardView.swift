@@ -13,14 +13,18 @@ import SwiftUI
 struct ReviewModerationDashboardView: View {
 
     @StateObject private var vm = ReviewModerationViewModel()
-
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 0) {
             sectionPicker
             content
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .customNavigationBar("Review Moderation", displayMode: .large)
+        .customNavigationBar("Review Moderation") {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
         .onAppear { vm.onAppear() }
     }
 

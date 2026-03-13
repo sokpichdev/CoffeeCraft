@@ -13,7 +13,7 @@ import SwiftUI
 struct SalesAnalyticsView: View {
 
     @StateObject private var vm = SalesAnalyticsViewModel()
-
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         CustomRefreshScrollView({
             VStack(alignment: .leading, spacing: 20) {
@@ -37,7 +37,11 @@ struct SalesAnalyticsView: View {
             await vm.loadAnalytics()
         })
         .background(Color.bgPrimary.ignoresSafeArea())
-        .customNavigationBar("Sales Snalytics", displayMode: .large)
+        .customNavigationBar("Sales Snalytics", displayMode: .large) {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
         .onAppear { vm.onAppear() }
     }
 
