@@ -41,42 +41,6 @@ struct AdminDashboardHomeView: View {
         }
     }
 
-    // MARK: - Header
-
-    private var headerSection: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(greetingText)
-                    .font(.subheadline)
-                    .foregroundColor(.textSecondary)
-                Text("Here's what's brewing")
-                    .font(.title3.weight(.semibold))
-                    .foregroundColor(.textPrimary)
-            }
-            Spacer()
-            // Coffee cup icon badge
-            ZStack {
-                Circle()
-                    .fill(LinearGradient.brandPrimary)
-                    .frame(width: 42, height: 42)
-                Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: 18))
-                    .foregroundStyle(.white)
-            }
-            .shadow(color: Color.accentPrimary.opacity(0.35), radius: 6, x: 0, y: 3)
-        }
-        .padding(.top, 6)
-    }
-
-    private var greetingText: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 0..<12:  return "Good morning ☕"
-        case 12..<17: return "Good afternoon ☀️"
-        default:      return "Good evening 🌙"
-        }
-    }
-
     // MARK: - Period Picker + Revenue Card
 
     private var revenuePeriodPicker: some View {
@@ -301,6 +265,22 @@ struct AdminDashboardHomeView: View {
                 .padding(.vertical, 12)
                 .padding(.horizontal, 16)
             }
+            NavigationLink(destination: UserManagementView()) {
+                HStack {
+                    Image(systemName: "chart.xyaxis.line")
+                        .font(.subheadline)
+                        .foregroundColor(.accentPrimary)
+                        .frame(width: 28)
+                    Text("User Management")
+                        .font(.subheadline)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+            }
         }
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
@@ -330,7 +310,46 @@ struct AdminDashboardHomeView: View {
             paginationFooter
         }
     }
+}
 
+extension AdminDashboardHomeView {
+    
+    // MARK: - Header
+
+    private var headerSection: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(greetingText)
+                    .font(.subheadline)
+                    .foregroundColor(.textSecondary)
+                Text("Here's what's brewing")
+                    .font(.title3.weight(.semibold))
+                    .foregroundColor(.textPrimary)
+            }
+            Spacer()
+            // Coffee cup icon badge
+            ZStack {
+                Circle()
+                    .fill(LinearGradient.brandPrimary)
+                    .frame(width: 42, height: 42)
+                Image(systemName: "cup.and.saucer.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.white)
+            }
+            .shadow(color: Color.accentPrimary.opacity(0.35), radius: 6, x: 0, y: 3)
+        }
+        .padding(.top, 6)
+    }
+    
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 0..<12:  return "Good morning ☕"
+        case 12..<17: return "Good afternoon ☀️"
+        default:      return "Good evening 🌙"
+        }
+    }
+    
     @ViewBuilder
     private var paginationFooter: some View {
         if vm.isLoadingMore {
@@ -359,7 +378,7 @@ struct AdminDashboardHomeView: View {
             .padding(.vertical, 14)
         }
     }
-
+    
     // MARK: - Loading Skeleton
 
     private var loadingPlaceholder: some View {
@@ -391,7 +410,7 @@ struct AdminDashboardHomeView: View {
             }
         }
     }
-
+    
     // MARK: - Empty State
 
     private var emptyActivityView: some View {
