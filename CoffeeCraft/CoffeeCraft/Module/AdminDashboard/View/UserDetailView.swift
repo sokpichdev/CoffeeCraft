@@ -13,7 +13,8 @@ struct UserDetailView: View {
 
     let user: UserStatItem
     @StateObject private var vm: UserDetailViewModel
-
+    @Environment(\.dismiss) private var dismiss
+    
     init(user: UserStatItem) {
         self.user = user
         _vm = StateObject(wrappedValue: UserDetailViewModel(user: user))
@@ -38,25 +39,17 @@ struct UserDetailView: View {
         })
         .background(Color.bgPrimary.ignoresSafeArea())
         .customNavigationBar(user.name, displayMode: .inline) {
-            toolbarContent
+            ToolBarButton.back {
+                dismiss()
+            }
+            ToolBarButton(placement: .topBarTrailing, buttonType: .icon("bell.badge")) {
+                if vm.canSendNotification {
+                    vm.showNotifSheet = true
+                }
+            }
         }
         .sheet(isPresented: $vm.showNotifSheet) { notificationSheet }
         .onAppear { vm.onAppear() }
-    }
-
-    // MARK: - Toolbar
-
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                vm.showNotifSheet = true
-            } label: {
-                Image(systemName: "bell.badge")
-                    .foregroundStyle(Color.accentPrimary)
-            }
-            .disabled(!vm.canSendNotification)
-        }
     }
 
     // MARK: - Profile Header
@@ -269,6 +262,9 @@ struct UserDetailView: View {
             .padding(20)
             .background(Color.bgPrimary.ignoresSafeArea())
             .customNavigationBar("Send to \(user.name)", displayMode: .inline) {
+                ToolBarButton.back {
+                    dismiss()
+                }
                 ToolBarButton(placement: .topBarTrailing, buttonType: .text("Cancel")) {
                     vm.showNotifSheet = false
                 }

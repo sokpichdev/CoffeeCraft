@@ -12,7 +12,7 @@ import SwiftUI
 struct UserManagementView: View {
 
     @StateObject private var vm = UserManagementViewModel()
-
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 0) {
             searchBar
@@ -20,9 +20,11 @@ struct UserManagementView: View {
             content
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle("Users")
-        .navigationBarTitleDisplayMode(.large)
-        .customNavigationBar("Users", displayMode: .large)
+        .customNavigationBar("Users") {
+            ToolBarButton.back {
+                dismiss()
+            }
+        }
         .onAppear { vm.onAppear() }
     }
 
