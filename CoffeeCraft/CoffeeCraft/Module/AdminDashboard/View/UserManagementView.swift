@@ -61,58 +61,59 @@ struct UserManagementView: View {
 
     @ViewBuilder
     private var content: some View {
-        if vm.isLoading {
-            userListSkeleton
-        } else if vm.users.isEmpty {
-            DashboardEmptyState(
-                icon: "person.2.slash",
-                title: "No customers found",
-                message: vm.searchText.isEmpty
-                    ? "No customer accounts registered yet."
-                    : "No results for \"\(vm.searchText)\"."
-            )
-        } else {
-            userList
-        }
+        CustomRefreshScrollView({
+            if vm.isLoading {
+                userListSkeleton
+            } else if vm.users.isEmpty {
+                DashboardEmptyState(
+                    icon: "person.2.slash",
+                    title: "No customers found",
+                    message: vm.searchText.isEmpty
+                        ? "No customer accounts registered yet."
+                        : "No results for \"\(vm.searchText)\"."
+                )
+            } else {
+                userList
+            }
+        }, onRefresh: {
+            await vm.load()
+        })
     }
 
     // MARK: - User List
 
     private var userList: some View {
-        ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                Section {
-                    ForEach(vm.users) { user in
-                        NavigationLink(destination: UserDetailView(user: user)) {
-                            UserListRow(user: user)
-                        }
-                        .buttonStyle(.plain)
-
-                        if user.id == vm.users.last?.id {
-                            Color.clear.frame(height: 1)
-                                .onAppear { Task { await vm.loadMore() } }
-                        }
-
-                        Divider().padding(.leading, 58).background(Color.borderColor)
+        LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+            Section {
+                ForEach(vm.users) { user in
+                    NavigationLink(destination: UserDetailView(user: user)) {
+                        UserListRow(user: user)
                     }
-
-                    if vm.isLoadingMore {
-                        ProgressView().tint(.accentPrimary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                    } else if !vm.canLoadMore && vm.users.count >= 20 {
-                        Text("All \(vm.users.count) users loaded")
-                            .font(.caption)
-                            .foregroundStyle(Color.textMuted)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
+                    .buttonStyle(.plain)
+                    
+                    if user.id == vm.users.last?.id {
+                        Color.clear.frame(height: 1)
+                            .onAppear { Task { await vm.loadMore() } }
                     }
-                } header: {
-                    columnHeader
+                    
+                    Divider().padding(.leading, 58).background(Color.borderColor)
                 }
+                
+                if vm.isLoadingMore {
+                    ProgressView().tint(.accentPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                } else if !vm.canLoadMore && vm.users.count >= 20 {
+                    Text("All \(vm.users.count) users loaded")
+                        .font(.caption)
+                        .foregroundStyle(Color.textMuted)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                }
+            } header: {
+                columnHeader
             }
         }
-        .refreshable { await vm.load() }
     }
 
     private var columnHeader: some View {
@@ -142,12 +143,10 @@ struct UserManagementView: View {
     // MARK: - Skeleton
 
     private var userListSkeleton: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                ForEach(0..<12, id: \.self) { _ in
-                    UserListRowSkeleton()
-                    Divider().padding(.leading, 58).background(Color.borderColor)
-                }
+        VStack(spacing: 0) {
+            ForEach(0..<12, id: \.self) { _ in
+                UserListRowSkeleton()
+                Divider().padding(.leading, 58).background(Color.borderColor)
             }
         }
     }
