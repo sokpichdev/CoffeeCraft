@@ -24,7 +24,7 @@ struct ReviewModerationDashboardView: View {
             ProductPickerSheet(
                 options: vm.productOptions,
                 selectedId: $vm.selectedProductId,
-                onSelect: { Task { await vm.productChanged() } }
+                onSelect: { Task { await vm.setSelectedProduct(vm.selectedProductId) } }
             )
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
@@ -36,6 +36,9 @@ struct ReviewModerationDashboardView: View {
             }
         }
         .onAppear { vm.onAppear() }
+        .onChange(of: vm.selectedSection) { _, _ in
+            Task { await vm.setSelectedProduct(vm.selectedProductId) }
+        }
     }
 
     // MARK: - Section Picker
@@ -108,7 +111,7 @@ struct ReviewModerationDashboardView: View {
                         showProductSheet = true
                     } label: {
                         HStack(spacing: 4) {
-                            Text(vm.productOptions.first(where: { $0.id == vm.filter.productId })?.name ?? "All Products")
+                            Text(vm.productOptions.first(where: { $0.id == vm.selectedProductId })?.name ?? "All Products")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.accentPrimary)
                             Image(systemName: "chevron.up.chevron.down")

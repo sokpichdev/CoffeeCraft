@@ -176,4 +176,22 @@ final class ReviewModerationViewModel: ObservableObject {
         analyticsData = nil
         await loadAnalytics()
     }
+    
+    func setSelectedProduct(_ id: String?) async {
+        selectedProductId = id
+        filter.productId = id
+
+        if selectedSection == .queue {
+            await loadQueue()
+            return
+        }
+
+        // Analytics section
+        guard let id else {
+            analyticsData = nil
+            return
+        }
+
+        await loadAnalytics()
+    }
 }
