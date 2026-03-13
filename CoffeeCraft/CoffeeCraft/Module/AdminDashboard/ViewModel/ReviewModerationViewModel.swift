@@ -5,18 +5,18 @@
 //  Created by Sok Pich on 3/13/26.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 // MARK: - Section
 
 enum ReviewDashboardSection: String, CaseIterable, Identifiable {
-    case queue      = "Reviews"
+    case queue = "Reviews"
     case analytics = "Analytics"
     var id: String { rawValue }
     var icon: String {
         switch self {
-        case .queue:     return "text.bubble.fill"
+        case .queue: return "text.bubble.fill"
         case .analytics: return "chart.bar.fill"
         }
     }
@@ -39,12 +39,12 @@ final class ReviewModerationViewModel: ObservableObject {
     @Published var isLoadingQueue: Bool = false
     @Published var isLoadingMore: Bool = false
     @Published var canLoadMore: Bool = true
-    @Published var togglingIds: Set<String> = []    // in-flight hide/unhide guards
+    @Published var togglingIds: Set<String> = [] // in-flight hide/unhide guards
 
     // MARK: - Analytics State
 
     @Published var analyticsData: ReviewAnalyticsData?
-    @Published var selectedProductId: String? = nil
+    @Published var selectedProductId: String?
     @Published var isLoadingAnalytics: Bool = false
 
     // MARK: - Private
@@ -123,8 +123,8 @@ final class ReviewModerationViewModel: ObservableObject {
         do {
             try await service.setReviewHidden(
                 productId: review.productId,
-                reviewId:  review.id,
-                hidden:    !review.isHidden   // original value before toggle
+                reviewId: review.id,
+                hidden: !review.isHidden // original value before toggle
             )
         } catch {
             // Revert on failure

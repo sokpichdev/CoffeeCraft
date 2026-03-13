@@ -2,46 +2,49 @@
 //  DashboardComponents.swift
 //  CoffeeCraft
 //
-//  Palette-aware shared components for all Admin Dashboard screens.
-//  Uses semantic Color tokens (Color.surfacePrimary, .textPrimary, etc.)
-//  so every palette (Brown / Strawberry / Matcha / Oreo) and dark mode work
-//  automatically without any hardcoded hex values.
+//  Palette-aware shared components using semantic Color tokens.
 //
 
 import SwiftUI
 
 // MARK: - Stat Card
 
-/// 2-column metric card. Pass `tintBackground: true` for health-signal cards
-/// (completion rate, cancellation rate) so the accent colour fills the background
-/// — making green / orange / red immediately readable at a glance.
+/// Metric card with optional tinted background for health-signal metrics.
 struct StatCard: View {
     let title: String
     let value: String
     let icon: String
     let color: Color
     var isLoading: Bool = false
-    /// When true the card background is tinted with `color`. Use for status
-    /// metrics where the colour IS the signal (cancellation rate, etc.).
     var tintBackground: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.subheadline)
-                    .foregroundStyle(tintBackground ? color : color)
+        VStack(alignment: .leading, spacing: 10) {
+
+            // Icon row
+            HStack(spacing: 7) {
+                ZStack {
+                    Circle()
+                        .fill((tintBackground ? color : Color.accentPrimary).opacity(0.12))
+                        .frame(width: 30, height: 30)
+                    Image(systemName: icon)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(tintBackground ? color : Color.accentPrimary)
+                }
                 Text(title)
-                    .font(.caption)
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(tintBackground ? color.opacity(0.85) : Color.textSecondary)
+                    .lineLimit(1)
             }
+
+            // Value
             if isLoading {
                 ShimmerView()
                     .frame(width: 80, height: 22)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             } else {
                 Text(value)
-                    .font(.title3.bold())
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundStyle(tintBackground ? color : Color.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -51,44 +54,73 @@ struct StatCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             tintBackground
-                ? color.opacity(0.10)
+                ? color.opacity(0.09)
                 : Color.surfacePrimary,
             in: RoundedRectangle(cornerRadius: 14)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(color.opacity(tintBackground ? 0.30 : 0.15), lineWidth: 1)
+                .stroke(color.opacity(tintBackground ? 0.28 : 0.14), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
 }
 
 // MARK: - Chart Card Container
 
-/// Consistent card wrapper for every chart section across dashboard screens.
+/// Consistent card wrapper for all chart sections.
 struct ChartCard<Content: View>: View {
     let title: String
     let subtitle: String
     @ViewBuilder let content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(Color.textPrimary)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(Color.textMuted)
+        VStack(alignment: .leading, spacing: 14) {
+            // Header
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(Color.textPrimary)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(Color.textMuted)
+                }
+                Spacer()
             }
+
+            Divider()
+                .background(Color.borderColor)
+
             content()
         }
         .padding(16)
-        .background(Color.surfacePrimary, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.surfacePrimary, in: RoundedRectangle(cornerRadius: 18))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 18)
                 .stroke(Color.borderColor, lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 3)
+    }
+}
+
+// MARK: - Section Header Label
+
+struct SectionHeaderLabel: View {
+    let icon: String
+    let title: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.accentPrimary)
+                .frame(width: 26, height: 26)
+                .background(Color.accentPrimary.opacity(0.10), in: RoundedRectangle(cornerRadius: 7))
+            Text(title)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(Color.textPrimary)
+        }
     }
 }
 
@@ -112,22 +144,25 @@ struct DashboardLoadingPlaceholder: View {
 // MARK: - Dashboard Empty State
 
 struct DashboardEmptyState: View {
-    var icon: String = "chart.xyaxis.line"
+    var icon: String  = "chart.xyaxis.line"
     var title: String = "No data for this period"
     var message: String = "Place some orders to see analytics appear here."
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Color.accentPrimary.opacity(0.08))
-                    .frame(width: 72, height: 72)
+                    .fill(Color.accentPrimary.opacity(0.07))
+                    .frame(width: 80, height: 80)
+                Circle()
+                    .fill(Color.accentPrimary.opacity(0.04))
+                    .frame(width: 60, height: 60)
                 Image(systemName: icon)
-                    .font(.system(size: 30))
-                    .foregroundStyle(Color.accentPrimary.opacity(0.5))
+                    .font(.system(size: 28))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.45))
             }
             Text(title)
-                .font(.headline)
+                .font(.headline.weight(.semibold))
                 .foregroundStyle(Color.textSecondary)
             Text(message)
                 .font(.subheadline)

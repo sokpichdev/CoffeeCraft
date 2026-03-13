@@ -13,7 +13,7 @@ final class ProductPerformanceViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var performanceData: ProductPerformanceData?
-    @Published var selectedPeriod: SalesPeriod = .month   // default 30 days for richer data
+    @Published var selectedPeriod: SalesPeriod = .month // default 30 days for richer data
     @Published var isLoading: Bool = false
 
     // MARK: - Private

@@ -9,8 +9,6 @@ import SwiftUI
 
 // MARK: - Order Queue Card
 
-/// A card shown in the live order queue.
-/// Displays elapsed wait time, items preview, and a one-tap advance button.
 struct OrderQueueCard: View {
 
     let item: OrderQueueItem
@@ -19,104 +17,107 @@ struct OrderQueueCard: View {
     let onAdvance: () async -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
 
-            // Top row: customer + wait badge
+            // Top: customer name + wait badge
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(item.customerName)
                         .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.textPrimary)
                         .lineLimit(1)
                     Text(item.itemsSubtitle)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                         .lineLimit(1)
                 }
-
                 Spacer()
-
                 WaitTimeBadge(minutes: item.waitMinutes(relativeTo: now))
             }
 
-            // Divider
-            Divider()
+            Divider().background(Color.borderColor)
 
-            // Bottom row: price + status + advance button
-            HStack {
-                // Order ID + price
+            // Bottom: order ID + price + status + advance
+            HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("#\(item.id.prefix(8).uppercased())")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .monospaced()
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.textMuted)
                     Text(item.totalFormatted)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color.textPrimary)
                 }
 
                 Spacer()
 
-                // Status badge
                 StatusBadge1(status: item.status.rawValue)
 
-                // Advance button — only shown when a next status exists
                 if let next = item.nextStatus {
                     Button {
                         Task { await onAdvance() }
                     } label: {
                         if isUpdating {
                             ProgressView()
-                                .scaleEffect(0.7)
-                                .frame(width: 28, height: 28)
+                                .scaleEffect(0.75)
+                                .frame(width: 36, height: 36)
                         } else {
                             Image(systemName: next == .preparing ? "flame.fill" : "checkmark.circle.fill")
-                                .font(.title3)
+                                .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 36, height: 36)
                                 .background(item.status.color, in: Circle())
+                                .shadow(color: item.status.color.opacity(0.3), radius: 4, x: 0, y: 2)
                         }
                     }
                     .buttonStyle(.plain)
                     .disabled(isUpdating)
-                    .padding(.leading, 6)
                     .accessibilityLabel(item.status.advanceButtonLabel)
                 }
             }
         }
-        .padding(14)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+        .padding(16)
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        // Status-coloured left border stripe
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(item.status.color)
+                .frame(width: 4)
+                .padding(.vertical, 12)
+        }
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(item.status.color.opacity(0.3), lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(item.status.color.opacity(0.22), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 }
 
 // MARK: - Wait Time Badge
 
-/// Shows elapsed wait time. Turns red when waiting > 15 minutes.
 private struct WaitTimeBadge: View {
     let minutes: Int
 
     private var isUrgent: Bool { minutes >= 15 }
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             Image(systemName: "clock")
-                .font(.system(size: 10))
+                .font(.system(size: 10, weight: .medium))
             Text(label)
                 .font(.system(size: 11, weight: .semibold))
                 .monospacedDigit()
         }
-        .foregroundStyle(isUrgent ? .white : .primary)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(isUrgent ? Color.red : Color.secondary.opacity(0.12),
-                    in: Capsule())
+        .foregroundStyle(isUrgent ? .white : Color.textSecondary)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(isUrgent ? Color.red : Color.surfaceSub, in: Capsule())
+        .overlay(Capsule().stroke(isUrgent ? Color.red.opacity(0.4) : Color.borderColor, lineWidth: 1))
         .animation(.easeInOut(duration: 0.3), value: isUrgent)
     }
 
     private var label: String {
-        if minutes < 1  { return "Just now" }
+        if minutes < 1 { return "Just now" }
         if minutes < 60 { return "\(minutes)m" }
         return "\(minutes / 60)h \(minutes % 60)m"
     }
@@ -124,14 +125,13 @@ private struct WaitTimeBadge: View {
 
 // MARK: - History Order Row
 
-/// Compact row used in the paginated history table.
 struct HistoryOrderRow: View {
     let item: OrderQueueItem
     let now: Date
 
     var body: some View {
         HStack(spacing: 12) {
-            // Status dot
+            // Status indicator dot
             Circle()
                 .fill(item.status.color)
                 .frame(width: 9, height: 9)
@@ -139,10 +139,11 @@ struct HistoryOrderRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.customerName)
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
                 Text(item.itemsSubtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textMuted)
                     .lineLimit(1)
             }
 
@@ -151,16 +152,15 @@ struct HistoryOrderRow: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(item.totalFormatted)
                     .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.textPrimary)
                 Text(item.timestamp.timeAgo(relativeTo: now))
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.textMuted)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 9)
     }
 }
-
-// MARK: - Date Extension (reused from DashboardSummary pattern)
 
 private extension Date {
     func timeAgo(relativeTo now: Date) -> String {

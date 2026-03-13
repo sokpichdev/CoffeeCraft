@@ -18,7 +18,7 @@ extension AnalyticsService {
     /// Does NOT include totalOrders/totalSpent — call `enrichUsers` after.
     func fetchUserList(searchText: String = "",
                        pageSize: Int = 20) async throws -> UserListPage {
-        var query: Query = db.collection("users")
+        let query: Query = db.collection("users")
             .whereField("role", isEqualTo: "customer")
             .order(by: "createdAt", descending: true)
             .limit(to: pageSize + 1)
@@ -98,7 +98,7 @@ extension AnalyticsService {
                         }
                         return (userId, count, spent)
                     } catch {
-                        return (userId, 0, 0)   // fail silently — list row shows "—"
+                        return (userId, 0, 0) // fail silently — list row shows "—"
                     }
                 }
             }
@@ -118,13 +118,13 @@ extension AnalyticsService {
     ///   - Last 10 orders (all statuses)
     ///   - Wallet balance
     func fetchUserDetail(userId: String, base: UserStatItem) async throws -> UserDetailData {
-        async let userDocFetch   = db.collection("users").document(userId).getDocument()
-        async let ordersFetch    = db.collection("orders")
+        async let userDocFetch = db.collection("users").document(userId).getDocument()
+        async let ordersFetch = db.collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
             .limit(to: 10)
             .getDocuments()
-        async let walletFetch    = db.collection("wallets").document(userId).getDocument()
+        async let walletFetch = db.collection("wallets").document(userId).getDocument()
 
         let (userDoc, ordersSnap, walletDoc) = try await (userDocFetch, ordersFetch, walletFetch)
 
@@ -133,9 +133,9 @@ extension AnalyticsService {
         let recentOrders: [UserOrderItem] = ordersSnap.documents.compactMap { doc in
             let data = doc.data()
             guard
-                let ts         = (data["timestamp"] as? Timestamp)?.dateValue(),
+                let ts = (data["timestamp"] as? Timestamp)?.dateValue(),
                 let totalPrice = data["totalPrice"] as? Double,
-                let status     = data["status"] as? String
+                let status = data["status"] as? String
             else { return nil }
 
             let items = data["items"] as? [[String: Any]] ?? []
@@ -176,12 +176,12 @@ extension AnalyticsService {
                                 title: String,
                                 body: String) async throws {
         let notifData: [String: Any] = [
-            "userId":    userId,
-            "title":     title,
-            "body":      body,
-            "sentAt":    FieldValue.serverTimestamp(),
-            "sentBy":    "manager",
-            "status":    "pending"   // Cloud Function updates to "sent" / "failed"
+            "userId": userId,
+            "title": title,
+            "body": body,
+            "sentAt": FieldValue.serverTimestamp(),
+            "sentBy": "manager",
+            "status": "pending"   // Cloud Function updates to "sent" / "failed"
         ]
 
         try await db.collection("notifications")
@@ -203,11 +203,11 @@ extension AnalyticsService {
         let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(timeIntervalSince1970: 0)
 
         return UserStatItem(
-            id:             doc.documentID,
-            name:           name,
-            email:          data["email"]         as? String ?? "",
-            joinDate:       createdAt,
-            loyaltyPoints:  data["loyaltyPoints"] as? Int ?? 0
+            id: doc.documentID,
+            name: name,
+            email: data["email"] as? String ?? "",
+            joinDate: createdAt,
+            loyaltyPoints: data["loyaltyPoints"] as? Int ?? 0
         )
     }
 }

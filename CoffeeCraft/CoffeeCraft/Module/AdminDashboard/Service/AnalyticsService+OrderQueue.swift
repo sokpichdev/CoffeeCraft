@@ -19,8 +19,8 @@ extension AnalyticsService {
     func listenToOrderQueue(onChange: @escaping ([OrderQueueItem]) -> Void) -> ListenerRegistration {
         db.collection("orders")
             .whereField("status", in: ["Pending", "Preparing"])
-            .order(by: "timestamp", descending: false)   // oldest first
-            .addSnapshotListener { snapshot, error in
+            .order(by: "timestamp", descending: false) // oldest first
+            .addSnapshotListener { snapshot, _ in
                 guard let snapshot else { return }
                 onChange(snapshot.documents.compactMap(self.mapToQueueItem))
             }
@@ -59,7 +59,7 @@ extension AnalyticsService {
         // Amount sorting (client-side, after text filter)
         switch filter.sortOrder {
         case .highest: items.sort { $0.totalPrice > $1.totalPrice }
-        case .lowest:  items.sort { $0.totalPrice < $1.totalPrice }
+        case .lowest: items.sort { $0.totalPrice < $1.totalPrice }
         default: break
         }
 
@@ -124,19 +124,19 @@ extension AnalyticsService {
             .getDocuments()
 
         let orders = snapshot.documents.map { $0.data() }
-        let completed  = orders.filter { $0["status"] as? String == "Completed" }
-        let cancelled  = orders.filter { $0["status"] as? String == "Cancelled" }
-        let active     = orders.filter {
+        let completed = orders.filter { $0["status"] as? String == "Completed" }
+        let cancelled = orders.filter { $0["status"] as? String == "Cancelled" }
+        let active = orders.filter {
             ["Pending", "Preparing", "Ready"].contains($0["status"] as? String ?? "")
         }
 
         // Average fulfillment time — only for orders that have completedAt stored
         let fulfillmentTimes: [Double] = completed.compactMap { order in
             guard
-                let placedTs     = (order["timestamp"]   as? Timestamp)?.dateValue(),
-                let completedTs  = (order["completedAt"] as? Timestamp)?.dateValue()
+                let placedTs = (order["timestamp"]   as? Timestamp)?.dateValue(),
+                let completedTs = (order["completedAt"] as? Timestamp)?.dateValue()
             else { return nil }
-            return completedTs.timeIntervalSince(placedTs) / 60   // minutes
+            return completedTs.timeIntervalSince(placedTs) / 60 // minutes
         }
 
         let avgFulfillment: Double? = fulfillmentTimes.isEmpty
@@ -176,8 +176,8 @@ extension AnalyticsService {
         guard
             let timestamp = (data["timestamp"] as? Timestamp)?.dateValue(),
             let totalPrice = data["totalPrice"] as? Double,
-            let statusRaw  = data["status"] as? String,
-            let status     = OrderStatus(rawValue: statusRaw)
+            let statusRaw = data["status"] as? String,
+            let status = OrderStatus(rawValue: statusRaw)
         else { return nil }
 
         let items = data["items"] as? [[String: Any]] ?? []

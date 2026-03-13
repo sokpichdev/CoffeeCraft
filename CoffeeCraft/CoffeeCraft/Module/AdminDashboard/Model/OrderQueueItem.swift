@@ -20,9 +20,9 @@ struct OrderQueueItem: Identifiable {
     let totalPrice: Double
     let status: OrderStatus
     let timestamp: Date
-    let completedAt: Date?          // nil until order reaches Completed
+    let completedAt: Date? // nil until order reaches Completed
     let itemCount: Int
-    let itemNames: [String]         // first 2 item names for the subtitle
+    let itemNames: [String] // first 2 item names for the subtitle
     let branchId: String
 
     var totalFormatted: String { totalPrice.asCurrency }
@@ -59,9 +59,9 @@ struct OrderQueueItem: Identifiable {
 // MARK: - Order Status
 
 enum OrderStatus: String, CaseIterable, Identifiable {
-    case pending   = "Pending"
+    case pending = "Pending"
     case preparing = "Preparing"
-    case ready     = "Ready"
+    case ready = "Ready"
     case completed = "Completed"
     case cancelled = "Cancelled"
 
@@ -69,9 +69,9 @@ enum OrderStatus: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
-        case .pending:   return .orange
+        case .pending: return .orange
         case .preparing: return .blue
-        case .ready:     return .green
+        case .ready: return .green
         case .completed: return .gray
         case .cancelled: return .red
         }
@@ -79,9 +79,9 @@ enum OrderStatus: String, CaseIterable, Identifiable {
 
     var icon: String {
         switch self {
-        case .pending:   return "clock"
+        case .pending: return "clock"
         case .preparing: return "flame.fill"
-        case .ready:     return "checkmark.circle.fill"
+        case .ready: return "checkmark.circle.fill"
         case .completed: return "archivebox.fill"
         case .cancelled: return "xmark.circle.fill"
         }
@@ -90,9 +90,9 @@ enum OrderStatus: String, CaseIterable, Identifiable {
     /// Label for the one-tap advance button shown on queue cards.
     var advanceButtonLabel: String {
         switch self {
-        case .pending:   return "Start Preparing"
+        case .pending: return "Start Preparing"
         case .preparing: return "Mark Ready"
-        default:         return ""
+        default: return ""
         }
     }
 }
@@ -100,7 +100,7 @@ enum OrderStatus: String, CaseIterable, Identifiable {
 // MARK: - History Filter State
 
 struct OrderHistoryFilter {
-    var status: OrderStatus? = nil          // nil = all statuses
+    var status: OrderStatus? // nil = all statuses
     var searchText: String = ""
     var sortOrder: HistorySortOrder = .newest
 
@@ -110,10 +110,10 @@ struct OrderHistoryFilter {
 }
 
 enum HistorySortOrder: String, CaseIterable {
-    case newest  = "Newest"
-    case oldest  = "Oldest"
+    case newest = "Newest"
+    case oldest = "Oldest"
     case highest = "Highest Amount"
-    case lowest  = "Lowest Amount"
+    case lowest = "Lowest Amount"
 }
 
 // MARK: - Order Funnel Data

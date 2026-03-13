@@ -13,8 +13,6 @@ import SwiftUI
 struct OrderAnalyticsDashboardView: View {
 
     @StateObject private var vm = OrderAnalyticsViewModel()
-
-    /// Shared 30-second tick — drives all relative time labels across queue and history rows.
     @State private var now = Date()
 
     var body: some View {
@@ -22,6 +20,7 @@ struct OrderAnalyticsDashboardView: View {
             sectionPicker
             contentArea
         }
+        .background(Color.bgPrimary.ignoresSafeArea())
         .navigationTitle("Order Analytics")
         .navigationBarTitleDisplayMode(.large)
         .onAppear { vm.onAppear() }
@@ -42,10 +41,10 @@ struct OrderAnalyticsDashboardView: View {
         .pickerStyle(.segmented)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color.bgPrimary)
+        .background(Color.bgSecondary)
     }
 
-    // MARK: - Content Area
+    // MARK: - Content Router
 
     @ViewBuilder
     private var contentArea: some View {
@@ -56,15 +55,28 @@ struct OrderAnalyticsDashboardView: View {
         }
     }
 
-    // MARK: ─── SECTION: QUEUE ────────────────────────────────────────────────
+    // MARK: - QUEUE ─
 
     private var queueSection: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 if vm.queueItems.isEmpty {
-                    queueEmptyState
+                    DashboardEmptyState(
+                        icon: "tray.fill",
+                        title: "Queue is clear",
+                        message: "No pending or preparing orders right now."
+                    )
                 } else {
-                    queueHeader
+                    // Queue header
+                    HStack {
+                        Text("\(vm.queueItems.count) active order\(vm.queueItems.count == 1 ? "" : "s")")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.textSecondary)
+                        Spacer()
+                        LiveBadge()
+                    }
+                    .padding(.top, 4)
+
                     ForEach(vm.queueItems) { item in
                         OrderQueueCard(
                             item: item,
@@ -79,34 +91,15 @@ struct OrderAnalyticsDashboardView: View {
         }
     }
 
-    private var queueHeader: some View {
-        HStack {
-            Text("\(vm.queueItems.count) active order\(vm.queueItems.count == 1 ? "" : "s")")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Spacer()
-            LiveBadge()
-        }
-    }
-
-    private var queueEmptyState: some View {
-        DashboardEmptyState(
-            icon: "tray.fill",
-            title: "Queue is clear",
-            message: "No pending or preparing orders right now."
-        )
-    }
-
-    // MARK: ─── SECTION: HISTORY ──────────────────────────────────────────────
+    // MARK: ─ HISTORY ─
 
     private var historySection: some View {
         VStack(spacing: 0) {
             historyFilterBar
-            Divider()
+            Divider().background(Color.borderColor)
 
             if vm.isLoadingHistory {
-                DashboardLoadingPlaceholder(count: 2)
-                    .padding(16)
+                DashboardLoadingPlaceholder(count: 2).padding(16)
             } else if vm.historyItems.isEmpty {
                 DashboardEmptyState(
                     icon: "clock.arrow.circlepath",
@@ -122,11 +115,13 @@ struct OrderAnalyticsDashboardView: View {
     private var historyFilterBar: some View {
         VStack(spacing: 10) {
             // Search field
-            HStack {
+            HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.textMuted)
                 TextField("Search by name or order ID", text: $vm.filter.searchText)
                     .autocorrectionDisabled()
+                    .font(.subheadline)
                     .onSubmit { Task { await vm.applyFilter() } }
                 if !vm.filter.searchText.isEmpty {
                     Button {
@@ -134,30 +129,26 @@ struct OrderAnalyticsDashboardView: View {
                         Task { await vm.applyFilter() }
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textMuted)
                     }
                 }
             }
-            .padding(10)
-            .background(Color.surfaceSub, in: RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color.surfaceSub, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.borderColor, lineWidth: 1))
 
-            // Status filter chips
+            // Status chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    FilterChip(
-                        label: "All",
-                        isSelected: vm.filter.status == nil,
-                        color: .accentPrimary
-                    ) {
+                    FilterChip(label: "All", isSelected: vm.filter.status == nil,
+                               color: .accentPrimary) {
                         vm.filter.status = nil
                         Task { await vm.applyFilter() }
                     }
                     ForEach(OrderStatus.allCases) { status in
-                        FilterChip(
-                            label: status.rawValue,
-                            isSelected: vm.filter.status == status,
-                            color: status.color
-                        ) {
+                        FilterChip(label: status.rawValue, isSelected: vm.filter.status == status,
+                                   color: status.color) {
                             vm.filter.status = (vm.filter.status == status) ? nil : status
                             Task { await vm.applyFilter() }
                         }
@@ -165,11 +156,11 @@ struct OrderAnalyticsDashboardView: View {
                 }
             }
 
-            // Sort menu
+            // Result count + sort
             HStack {
                 Text("\(vm.historyItems.count) result\(vm.historyItems.count == 1 ? "" : "s")")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textMuted)
                 Spacer()
                 Menu {
                     ForEach(HistorySortOrder.allCases, id: \.self) { order in
@@ -183,17 +174,19 @@ struct OrderAnalyticsDashboardView: View {
                     }
                 } label: {
                     Label(vm.filter.sortOrder.rawValue, systemImage: "arrow.up.arrow.down")
-                        .font(.caption)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.accentPrimary)
                 }
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .padding(.vertical, 12)
+        .background(Color.bgSecondary)
     }
 
     private var historyList: some View {
         ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: []) {
+            LazyVStack(spacing: 0) {
                 ForEach(vm.historyItems) { item in
                     HistoryOrderRow(item: item, now: now)
                         .padding(.horizontal, 16)
@@ -202,17 +195,17 @@ struct OrderAnalyticsDashboardView: View {
                                 Task { await vm.loadMoreHistory() }
                             }
                         }
-                    Divider().padding(.leading, 16 + 9 + 12)
+                    Divider().padding(.leading, 37).background(Color.borderColor)
                 }
 
                 if vm.isLoadingMoreHistory {
-                    ProgressView()
+                    ProgressView().tint(.accentPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                 } else if !vm.canLoadMoreHistory && vm.historyItems.count >= 20 {
                     Text("All orders loaded")
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(Color.textMuted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                 }
@@ -220,7 +213,7 @@ struct OrderAnalyticsDashboardView: View {
         }
     }
 
-    // MARK: ─── SECTION: FUNNEL ───────────────────────────────────────────────
+    // MARK: ─── FUNNEL ────────────────────────────────────────────────────────
 
     private var funnelSection: some View {
         ScrollView {
@@ -260,13 +253,13 @@ struct OrderAnalyticsDashboardView: View {
                     title: "Total Orders",
                     value: "\(vm.funnelData.totalOrders)",
                     icon: "bag.fill",
-                    color: .blue
+                    color: .accentPrimary
                 )
                 StatCard(
                     title: "Avg Fulfillment",
                     value: vm.funnelData.avgFulfillmentFormatted,
                     icon: "timer",
-                    color: .purple
+                    color: .accentGold
                 )
             }
         }
@@ -275,9 +268,9 @@ struct OrderAnalyticsDashboardView: View {
     private var funnelBarChart: some View {
         ChartCard(title: "Order Breakdown", subtitle: "Last 30 days") {
             let data: [(String, Int, Color)] = [
-                ("Completed",  vm.funnelData.completedCount, .green),
-                ("Active",     vm.funnelData.activeCount,    .blue),
-                ("Cancelled",  vm.funnelData.cancelledCount, .red),
+                ("Completed", vm.funnelData.completedCount, .semanticSuccess),
+                ("Active", vm.funnelData.activeCount, .accentPrimary),
+                ("Cancelled", vm.funnelData.cancelledCount, .semanticError)
             ]
 
             Chart(data, id: \.0) { label, count, color in
@@ -290,6 +283,7 @@ struct OrderAnalyticsDashboardView: View {
                 .annotation(position: .trailing, alignment: .leading) {
                     Text("\(count)")
                         .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.textSecondary)
                         .padding(.leading, 4)
                 }
             }
@@ -301,19 +295,25 @@ struct OrderAnalyticsDashboardView: View {
     private var funnelFulfillmentCard: some View {
         ChartCard(title: "Avg Fulfillment Time",
                   subtitle: "Only orders with completedAt field") {
-            HStack(spacing: 16) {
-                Image(systemName: "timer")
-                    .font(.largeTitle)
-                    .foregroundStyle(.purple.opacity(0.7))
+            HStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentGold.opacity(0.10))
+                        .frame(width: 60, height: 60)
+                    Image(systemName: "timer")
+                        .font(.system(size: 26))
+                        .foregroundStyle(Color.accentGold.opacity(0.80))
+                }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(vm.funnelData.avgFulfillmentFormatted)
                         .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
                     Text(vm.funnelData.avgFulfillmentMinutes == nil
                          ? "Add completedAt to orders to enable this metric"
                          : "from order placed to Ready")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                 }
             }
             .padding(.vertical, 8)
@@ -323,13 +323,13 @@ struct OrderAnalyticsDashboardView: View {
     // MARK: - Colour Helpers
 
     private var completionColor: Color {
-        vm.funnelData.completionRate >= 80 ? .green :
-        vm.funnelData.completionRate >= 50 ? .orange : .red
+        vm.funnelData.completionRate >= 80 ? .semanticSuccess :
+        vm.funnelData.completionRate >= 50 ? .orange : .semanticError
     }
 
     private var cancellationColor: Color {
-        vm.funnelData.cancellationRate < 5  ? .green :
-        vm.funnelData.cancellationRate < 15 ? .orange : .red
+        vm.funnelData.cancellationRate < 5 ? .semanticSuccess :
+        vm.funnelData.cancellationRate < 15 ? .orange : .semanticError
     }
 }
 
@@ -348,8 +348,8 @@ private struct FilterChip: View {
                 .foregroundStyle(isSelected ? .white : color)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(isSelected ? color : color.opacity(0.1),
-                            in: Capsule())
+                .background(isSelected ? color : color.opacity(0.10), in: Capsule())
+                .overlay(Capsule().stroke(color.opacity(isSelected ? 0 : 0.25), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

@@ -12,15 +12,15 @@ import Foundation
 /// Aggregated performance data for one product over a given period.
 /// Built by joining order item data with the product catalog.
 struct ProductStatItem: Identifiable {
-    let id: String              // productId
+    let id: String // productId
     let name: String
     let category: String
     let unitsSold: Int
     let revenue: Double
-    let avgRating: Double       // pulled from products/{productId}.avgRating
+    let avgRating: Double // pulled from products/{productId}.avgRating
     let ratingCount: Int
     let imageURL: String?
-    var rank: Int = 0           // assigned after sorting, 1-based
+    var rank: Int = 0 // assigned after sorting, 1-based
 
     var revenueFormatted: String { revenue.asCurrency }
     var avgRatingFormatted: String { String(format: "%.1f", avgRating) }
@@ -37,7 +37,7 @@ struct CategoryRevenueStat: Identifiable {
     let category: String
     let revenue: Double
     let unitsSold: Int
-    let percentage: Double      // 0–100, pre-computed
+    let percentage: Double // 0–100, pre-computed
 
     var revenueFormatted: String { revenue.asCurrency }
     var percentageFormatted: String { String(format: "%.1f%%", percentage) }
@@ -47,7 +47,7 @@ struct CategoryRevenueStat: Identifiable {
 
 struct ProductPerformanceData {
     let period: SalesPeriod
-    let topProducts: [ProductStatItem]          // sorted by unitsSold desc, rank assigned
+    let topProducts: [ProductStatItem] // sorted by unitsSold desc, rank assigned
     let categoryRevenue: [CategoryRevenueStat]  // sorted by revenue desc
     let totalRevenue: Double
     let totalUnitsSold: Int
