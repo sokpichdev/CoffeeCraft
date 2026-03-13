@@ -19,7 +19,7 @@ extension AnalyticsService {
     ///
     /// ⚠️  Requires a Firestore composite index on:
     ///     Collection group: reviews
-    ///     Fields: timestamp DESC
+    ///     Fields: createdAt DESC
     ///
     /// Firestore will print a clickable creation link on first run.
     func fetchAllReviews(filter: ReviewFilter,
@@ -29,14 +29,14 @@ extension AnalyticsService {
 
         // Step 2: Build the base collectionGroup query
         var query: Query = db.collectionGroup("reviews")
-            .order(by: "timestamp", descending: true)
+            .order(by: "createdAt", descending: true)
             .limit(to: pageSize + 1)
 
         // Rating filter — Firestore supports equality on collectionGroup
         if let stars = filter.rating {
             query = db.collectionGroup("reviews")
                 .whereField("rating", isEqualTo: stars)
-                .order(by: "timestamp", descending: true)
+                .order(by: "createdAt", descending: true)
                 .limit(to: pageSize + 1)
         }
 
@@ -73,14 +73,14 @@ extension AnalyticsService {
         let productCatalog = try await fetchProductNameMap()
 
         var query: Query = db.collectionGroup("reviews")
-            .order(by: "timestamp", descending: true)
+            .order(by: "createdAt", descending: true)
             .start(afterDocument: cursor)
             .limit(to: pageSize + 1)
 
         if let stars = filter.rating {
             query = db.collectionGroup("reviews")
                 .whereField("rating", isEqualTo: stars)
-                .order(by: "timestamp", descending: true)
+                .order(by: "createdAt", descending: true)
                 .start(afterDocument: cursor)
                 .limit(to: pageSize + 1)
         }
@@ -127,32 +127,33 @@ extension AnalyticsService {
         let snapshot = try await db
             .collection("products").document(productId)
             .collection("reviews")
-            .order(by: "timestamp", descending: false)
+            .order(by: "createdAt", descending: false)
             .getDocuments()
 
         let reviews = snapshot.documents.compactMap { doc -> (Int, Bool, Date)? in
             let data = doc.data()
             guard
-                let rating    = data["rating"]    as? Int,
-                let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
+                let rating = data["rating"]    as? Int,
+                // Review struct uses "createdAt" not "timestamp"
+                let timestamp = (data["createdAt"] as? Timestamp)?.dateValue()
             else { return nil }
             let isHidden = data["isHidden"] as? Bool ?? false
             return (rating, isHidden, timestamp)
         }
 
-        let total   = reviews.count
-        let hidden  = reviews.filter { $0.1 }.count
+        let total = reviews.count
+        let hidden = reviews.filter { $0.1 }.count
         let ratings = reviews.map { $0.0 }
-        let avg     = ratings.isEmpty ? 0.0 : Double(ratings.reduce(0, +)) / Double(ratings.count)
+        let avg = ratings.isEmpty ? 0.0 : Double(ratings.reduce(0, +)) / Double(ratings.count)
 
         return ReviewAnalyticsData(
-            productId:            productId,
-            productName:          productName,
-            totalCount:           total,
-            hiddenCount:          hidden,
-            avgRating:            avg,
-            ratingDistribution:   buildRatingDistribution(from: ratings),
-            ratingOverTime:       buildRatingOverTime(from: reviews)
+            productId: productId,
+            productName: productName,
+            totalCount: total,
+            hiddenCount: hidden,
+            avgRating: avg,
+            ratingDistribution: buildRatingDistribution(from: ratings),
+            ratingOverTime: buildRatingOverTime(from: reviews)
         )
     }
 
@@ -187,32 +188,34 @@ extension AnalyticsService {
                                  productCatalog: [String: String]) -> ReviewItem? {
         let data = doc.data() ?? [:]
         guard
-            let rating    = data["rating"]    as? Int,
-            let comment   = data["comment"]   as? String,
-            let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
+            let rating = data["rating"] as? Int,
+            // Review struct uses "createdAt" not "timestamp"
+            let timestamp = (data["createdAt"] as? Timestamp)?.dateValue()
         else { return nil }
+
+        // body is optional in the Review struct — fall back to empty string
+        let body = data["body"] as? String ?? ""
 
         // Extract productId from the document's parent path:
         // path: products/{productId}/reviews/{reviewId}
         let pathComponents = doc.reference.path.split(separator: "/")
-        let productId: String = pathComponents.count >= 2
+        let productId: String = pathComponents.count >= 4
             ? String(pathComponents[pathComponents.count - 3])
             : ""
 
         let productName = productCatalog[productId] ?? "Unknown Product"
 
         return ReviewItem(
-            id:           doc.documentID,
-            productId:    productId,
-            productName:  productName,
-            customerName: data["customerName"] as? String
-                          ?? data["userName"]  as? String
-                          ?? "Customer",
-            userId:       data["userId"] as? String ?? "",
-            rating:       min(max(rating, 1), 5),   // clamp to valid range
-            comment:      comment,
-            timestamp:    timestamp,
-            isHidden:     data["isHidden"] as? Bool ?? false
+            id: doc.documentID,
+            productId: productId,
+            productName: productName,
+            // Review struct stores display name as "userName"
+            customerName: data["userName"] as? String ?? "Customer",
+            userId: data["userId"] as? String ?? "",
+            rating: min(max(rating, 1), 5),
+            comment: body,
+            timestamp: timestamp,
+            isHidden: data["isHidden"] as? Bool ?? false
         )
     }
 
@@ -243,8 +246,8 @@ extension AnalyticsService {
         return weekMap
             .map { weekStart, ratings in
                 RatingTimePoint(
-                    weekStart:   weekStart,
-                    avgRating:   Double(ratings.reduce(0, +)) / Double(ratings.count),
+                    weekStart: weekStart,
+                    avgRating: Double(ratings.reduce(0, +)) / Double(ratings.count),
                     reviewCount: ratings.count
                 )
             }
