@@ -86,6 +86,11 @@ final class OrderAnalyticsViewModel: ObservableObject {
         guard let next = item.nextStatus,
               !isUpdatingStatus.contains(item.id) else { return }
 
+        guard NetworkMonitor.shared.isConnected else {
+            AlertManager.shared.showNoInternet()
+            return
+        }
+
         isUpdatingStatus.insert(item.id)
         do {
             try await service.updateOrderStatus(orderId: item.id, to: next)
