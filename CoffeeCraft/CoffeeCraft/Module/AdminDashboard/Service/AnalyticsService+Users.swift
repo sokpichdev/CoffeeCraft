@@ -196,10 +196,11 @@ extension AnalyticsService {
 
     private func mapToUserStatItem(_ doc: DocumentSnapshot) -> UserStatItem? {
         let data = doc.data() ?? [:]
-        guard
-            let name      = data["name"]      as? String,
-            let createdAt = (data["createdAt"] as? Timestamp)?.dateValue()
-        else { return nil }
+        // `name` is the only true required field — `createdAt` is optional so
+        // accounts registered before the analytics fix still appear in the list.
+        guard let name = data["name"] as? String else { return nil }
+
+        let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(timeIntervalSince1970: 0)
 
         return UserStatItem(
             id:             doc.documentID,
