@@ -27,14 +27,14 @@ extension AnalyticsService {
 
         // Step 2: Build the base collectionGroup query
         var query: Query = db.collectionGroup("reviews")
-            .order(by: "timestamp", descending: true)
+            .order(by: "createdAt", descending: true)
             .limit(to: pageSize + 1)
 
         // Rating filter — Firestore supports equality on collectionGroup
         if let stars = filter.rating {
             query = db.collectionGroup("reviews")
                 .whereField("rating", isEqualTo: stars)
-                .order(by: "timestamp", descending: true)
+                .order(by: "createdAt", descending: true)
                 .limit(to: pageSize + 1)
         }
 
@@ -71,14 +71,14 @@ extension AnalyticsService {
         let productCatalog = try await fetchProductNameMap()
 
         var query: Query = db.collectionGroup("reviews")
-            .order(by: "timestamp", descending: true)
+            .order(by: "createdAt", descending: true)
             .start(afterDocument: cursor)
             .limit(to: pageSize + 1)
 
         if let stars = filter.rating {
             query = db.collectionGroup("reviews")
                 .whereField("rating", isEqualTo: stars)
-                .order(by: "timestamp", descending: true)
+                .order(by: "createdAt", descending: true)
                 .start(afterDocument: cursor)
                 .limit(to: pageSize + 1)
         }
@@ -125,14 +125,14 @@ extension AnalyticsService {
         let snapshot = try await db
             .collection("products").document(productId)
             .collection("reviews")
-            .order(by: "timestamp", descending: false)
+            .order(by: "createdAt", descending: false)
             .getDocuments()
 
         let reviews = snapshot.documents.compactMap { doc -> (Int, Bool, Date)? in
             let data = doc.data()
             guard
                 let rating = data["rating"] as? Int,
-                let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
+                let timestamp = (data["createdAt"] as? Timestamp)?.dateValue()
             else { return nil }
             let isHidden = data["isHidden"] as? Bool ?? false
             return (rating, isHidden, timestamp)
@@ -186,8 +186,8 @@ extension AnalyticsService {
         let data = doc.data() ?? [:]
         guard
             let rating = data["rating"] as? Int,
-            let comment = data["comment"] as? String,
-            let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
+            let comment = data["body"] as? String,
+            let timestamp = (data["createdAt"] as? Timestamp)?.dateValue()
         else { return nil }
 
         // Extract productId from the document's parent path:
