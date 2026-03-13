@@ -37,9 +37,9 @@ struct UserDetailView: View {
             await vm.load()
         })
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle(user.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar { toolbarContent }
+        .customNavigationBar(user.name, displayMode: .inline) {
+            toolbarContent
+        }
         .sheet(isPresented: $vm.showNotifSheet) { notificationSheet }
         .onAppear { vm.onAppear() }
     }
@@ -268,12 +268,9 @@ struct UserDetailView: View {
             }
             .padding(20)
             .background(Color.bgPrimary.ignoresSafeArea())
-            .navigationTitle("Send to \(user.name)")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { vm.showNotifSheet = false }
-                        .foregroundStyle(Color.accentPrimary)
+            .customNavigationBar("Send to \(user.name)", displayMode: .inline) {
+                ToolBarButton(placement: .topBarTrailing, buttonType: .text("Cancel")) {
+                    vm.showNotifSheet = false
                 }
             }
         }

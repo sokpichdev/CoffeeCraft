@@ -37,8 +37,7 @@ struct SalesAnalyticsView: View {
             await vm.loadAnalytics()
         })
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle("Sales Analytics")
-        .navigationBarTitleDisplayMode(.large)
+        .customNavigationBar("Sales Snalytics", displayMode: .large)
         .onAppear { vm.onAppear() }
     }
 

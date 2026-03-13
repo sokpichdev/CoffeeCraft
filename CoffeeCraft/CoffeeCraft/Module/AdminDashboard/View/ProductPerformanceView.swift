@@ -39,8 +39,7 @@ struct ProductPerformanceView: View {
             await vm.loadPerformance()
         })
         .background(Color.bgPrimary.ignoresSafeArea())
-        .navigationTitle("Product Performance")
-        .navigationBarTitleDisplayMode(.large)
+        .customNavigationBar("Product Performance", displayMode: .large)
         .onAppear { vm.onAppear() }
     }
 

@@ -22,6 +22,7 @@ struct UserManagementView: View {
         .background(Color.bgPrimary.ignoresSafeArea())
         .navigationTitle("Users")
         .navigationBarTitleDisplayMode(.large)
+        .customNavigationBar("Users", displayMode: .large)
         .onAppear { vm.onAppear() }
     }
 

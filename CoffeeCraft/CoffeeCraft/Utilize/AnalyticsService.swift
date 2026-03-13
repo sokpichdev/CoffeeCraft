@@ -1,5 +1,5 @@
 //
-//  AnalyticsEvent.swift
+//  AnalyticsService.swift
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 3/11/26.
