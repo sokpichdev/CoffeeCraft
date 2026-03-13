@@ -281,6 +281,22 @@ struct AdminDashboardHomeView: View {
                 .padding(.vertical, 12)
                 .padding(.horizontal, 16)
             }
+            NavigationLink(destination: ReviewModerationDashboardView()) {
+                HStack {
+                    Image(systemName: "chart.xyaxis.line")
+                        .font(.subheadline)
+                        .foregroundColor(.accentPrimary)
+                        .frame(width: 28)
+                    Text("Review Moderation")
+                        .font(.subheadline)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+            }
         }
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
