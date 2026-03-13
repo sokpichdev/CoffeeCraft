@@ -133,11 +133,12 @@ extension AnalyticsService {
     // MARK: - Peak Hours Heatmap
 
     /// Counts orders per (hour, weekday) cell for the heatmap grid.
+    /// Groups orders into the heatmap's 2-hour display columns (6am, 8am … 10pm).
     /// Only counts non-cancelled orders so noise doesn't distort the heatmap.
     private func computePeakHours(from orders: [[String: Any]]) -> [PeakHourPoint] {
         let cal = Calendar.current
 
-        // (weekday, hour) → count
+        // (weekday, displayHour) → count
         var grid: [Int: [Int: Int]] = [:]
 
         for order in orders {
@@ -148,18 +149,21 @@ extension AnalyticsService {
 
             let hour    = cal.component(.hour, from: ts)
             let weekday = cal.component(.weekday, from: ts)   // 1=Sun … 7=Sat
-            grid[weekday, default: [:]][hour, default: 0] += 1
+
+            // Snap to the nearest 2-hour display bucket used by the heatmap:
+            // 6→6, 7→6, 8→8, 9→8, 10→10 … 22→22, 23→22
+            // Orders before 6am and after 11pm are outside business hours — skip.
+            guard hour >= 6 else { continue }
+            let displayHour = min(22, (hour / 2) * 2)
+
+            grid[weekday, default: [:]][displayHour, default: 0] += 1
         }
 
         var points: [PeakHourPoint] = []
         for weekday in 1...7 {
-            for hour in 0...23 {
+            for hour in stride(from: 6, through: 22, by: 2) {
                 let count = grid[weekday]?[hour] ?? 0
-                // Skip zero cells outside business hours to keep the heatmap readable.
-                // We still include 0-count cells inside 6am–10pm so the grid is uniform.
-                if hour >= 6 && hour <= 22 {
-                    points.append(PeakHourPoint(hour: hour, weekday: weekday, orderCount: count))
-                }
+                points.append(PeakHourPoint(hour: hour, weekday: weekday, orderCount: count))
             }
         }
         return points
