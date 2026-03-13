@@ -48,7 +48,7 @@ struct OrderStatusPoint: Identifiable {
     let id = UUID()
     let status: String
     let count: Int
-    let percentage: Double   // 0–100, pre-computed for the label
+    let percentage: Double // 0–100, pre-computed for the label
 }
 
 // MARK: - Peak Hour Point
@@ -57,13 +57,13 @@ struct OrderStatusPoint: Identifiable {
 /// `hour` is 0–23, `weekday` is 1 (Sun) – 7 (Sat) matching Calendar.
 struct PeakHourPoint: Identifiable {
     let id = UUID()
-    let hour: Int           // 0–23
-    let weekday: Int        // 1=Sun … 7=Sat
+    let hour: Int // 0–23
+    let weekday: Int // 1=Sun … 7=Sat
     let orderCount: Int
 
     var hourLabel: String {
-        let h = hour % 12 == 0 ? 12 : hour % 12
-        return "\(h)\(hour < 12 ? "am" : "pm")"
+        let hr = hour % 12 == 0 ? 12 : hour % 12
+        return "\(hr)\(hour < 12 ? "am" : "pm")"
     }
 
     var weekdayLabel: String {
@@ -78,13 +78,13 @@ struct SalesSummary {
     let totalRevenue: Double
     let totalOrders: Int
     let avgOrderValue: Double
-    let refundRate: Double              // 0–100 %
+    let refundRate: Double // 0–100 %
     let cancelledCount: Int
     let completedCount: Int
 
-    var totalRevenueFormatted: String  { totalRevenue.asCurrency }
+    var totalRevenueFormatted: String { totalRevenue.asCurrency }
     var avgOrderValueFormatted: String { avgOrderValue.asCurrency }
-    var refundRateFormatted: String    { String(format: "%.1f%%", refundRate) }
+    var refundRateFormatted: String { String(format: "%.1f%%", refundRate) }
 
     static var empty: SalesSummary {
         SalesSummary(totalRevenue: 0, totalOrders: 0, avgOrderValue: 0,

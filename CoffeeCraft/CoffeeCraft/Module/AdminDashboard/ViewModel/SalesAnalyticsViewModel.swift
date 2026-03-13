@@ -25,7 +25,7 @@ final class SalesAnalyticsViewModel: ObservableObject {
     /// Max revenue value across all daily points — used to set chart y-axis domain.
     var revenueChartMax: Double {
         let max = analyticsData?.dailyRevenue.map(\.revenue).max() ?? 0
-        return max == 0 ? 100 : max * 1.2   // 20% headroom so the peak isn't clipped
+        return max == 0 ? 100 : max * 1.2 // 20% headroom so the peak isn't clipped
     }
 
     var hasData: Bool {

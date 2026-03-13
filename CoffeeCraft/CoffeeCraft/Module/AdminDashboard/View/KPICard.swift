@@ -8,81 +8,92 @@ import SwiftUI
 // MARK: - KPI Card
 
 struct KPICard: View {
-
+    
     let title: String
     let value: String
     let icon: String
     let accentColor: Color
-    var subtitle: String? = nil
-    var subtitleIsPositive: Bool?  = nil
+    var subtitle: String?
+    var subtitleIsPositive: Bool?
     var isLoading: Bool = false
-
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-
-            // Icon chip
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 0) {
+            
+            // Icon + title row
+            HStack(spacing: 8) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(accentColor.opacity(0.14))
-                        .frame(width: 30, height: 30)
+                    RoundedRectangle(cornerRadius: 9)
+                        .fill(accentColor.opacity(0.13))
+                        .frame(width: 34, height: 34)
                     Image(systemName: icon)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(accentColor)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(accentColor)
                 }
                 Text(title)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.textSecondary)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
+                Spacer()
             }
-
+            .padding(.bottom, 12)
+            
             // Value
             if isLoading {
                 ShimmerView()
-                    .frame(width: 88, height: 26)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .frame(width: 90, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .padding(.bottom, 8)
             } else {
                 Text(value)
-                    .font(.title2.bold())
-                    .foregroundColor(.textPrimary)
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.65)
+                    .padding(.bottom, 6)
             }
-
-            // Subtitle
+            
+            // Subtitle / change indicator
             if let subtitle {
                 if isLoading {
                     ShimmerView()
-                        .frame(width: 64, height: 12)
+                        .frame(width: 64, height: 11)
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 } else {
                     HStack(spacing: 3) {
                         if let isPositive = subtitleIsPositive {
                             Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(isPositive ? Color.semanticSuccess : Color.semanticError)
+                                .foregroundStyle(isPositive ? Color.semanticSuccess : Color.semanticError)
                         }
                         Text(subtitle)
                             .font(.caption2)
-                            .foregroundColor(subtitleColor)
+                            .foregroundStyle(subtitleColor)
                     }
                 }
             }
+            
+            Spacer(minLength: 0)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.surfacePrimary)
-                .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
-        )
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        // Left accent stripe — the colour IS the signal
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(accentColor)
+                .frame(width: 4)
+                .padding(.vertical, 16)
+                .padding(.leading, 0)
+        }
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 3)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(accentColor.opacity(0.18), lineWidth: 1)
+                .stroke(Color.borderColor, lineWidth: 1)
         )
     }
-
+    
     private var subtitleColor: Color {
         guard let isPositive = subtitleIsPositive else { return .textMuted }
         return isPositive ? .semanticSuccess : .semanticError
@@ -93,37 +104,35 @@ struct KPICard: View {
 
 struct LiveBadge: View {
     @State private var pulse = false
-
+    
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 5) {
             Circle()
                 .fill(Color.semanticSuccess)
                 .frame(width: 7, height: 7)
-                .scaleEffect(pulse ? 1.45 : 1.0)
-                .animation(
-                    .easeInOut(duration: 0.85).repeatForever(autoreverses: true),
-                    value: pulse
-                )
+                .scaleEffect(pulse ? 1.4 : 1.0)
+                .animation(.easeInOut(duration: 0.85).repeatForever(autoreverses: true),
+                           value: pulse)
                 .onAppear { pulse = true }
             Text("LIVE")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(Color.semanticSuccess)
-                .tracking(0.5)
+                .tracking(0.8)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.semanticSuccess.opacity(0.12), in: Capsule())
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(Color.semanticSuccess.opacity(0.10), in: Capsule())
+        .overlay(Capsule().stroke(Color.semanticSuccess.opacity(0.25), lineWidth: 1))
     }
 }
 
 // MARK: - Revenue Stat Row
 
-/// Used inside the period revenue card to show a comparison stat.
 struct RevenueStatRow: View {
     let label: String
     let value: String
     let color: Color
-
+    
     var body: some View {
         HStack {
             Circle()
@@ -131,11 +140,11 @@ struct RevenueStatRow: View {
                 .frame(width: 8, height: 8)
             Text(label)
                 .font(.caption)
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             Spacer()
             Text(value)
                 .font(.caption.bold())
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
         }
     }
 }

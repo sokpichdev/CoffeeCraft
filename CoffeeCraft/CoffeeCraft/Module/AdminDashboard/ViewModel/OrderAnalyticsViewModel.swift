@@ -5,23 +5,23 @@
 //  Created by Sok Pich on 13/03/2026.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 // MARK: - Section Enum
 
 enum OrderAnalyticsSection: String, CaseIterable, Identifiable {
-    case queue   = "Queue"
+    case queue = "Queue"
     case history = "History"
-    case funnel  = "Funnel"
+    case funnel = "Funnel"
 
     var id: String { rawValue }
 
     var icon: String {
         switch self {
-        case .queue:   return "flame.fill"
+        case .queue: return "flame.fill"
         case .history: return "clock.arrow.circlepath"
-        case .funnel:  return "chart.bar.xaxis"
+        case .funnel: return "chart.bar.xaxis"
         }
     }
 }
@@ -36,7 +36,7 @@ final class OrderAnalyticsViewModel: ObservableObject {
     // MARK: - Queue
 
     @Published var queueItems: [OrderQueueItem] = []
-    @Published var isUpdatingStatus: Set<String> = []   // prevents double-tap
+    @Published var isUpdatingStatus: Set<String> = [] // prevents double-tap
 
     // MARK: - History
 

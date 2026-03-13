@@ -24,8 +24,8 @@
 //  │  liveListener       → growing-window; re-attaches after page    │
 //  └──────────────────────────────────────────────────────────────────┘
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 @MainActor
 final class DashboardHomeViewModel: ObservableObject {

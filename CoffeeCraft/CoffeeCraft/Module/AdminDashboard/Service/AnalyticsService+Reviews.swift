@@ -8,8 +8,6 @@
 import FirebaseFirestore
 import Foundation
 
-// MARK: - AnalyticsService — Review Moderation (Phase 8.6)
-
 extension AnalyticsService {
 
     // MARK: - Fetch All Reviews (Collection Group)
@@ -87,8 +85,8 @@ extension AnalyticsService {
 
         switch filter.visibility {
         case .visible: query = query.whereField("isHidden", isEqualTo: false)
-        case .hidden:  query = query.whereField("isHidden", isEqualTo: true)
-        case .all:     break
+        case .hidden: query = query.whereField("isHidden", isEqualTo: true)
+        case .all: break
         }
 
         let snapshot = try await query.getDocuments()
@@ -133,26 +131,26 @@ extension AnalyticsService {
         let reviews = snapshot.documents.compactMap { doc -> (Int, Bool, Date)? in
             let data = doc.data()
             guard
-                let rating    = data["rating"]    as? Int,
+                let rating = data["rating"] as? Int,
                 let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
             else { return nil }
             let isHidden = data["isHidden"] as? Bool ?? false
             return (rating, isHidden, timestamp)
         }
 
-        let total   = reviews.count
-        let hidden  = reviews.filter { $0.1 }.count
+        let total = reviews.count
+        let hidden = reviews.filter { $0.1 }.count
         let ratings = reviews.map { $0.0 }
-        let avg     = ratings.isEmpty ? 0.0 : Double(ratings.reduce(0, +)) / Double(ratings.count)
+        let avg = ratings.isEmpty ? 0.0 : Double(ratings.reduce(0, +)) / Double(ratings.count)
 
         return ReviewAnalyticsData(
-            productId:            productId,
-            productName:          productName,
-            totalCount:           total,
-            hiddenCount:          hidden,
-            avgRating:            avg,
-            ratingDistribution:   buildRatingDistribution(from: ratings),
-            ratingOverTime:       buildRatingOverTime(from: reviews)
+            productId: productId,
+            productName: productName,
+            totalCount: total,
+            hiddenCount: hidden,
+            avgRating: avg,
+            ratingDistribution: buildRatingDistribution(from: ratings),
+            ratingOverTime: buildRatingOverTime(from: reviews)
         )
     }
 
@@ -187,8 +185,8 @@ extension AnalyticsService {
                                  productCatalog: [String: String]) -> ReviewItem? {
         let data = doc.data() ?? [:]
         guard
-            let rating    = data["rating"]    as? Int,
-            let comment   = data["comment"]   as? String,
+            let rating = data["rating"] as? Int,
+            let comment = data["comment"] as? String,
             let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
         else { return nil }
 
@@ -202,17 +200,17 @@ extension AnalyticsService {
         let productName = productCatalog[productId] ?? "Unknown Product"
 
         return ReviewItem(
-            id:           doc.documentID,
-            productId:    productId,
-            productName:  productName,
+            id: doc.documentID,
+            productId: productId,
+            productName: productName,
             customerName: data["customerName"] as? String
                           ?? data["userName"]  as? String
                           ?? "Customer",
-            userId:       data["userId"] as? String ?? "",
-            rating:       min(max(rating, 1), 5),   // clamp to valid range
-            comment:      comment,
-            timestamp:    timestamp,
-            isHidden:     data["isHidden"] as? Bool ?? false
+            userId: data["userId"] as? String ?? "",
+            rating: min(max(rating, 1), 5),   // clamp to valid range
+            comment: comment,
+            timestamp: timestamp,
+            isHidden: data["isHidden"] as? Bool ?? false
         )
     }
 
@@ -243,8 +241,8 @@ extension AnalyticsService {
         return weekMap
             .map { weekStart, ratings in
                 RatingTimePoint(
-                    weekStart:   weekStart,
-                    avgRating:   Double(ratings.reduce(0, +)) / Double(ratings.count),
+                    weekStart: weekStart,
+                    avgRating: Double(ratings.reduce(0, +)) / Double(ratings.count),
                     reviewCount: ratings.count
                 )
             }

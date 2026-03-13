@@ -5,8 +5,8 @@
 //  Created by Sok Pich on 3/13/26.
 //
 
-import Foundation
 import FirebaseFirestore
+import Foundation
 
 @MainActor
 final class UserManagementViewModel: ObservableObject {
@@ -106,7 +106,7 @@ final class UserManagementViewModel: ObservableObject {
             for (userId, (count, spent)) in stats {
                 if let idx = users.firstIndex(where: { $0.id == userId }) {
                     users[idx].totalOrders = count
-                    users[idx].totalSpent  = spent
+                    users[idx].totalSpent = spent
                 }
             }
         }

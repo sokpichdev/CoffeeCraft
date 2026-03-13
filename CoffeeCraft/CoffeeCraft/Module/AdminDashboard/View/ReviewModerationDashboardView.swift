@@ -19,6 +19,7 @@ struct ReviewModerationDashboardView: View {
             sectionPicker
             content
         }
+        .background(Color.bgPrimary.ignoresSafeArea())
         .navigationTitle("Review Moderation")
         .navigationBarTitleDisplayMode(.large)
         .onAppear { vm.onAppear() }
@@ -35,7 +36,7 @@ struct ReviewModerationDashboardView: View {
         .pickerStyle(.segmented)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color.bgPrimary)
+        .background(Color.bgSecondary)
     }
 
     // MARK: - Content Router
@@ -43,49 +44,40 @@ struct ReviewModerationDashboardView: View {
     @ViewBuilder
     private var content: some View {
         switch vm.selectedSection {
-        case .queue:     queueSection
+        case .queue: queueSection
         case .analytics: analyticsSection
         }
     }
 
-    // MARK: ─── SECTION: REVIEW QUEUE ─────────────────────────────────────────
+    // MARK: - REVIEW QUEUE ─
 
     private var queueSection: some View {
         VStack(spacing: 0) {
             filterBar
-            Divider()
+            Divider().background(Color.borderColor)
             reviewList
         }
     }
 
-    // MARK: Filter Bar
-
     private var filterBar: some View {
         VStack(spacing: 10) {
-            // Visibility chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    // Visibility chips
                     ForEach(ReviewVisibility.allCases) { vis in
-                        FilterChip(
-                            label: vis.rawValue,
-                            isSelected: vm.filter.visibility == vis,
-                            color: .accentPrimary
-                        ) {
+                        FilterChip(label: vis.rawValue,
+                                   isSelected: vm.filter.visibility == vis,
+                                   color: .accentPrimary) {
                             vm.filter.visibility = vis
                             Task { await vm.applyFilter() }
                         }
                     }
 
-                    Divider().frame(height: 20)
+                    Divider().frame(height: 20).background(Color.borderColor)
 
-                    // Star rating chips
                     ForEach([1, 2, 3, 4, 5], id: \.self) { stars in
-                        FilterChip(
-                            label: "\(stars)★",
-                            isSelected: vm.filter.rating == stars,
-                            color: .yellow
-                        ) {
+                        FilterChip(label: "\(stars)★",
+                                   isSelected: vm.filter.rating == stars,
+                                   color: .accentGold) {
                             vm.filter.rating = (vm.filter.rating == stars) ? nil : stars
                             Task { await vm.applyFilter() }
                         }
@@ -94,13 +86,11 @@ struct ReviewModerationDashboardView: View {
                 .padding(.horizontal, 16)
             }
 
-            // Product picker (only shown when products exist)
             if !vm.productOptions.isEmpty {
                 HStack {
                     Text("Product:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.textMuted)
                     Picker("Product", selection: $vm.filter.productId) {
                         Text("All Products").tag(String?.none)
                         ForEach(vm.productOptions) { opt in
@@ -109,19 +99,17 @@ struct ReviewModerationDashboardView: View {
                     }
                     .pickerStyle(.menu)
                     .font(.caption)
+                    .foregroundStyle(Color.accentPrimary)
                     .onChange(of: vm.filter.productId) { _, _ in
                         Task { await vm.applyFilter() }
                     }
-
                     Spacer()
-
-                    // Active filter count badge
                     if !vm.filter.isEmpty {
                         Button("Clear") {
                             vm.filter = ReviewFilter()
                             Task { await vm.applyFilter() }
                         }
-                        .font(.caption)
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(Color.accentPrimary)
                     }
                 }
@@ -129,24 +117,23 @@ struct ReviewModerationDashboardView: View {
             }
         }
         .padding(.vertical, 10)
+        .background(Color.bgSecondary)
     }
-
-    // MARK: Review List
 
     @ViewBuilder
     private var reviewList: some View {
-        if vm.isLoadingQueue {
-            reviewListSkeleton
-        } else if vm.reviews.isEmpty {
-            DashboardEmptyState(
-                icon: "bubble.left.and.bubble.right",
-                title: "No reviews found",
-                message: vm.filter.isEmpty
+        CustomRefreshScrollView({
+            if vm.isLoadingQueue {
+                reviewListSkeleton
+            } else if vm.reviews.isEmpty {
+                DashboardEmptyState(
+                    icon: "bubble.left.and.bubble.right",
+                    title: "No reviews found",
+                    message: vm.filter.isEmpty
                     ? "No reviews have been submitted yet."
                     : "Try adjusting your filters."
-            )
-        } else {
-            ScrollView {
+                )
+            } else {
                 LazyVStack(spacing: 12) {
                     ForEach(vm.reviews) { review in
                         ReviewQueueCard(
@@ -160,19 +147,19 @@ struct ReviewModerationDashboardView: View {
                             }
                         }
                     }
-
                     if vm.isLoadingMore {
-                        ProgressView().frame(maxWidth: .infinity).padding(.vertical, 16)
+                        ProgressView().tint(.accentPrimary).frame(maxWidth: .infinity).padding(.vertical, 16)
                     } else if !vm.canLoadMore && vm.reviews.count >= 30 {
                         Text("All reviews loaded")
-                            .font(.caption).foregroundStyle(.tertiary)
+                            .font(.caption).foregroundStyle(Color.textMuted)
                             .frame(maxWidth: .infinity).padding(.vertical, 16)
                     }
                 }
                 .padding(16)
             }
-            .refreshable { await vm.loadQueue() }
-        }
+        }, onRefresh: {
+            await vm.loadQueue()
+        })
     }
 
     private var reviewListSkeleton: some View {
@@ -181,32 +168,43 @@ struct ReviewModerationDashboardView: View {
                 ForEach(0..<8, id: \.self) { _ in
                     ShimmerView()
                         .frame(maxWidth: .infinity, minHeight: 110)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
             }
             .padding(16)
         }
     }
 
-    // MARK: ─── SECTION: ANALYTICS ────────────────────────────────────────────
+    // MARK: ─ ANALYTICS ─
 
     private var analyticsSection: some View {
         VStack(spacing: 0) {
             productPickerBar
-            Divider()
+            Divider().background(Color.borderColor)
 
-            if vm.isLoadingAnalytics {
-                DashboardLoadingPlaceholder(count: 3)
-                    .padding(16)
-            } else if let data = vm.analyticsData {
-                analyticsContent(data: data)
-            } else if vm.productOptions.isEmpty {
-                DashboardEmptyState(
-                    icon: "star.slash",
-                    title: "No products with reviews",
-                    message: "Reviews will appear here once customers start rating products."
-                )
-            }
+            CustomRefreshScrollView({
+                if vm.isLoadingAnalytics {
+                    DashboardLoadingPlaceholder(count: 3).padding(16)
+                } else if let data = vm.analyticsData {
+                    VStack(spacing: 20) {
+                        analyticsStatCards(data: data)
+                        ratingDistributionChart(data: data)
+                        if data.ratingOverTime.count >= 2 {
+                            ratingOverTimeChart(data: data)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 32)
+                } else if vm.productOptions.isEmpty {
+                    DashboardEmptyState(
+                        icon: "star.slash",
+                        title: "No products with reviews",
+                        message: "Reviews will appear here once customers start rating products."
+                    )
+                }
+            }, onRefresh: {
+                await vm.loadAnalytics()
+            })
         }
     }
 
@@ -214,82 +212,50 @@ struct ReviewModerationDashboardView: View {
         HStack {
             Text("Product")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-
+                .foregroundStyle(Color.textMuted)
             Picker("Product", selection: $vm.selectedProductId) {
                 ForEach(vm.productOptions) { opt in
                     Text(opt.name).tag(String?.some(opt.id))
                 }
             }
             .pickerStyle(.menu)
+            .foregroundStyle(Color.accentPrimary)
             .onChange(of: vm.selectedProductId) { _, _ in
                 Task { await vm.productChanged() }
             }
-
             Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+        .background(Color.bgSecondary)
     }
-
-    private func analyticsContent(data: ReviewAnalyticsData) -> some View {
-        CustomRefreshScrollView({
-            VStack(spacing: 20) {
-                analyticsStatCards(data: data)
-                ratingDistributionChart(data: data)
-                if data.ratingOverTime.count >= 2 {
-                    ratingOverTimeChart(data: data)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
-        }, onRefresh: {
-            await vm.loadAnalytics()
-        })
-    }
-
-    // MARK: Analytics Stat Cards
 
     private func analyticsStatCards(data: ReviewAnalyticsData) -> some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                StatCard(
-                    title: "Avg Rating",
-                    value: "\(data.avgRatingFormatted) ★",
-                    icon: "star.fill",
-                    color: .yellow
-                )
-                StatCard(
-                    title: "Total Reviews",
-                    value: "\(data.totalCount)",
-                    icon: "bubble.left.fill",
-                    color: .blue
-                )
+                StatCard(title: "Avg Rating",
+                         value: "\(data.avgRatingFormatted) ★",
+                         icon: "star.fill",
+                         color: .accentGold)
+                StatCard(title: "Total Reviews",
+                         value: "\(data.totalCount)",
+                         icon: "bubble.left.fill",
+                         color: .accentPrimary)
             }
             HStack(spacing: 12) {
-                StatCard(
-                    title: "Visible",
-                    value: "\(data.visibleCount)",
-                    icon: "eye.fill",
-                    color: .green
-                )
-                StatCard(
-                    title: "Hidden",
-                    value: "\(data.hiddenCount)",
-                    icon: "eye.slash.fill",
-                    color: data.hiddenCount > 0 ? .orange : .secondary
-                )
+                StatCard(title: "Visible",
+                         value: "\(data.visibleCount)",
+                         icon: "eye.fill", color: .semanticSuccess)
+                StatCard(title: "Hidden",
+                         value: "\(data.hiddenCount)",
+                         icon: "eye.slash.fill",
+                         color: data.hiddenCount > 0 ? .orange : .secondary)
             }
         }
     }
 
-    // MARK: Rating Distribution Bar Chart
-
     private func ratingDistributionChart(data: ReviewAnalyticsData) -> some View {
-        ChartCard(
-            title: "Rating Distribution",
-            subtitle: data.productName
-        ) {
+        ChartCard(title: "Rating Distribution", subtitle: data.productName) {
             Chart(data.ratingDistribution) { bucket in
                 BarMark(
                     x: .value("Stars", "\(bucket.stars)★"),
@@ -301,16 +267,14 @@ struct ReviewModerationDashboardView: View {
                     if bucket.count > 0 {
                         Text("\(bucket.count)")
                             .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textMuted)
                     }
                 }
             }
             .chartXAxis {
                 AxisMarks { value in
                     AxisValueLabel {
-                        if let label = value.as(String.self) {
-                            Text(label).font(.caption)
-                        }
+                        if let label = value.as(String.self) { Text(label).font(.caption) }
                     }
                 }
             }
@@ -322,12 +286,11 @@ struct ReviewModerationDashboardView: View {
             }
             .frame(height: 160)
 
-            // Percentage labels below bars
             HStack {
                 ForEach(data.ratingDistribution) { bucket in
                     Text(bucket.count > 0 ? String(format: "%.0f%%", bucket.percentage) : "")
                         .font(.system(size: 9))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(Color.textMuted)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -335,13 +298,8 @@ struct ReviewModerationDashboardView: View {
         }
     }
 
-    // MARK: Rating Over Time Line Chart
-
     private func ratingOverTimeChart(data: ReviewAnalyticsData) -> some View {
-        ChartCard(
-            title: "Rating Over Time",
-            subtitle: "Weekly average · \(data.productName)"
-        ) {
+        ChartCard(title: "Rating Over Time", subtitle: "Weekly average · \(data.productName)") {
             Chart(data.ratingOverTime) { point in
                 AreaMark(
                     x: .value("Week", point.weekStart, unit: .weekOfYear),
@@ -349,7 +307,7 @@ struct ReviewModerationDashboardView: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color.yellow.opacity(0.25), Color.yellow.opacity(0.02)],
+                        colors: [Color.accentGold.opacity(0.22), Color.accentGold.opacity(0.02)],
                         startPoint: .top, endPoint: .bottom
                     )
                 )
@@ -359,20 +317,20 @@ struct ReviewModerationDashboardView: View {
                     x: .value("Week", point.weekStart, unit: .weekOfYear),
                     y: .value("Avg Rating", point.avgRating)
                 )
-                .foregroundStyle(Color.yellow)
-                .lineStyle(StrokeStyle(lineWidth: 2))
+                .foregroundStyle(Color.accentGold)
+                .lineStyle(StrokeStyle(lineWidth: 2.5))
                 .interpolationMethod(.catmullRom)
 
                 PointMark(
                     x: .value("Week", point.weekStart, unit: .weekOfYear),
                     y: .value("Avg Rating", point.avgRating)
                 )
-                .foregroundStyle(Color.yellow)
+                .foregroundStyle(Color.accentGold)
                 .symbolSize(30)
                 .annotation(position: .top, spacing: 4) {
                     Text(String(format: "%.1f", point.avgRating))
                         .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                 }
             }
             .chartYScale(domain: 1...5.2)
@@ -396,15 +354,13 @@ struct ReviewModerationDashboardView: View {
         }
     }
 
-    // MARK: - Helpers
-
     private func starColor(_ stars: Int) -> Color {
         switch stars {
-        case 5:    return .green
-        case 4:    return Color(red: 0.6, green: 0.85, blue: 0.3)
-        case 3:    return .yellow
-        case 2:    return .orange
-        default:   return .red
+        case 5: return .semanticSuccess
+        case 4: return Color(red: 0.55, green: 0.82, blue: 0.28)
+        case 3: return .accentGold
+        case 2: return .orange
+        default: return .semanticError
         }
     }
 }
@@ -419,77 +375,78 @@ private struct ReviewQueueCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
 
-            // Top row: product name + hide button
+            // Product + customer header
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(review.productName)
-                        .font(.caption.weight(.semibold))
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(Color.accentPrimary)
                     Text(review.customerName)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                 }
-
                 Spacer()
-
-                // Hidden status badge
                 if review.isHidden {
                     Label("Hidden", systemImage: "eye.slash.fill")
-                        .font(.caption2.weight(.semibold))
+                        .font(.caption2.weight(.bold))
                         .foregroundStyle(.orange)
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 9)
                         .padding(.vertical, 4)
-                        .background(Color.orange.opacity(0.12), in: Capsule())
+                        .background(Color.orange.opacity(0.10), in: Capsule())
+                        .overlay(Capsule().stroke(Color.orange.opacity(0.25), lineWidth: 1))
                 }
             }
 
-            // Star rating + date
+            // Stars + date
             HStack(spacing: 6) {
-                // Individual star icons (more legible than the string approach)
                 HStack(spacing: 2) {
-                    ForEach(1...5, id: \.self) { i in
-                        Image(systemName: i <= review.rating ? "star.fill" : "star")
+                    ForEach(1...5, id: \.self) { idx in
+                        Image(systemName: idx <= review.rating ? "star.fill" : "star")
                             .font(.system(size: 11))
-                            .foregroundStyle(i <= review.rating ? Color.yellow : Color.secondary.opacity(0.4))
+                            .foregroundStyle(idx <= review.rating ? Color.accentGold : Color.borderColor)
                     }
                 }
-                Text("·")
-                    .foregroundStyle(.tertiary)
+                Text("·").foregroundStyle(Color.borderColor)
                 Text(review.timestampFormatted)
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.textMuted)
             }
 
-            // Review excerpt
+            // Review body
             Text(review.excerpt)
                 .font(.subheadline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.textPrimary)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Divider()
+            Divider().background(Color.borderColor)
 
-            // Action button
+            // Action
             HStack {
                 Spacer()
                 Button {
                     Task { await onToggle() }
                 } label: {
                     if isToggling {
-                        ProgressView().scaleEffect(0.8)
-                            .frame(width: 80, height: 28)
+                        ProgressView().scaleEffect(0.8).frame(width: 80, height: 28)
                     } else {
                         Label(
                             review.isHidden ? "Unhide" : "Hide",
                             systemImage: review.isHidden ? "eye.fill" : "eye.slash.fill"
                         )
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(review.isHidden ? .green : .orange)
+                        .foregroundStyle(review.isHidden ? Color.semanticSuccess : .orange)
                         .padding(.horizontal, 14)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 7)
                         .background(
-                            (review.isHidden ? Color.green : Color.orange).opacity(0.1),
+                            (review.isHidden ? Color.semanticSuccess : Color.orange).opacity(0.10),
                             in: Capsule()
+                        )
+                        .overlay(
+                            Capsule().stroke(
+                                (review.isHidden ? Color.semanticSuccess : Color.orange).opacity(0.25),
+                                lineWidth: 1
+                            )
                         )
                     }
                 }
@@ -497,26 +454,22 @@ private struct ReviewQueueCard: View {
                 .disabled(isToggling)
             }
         }
-        .padding(14)
+        .padding(16)
         .background(
-            review.isHidden
-                ? Color.surfaceSub
-                : Color.surfacePrimary,
-            in: RoundedRectangle(cornerRadius: 14)
+            review.isHidden ? Color.surfaceSub : Color.surfacePrimary,
+            in: RoundedRectangle(cornerRadius: 16)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(
-                    review.isHidden ? Color.orange.opacity(0.25) : Color.borderColor,
-                    lineWidth: 1
-                )
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(review.isHidden ? Color.orange.opacity(0.22) : Color.borderColor, lineWidth: 1)
         )
-        .opacity(review.isHidden ? 0.75 : 1.0)
+        .opacity(review.isHidden ? 0.78 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: review.isHidden)
+        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
 }
 
-// MARK: - Filter Chip (reused from 8.4, local copy avoids module-scope conflicts)
+// MARK: - Filter Chip (local)
 
 private struct FilterChip: View {
     let label: String
@@ -531,7 +484,8 @@ private struct FilterChip: View {
                 .foregroundStyle(isSelected ? .white : color)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(isSelected ? color : color.opacity(0.1), in: Capsule())
+                .background(isSelected ? color : color.opacity(0.10), in: Capsule())
+                .overlay(Capsule().stroke(color.opacity(isSelected ? 0 : 0.22), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

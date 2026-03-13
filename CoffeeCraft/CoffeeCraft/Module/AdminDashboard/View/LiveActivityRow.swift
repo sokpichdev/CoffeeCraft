@@ -10,53 +10,57 @@ import SwiftUI
 struct LiveActivityRow: View {
 
     let item: LiveOrderItem
-    /// Passed from the parent's 30-second timer so all rows refresh together.
+    /// Passed from parent's 30-second timer so all rows refresh simultaneously.
     let now: Date
 
     var body: some View {
         HStack(spacing: 14) {
 
-            // Avatar / status circle
+            // Avatar with status ring
             ZStack {
                 Circle()
-                    .fill(statusColor.opacity(0.12))
-                    .frame(width: 40, height: 40)
+                    .fill(statusColor.opacity(0.10))
+                    .frame(width: 42, height: 42)
                 Image(systemName: statusIcon)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(statusColor)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(statusColor)
             }
+            .overlay(
+                Circle()
+                    .stroke(statusColor.opacity(0.30), lineWidth: 1.5)
+            )
 
             // Order info
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.customerName)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
 
                 HStack(spacing: 4) {
                     Text("\(item.itemCount) item\(item.itemCount > 1 ? "s" : "")")
                         .font(.caption)
-                        .foregroundColor(.textMuted)
+                        .foregroundStyle(Color.textMuted)
                     Text("·")
                         .font(.caption)
-                        .foregroundColor(.textMuted)
+                        .foregroundStyle(Color.textMuted)
                     Text(item.timeAgo(relativeTo: now))
                         .font(.caption)
-                        .foregroundColor(.textMuted)
+                        .foregroundStyle(Color.textMuted)
                 }
             }
 
             Spacer()
 
-            // Amount + badge
+            // Amount + status badge
             VStack(alignment: .trailing, spacing: 5) {
                 Text(item.totalFormatted)
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                 StatusBadge1(status: item.status)
             }
         }
-        .padding(.vertical, 10)
+        .padding(.vertical, 11)
         .padding(.horizontal, 2)
         .contentShape(Rectangle())
     }
@@ -65,7 +69,7 @@ struct LiveActivityRow: View {
 
     private var statusColor: Color {
         switch item.status {
-        case "Pending": return Color.orange
+        case "Pending": return .orange
         case "Preparing": return Color.accentPrimary
         case "Ready": return Color.semanticSuccess
         case "Completed": return Color.textMuted
@@ -96,14 +100,15 @@ struct StatusBadge1: View {
             .font(.system(size: 10, weight: .bold))
             .foregroundStyle(color)
             .tracking(0.2)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
             .background(color.opacity(0.12), in: Capsule())
+            .overlay(Capsule().stroke(color.opacity(0.22), lineWidth: 1))
     }
 
     private var color: Color {
         switch status {
-        case "Pending": return Color.orange
+        case "Pending": return .orange
         case "Preparing": return Color.accentPrimary
         case "Ready": return Color.semanticSuccess
         case "Completed": return Color.textMuted

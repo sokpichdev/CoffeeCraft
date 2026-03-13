@@ -1,8 +1,6 @@
 //
 //  ProductPerformanceView.swift
-//  CoffeeCraft
-//
-//  Created by Sok Pich on 13/03/2026.
+//  CoffeeCraft — Admin Dashboard Redesign
 //
 
 import Charts
@@ -40,6 +38,7 @@ struct ProductPerformanceView: View {
         }, onRefresh: {
             await vm.loadPerformance()
         })
+        .background(Color.bgPrimary.ignoresSafeArea())
         .navigationTitle("Product Performance")
         .navigationBarTitleDisplayMode(.large)
         .onAppear { vm.onAppear() }
@@ -60,7 +59,7 @@ struct ProductPerformanceView: View {
         }
     }
 
-    // MARK: - Summary Stat Cards
+    // MARK: - Summary Cards
 
     private var summaryCards: some View {
         HStack(spacing: 12) {
@@ -68,21 +67,21 @@ struct ProductPerformanceView: View {
                 title: "Units Sold",
                 value: "\(vm.performanceData?.totalUnitsSold ?? 0)",
                 icon: "shippingbox.fill",
-                color: .blue,
+                color: .accentPrimary,
                 isLoading: vm.isLoading
             )
             StatCard(
                 title: "Total Revenue",
                 value: vm.performanceData?.totalRevenue.asCurrency ?? "$0.00",
                 icon: "dollarsign.circle.fill",
-                color: .green,
+                color: .semanticSuccess,
                 isLoading: vm.isLoading
             )
             StatCard(
-                title: "Products Sold",
+                title: "Products",
                 value: "\(vm.performanceData?.topProducts.count ?? 0)",
                 icon: "cup.and.saucer.fill",
-                color: .orange,
+                color: .accentGold,
                 isLoading: vm.isLoading
             )
         }
@@ -105,15 +104,15 @@ struct ProductPerformanceView: View {
                     Text("★").frame(width: 34, alignment: .trailing)
                 }
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.textMuted)
                 .padding(.bottom, 8)
 
-                Divider()
+                Divider().background(Color.borderColor)
 
                 ForEach(vm.performanceData?.topProducts ?? []) { item in
                     BestSellerRow(item: item, maxUnits: vm.maxUnitsSold)
                     if item.id != vm.performanceData?.topProducts.last?.id {
-                        Divider().padding(.leading, 28)
+                        Divider().padding(.leading, 28).background(Color.borderColor)
                     }
                 }
             }
@@ -128,7 +127,6 @@ struct ProductPerformanceView: View {
             subtitle: vm.selectedPeriod.rawValue
         ) {
             HStack(alignment: .center, spacing: 20) {
-                // Donut chart
                 ZStack {
                     Chart(vm.performanceData?.categoryRevenue ?? []) { stat in
                         SectorMark(
@@ -139,35 +137,35 @@ struct ProductPerformanceView: View {
                         .foregroundStyle(by: .value("Category", stat.category))
                         .cornerRadius(4)
                     }
-                    // Centre label
                     VStack(spacing: 2) {
                         Text(vm.totalRevenue.asCurrency)
                             .font(.subheadline.bold())
                             .minimumScaleFactor(0.6)
+                            .foregroundStyle(Color.textPrimary)
                         Text("total")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textMuted)
                     }
                 }
                 .frame(width: 150, height: 150)
                 .chartLegend(.hidden)
 
-                // Manual legend with percentages
+                // Legend
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(vm.performanceData?.categoryRevenue ?? []) { stat in
                         HStack(spacing: 6) {
                             Circle()
                                 .frame(width: 8, height: 8)
-                                // Colour matched to Swift Charts' auto-palette by index
                                 .foregroundStyle(categoryColor(stat.category,
                                     in: vm.performanceData?.categoryRevenue ?? []))
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(stat.category)
                                     .font(.caption.weight(.medium))
+                                    .foregroundStyle(Color.textPrimary)
                                     .lineLimit(1)
                                 Text("\(stat.percentageFormatted) · \(stat.revenueFormatted)")
                                     .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.textMuted)
                             }
                         }
                     }
@@ -184,13 +182,12 @@ struct ProductPerformanceView: View {
             title: "Rating vs. Sales",
             subtitle: "Bubble size = revenue · Only rated products shown"
         ) {
-            let ratedProducts = (vm.performanceData?.topProducts ?? [])
-                .filter(\.hasRatings)
+            let ratedProducts = (vm.performanceData?.topProducts ?? []).filter(\.hasRatings)
 
             if ratedProducts.isEmpty {
                 Text("No rated products in this period")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textMuted)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 24)
             } else {
@@ -200,12 +197,11 @@ struct ProductPerformanceView: View {
                         y: .value("Units Sold", item.unitsSold)
                     )
                     .foregroundStyle(Color.accentPrimary.opacity(0.7))
-                    // Scale bubble by revenue — clamp so tiny items are still visible
                     .symbolSize(max(60, min(600, item.revenue * 0.8)))
                     .annotation(position: .top, spacing: 4) {
                         Text(item.name)
                             .font(.system(size: 9))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.textMuted)
                             .lineLimit(1)
                             .fixedSize()
                     }
@@ -233,20 +229,17 @@ struct ProductPerformanceView: View {
                         AxisValueLabel { value.as(Int.self).map { Text("\($0)").font(.caption2) } }
                     }
                 }
-                // Quadrant annotation: high rating + high sales = sweet spot
                 .chartOverlay { proxy in
                     if let plotFrame = proxy.plotFrame {
                         GeometryReader { geo in
                             let rect = geo[plotFrame]
-                            // "Sweet spot" top-right corner label
                             Text("Sweet spot ↗")
                                 .font(.system(size: 9, weight: .semibold))
-                                .foregroundStyle(.green.opacity(0.6))
+                                .foregroundStyle(Color.semanticSuccess.opacity(0.6))
                                 .position(x: rect.maxX - 36, y: rect.minY + 12)
-                            // "Underperforming" bottom-left
                             Text("Underperforming ↙")
                                 .font(.system(size: 9, weight: .semibold))
-                                .foregroundStyle(.red.opacity(0.5))
+                                .foregroundStyle(Color.semanticError.opacity(0.5))
                                 .position(x: rect.minX + 52, y: rect.maxY - 12)
                         }
                     }
@@ -256,12 +249,8 @@ struct ProductPerformanceView: View {
         }
     }
 
-    // MARK: - Category Colour Helper
-
-    /// Returns the colour Swift Charts auto-assigns to each category by position.
-    /// Matches the donut chart colour so the legend dots are consistent.
     private func categoryColor(_ category: String, in stats: [CategoryRevenueStat]) -> Color {
-        let palette: [Color] = [.blue, .green, .orange, .purple, .teal, .red, .yellow, .pink]
+        let palette: [Color] = [.accentPrimary, .semanticSuccess, .accentGold, .orange, .teal, .semanticError, .yellow, .pink]
         let idx = stats.firstIndex(where: { $0.category == category }) ?? 0
         return palette[idx % palette.count]
     }
@@ -283,38 +272,37 @@ private struct BestSellerRow: View {
                         .frame(width: 22, height: 22)
                     Text("\(item.rank)")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(item.rank <= 3 ? .white : .primary)
+                        .foregroundStyle(item.rank <= 3 ? .white : Color.textSecondary)
                 }
 
-                // Name + category
                 VStack(alignment: .leading, spacing: 1) {
                     Text(item.name)
                         .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color.textPrimary)
                         .lineLimit(1)
                     Text(item.category)
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.textMuted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Units sold
                 Text("\(item.unitsSold)")
                     .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.textPrimary)
                     .frame(width: 44, alignment: .trailing)
 
-                // Revenue
                 Text(item.revenueFormatted)
                     .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.textMuted)
                     .frame(width: 72, alignment: .trailing)
 
-                // Rating
                 HStack(spacing: 2) {
                     Image(systemName: "star.fill")
                         .font(.system(size: 9))
                         .foregroundStyle(.yellow)
                     Text(item.hasRatings ? item.avgRatingFormatted : "—")
                         .font(.caption)
+                        .foregroundStyle(Color.textSecondary)
                 }
                 .frame(width: 34, alignment: .trailing)
             }
@@ -323,9 +311,9 @@ private struct BestSellerRow: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.secondary.opacity(0.1))
+                        .fill(Color.surfaceSub)
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.accentPrimary.opacity(0.5))
+                        .fill(Color.accentPrimary.opacity(0.55))
                         .frame(width: max(4, geo.size.width * ratio))
                 }
             }
@@ -341,10 +329,10 @@ private struct BestSellerRow: View {
 
     private var rankColor: Color {
         switch item.rank {
-        case 1: return .yellow
-        case 2: return Color(red: 0.75, green: 0.75, blue: 0.75)   // silver
-        case 3: return Color(red: 0.80, green: 0.50, blue: 0.20)   // bronze
-        default: return Color.secondary.opacity(0.15)
+        case 1: return .accentGold
+        case 2: return Color(red: 0.72, green: 0.72, blue: 0.72)
+        case 3: return Color(red: 0.78, green: 0.48, blue: 0.18)
+        default: return Color.surfaceSub
         }
     }
 }

@@ -31,13 +31,13 @@ extension AnalyticsService {
     /// (lastDocument) is captured on the initial load — identical to how
     /// OrderViewModel.fetchOrders() sets `lastDocument` on page 1.
     func fetchDashboardSummary() async throws -> DashboardSummary {
-        async let revenue   = fetchRevenueSummary()
-        async let orders    = fetchOrderSummary()
+        async let revenue = fetchRevenueSummary()
+        async let orders = fetchOrderSummary()
         async let customers = fetchCustomerSummary()
 
         return try await DashboardSummary(
-            revenue:   revenue,
-            orders:    orders,
+            revenue: revenue,
+            orders: orders,
             customers: customers
         )
     }
@@ -45,14 +45,14 @@ extension AnalyticsService {
     // MARK: - Revenue
 
     private func fetchRevenueSummary() async throws -> RevenueSummary {
-        let now        = Date()
+        let now = Date()
         let todayStart = Calendar.current.startOfDay(for: now)
-        let weekStart  = Calendar.current.date(byAdding: .day, value: -6, to: todayStart)!
+        let weekStart = Calendar.current.date(byAdding: .day, value: -6, to: todayStart)!
         let monthStart = Calendar.current.date(byAdding: .day, value: -29, to: todayStart)!
 
-        async let todayRevenue  = revenueInRange(from: todayStart, to: now)
-        async let weekRevenue   = revenueInRange(from: weekStart,  to: now)
-        async let monthRevenue  = revenueInRange(from: monthStart, to: now)
+        async let todayRevenue = revenueInRange(from: todayStart, to: now)
+        async let weekRevenue = revenueInRange(from: weekStart, to: now)
+        async let monthRevenue = revenueInRange(from: monthStart, to: now)
 
         return try await RevenueSummary(
             today: todayRevenue,
@@ -65,7 +65,7 @@ extension AnalyticsService {
         let snapshot = try await db.collection("orders")
             .whereField("status", isEqualTo: "Completed")
             .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("timestamp", isLessThanOrEqualTo:    Timestamp(date: end))
+            .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
             .getDocuments()
 
         return snapshot.documents.reduce(0.0) { sum, doc in
@@ -76,8 +76,8 @@ extension AnalyticsService {
     // MARK: - Orders
 
     private func fetchOrderSummary() async throws -> OrderSummary {
-        let now            = Date()
-        let todayStart     = Calendar.current.startOfDay(for: now)
+        let now = Date()
+        let todayStart = Calendar.current.startOfDay(for: now)
         let yesterdayStart = Calendar.current.date(byAdding: .day, value: -1, to: todayStart)!
 
         async let todaySnap = db.collection("orders")
@@ -96,9 +96,9 @@ extension AnalyticsService {
         let (today, yesterday, active) = try await (todaySnap, yesterdaySnap, activeSnap)
 
         return OrderSummary(
-            todayCount:     today.documents.count,
+            todayCount: today.documents.count,
             yesterdayCount: yesterday.documents.count,
-            activeCount:    active.documents.count
+            activeCount: active.documents.count
         )
     }
 
@@ -120,7 +120,7 @@ extension AnalyticsService {
 
         return CustomerSummary(
             newThisWeek: newUsers.documents.count,
-            totalCount:  totalUsers.documents.count
+            totalCount: totalUsers.documents.count
         )
     }
 
@@ -139,7 +139,7 @@ extension AnalyticsService {
     func fetchMoreActivity(after cursor: DocumentSnapshot?, pageSize: Int = 10) async throws -> ActivityPage {
         var query: Query = db.collection("orders")
             .order(by: "timestamp", descending: true)
-            .limit(to: pageSize + 1)    // +1 to detect hasMore
+            .limit(to: pageSize + 1) // +1 to detect hasMore
 
         if let cursor { query = query.start(afterDocument: cursor) }
 
@@ -148,9 +148,9 @@ extension AnalyticsService {
         let pageDocs = hasMore ? Array(snapshot.documents.prefix(pageSize)) : snapshot.documents
 
         return ActivityPage(
-            items:        pageDocs.compactMap(mapToLiveOrderItem),
+            items: pageDocs.compactMap(mapToLiveOrderItem),
             lastDocument: pageDocs.last,
-            hasMore:      hasMore
+            hasMore: hasMore
         )
     }
 
@@ -176,19 +176,19 @@ extension AnalyticsService {
     private func mapToLiveOrderItem(_ doc: DocumentSnapshot) -> LiveOrderItem? {
         let data = doc.data() ?? [:]
         guard
-            let timestamp  = (data["timestamp"]  as? Timestamp)?.dateValue(),
-            let totalPrice = data["totalPrice"]  as? Double,
-            let status     = data["status"]      as? String
+            let timestamp = (data["timestamp"] as? Timestamp)?.dateValue(),
+            let totalPrice = data["totalPrice"] as? Double,
+            let status = data["status"] as? String
         else { return nil }
 
         let items = data["items"] as? [[String: Any]] ?? []
         return LiveOrderItem(
-            id:           doc.documentID,
+            id: doc.documentID,
             customerName: data["customerName"] as? String ?? "Customer",
-            totalPrice:   totalPrice,
-            status:       status,
-            timestamp:    timestamp,
-            itemCount:    items.count
+            totalPrice: totalPrice,
+            status: status,
+            timestamp: timestamp,
+            itemCount: items.count
         )
     }
 }

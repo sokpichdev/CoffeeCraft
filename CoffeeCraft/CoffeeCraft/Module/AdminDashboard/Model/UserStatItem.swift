@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 // MARK: - User Stat Item (List Row)
 
@@ -14,7 +15,7 @@ import Foundation
 /// by a background enrichment pass after the page loads — so the list
 /// appears immediately and spend data populates progressively.
 struct UserStatItem: Identifiable {
-    let id: String                  // userId (Firestore document ID)
+    let id: String // userId (Firestore document ID)
     let name: String
     let email: String
     let joinDate: Date
@@ -25,10 +26,10 @@ struct UserStatItem: Identifiable {
     var totalSpent: Double?
 
     var joinDateFormatted: String {
-        let f = DateFormatter()
-        f.dateStyle = .medium
-        f.timeStyle = .none
-        return f.string(from: joinDate)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: joinDate)
     }
 
     var totalSpentFormatted: String {
@@ -55,9 +56,9 @@ struct UserStatItem: Identifiable {
 /// Loaded in a single parallel fetch (user doc + orders + wallet).
 struct UserDetailData {
     let user: UserStatItem
-    let recentOrders: [UserOrderItem]   // last 10
+    let recentOrders: [UserOrderItem] // last 10
     let walletBalance: Double
-    let fcmToken: String?               // present when user has push notifications enabled
+    let fcmToken: String? // present when user has push notifications enabled
 
     var walletFormatted: String { walletBalance.asCurrency }
 }
@@ -83,12 +84,12 @@ struct UserOrderItem: Identifiable {
 
     var statusColor: StatusColor {
         switch status {
-        case "Completed":  return .green
-        case "Pending":    return .orange
-        case "Preparing":  return .blue
-        case "Ready":      return .teal
-        case "Cancelled":  return .red
-        default:           return .secondary
+        case "Completed": return .green
+        case "Pending": return .orange
+        case "Preparing": return .blue
+        case "Ready": return .teal
+        case "Cancelled": return .red
+        default: return .secondary
         }
     }
 
@@ -102,7 +103,3 @@ struct UserListPage {
     let lastDocument: DocumentSnapshot?
     let hasMore: Bool
 }
-
-// MARK: - Import
-
-import FirebaseFirestore

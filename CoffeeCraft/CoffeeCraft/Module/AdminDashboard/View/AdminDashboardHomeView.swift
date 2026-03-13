@@ -10,21 +10,16 @@ import SwiftUI
 struct AdminDashboardHomeView: View {
 
     @StateObject private var vm = DashboardHomeViewModel()
-
-    /// 30-second tick — shared with all LiveActivityRow instances so relative
-    /// timestamps update simultaneously (same pattern as before).
     @State private var now = Date()
 
     var body: some View {
         CustomRefreshScrollView({
             VStack(alignment: .leading, spacing: 20) {
-
                 headerSection
-                revenuePeriodPicker
+                revenueCard
                 kpiGrid
                 quickLinksSection
                 liveActivitySection
-
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 32)
@@ -34,95 +29,132 @@ struct AdminDashboardHomeView: View {
         .background(Color.bgPrimary.ignoresSafeArea())
         .navigationTitle("Dashboard")
         .navigationBarTitleDisplayMode(.large)
-        .onAppear  { vm.onAppear() }
+        .onAppear { vm.onAppear() }
         .onDisappear { vm.onDisappear() }
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { tick in
             now = tick
         }
     }
 
-    // MARK: - Period Picker + Revenue Card
+    // MARK: - Header
 
-    private var revenuePeriodPicker: some View {
-        VStack(alignment: .leading, spacing: 12) {
-
-            // Title row
-            HStack {
-                Label("Revenue", systemImage: "chart.line.uptrend.xyaxis")
-                    .font(.headline.weight(.semibold))
-                    .foregroundColor(.textPrimary)
-                Spacer()
+    private var headerSection: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(greetingText)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.textSecondary)
+                Text("Here's what's brewing")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Color.textPrimary)
             }
+            Spacer()
+            ZStack {
+                Circle()
+                    .fill(LinearGradient.brandPrimary)
+                    .frame(width: 44, height: 44)
+                Image(systemName: "cup.and.saucer.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.white)
+            }
+            .shadow(color: Color.accentPrimary.opacity(0.35), radius: 7, x: 0, y: 3)
+        }
+        .padding(.top, 6)
+    }
 
-            // Segmented picker
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 0..<12: return "Good morning ☕"
+        case 12..<17: return "Good afternoon ☀️"
+        default: return "Good evening 🌙"
+        }
+    }
+
+    // MARK: - Revenue Card
+
+    private var revenueCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+
+            // Period picker
             Picker("Period", selection: $vm.selectedPeriod) {
                 ForEach(DashboardPeriod.allCases, id: \.self) { period in
                     Text(period.rawValue).tag(period)
                 }
             }
             .pickerStyle(.segmented)
+            .padding(.bottom, 16)
 
-            // Revenue amount
-            HStack(alignment: .lastTextBaseline, spacing: 6) {
-                if vm.isLoading {
-                    ShimmerView()
-                        .frame(width: 150, height: 44)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                } else {
+            // Revenue label + amount
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.accentGold)
+                Text("Revenue")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.textSecondary)
+                    .tracking(0.4)
+            }
+            .padding(.bottom, 6)
+
+            if vm.isLoading {
+                ShimmerView()
+                    .frame(width: 160, height: 46)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .padding(.bottom, 16)
+            } else {
+                HStack(alignment: .lastTextBaseline, spacing: 6) {
                     Text(vm.displayRevenue)
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                        .foregroundColor(.textPrimary)
+                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.textPrimary)
                     Text(vm.displayRevenueLabel)
                         .font(.subheadline.weight(.medium))
-                        .foregroundColor(.textMuted)
+                        .foregroundStyle(Color.textMuted)
                         .padding(.bottom, 5)
                 }
+                .padding(.bottom, 16)
             }
 
             // Mini stats row
             if !vm.isLoading, let summary = vm.summary {
-                Divider()
-                    .background(Color.borderColor)
+                Divider().background(Color.borderColor)
 
                 HStack(spacing: 0) {
-                    miniStat(
-                        label: "Today",
-                        value: summary.revenue.todayFormatted,
-                        color: .accentPrimary
-                    )
-                    Divider()
-                        .frame(height: 28)
-                        .background(Color.borderColor)
-                    miniStat(
-                        label: "Week",
-                        value: summary.revenue.thisWeekFormatted,
-                        color: .accentPrimary
-                    )
-                    Divider()
-                        .frame(height: 28)
-                        .background(Color.borderColor)
-                    miniStat(
-                        label: "Month",
-                        value: summary.revenue.thisMonthFormatted,
-                        color: .accentPrimary
-                    )
+                    miniStat(label: "Today", value: summary.revenue.todayFormatted, color: .accentPrimary)
+                    revenueStatDivider
+                    miniStat(label: "Week", value: summary.revenue.thisWeekFormatted, color: .accentPrimary)
+                    revenueStatDivider
+                    miniStat(label: "Month", value: summary.revenue.thisMonthFormatted, color: .accentGold)
                 }
+                .padding(.top, 12)
             }
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color.surfacePrimary)
-                .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
-        )
+        .padding(18)
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        // Gold accent top border
+        .overlay(alignment: .top) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(LinearGradient.brandGold)
+                .frame(height: 3)
+                .padding(.horizontal, 20)
+                .padding(.top, 0)
+        }
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
+            RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.borderColor, lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+    }
+
+    private var revenueStatDivider: some View {
+        Divider()
+            .frame(height: 28)
+            .background(Color.borderColor)
     }
 
     private func miniStat(label: String, value: String, color: Color) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 3) {
             Text(value)
                 .font(.caption.bold())
                 .foregroundStyle(color)
@@ -130,7 +162,8 @@ struct AdminDashboardHomeView: View {
                 .minimumScaleFactor(0.7)
             Text(label)
                 .font(.system(size: 10))
-                .foregroundColor(.textMuted)
+                .foregroundStyle(Color.textMuted)
+                .tracking(0.3)
         }
         .frame(maxWidth: .infinity)
     }
@@ -153,7 +186,7 @@ struct AdminDashboardHomeView: View {
                     title: "Active Now",
                     value: vm.isLoading ? "—" : "\(vm.summary?.orders.activeCount ?? 0)",
                     icon: "flame.fill",
-                    accentColor: .accentPrimary,
+                    accentColor: .orange,
                     isLoading: vm.isLoading
                 )
             }
@@ -162,7 +195,7 @@ struct AdminDashboardHomeView: View {
                     title: "New Members",
                     value: vm.isLoading ? "—" : "\(vm.summary?.customers.newThisWeek ?? 0)",
                     icon: "person.badge.plus.fill",
-                    accentColor: .accentPrimary,
+                    accentColor: .accentGold,
                     subtitle: "This week",
                     isLoading: vm.isLoading
                 )
@@ -177,16 +210,113 @@ struct AdminDashboardHomeView: View {
         }
     }
 
+    // MARK: - Quick Links (Icon Grid)
+
+    private struct QuickNavItem {
+        let title: String
+        let subtitle: String
+        let icon: String
+        let color: Color
+    }
+
+    private let navItems: [(title: String, subtitle: String, icon: String, color: Color)] = [
+        ("Sales", "Revenue & trends", "chart.xyaxis.line", .accentPrimary),
+        ("Products", "Top sellers", "trophy.fill", .accentGold),
+        ("Orders", "Queue & history", "bag.fill", .orange),
+        ("Users", "Customer accounts", "person.2.fill", .blue),
+        ("Reviews", "Moderation", "bubble.left.and.bubble.right.fill", .semanticSuccess)
+    ]
+
+    private var quickLinksSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeaderLabel(icon: "square.grid.2x2.fill", title: "Quick Navigation")
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                      spacing: 12) {
+                // Sales
+                quickNavCell(
+                    title: "Sales",
+                    subtitle: "Trends",
+                    icon: "chart.xyaxis.line",
+                    color: .accentPrimary,
+                    destination: AnyView(SalesAnalyticsView())
+                )
+                // Products
+                quickNavCell(
+                    title: "Products",
+                    subtitle: "Top sellers",
+                    icon: "trophy.fill",
+                    color: .accentGold,
+                    destination: AnyView(ProductPerformanceView())
+                )
+                // Orders
+                quickNavCell(
+                    title: "Orders",
+                    subtitle: "Queue",
+                    icon: "bag.fill",
+                    color: .orange,
+                    destination: AnyView(OrderAnalyticsDashboardView())
+                )
+                // Users
+                quickNavCell(
+                    title: "Users",
+                    subtitle: "Accounts",
+                    icon: "person.2.fill",
+                    color: .blue,
+                    destination: AnyView(UserManagementView())
+                )
+                // Reviews
+                quickNavCell(
+                    title: "Reviews",
+                    subtitle: "Moderate",
+                    icon: "bubble.left.and.bubble.right.fill",
+                    color: Color.semanticSuccess,
+                    destination: AnyView(ReviewModerationDashboardView())
+                )
+            }
+        }
+    }
+
+    private func quickNavCell(title: String, subtitle: String, icon: String,
+                              color: Color, destination: AnyView) -> some View {
+        NavigationLink(destination: destination) {
+            VStack(spacing: 8) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(color.opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(color)
+                }
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.textPrimary)
+                Text(subtitle)
+                    .font(.system(size: 9))
+                    .foregroundStyle(Color.textMuted)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Color.surfacePrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(color.opacity(0.18), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Live Activity Section
 
     private var liveActivitySection: some View {
         VStack(alignment: .leading, spacing: 14) {
 
-            // Header
             HStack {
-                Label("Live Activity", systemImage: "waveform.path.ecg")
-                    .font(.headline.weight(.semibold))
-                    .foregroundColor(.textPrimary)
+                SectionHeaderLabel(icon: "waveform.path.ecg", title: "Live Activity")
                 Spacer()
                 LiveBadge()
             }
@@ -200,107 +330,15 @@ struct AdminDashboardHomeView: View {
             }
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color.surfacePrimary)
-                .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
-        )
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
             RoundedRectangle(cornerRadius: 18)
                 .stroke(Color.borderColor, lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
     }
 
-    private var quickLinksSection: some View {
-        VStack(spacing: 0) {
-            NavigationLink(destination: SalesAnalyticsView()) {
-                HStack {
-                    Image(systemName: "chart.xyaxis.line")
-                        .font(.subheadline)
-                        .foregroundColor(.accentPrimary)
-                        .frame(width: 28)
-                    Text("Sales Analytics")
-                        .font(.subheadline)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-            }
-            Divider().padding(.leading, 16 + 28 + 8)
-     
-            // Future: Product Performance, User Management links go here
-            NavigationLink(destination: ProductPerformanceView()) {
-                HStack {
-                    Image(systemName: "chart.xyaxis.line")
-                        .font(.subheadline)
-                        .foregroundColor(.accentPrimary)
-                        .frame(width: 28)
-                    Text("Product Performance")
-                        .font(.subheadline)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-            }
-            
-            NavigationLink(destination: OrderAnalyticsDashboardView()) {
-                HStack {
-                    Image(systemName: "chart.xyaxis.line")
-                        .font(.subheadline)
-                        .foregroundColor(.accentPrimary)
-                        .frame(width: 28)
-                    Text("Order Analytics")
-                        .font(.subheadline)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-            }
-            NavigationLink(destination: UserManagementView()) {
-                HStack {
-                    Image(systemName: "chart.xyaxis.line")
-                        .font(.subheadline)
-                        .foregroundColor(.accentPrimary)
-                        .frame(width: 28)
-                    Text("User Management")
-                        .font(.subheadline)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-            }
-            NavigationLink(destination: ReviewModerationDashboardView()) {
-                HStack {
-                    Image(systemName: "chart.xyaxis.line")
-                        .font(.subheadline)
-                        .foregroundColor(.accentPrimary)
-                        .frame(width: 28)
-                    Text("Review Moderation")
-                        .font(.subheadline)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-            }
-        }
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
-    }
-    
     // MARK: - Activity List (paginated)
 
     private var activityList: some View {
@@ -308,75 +346,33 @@ struct AdminDashboardHomeView: View {
             ForEach(vm.allActivity) { item in
                 LiveActivityRow(item: item, now: now)
                     .onAppear {
-                        // Trigger next page when the last visible row appears
-                        // — identical trigger pattern to OrderViewModel's loadMore
                         if item.id == vm.allActivity.last?.id {
                             Task { await vm.loadMoreActivity() }
                         }
                     }
-
                 if item.id != vm.allActivity.last?.id {
                     Divider()
                         .background(Color.borderColor)
-                        .padding(.leading, 54)
+                        .padding(.leading, 56)
                 }
             }
-
-            // Pagination footer
             paginationFooter
         }
     }
 }
 
 extension AdminDashboardHomeView {
-    
-    // MARK: - Header
 
-    private var headerSection: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(greetingText)
-                    .font(.subheadline)
-                    .foregroundColor(.textSecondary)
-                Text("Here's what's brewing")
-                    .font(.title3.weight(.semibold))
-                    .foregroundColor(.textPrimary)
-            }
-            Spacer()
-            // Coffee cup icon badge
-            ZStack {
-                Circle()
-                    .fill(LinearGradient.brandPrimary)
-                    .frame(width: 42, height: 42)
-                Image(systemName: "cup.and.saucer.fill")
-                    .font(.system(size: 18))
-                    .foregroundStyle(.white)
-            }
-            .shadow(color: Color.accentPrimary.opacity(0.35), radius: 6, x: 0, y: 3)
-        }
-        .padding(.top, 6)
-    }
-    
-    private var greetingText: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 0..<12:  return "Good morning ☕"
-        case 12..<17: return "Good afternoon ☀️"
-        default:      return "Good evening 🌙"
-        }
-    }
-    
     @ViewBuilder
     private var paginationFooter: some View {
         if vm.isLoadingMore {
             HStack {
                 Spacer()
                 VStack(spacing: 6) {
-                    ProgressView()
-                        .tint(.accentPrimary)
+                    ProgressView().tint(.accentPrimary)
                     Text("Loading more orders…")
                         .font(.caption2)
-                        .foregroundColor(.textMuted)
+                        .foregroundStyle(Color.textMuted)
                 }
                 .padding(.vertical, 16)
                 Spacer()
@@ -385,16 +381,16 @@ extension AdminDashboardHomeView {
             HStack(spacing: 6) {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.caption)
-                    .foregroundColor(.accentPrimary.opacity(0.6))
+                    .foregroundStyle(Color.accentPrimary.opacity(0.6))
                 Text("All orders loaded")
                     .font(.caption)
-                    .foregroundColor(.textMuted)
+                    .foregroundStyle(Color.textMuted)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
         }
     }
-    
+
     // MARK: - Loading Skeleton
 
     private var loadingPlaceholder: some View {
@@ -402,44 +398,36 @@ extension AdminDashboardHomeView {
             ForEach(0..<5, id: \.self) { _ in
                 HStack(spacing: 14) {
                     ShimmerView()
-                        .frame(width: 40, height: 40)
+                        .frame(width: 42, height: 42)
                         .clipShape(Circle())
                     VStack(alignment: .leading, spacing: 6) {
-                        ShimmerView()
-                            .frame(width: 110, height: 14)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                        ShimmerView()
-                            .frame(width: 80, height: 10)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                        ShimmerView().frame(width: 110, height: 14).clipShape(RoundedRectangle(cornerRadius: 4))
+                        ShimmerView().frame(width: 80, height: 10).clipShape(RoundedRectangle(cornerRadius: 4))
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 6) {
-                        ShimmerView()
-                            .frame(width: 52, height: 14)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                        ShimmerView()
-                            .frame(width: 58, height: 18)
-                            .clipShape(Capsule())
+                        ShimmerView().frame(width: 52, height: 14).clipShape(RoundedRectangle(cornerRadius: 4))
+                        ShimmerView().frame(width: 58, height: 18).clipShape(Capsule())
                     }
                 }
                 .padding(.vertical, 4)
             }
         }
     }
-    
+
     // MARK: - Empty State
 
     private var emptyActivityView: some View {
         VStack(spacing: 10) {
             Image(systemName: "cup.and.saucer")
                 .font(.system(size: 40))
-                .foregroundStyle(Color.accentPrimary.opacity(0.4))
+                .foregroundStyle(Color.accentPrimary.opacity(0.35))
             Text("No orders yet today")
                 .font(.subheadline.weight(.medium))
-                .foregroundColor(.textSecondary)
+                .foregroundStyle(Color.textSecondary)
             Text("Orders will appear here in real time")
                 .font(.caption)
-                .foregroundColor(.textMuted)
+                .foregroundStyle(Color.textMuted)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)

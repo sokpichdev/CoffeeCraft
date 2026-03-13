@@ -22,7 +22,7 @@ struct RevenueSummary {
     let thisWeek: Double
     let thisMonth: Double
 
-    var todayFormatted:    String { today.asCurrency }
+    var todayFormatted: String { today.asCurrency }
     var thisWeekFormatted: String { thisWeek.asCurrency }
     var thisMonthFormatted: String { thisMonth.asCurrency }
 }
@@ -71,7 +71,7 @@ struct LiveOrderItem: Identifiable {
         let diff = now.timeIntervalSince(timestamp)
         if diff < 60 { return "Just now" }
         let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle   = .short
+        formatter.unitsStyle = .short
         formatter.dateTimeStyle = .named
         return formatter.localizedString(for: timestamp, relativeTo: now)
     }

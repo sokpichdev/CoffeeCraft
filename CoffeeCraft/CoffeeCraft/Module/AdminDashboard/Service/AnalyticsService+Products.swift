@@ -25,7 +25,7 @@ extension AnalyticsService {
         let (start, end) = productDateRange(for: period)
 
         // Run both queries in parallel — they're independent
-        async let ordersData   = fetchCompletedOrderItems(from: start, to: end)
+        async let ordersData = fetchCompletedOrderItems(from: start, to: end)
         async let productsData = fetchAllProducts()
 
         let (itemMap, totalRevenue, totalUnits) = try await ordersData
@@ -111,11 +111,11 @@ extension AnalyticsService {
 
         for (productId, (units, revenue)) in itemMap {
             let data = catalog[productId] ?? [:]
-            let name      = data["name"]      as? String ?? "Unknown Product"
-            let category  = data["category"]  as? String ?? "Uncategorized"
+            let name = data["name"] as? String ?? "Unknown Product"
+            let category = data["category"]  as? String ?? "Uncategorized"
             let avgRating = data["avgRating"] as? Double ?? 0.0
             let ratingCount = data["ratingCount"] as? Int ?? 0
-            let imageURL  = data["imageURL"]  as? String
+            let imageURL = data["imageURL"]  as? String
 
             stats.append(ProductStatItem(
                 id: productId,

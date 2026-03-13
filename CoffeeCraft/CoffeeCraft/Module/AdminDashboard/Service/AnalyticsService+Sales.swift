@@ -22,10 +22,10 @@ extension AnalyticsService {
 
         // All aggregations are computed from the same in-memory snapshot —
         // no extra Firestore reads needed after the initial fetch.
-        async let summary        = computeSummary(from: orders, period: period)
-        async let dailyRevenue   = computeDailyRevenue(from: orders, start: start, period: period)
+        async let summary = computeSummary(from: orders, period: period)
+        async let dailyRevenue = computeDailyRevenue(from: orders, start: start, period: period)
         async let statusBreakdown = computeStatusBreakdown(from: orders)
-        async let peakHours      = computePeakHours(from: orders)
+        async let peakHours = computePeakHours(from: orders)
 
         return await SalesAnalyticsData(
             period: period,
@@ -52,8 +52,8 @@ extension AnalyticsService {
     // MARK: - Summary Aggregation
 
     private func computeSummary(from orders: [[String: Any]], period: SalesPeriod) -> SalesSummary {
-        let completed  = orders.filter { $0["status"] as? String == "Completed" }
-        let cancelled  = orders.filter { $0["status"] as? String == "Cancelled" }
+        let completed = orders.filter { $0["status"] as? String == "Completed" }
+        let cancelled = orders.filter { $0["status"] as? String == "Cancelled" }
 
         let totalRevenue = completed.reduce(0.0) { $0 + ($1["totalPrice"] as? Double ?? 0) }
         let avgOrderValue = completed.isEmpty ? 0 : totalRevenue / Double(completed.count)
@@ -147,7 +147,7 @@ extension AnalyticsService {
                 let ts = (order["timestamp"] as? Timestamp)?.dateValue()
             else { continue }
 
-            let hour    = cal.component(.hour, from: ts)
+            let hour = cal.component(.hour, from: ts)
             let weekday = cal.component(.weekday, from: ts)   // 1=Sun … 7=Sat
 
             // Snap to the nearest 2-hour display bucket used by the heatmap:
