@@ -6,125 +6,165 @@
 import Charts
 import SwiftUI
 
-// MARK: - Product Performance View
+// MARK: - Tab Enum
+
+enum PerformanceTab: CaseIterable, Identifiable {
+    case analytics, bestSellers
+    var id: Self { self }
+    var title: String {
+        switch self {
+        case .analytics: return "Analytics"
+        case .bestSellers: return "Best Sellers"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .analytics: return "chart.pie.fill"
+        case .bestSellers: return "trophy.fill"
+        }
+    }
+}
 
 struct ProductPerformanceView: View {
 
     @StateObject private var vm = ProductPerformanceViewModel()
     @Environment(\.dismiss) private var dismiss
+
+    /// Drives conditional rendering — only one tab's subtree exists at a time.
+    @State private var activeTab: PerformanceTab = .analytics
+
     var body: some View {
-        CustomRefreshScrollView({
-            VStack(alignment: .leading, spacing: 20) {
+        VStack(spacing: 0) {
 
-                periodPicker
-                summaryCards
+            // Sticky header
+            stickyHeader
+            tabBar
 
-                if vm.isLoading {
-                    DashboardLoadingPlaceholder(count: 3)
-                } else if !vm.hasData {
-                    DashboardEmptyState(
-                        icon: "trophy",
-                        title: "No sales data yet",
-                        message: "Complete some orders to see product performance."
-                    )
+            Group {
+                if activeTab == .analytics {
+                    AnalyticsTab(vm: vm)
+                        .transition(.opacity) // cheap; avoids layout animation
                 } else {
-                    bestSellersSection
-                    categoryDonutSection
-                    ratingScatterSection
+                    BestSellersTab(vm: vm)
+                        .transition(.opacity)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
-        }, onRefresh: {
-            await vm.loadPerformance()
-        })
+            .animation(.easeInOut(duration: 0.18), value: activeTab)
+        }
         .background(Color.bgPrimary.ignoresSafeArea())
         .customNavigationBar("Product Performance", displayMode: .large) {
-            ToolBarButton.back {
-                dismiss()
-            }
+            ToolBarButton.back { dismiss() }
         }
         .onAppear { vm.onAppear() }
     }
 
-    // MARK: - Period Picker
+    /// Rendered once, never re-drawn during scroll.
+    private var stickyHeader: some View {
+        VStack(spacing: 12) {
+            Picker("Period", selection: $vm.selectedPeriod) {
+                ForEach(SalesPeriod.allCases) { p in
+                    Text(p.rawValue).tag(p)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: vm.selectedPeriod) { _, _ in
+                Task { await vm.periodChanged() }
+            }
 
-    private var periodPicker: some View {
-        Picker("Period", selection: $vm.selectedPeriod) {
-            ForEach(SalesPeriod.allCases) { period in
-                Text(period.rawValue).tag(period)
+            HStack(spacing: 12) {
+                StatCard(
+                    title: "Units Sold",
+                    value: "\(vm.performanceData?.totalUnitsSold ?? 0)",
+                    icon: "shippingbox.fill",
+                    color: .accentPrimary,
+                    isLoading: vm.isLoading
+                )
+                StatCard(
+                    title: "Total Revenue",
+                    value: vm.performanceData?.totalRevenue.asCurrency ?? "$0.00",
+                    icon: "dollarsign.circle.fill",
+                    color: .semanticSuccess,
+                    isLoading: vm.isLoading
+                )
+                StatCard(
+                    title: "Products",
+                    value: "\(vm.performanceData?.topProducts.count ?? 0)",
+                    icon: "cup.and.saucer.fill",
+                    color: .accentGold,
+                    isLoading: vm.isLoading
+                )
             }
         }
-        .pickerStyle(.segmented)
-        .padding(.top, 8)
-        .onChange(of: vm.selectedPeriod) { _, _ in
-            Task { await vm.periodChanged() }
-        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.bgPrimary)
     }
 
-    // MARK: - Summary Cards
-
-    private var summaryCards: some View {
-        HStack(spacing: 12) {
-            StatCard(
-                title: "Units Sold",
-                value: "\(vm.performanceData?.totalUnitsSold ?? 0)",
-                icon: "shippingbox.fill",
-                color: .accentPrimary,
-                isLoading: vm.isLoading
-            )
-            StatCard(
-                title: "Total Revenue",
-                value: vm.performanceData?.totalRevenue.asCurrency ?? "$0.00",
-                icon: "dollarsign.circle.fill",
-                color: .semanticSuccess,
-                isLoading: vm.isLoading
-            )
-            StatCard(
-                title: "Products",
-                value: "\(vm.performanceData?.topProducts.count ?? 0)",
-                icon: "cup.and.saucer.fill",
-                color: .accentGold,
-                isLoading: vm.isLoading
-            )
-        }
-    }
-
-    // MARK: - Best Sellers Table
-
-    private var bestSellersSection: some View {
-        ChartCard(
-            title: "Best Sellers",
-            subtitle: "\(vm.selectedPeriod.rawValue) · Ranked by units sold"
-        ) {
-            VStack(spacing: 0) {
-                // Header row
-                HStack {
-                    Text("#").frame(width: 22, alignment: .center)
-                    Text("Product").frame(maxWidth: .infinity, alignment: .leading)
-                    Text("Sold").frame(width: 44, alignment: .trailing)
-                    Text("Revenue").frame(width: 72, alignment: .trailing)
-                    Text("★").frame(width: 34, alignment: .trailing)
-                }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.textMuted)
-                .padding(.bottom, 8)
-
-                Divider().background(Color.borderColor)
-
-                let products = vm.performanceData?.topProducts ?? []
-                ForEach(Array(products.enumerated()), id: \.element.id) { index, item in
-                    BestSellerRow(item: item, maxUnits: vm.maxUnitsSold)
-                    if index < products.count - 1 {
-                        Divider().padding(.leading, 28).background(Color.borderColor)
+    private var tabBar: some View {
+        HStack(spacing: 0) {
+            ForEach(PerformanceTab.allCases) { tab in
+                Button {
+                    activeTab = tab
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 13, weight: .semibold))
+                        Text(tab.title)
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(activeTab == tab ? Color.accentPrimary : Color.textMuted)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .overlay(alignment: .bottom) {
+                        if activeTab == tab {
+                            Rectangle()
+                                .fill(Color.accentPrimary)
+                                .frame(height: 2)
+                                .matchedGeometryEffect(id: "tabUnderline", in: tabNS)
+                        }
                     }
                 }
+                .buttonStyle(.plain)
             }
         }
+        .background(
+            Divider(), alignment: .bottom
+        )
+        .padding(.horizontal, 16)
+    }
+
+    @Namespace private var tabNS
+}
+
+// MARK: - Analytics Tab (Donut + Scatter)
+
+struct AnalyticsTab: View {
+    @ObservedObject var vm: ProductPerformanceViewModel
+
+    var body: some View {
+        CustomRefreshScrollView({
+            VStack(alignment: .leading, spacing: 20) {
+                if vm.isLoading {
+                    DashboardLoadingPlaceholder(count: 2)
+                } else if !vm.hasData {
+                    DashboardEmptyState(
+                        icon: "chart.pie",
+                        title: "No data yet",
+                        message: "Complete some orders to see analytics."
+                    )
+                } else {
+                    categoryDonutSection
+                    ratingScatterSection
+                }
+            }
+            .padding(EdgeInsets(top: 16, leading: 16, bottom: 32, trailing: 16))
+        }, onRefresh: {
+            await vm.loadPerformance()
+        })
     }
 
     // MARK: - Category Revenue Donut
-
+    
     private var categoryDonutSection: some View {
         ChartCard(
             title: "Revenue by Category",
@@ -153,7 +193,7 @@ struct ProductPerformanceView: View {
                 }
                 .frame(width: 150, height: 150)
                 .chartLegend(.hidden)
-
+                
                 // Legend
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(vm.performanceData?.categoryRevenue ?? []) { stat in
@@ -161,7 +201,7 @@ struct ProductPerformanceView: View {
                             Circle()
                                 .frame(width: 8, height: 8)
                                 .foregroundStyle(categoryColor(stat.category,
-                                    in: vm.performanceData?.categoryRevenue ?? []))
+                                                               in: vm.performanceData?.categoryRevenue ?? []))
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(stat.category)
                                     .font(.caption.weight(.medium))
@@ -178,16 +218,16 @@ struct ProductPerformanceView: View {
             }
         }
     }
-
+    
     // MARK: - Rating vs Sales Scatter
-
+    
     private var ratingScatterSection: some View {
         ChartCard(
             title: "Rating vs. Sales",
             subtitle: "Bubble size = revenue · Only rated products shown"
         ) {
             let ratedProducts = (vm.performanceData?.topProducts ?? []).filter(\.hasRatings)
-
+            
             if ratedProducts.isEmpty {
                 Text("No rated products in this period")
                     .font(.subheadline)
@@ -215,9 +255,9 @@ struct ProductPerformanceView: View {
                     AxisMarks(values: [1, 2, 3, 4, 5]) { value in
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
                         AxisValueLabel {
-                            if let v = value.as(Double.self) {
+                            if let value = value.as(Double.self) {
                                 HStack(spacing: 2) {
-                                    Text(String(format: "%.0f", v))
+                                    Text(String(format: "%.0f", value))
                                     Image(systemName: "star.fill")
                                         .font(.system(size: 7))
                                         .foregroundStyle(.yellow)
@@ -252,82 +292,162 @@ struct ProductPerformanceView: View {
             }
         }
     }
-
+    
     private func categoryColor(_ category: String, in stats: [CategoryRevenueStat]) -> Color {
-        let palette: [Color] = [.accentPrimary, .semanticSuccess, .accentGold, .orange, .teal, .semanticError, .yellow, .pink]
-        let idx = stats.firstIndex(where: { $0.category == category }) ?? 0
-        return palette[idx % palette.count]
-    }
+            let palette: [Color] = [.accentPrimary, .semanticSuccess, .accentGold, .orange, .teal, .semanticError, .yellow, .pink]
+            let idx = stats.firstIndex(where: { $0.category == category }) ?? 0
+            return palette[idx % palette.count]
+        }
 }
 
-// MARK: - Best Seller Row
+// MARK: - Best Sellers Tab
+
+/// LazyVStack means rows are only instantiated as they scroll into view.
+/// For very long lists this is the single biggest win.
+struct BestSellersTab: View {
+    @ObservedObject var vm: ProductPerformanceViewModel
+
+    var body: some View {
+        CustomRefreshScrollView({
+            VStack(alignment: .leading, spacing: 0) {
+                if vm.isLoading {
+                    DashboardLoadingPlaceholder(count: 5)
+                } else if !vm.hasData {
+                    DashboardEmptyState(
+                        icon: "trophy",
+                        title: "No sales data yet",
+                        message: "Complete some orders to see product performance."
+                    )
+                } else {
+                    listHeader
+                    Divider().background(Color.borderColor)
+
+                    // ▶ LazyVStack: rows rendered only when entering the viewport.
+                    //   Use pinnedViews if you want the header to stick.
+                    LazyVStack(spacing: 0, pinnedViews: []) {
+                        let products = vm.performanceData?.topProducts ?? []
+                        ForEach(Array(products.enumerated()), id: \.element.id) { index, item in
+                            BestSellerRow(item: item, maxUnits: vm.maxUnitsSold)
+                                // id modifier tells SwiftUI rows are stable — avoids diff cost
+                                .id(item.id)
+
+                            if index < products.count - 1 {
+                                Divider()
+                                    .padding(.leading, 28)
+                                    .background(Color.borderColor)
+                            }
+                        }
+                    }
+                }
+            }
+            .background(Color.surfacePrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(EdgeInsets(top: 16, leading: 16, bottom: 32, trailing: 16))
+        }, onRefresh: {
+            await vm.loadPerformance()
+        })
+    }
+
+    private var listHeader: some View {
+        HStack {
+            Text("#").frame(width: 22, alignment: .center)
+            Text("Product").frame(maxWidth: .infinity, alignment: .leading)
+            Text("Sold").frame(width: 44, alignment: .trailing)
+            Text("Revenue").frame(width: 72, alignment: .trailing)
+            Text("★").frame(width: 34, alignment: .trailing)
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(Color.textMuted)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+}
 
 struct BestSellerRow: View {
     let item: ProductStatItem
     let maxUnits: Int
 
+    // Pre-compute ratio once — not recalculated on scroll
+    private var ratio: Double {
+        maxUnits > 0 ? min(Double(item.unitsSold) / Double(maxUnits), 1.0) : 0
+    }
+
     var body: some View {
         VStack(spacing: 6) {
             HStack(spacing: 8) {
-                // Rank badge
-                ZStack {
-                    Circle()
-                        .fill(rankColor)
-                        .frame(width: 22, height: 22)
-                    Text("\(item.rank)")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(item.rank <= 3 ? .white : Color.textSecondary)
-                }
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(item.name)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color.textPrimary)
-                        .lineLimit(1)
-                    Text(item.category)
-                        .font(.caption2)
-                        .foregroundStyle(Color.textMuted)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
+                rankBadge
+                productInfo
                 Text("\(item.unitsSold)")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.textPrimary)
                     .frame(width: 44, alignment: .trailing)
-
                 Text(item.revenueFormatted)
                     .font(.caption.weight(.medium))
                     .foregroundStyle(Color.textMuted)
                     .frame(width: 72, alignment: .trailing)
-
-                HStack(spacing: 2) {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.yellow)
-                    Text(item.hasRatings ? item.avgRatingFormatted : "—")
-                        .font(.caption)
-                        .foregroundStyle(Color.textSecondary)
-                }
-                .frame(width: 34, alignment: .trailing)
+                ratingView
             }
 
-            // Units progress bar — FIXED: Replaced GeometryReader with layoutPriority
-            HStack(spacing: 0) {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.accentPrimary.opacity(0.55))
-                    .layoutPriority(CGFloat(ratio))
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.surfaceSub)
-                    .layoutPriority(CGFloat(1 - ratio))
-            }
-            .frame(height: 4)
-            .padding(.leading, 30)
+            progressBar
+                .padding(.leading, 30)
         }
         .padding(.vertical, 8)
+        .padding(.horizontal, 16)
     }
 
-    private var ratio: Double {
-        maxUnits > 0 ? Double(item.unitsSold) / Double(maxUnits) : 0
+    private var rankBadge: some View {
+        ZStack {
+            Circle().fill(rankColor).frame(width: 22, height: 22)
+            Text("\(item.rank)")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(item.rank <= 3 ? .white : Color.textSecondary)
+        }
+    }
+
+    private var productInfo: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(item.name)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.textPrimary)
+                .lineLimit(1)
+            Text(item.category)
+                .font(.caption2)
+                .foregroundStyle(Color.textMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var ratingView: some View {
+        HStack(spacing: 2) {
+            Image(systemName: "star.fill")
+                .font(.system(size: 9))
+                .foregroundStyle(.yellow)
+            Text(item.hasRatings ? item.avgRatingFormatted : "—")
+                .font(.caption)
+                .foregroundStyle(Color.textSecondary)
+        }
+        .frame(width: 34, alignment: .trailing)
+    }
+
+    /// Canvas-based bar: one Metal draw call instead of two Views + HStack layout.
+    private var progressBar: some View {
+        Canvas { ctx, size in
+            let filled = size.width * ratio
+            // Background track
+            ctx.fill(
+                Path(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 2),
+                with: .color(Color.surfaceSub)
+            )
+            // Filled portion (only draw if non-zero to skip GPU work)
+            if filled > 0 {
+                ctx.fill(
+                    Path(roundedRect: CGRect(x: 0, y: 0, width: filled, height: size.height),
+                         cornerRadius: 2),
+                    with: .color(Color.accentPrimary.opacity(0.55))
+                )
+            }
+        }
+        .frame(height: 4)
     }
 
     private var rankColor: Color {
