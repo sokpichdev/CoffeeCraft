@@ -18,7 +18,13 @@ struct SalesAnalyticsView: View {
         CustomRefreshScrollView({
             VStack(alignment: .leading, spacing: 20) {
 
-                periodPicker
+                CustomSegmentedControl(
+                    selectedSegment: $vm.selectedPeriod,
+                    segments: SalesPeriod.allCases,
+                    onClick: { Task { await vm.periodChanged() } }
+                )
+                .padding(.top, 8)
+                
                 summaryCards
 
                 if vm.isLoading {
@@ -43,21 +49,6 @@ struct SalesAnalyticsView: View {
             }
         }
         .onAppear { vm.onAppear() }
-    }
-
-    // MARK: - Period Picker
-
-    private var periodPicker: some View {
-        Picker("Period", selection: $vm.selectedPeriod) {
-            ForEach(SalesPeriod.allCases) { period in
-                Text(period.rawValue).tag(period)
-            }
-        }
-        .pickerStyle(.segmented)
-        .padding(.top, 8)
-        .onChange(of: vm.selectedPeriod) { _, _ in
-            Task { await vm.periodChanged() }
-        }
     }
 
     // MARK: - Summary Stat Cards

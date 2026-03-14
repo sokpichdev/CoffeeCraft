@@ -6,20 +6,38 @@
 //
 import SwiftUI
 
-struct CustomSegmentedControl: View {
-    @Binding var selectedSegment: Segment
-    var segments: [Segment] = Segment.allCases
+// Protocol — any enum with a display title can drive the control
+protocol SegmentItem: Hashable {
+    var title: String { get }
+}
+
+// Existing Segment enum — unchanged, just add conformance
+extension Segment: SegmentItem {} // title already returns rawValue
+
+// Conform all dashboard enums
+extension SalesPeriod: SegmentItem {
+    var title: String { rawValue } // "7 Days" / "30 Days"
+}
+extension OrderAnalyticsSection: SegmentItem {
+    var title: String { rawValue } // "Queue" / "History" / "Funnel"
+}
+extension ReviewDashboardSection: SegmentItem {
+    var title: String { rawValue } // "Reviews" / "Analytics"
+}
+
+// Generic control — replaces the Segment-specific version
+struct CustomSegmentedControl<T: SegmentItem>: View {
+    @Binding var selectedSegment: T
+    var segments: [T]
     var onClick: () -> Void
 
     @Namespace private var animation
-
     private let height: CGFloat = 38
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(segments, id: \.self) { segment in
                 ZStack {
-                    // Selected background
                     if selectedSegment == segment {
                         RoundedRectangle(cornerRadius: 24)
                             .fill(
@@ -29,21 +47,14 @@ struct CustomSegmentedControl: View {
                                     endPoint: .bottom
                                 )
                             )
-                            .matchedGeometryEffect(
-                                id: "SEGMENT_BG",
-                                in: animation
-                            )
+                            .matchedGeometryEffect(id: "SEGMENT_BG", in: animation)
                             .frame(height: height)
                     }
 
                     Text(segment.title)
                         .font(.subheadline)
                         .fontWeight(selectedSegment == segment ? .semibold : .medium)
-                        .foregroundColor(
-                            selectedSegment == segment
-                            ? .white
-                            : Color.accentPrimary
-                        )
+                        .foregroundColor(selectedSegment == segment ? .white : Color.accentPrimary)
                 }
                 .frame(maxWidth: .infinity, minHeight: height)
                 .contentShape(Rectangle())
@@ -62,7 +73,7 @@ struct CustomSegmentedControl: View {
                 .fill(Color.bgPrimary)
                 .overlay {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
+                        .strokeBorder(Color.borderColor, lineWidth: 0.5)
                 }
                 .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
         }
