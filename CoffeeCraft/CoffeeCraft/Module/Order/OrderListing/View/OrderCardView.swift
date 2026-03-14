@@ -108,7 +108,7 @@ struct OrderCardView: View {
             ZStack(alignment: .leading) {
                 if !isExpanded {
                     // Visible preview items (first N items)
-                    ForEach(Array(items.prefix(previewDisplayCount).enumerated()), id: \.offset) { index, item in
+                    ForEach(Array(items.suffix(previewDisplayCount).enumerated()), id: \.offset) { index, item in
                         FlyingThumbnail(
                             url: item.imageURL ?? "",
                             index: index,

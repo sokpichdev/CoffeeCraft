@@ -40,7 +40,7 @@ struct OrderQueueCard: View {
             // Bottom: order ID + price + status + advance
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("#\(item.id.prefix(8).uppercased())")
+                    Text("#\(item.id.suffix(8).uppercased())")
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .foregroundStyle(Color.textMuted)
                     Text(item.totalFormatted)

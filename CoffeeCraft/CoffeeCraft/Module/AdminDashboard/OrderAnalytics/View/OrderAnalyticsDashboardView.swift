@@ -18,7 +18,12 @@ struct OrderAnalyticsDashboardView: View {
     var body: some View {
         VStack(spacing: 0) {
             sectionPicker
-            contentArea
+            
+            switch vm.selectedSection {
+            case .queue:   queueSection
+            case .history: historySection
+            case .funnel:  funnelSection
+            }
         }
         .background(Color.bgPrimary.ignoresSafeArea())
         .customNavigationBar("Order Analytics") {
@@ -46,18 +51,7 @@ struct OrderAnalyticsDashboardView: View {
         .padding(.vertical, 10)
         .background(Color.bgSecondary)
     }
-
-    // MARK: - Content Router
-
-    @ViewBuilder
-    private var contentArea: some View {
-        switch vm.selectedSection {
-        case .queue:   queueSection
-        case .history: historySection
-        case .funnel:  funnelSection
-        }
-    }
-
+    
     // MARK: - QUEUE ─
 
     private var queueSection: some View {
@@ -119,40 +113,26 @@ struct OrderAnalyticsDashboardView: View {
 
     private var historyFilterBar: some View {
         VStack(spacing: 10) {
-            // Search field
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.textMuted)
-                TextField("Search by name or order ID", text: $vm.filter.searchText)
-                    .autocorrectionDisabled()
-                    .font(.subheadline)
-                    .onSubmit { Task { await vm.applyFilter() } }
-                if !vm.filter.searchText.isEmpty {
-                    Button {
-                        vm.filter.searchText = ""
-                        Task { await vm.applyFilter() }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(Color.textMuted)
-                    }
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(Color.surfaceSub, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.borderColor, lineWidth: 1))
 
+            DashboardSearchTextField(
+                placeholder: "Search by name or order ID",
+                text: $vm.filter.searchText,
+                onSubmit: {
+                Task { await vm.applyFilter() }
+            }, onClear: {
+                Task { await vm.applyFilter() }
+            }
+            )
             // Status chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    FilterChip(label: "All", isSelected: vm.filter.status == nil,
+                    DashboardFilterChip(label: "All", isSelected: vm.filter.status == nil,
                                color: .accentPrimary) {
                         vm.filter.status = nil
                         Task { await vm.applyFilter() }
                     }
                     ForEach(OrderStatus.allCases) { status in
-                        FilterChip(label: status.rawValue, isSelected: vm.filter.status == status,
+                        DashboardFilterChip(label: status.rawValue, isSelected: vm.filter.status == status,
                                    color: status.color) {
                             vm.filter.status = (vm.filter.status == status) ? nil : status
                             Task { await vm.applyFilter() }
@@ -333,27 +313,5 @@ struct OrderAnalyticsDashboardView: View {
     private var cancellationColor: Color {
         vm.funnelData.cancellationRate < 5 ? .semanticSuccess :
         vm.funnelData.cancellationRate < 15 ? .orange : .semanticError
-    }
-}
-
-// MARK: - Filter Chip
-
-private struct FilterChip: View {
-    let label: String
-    let isSelected: Bool
-    let color: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(isSelected ? .white : color)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isSelected ? color : color.opacity(0.10), in: Capsule())
-                .overlay(Capsule().stroke(color.opacity(isSelected ? 0 : 0.25), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
     }
 }

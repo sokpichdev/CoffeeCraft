@@ -142,7 +142,7 @@ class OrderDetailViewModel: ObservableObject {
                 if let name = snapshot?.data()?["name"] as? String {
                     self.userName = name
                 } else {
-                    self.userName = "User #\(userId.prefix(6))"
+                    self.userName = "User #\(userId.suffix(6))"
                 }
             }
         }

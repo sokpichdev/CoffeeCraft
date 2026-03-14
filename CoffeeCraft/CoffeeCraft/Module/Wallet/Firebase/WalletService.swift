@@ -195,7 +195,7 @@ final class WalletService {
                     amount: -amount,
                     balanceBefore: current,
                     balanceAfter: newBalance,
-                    description: "Order #\(orderId.prefix(6))",
+                    description: "Order #\(orderId.suffix(6))",
                     referenceId: orderId,
                     timestamp: Date()
                 )
@@ -252,7 +252,7 @@ final class WalletService {
                     amount: amount,
                     balanceBefore: current,
                     balanceAfter: newBalance,
-                    description: "Refund for Order #\(orderId.prefix(6))",
+                    description: "Refund for Order #\(orderId.suffix(6))",
                     referenceId: orderId,
                     timestamp: Date()
                 )

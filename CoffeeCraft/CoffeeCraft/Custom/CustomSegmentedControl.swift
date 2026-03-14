@@ -57,18 +57,27 @@ struct CustomSegmentedControl: View {
             }
         }
         .padding(4)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white.opacity(0.75))
-                .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
-        )
+        .background {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color.bgPrimary)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
+                }
+                .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+        }
     }
 }
 
 enum Segment: String, CaseIterable {
+    // order
     case activeOrders = "Active Orders"
     case myOrders = "My Orders"
     
+    // dashboard
+    case today = "Today"
+    case week = "This Week"
+    case month = "This Month"
     var title: String {
             rawValue
         }
