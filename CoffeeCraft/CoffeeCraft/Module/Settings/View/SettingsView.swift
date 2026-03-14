@@ -10,7 +10,6 @@ struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showAppearance = false
-    @State private var showWalletTest = false
     @State private var showAuth = false
     var body: some View {
         CustomRefreshScrollView( {
@@ -45,12 +44,6 @@ struct SettingsView: View {
                     RowInSectionView(title: "Share the App", systemImage: "square.and.arrow.up.fill")
                     DeviderInSectionView()
                     RowInSectionView(title: "Write a Review", systemImage: "star.fill")
-                }
-                
-                SettingsSection(title: "Testing Feature", icon: "flask.fill") {
-                    RowInSectionView(title: "Wallet Phase 1 Test", systemImage: "flask.fill") {
-                        showWalletTest = true
-                    }
                 }
                 
                 if UserSession.shared.isLoggedIn {
@@ -95,7 +88,6 @@ struct SettingsView: View {
             }
         }
         .navigationDestination(isPresented: $showAppearance) { AppearanceSettingsView() }
-        .navigationDestination(isPresented: $showWalletTest) { WalletTestView() }
         .navigationDestination(isPresented: $showAuth) { AuthView().environmentObject(authVM) }
     }
 }
