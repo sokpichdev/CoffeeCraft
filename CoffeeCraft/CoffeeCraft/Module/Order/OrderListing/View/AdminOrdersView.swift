@@ -121,9 +121,11 @@ struct ActiveOrdersContent: View {
                                             
                                             Button("Complete") {
                                                 Task {
-                                                    let success = await vm.updateOrderStatus(order: order, status: "Completed")
+                                                    let success = await vm.updateOrderStatus(order: order,
+                                                                                             status: "Completed")
                                                     if success {
-                                                        ToastManager.shared.show(message: "Order Completed", type: .success)
+                                                        ToastManager.shared.show(message: "Order Completed",
+                                                                                 type: .success)
                                                     }
                                                 }
                                             }

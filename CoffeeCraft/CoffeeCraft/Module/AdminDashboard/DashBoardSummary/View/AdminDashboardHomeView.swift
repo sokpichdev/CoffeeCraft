@@ -61,28 +61,11 @@ struct AdminDashboardHomeView: View {
         .padding(.top, 6)
     }
 
-    private var greetingText: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 0..<12: return "Good morning ☕"
-        case 12..<17: return "Good afternoon ☀️"
-        default: return "Good evening 🌙"
-        }
-    }
-
     // MARK: - Revenue Card
 
     private var revenueCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-
-            // Period picker
-            Picker("Period", selection: $vm.selectedPeriod) {
-                ForEach(DashboardPeriod.allCases, id: \.self) { period in
-                    Text(period.rawValue).tag(period)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.bottom, 16)
+            CustomSegmentedControl(selectedSegment: $vm.selectedPeriod, segments: [.today, .week, .month], onClick: {})
 
             // Revenue label + amount
             HStack(alignment: .lastTextBaseline, spacing: 4) {

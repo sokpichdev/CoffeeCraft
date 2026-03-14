@@ -33,7 +33,7 @@ final class DashboardHomeViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var summary: DashboardSummary?
-    @Published var selectedPeriod: DashboardPeriod = .today
+    @Published var selectedPeriod: Segment = .today
     @Published var isLoading: Bool = false
     @Published var isLoadingMore: Bool = false
     @Published var hasMorePages: Bool = true
@@ -68,6 +68,7 @@ final class DashboardHomeViewModel: ObservableObject {
         case .today: return summary.revenue.todayFormatted
         case .week: return summary.revenue.thisWeekFormatted
         case .month: return summary.revenue.thisMonthFormatted
+        default: return ""
         }
     }
     var displayRevenueLabel: String { selectedPeriod.rawValue }

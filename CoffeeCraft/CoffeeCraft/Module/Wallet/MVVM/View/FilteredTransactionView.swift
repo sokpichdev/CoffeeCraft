@@ -102,7 +102,7 @@ struct FilteredTransactionView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(TransactionFilter.allCases, id: \.self) { filter in
-                    CoffeeFilterChip(
+                    TransactionFilterChip(
                         filter: filter,
                         isSelected: selectedFilter == filter,
                         count: countForFilter(filter)
@@ -279,7 +279,7 @@ struct FilteredTransactionView: View {
     }
 }
 
-struct CoffeeFilterChip: View {
+struct TransactionFilterChip: View {
     let filter: FilteredTransactionView.TransactionFilter
     let isSelected: Bool
     let count: Int

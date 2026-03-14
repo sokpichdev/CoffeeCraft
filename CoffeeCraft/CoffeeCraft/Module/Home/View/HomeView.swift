@@ -191,16 +191,6 @@ struct HomeView: View {
         .shadow(color: Color.surfacePrimary.opacity(0.05), radius: 8, y: 3)
     }
 
-    private var greetingText: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<12: return "Good morning ☀️ Your brew awaits"
-        case 12..<17: return "Good afternoon ☁️ Take a coffee break"
-        case 17..<21: return "Good evening 🌙 Wind down with a cup"
-        default: return "Hello! 🌙 Late night coffee?"
-        }
-    }
-
     private var quickOrderSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Order", icon: "cart.fill")

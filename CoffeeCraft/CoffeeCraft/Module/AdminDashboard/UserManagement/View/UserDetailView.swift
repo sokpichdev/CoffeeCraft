@@ -287,7 +287,7 @@ private struct UserOrderRow: View {
                 .frame(width: 9, height: 9)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("#\(order.id.prefix(8).uppercased())")
+                Text("#\(order.id.suffix(8).uppercased())")
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
                     .foregroundStyle(Color.textPrimary)
                 Text("\(order.itemCount) item\(order.itemCount == 1 ? "" : "s")")

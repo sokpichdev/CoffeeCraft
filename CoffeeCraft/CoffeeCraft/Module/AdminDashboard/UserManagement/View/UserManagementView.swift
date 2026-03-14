@@ -15,7 +15,15 @@ struct UserManagementView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 0) {
-            searchBar
+            DashboardSearchTextField(placeholder: "Search by name or email", text: $vm.searchText) {
+                Task { await vm.applySearch() }
+            } onClear: {
+                vm.searchText = ""
+                Task { await vm.applySearch() }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            
             Divider().background(Color.borderColor)
             content
         }
@@ -26,38 +34,6 @@ struct UserManagementView: View {
             }
         }
         .onAppear { vm.onAppear() }
-    }
-
-    // MARK: - Search Bar
-
-    private var searchBar: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.textMuted)
-            TextField("Search by name or email", text: $vm.searchText)
-                .autocorrectionDisabled()
-                .autocapitalization(.none)
-                .font(.subheadline)
-                .foregroundStyle(Color.textPrimary)
-                .onSubmit { Task { await vm.applySearch() } }
-            if !vm.searchText.isEmpty {
-                Button {
-                    vm.searchText = ""
-                    Task { await vm.applySearch() }
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Color.textMuted)
-                }
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color.surfaceSub, in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.borderColor, lineWidth: 1))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.bgSecondary)
     }
 
     // MARK: - Content

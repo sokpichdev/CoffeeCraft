@@ -55,7 +55,7 @@ struct MapFilterChips: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(MapFilter.allCases) { filter in
-                    FilterChip(
+                    MapFilterChip(
                         filter: filter,
                         isActive: activeFilters.contains(filter)
                     ) {
@@ -86,7 +86,7 @@ struct MapFilterChips: View {
 
 // MARK: - FilterChip
 
-private struct FilterChip: View {
+private struct MapFilterChip: View {
     let filter: MapFilter
     let isActive: Bool
     let onTap: () -> Void
