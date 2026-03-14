@@ -243,6 +243,7 @@ struct AccountView: View {
                                 Image(systemName: "cart.badge.plus")
                                     .font(.headline)
                                     .foregroundColor(.textPrimary)
+                                    .colorInvert()
                             }
                             Text("Purchase")
                                 .font(.subheadline)

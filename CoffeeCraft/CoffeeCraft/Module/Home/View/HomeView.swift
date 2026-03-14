@@ -345,10 +345,11 @@ struct CozyOrderButton: View {
                             endPoint: .bottomTrailing
                         )
                     )
-            )
-            .shadow(
-                color: Color.accentPrimary.opacity(isDisabled ? 0.05 : 0.3),
-                radius: 8, x: 0, y: 4
+                    .shadow(
+                        color: Color.accentPrimary.opacity(isDisabled ? 0.05 : 0.3),
+                        radius: 8, x: 0, y: 4
+                    )
+                    .colorScheme(.light)
             )
             .overlay(
                 Group {
