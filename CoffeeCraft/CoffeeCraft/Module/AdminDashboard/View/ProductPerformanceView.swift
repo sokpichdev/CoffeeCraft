@@ -309,26 +309,22 @@ struct BestSellersTab: View {
 
     var body: some View {
         CustomRefreshScrollView({
-            VStack(alignment: .leading, spacing: 0) {
-                if vm.isLoading {
-                    DashboardLoadingPlaceholder(count: 5)
-                } else if !vm.hasData {
-                    DashboardEmptyState(
-                        icon: "trophy",
-                        title: "No sales data yet",
-                        message: "Complete some orders to see product performance."
-                    )
-                } else {
-                    listHeader
-                    Divider().background(Color.borderColor)
-
-                    // ▶ LazyVStack: rows rendered only when entering the viewport.
-                    //   Use pinnedViews if you want the header to stick.
-                    LazyVStack(spacing: 0, pinnedViews: []) {
+            if vm.isLoading {
+                DashboardLoadingPlaceholder(count: 5)
+                    .padding(EdgeInsets(top: 16, leading: 16, bottom: 32, trailing: 16))
+            } else if !vm.hasData {
+                DashboardEmptyState(
+                    icon: "trophy",
+                    title: "No sales data yet",
+                    message: "Complete some orders to see product performance."
+                )
+                .padding(EdgeInsets(top: 16, leading: 16, bottom: 32, trailing: 16))
+            } else {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    Section {
                         let products = vm.performanceData?.topProducts ?? []
                         ForEach(Array(products.enumerated()), id: \.element.id) { index, item in
                             BestSellerRow(item: item, maxUnits: vm.maxUnitsSold)
-                                // id modifier tells SwiftUI rows are stable — avoids diff cost
                                 .id(item.id)
 
                             if index < products.count - 1 {
@@ -337,29 +333,38 @@ struct BestSellersTab: View {
                                     .background(Color.borderColor)
                             }
                         }
+                    } header: {
+                        listHeader
                     }
                 }
+                .background(Color.surfacePrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(EdgeInsets(top: 16, leading: 16, bottom: 32, trailing: 16))
             }
-            .background(Color.surfacePrimary)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .padding(EdgeInsets(top: 16, leading: 16, bottom: 32, trailing: 16))
         }, onRefresh: {
             await vm.loadPerformance()
         })
     }
 
     private var listHeader: some View {
-        HStack {
-            Text("#").frame(width: 22, alignment: .center)
-            Text("Product").frame(maxWidth: .infinity, alignment: .leading)
-            Text("Sold").frame(width: 44, alignment: .trailing)
-            Text("Revenue").frame(width: 72, alignment: .trailing)
-            Text("★").frame(width: 34, alignment: .trailing)
+        VStack(spacing: 0) {
+            HStack {
+                Text("#").frame(width: 22, alignment: .center)
+                Text("Product").frame(maxWidth: .infinity, alignment: .leading)
+                Text("Sold").frame(width: 44, alignment: .trailing)
+                Text("Revenue").frame(width: 72, alignment: .trailing)
+                Text("★").frame(width: 34, alignment: .trailing)
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Color.textMuted)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            Divider().background(Color.borderColor)
         }
-        .font(.caption.weight(.semibold))
-        .foregroundStyle(Color.textMuted)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        // Opaque background is required — without it, rows scroll
+        // visibly behind the header as they pass underneath it.
+        .background(Color.surfacePrimary)
     }
 }
 
