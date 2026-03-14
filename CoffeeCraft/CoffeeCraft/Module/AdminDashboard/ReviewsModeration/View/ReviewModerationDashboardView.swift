@@ -17,7 +17,14 @@ struct ReviewModerationDashboardView: View {
     @State private var showProductSheet = false
     var body: some View {
         VStack(spacing: 0) {
-            sectionPicker
+            CustomSegmentedControl(
+                selectedSegment: $vm.selectedSection,
+                segments: ReviewDashboardSection.allCases,
+                onClick: {}
+            )
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.bgSecondary)
             content
         }
         .sheet(isPresented: $showProductSheet) {
@@ -39,20 +46,6 @@ struct ReviewModerationDashboardView: View {
         .onChange(of: vm.selectedSection) { _, _ in
             Task { await vm.setSelectedProduct(vm.selectedProductId) }
         }
-    }
-
-    // MARK: - Section Picker
-
-    private var sectionPicker: some View {
-        Picker("Section", selection: $vm.selectedSection) {
-            ForEach(ReviewDashboardSection.allCases) { section in
-                Label(section.rawValue, systemImage: section.icon).tag(section)
-            }
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.bgSecondary)
     }
 
     // MARK: - Content Router

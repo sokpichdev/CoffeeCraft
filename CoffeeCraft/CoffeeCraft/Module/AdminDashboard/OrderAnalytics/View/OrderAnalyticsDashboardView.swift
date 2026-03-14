@@ -17,7 +17,14 @@ struct OrderAnalyticsDashboardView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 0) {
-            sectionPicker
+            CustomSegmentedControl(
+                selectedSegment: $vm.selectedSection,
+                segments: OrderAnalyticsSection.allCases,
+                onClick: {}  // section switch is driven by the binding directly
+            )
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.bgSecondary)
             
             switch vm.selectedSection {
             case .queue:   queueSection
@@ -36,20 +43,6 @@ struct OrderAnalyticsDashboardView: View {
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) {
             now = $0
         }
-    }
-
-    // MARK: - Section Picker
-
-    private var sectionPicker: some View {
-        Picker("Section", selection: $vm.selectedSection) {
-            ForEach(OrderAnalyticsSection.allCases) { section in
-                Label(section.rawValue, systemImage: section.icon).tag(section)
-            }
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.bgSecondary)
     }
     
     // MARK: - QUEUE ─

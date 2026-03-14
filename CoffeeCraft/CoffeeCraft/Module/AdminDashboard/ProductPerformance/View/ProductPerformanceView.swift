@@ -51,7 +51,7 @@ struct ProductPerformanceView: View {
             .animation(.easeInOut(duration: 0.18), value: activeTab)
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .customNavigationBar("Product Performance", displayMode: .large) {
+        .customNavigationBar("Product Performance") {
             ToolBarButton.back { dismiss() }
         }
         .onAppear { vm.onAppear() }
@@ -60,15 +60,11 @@ struct ProductPerformanceView: View {
     /// Rendered once, never re-drawn during scroll.
     private var stickyHeader: some View {
         VStack(spacing: 12) {
-            Picker("Period", selection: $vm.selectedPeriod) {
-                ForEach(SalesPeriod.allCases) { p in
-                    Text(p.rawValue).tag(p)
-                }
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: vm.selectedPeriod) { _, _ in
-                Task { await vm.periodChanged() }
-            }
+            CustomSegmentedControl(
+                selectedSegment: $vm.selectedPeriod,
+                segments: SalesPeriod.allCases,
+                onClick: { Task { await vm.periodChanged() } }
+            )
 
             HStack(spacing: 12) {
                 StatCard(
