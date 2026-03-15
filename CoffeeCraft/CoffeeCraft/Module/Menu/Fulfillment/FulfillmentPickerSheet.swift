@@ -29,48 +29,55 @@ struct FulfillmentPickerSheet: View {
     @State private var showAddressPicker = false
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottom) {
-                Color.bgPrimary.ignoresSafeArea()
+        // No NavigationStack — navigationDestination does not work inside a
+        // .presentationDetents sheet. DeliveryDestinationPicker is presented
+        // as a separate sheet on top instead.
+        ZStack(alignment: .bottom) {
+            Color.bgPrimary.ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    dragHandle
+            VStack(spacing: 0) {
+                dragHandle
 
-                    // Branch header
-                    branchHeader
-                        .padding(.horizontal, 20)
-                        .padding(.top, 4)
-                        .padding(.bottom, 28)
-
-                    // Mode cards
-                    VStack(spacing: 12) {
-                        modeCard(
-                            icon:     "bag.fill",
-                            title:    "Pickup",
-                            subtitle: "Walk in and collect at the counter",
-                            color:    Color.accentPrimary
-                        ) {
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            orderEnv.selectPickup(branch: branch)
-                            dismiss()
-                        }
-
-                        modeCard(
-                            icon:     "bicycle",
-                            title:    "Delivery",
-                            subtitle: "Rider brings it to your door",
-                            color:    Color.semanticSuccess
-                        ) {
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            showAddressPicker = true
-                        }
-                    }
+                branchHeader
                     .padding(.horizontal, 20)
+                    .padding(.top, 4)
+                    .padding(.bottom, 28)
 
-                    Spacer()
+                VStack(spacing: 12) {
+                    modeCard(
+                        icon:     "bag.fill",
+                        title:    "Pickup",
+                        subtitle: "Walk in and collect at the counter",
+                        color:    Color.accentPrimary
+                    ) {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        orderEnv.selectPickup(branch: branch)
+                        dismiss()
+                    }
+
+                    modeCard(
+                        icon:     "bicycle",
+                        title:    "Delivery",
+                        subtitle: "Rider brings it to your door",
+                        color:    Color.semanticSuccess
+                    ) {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        showAddressPicker = true
+                    }
                 }
+                .padding(.horizontal, 20)
+
+                Spacer()
             }
-            .navigationDestination(isPresented: $showAddressPicker) {
+        }
+        .presentationDetents([.medium])
+        .presentationCornerRadius(26)
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(Color.bgPrimary)
+        .sheet(isPresented: $showAddressPicker) {
+            // Present as a separate sheet — navigationDestination is silently
+            // ignored inside a detent sheet, so push navigation is not an option.
+            NavigationStack {
                 DeliveryDestinationPicker(
                     branch:          branch,
                     locationManager: locationManager,
@@ -81,6 +88,7 @@ struct FulfillmentPickerSheet: View {
                             addressLabel: label,
                             destination:  coordinate
                         )
+                        showAddressPicker = false
                         dismiss()
                     },
                     onCancel: {
@@ -88,11 +96,10 @@ struct FulfillmentPickerSheet: View {
                     }
                 )
             }
+            .presentationDetents([.medium, .large])
+            .presentationCornerRadius(26)
+            .presentationBackground(Color.bgPrimary)
         }
-        .presentationDetents([.medium])
-        .presentationCornerRadius(26)
-        .presentationDragIndicator(.hidden)
-        .presentationBackground(Color.bgPrimary)
         .onAppear {
             if let userId = UserSession.shared.userId {
                 Task { await locationManager.fetchLocations(for: userId) }

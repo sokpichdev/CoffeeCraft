@@ -79,20 +79,11 @@ struct MenuView: View {
             if orderEnv.selectedBranch == nil && orderEnv.pendingMapBranch == nil {
                 showBranchSheet = true
             }
-            // Map shortcut: branch already pre-selected, go straight to fulfillment.
-            // Delay to ensure any in-progress sheet dismissal has completed.
-            // pendingMapBranch is already set post-dismiss (0.6s delay in MenuBranchSelectionSheet)
-            // so no extra delay needed here.
-            if let mapBranch = orderEnv.pendingMapBranch {
-                pendingFulfillmentBranch = mapBranch
-            }
+            // Note: map shortcut (pendingMapBranch) is handled by onChange below.
+            // onAppear only runs once on first render — onChange catches subsequent changes.
         }
-        // Map tab "Order from here" sets pendingMapBranch after dismissing MenuBranchSelectionSheet.
-        // We must wait for that sheet's dismiss animation to complete before presenting the next
-        // sheet — iOS silently drops a sheet presentation that fires in the same run loop as a dismiss.
-        // pendingMapBranch is set by MenuBranchSelectionSheet AFTER dismiss() completes
-        // (with a 0.6s delay), so by the time this fires showBranchSheet is already false.
-        // No further delay needed — present FulfillmentPickerSheet immediately.
+        // Map shortcut: pendingMapBranch is set in MenuBranchSelectionSheet 0.6s after
+        // dismiss(), so showBranchSheet is already false when this fires.
         .onChange(of: orderEnv.pendingMapBranch) { _, mapBranch in
             guard let branch = mapBranch else { return }
             pendingFulfillmentBranch = branch
@@ -125,10 +116,12 @@ struct MenuView: View {
         }
         .sheet(isPresented: $showBranchSheet) {
             MenuBranchSelectionSheet(onBranchSelected: { branch in
-                pendingFulfillmentBranch = branch
-                // Delay presentation until the branch sheet has fully dismissed.
-                // Delay so the branch sheet dismiss animation completes before presenting.
+                // Capture branch before the sheet dismisses — @State on a dismissing
+                // view goes stale. Set pendingFulfillmentBranch after the dismiss
+                // animation so sheet(item:) doesn't fire while showBranchSheet is still true.
+                let capturedBranch = branch
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    pendingFulfillmentBranch = capturedBranch
                 }
             })
             .environmentObject(orderEnv)
