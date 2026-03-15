@@ -20,7 +20,8 @@ struct OrderDetailView: View {
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var cartManager: CartManager
-    @State private var showReceipt = false
+    @State private var showReceipt        = false
+    @State private var navigateToDelivery = false
     
     init(order: Order, isActive: Bool = false) {
         self.initialOrder = order
@@ -53,6 +54,15 @@ struct OrderDetailView: View {
                         walletAmountPaid: vm.order.walletAmountPaid
                     )
 
+                    // Track delivery button — shown when this order is
+                    // the currently active delivery in OrderEnvironment
+                    if vm.order.isDeliveryOrder,
+                       OrderEnvironment.shared.activeDeliverySession?.orderId == vm.order.deliverySessionId {
+                        TrackDeliveryButton {
+                            navigateToDelivery = true
+                        }
+                    }
+
                     ActionButtonsSection(
                         order: vm.order,
                         isActive: isActive,
@@ -70,6 +80,11 @@ struct OrderDetailView: View {
             }
         })
         .background(Color.bgSecondary)
+        .navigationDestination(isPresented: $navigateToDelivery) {
+            if let vm = OrderEnvironment.shared.activeDeliveryVM {
+                DeliveryMapView(vm: vm)
+            }
+        }
         .customNavigationBar("Order Detail") {
             ToolBarButton.back {
                 dismiss()

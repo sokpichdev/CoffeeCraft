@@ -162,8 +162,15 @@ class OrderService: ObservableObject {
             orderData["walletAmountPaid"] = total
         }
         if let branch = OrderEnvironment.shared.selectedBranch {
-            orderData["branchId"] = branch.id
+            orderData["branchId"]   = branch.id
             orderData["branchName"] = branch.name
+        }
+        // Tag as delivery order when a session was started from MapView
+        if let session = OrderEnvironment.shared.activeDeliverySession {
+            orderData["deliveryType"]      = "delivery"
+            orderData["deliverySessionId"] = session.orderId
+        } else {
+            orderData["deliveryType"] = "pickup"
         }
         return orderData
     }

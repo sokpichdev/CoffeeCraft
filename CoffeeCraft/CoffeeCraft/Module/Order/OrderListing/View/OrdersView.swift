@@ -12,6 +12,7 @@ struct OrdersView: View {
     @EnvironmentObject var coordinator: NotificationCoordinator
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedOrder: Order?
+    @State private var navigateToDelivery = false
 
     var body: some View {
         ZStack {
@@ -30,6 +31,11 @@ struct OrdersView: View {
         .navigationDestination(item: $selectedOrder) { order in
             OrderDetailView(order: order)
                 .environmentObject(cartManager)
+        }
+        .navigationDestination(isPresented: $navigateToDelivery) {
+            if let vm = OrderEnvironment.shared.activeDeliveryVM {
+                DeliveryMapView(vm: vm)
+            }
         }
         .onAppear {
             Task { await orderVM.fetchOrders() }
@@ -93,7 +99,16 @@ struct OrdersView: View {
     private func orderRow(for order: Order) -> some View {
         OrderCardView(
             order: order,
-            onNavigate: { navigateToDetail(order: order) },
+            onNavigate: {
+                // If this card has an active delivery, go straight to the map
+                if order.isDeliveryOrder,
+                   let sessionId = order.deliverySessionId,
+                   OrderEnvironment.shared.activeDeliverySession?.orderId == sessionId {
+                    navigateToDelivery = true
+                } else {
+                    navigateToDetail(order: order)
+                }
+            },
             onReorder: { handleReorder(for: order) }
         )
         .padding(.horizontal)

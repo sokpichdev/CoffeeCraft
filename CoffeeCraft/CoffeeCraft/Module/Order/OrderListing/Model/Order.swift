@@ -35,6 +35,14 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
     /// the correct name even if the branch is renamed later.
     var branchName: String?
 
+    // MARK: Delivery (Map module Phase 4)
+    /// Firestore document ID in deliveries/{orderId}. nil = pickup order (no tracking).
+    var deliverySessionId: String?
+    /// "delivery" | "pickup" — nil on old orders treated as pickup.
+    var deliveryType: String?
+
+    var isDeliveryOrder: Bool { deliveryType == "delivery" }
+
     // MARK: Phase 7 — Ratings (proof of purchase)
     /// Flat array of productIds from all items in this order.
     /// Written at checkout by OrderService. Enables single-query proof-of-
