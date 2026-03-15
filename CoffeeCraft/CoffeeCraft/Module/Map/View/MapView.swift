@@ -2,17 +2,21 @@
 //  MapView.swift
 //  CoffeeCraft
 //
-//  Map Module — UI Enhanced
+//  Map Module — Phase 4 (Delivery)
 //  Glass bottom panel with ultraThinMaterial, floating recenter pill, animated offline toast.
+//  Phase 4: "Order from Here" builds a DeliverySession and navigates to DeliveryMapView.
 //
 
+import CoreLocation
 import MapKit
 import SwiftUI
 
 struct MapView: View {
 
-    @State private var viewModel   = MapViewModel()
-    @State private var localSearch = ""
+    @State private var viewModel         = MapViewModel()
+    @State private var localSearch       = ""
+    @State private var deliverySession:  DeliverySession? = nil
+    @State private var navigateToDelivery = false
     @EnvironmentObject private var orderEnv: OrderEnvironment
 
     var body: some View {
@@ -32,7 +36,7 @@ struct MapView: View {
             if viewModel.isOffline {
                 VStack {
                     offlineBanner
-                        .padding(.top, 56)   // below status bar
+                        .padding(.top, 56)
                         .padding(.horizontal, 16)
                     Spacer()
                 }
@@ -72,6 +76,7 @@ struct MapView: View {
                     onOrderHere: {
                         orderEnv.select(branch: branch)
                         viewModel.isSheetPresented = false
+                        launchDelivery(for: branch)
                     },
                     onDismiss: { viewModel.deselectBranch() }
                 )
@@ -81,7 +86,47 @@ struct MapView: View {
                 .presentationBackground(Color.bgPrimary)
             }
         }
+        // ── Delivery tracking push ──────────────────────────────────
+        // Uses the nearest ancestor NavigationStack — provided by
+        // CoffeeCraftApp (tab flow) or MenuBranchSelectionSheet (sheet flow).
+        .navigationDestination(isPresented: $navigateToDelivery) {
+            if let session = deliverySession {
+                DeliveryMapView(initialSession: session)
+            }
+        }
         .customNavigationBar("Find a Branch", hideBackBtn: false)
+    }
+
+    // MARK: - Launch Delivery
+
+    /// Builds a DeliverySession from the selected branch + user location,
+    /// then pushes DeliveryMapView onto the navigation stack.
+    private func launchDelivery(for branch: Branch) {
+        let destination = viewModel.userLocation?.coordinate
+            ?? branch.coordinate          // fallback: deliver to branch itself
+
+        let orderId = generateOrderId()
+
+        let session = DeliverySession(
+            orderId:               orderId,
+            branchId:              branch.id ?? "unknown",
+            branchCoordinate:      branch.coordinate,
+            destinationCoordinate: destination
+        )
+
+        deliverySession    = session
+        navigateToDelivery = true
+
+        AppLog.firestore.info("[MapView] Launching delivery — order: \(orderId), branch: \(branch.name)")
+    }
+
+    /// Produces a human-readable order ID: YYYY-MM-DD-NNN (NNN = random 3-digit suffix).
+    private func generateOrderId() -> String {
+        let formatter        = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let datePart         = formatter.string(from: Date())
+        let suffix           = String(format: "%03d", Int.random(in: 1 ... 999))
+        return "\(datePart)-\(suffix)"
     }
 
     // MARK: - Bottom Panel
