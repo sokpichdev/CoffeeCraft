@@ -38,7 +38,13 @@ struct SavedLocationFormSheet: View {
     @State private var showSuggestions = false
     @State private var isSearching     = false
 
-    private let completer = AddressCompleter()
+    // MARK: - Location & Map Picker State
+
+    @State private var showMapPicker      = false
+    @State private var isLocating         = false
+
+    private let completer     = AddressCompleter()
+    private let geocoder      = CLGeocoder()
 
     // MARK: - Validation
 
@@ -72,6 +78,21 @@ struct SavedLocationFormSheet: View {
                 }
             }
         }
+        .sheet(isPresented: $showMapPicker) {
+            MapPinPicker(
+                initialCoordinate: latitude != 0
+                    ? CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                    : CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282),
+                onConfirm: { coord, label in
+                    latitude    = coord.latitude
+                    longitude   = coord.longitude
+                    address     = label
+                    searchQuery = label
+                    showMapPicker = false
+                },
+                onCancel: { showMapPicker = false }
+            )
+        }
         .onAppear { prefill() }
         .onChange(of: searchQuery) { _, q in
             if q.count >= 2 {
@@ -90,6 +111,70 @@ struct SavedLocationFormSheet: View {
 
     // MARK: - Label Section
 
+    
+
+    private func useCurrentLocation() {
+        isLocating = true
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        let manager = CLLocationManager()
+        // Request one-shot location via geocoder on last known location
+        // For simplicity, reverse-geocode using CLLocationManager's last location.
+        // If unavailable, fall back gracefully.
+        Task {
+            // Give CLLocationManager a moment to provide a fix
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            let location: CLLocation? = manager.location
+            guard let loc = location else {
+                await MainActor.run {
+                    isLocating = false
+                    AlertManager.shared.showError(
+                        title: "Location Unavailable",
+                        message: "Unable to get your current location. Please check location permissions."
+                    )
+                }
+                return
+            }
+            geocoder.reverseGeocodeLocation(loc) { placemarks, _ in
+                DispatchQueue.main.async {
+                    isLocating = false
+                    guard let placemark = placemarks?.first else { return }
+                    let resolved = [
+                        placemark.subThoroughfare,
+                        placemark.thoroughfare,
+                        placemark.locality,
+                        placemark.administrativeArea
+                    ].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")
+                    guard !resolved.isEmpty else { return }
+                    latitude    = loc.coordinate.latitude
+                    longitude   = loc.coordinate.longitude
+                    address     = resolved
+                    searchQuery = resolved
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                }
+            }
+        }
+    }
+
+    private func save() {
+        guard isValid else { return }
+
+        isSaving = true
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+
+        var location       = existing ?? SavedLocation(id: nil, label: "", address: "",
+                                                       latitude: 0, longitude: 0,
+                                                       isDefault: false, createdAt: Date())
+        location.label     = label.trimmingCharacters(in: .whitespaces)
+        location.address   = address.trimmingCharacters(in: .whitespaces)
+        location.latitude  = latitude
+        location.longitude = longitude
+        location.isDefault = isDefault
+
+        onSave(location)
+    }
+}
+
+extension SavedLocationFormSheet {
     private var labelSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionHeader("Label", icon: "tag.fill")
@@ -138,6 +223,61 @@ struct SavedLocationFormSheet: View {
     private var addressSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionHeader("Delivery Address", icon: "location.fill")
+
+            // Quick action row
+            HStack(spacing: 10) {
+                // Use current location
+                Button {
+                    useCurrentLocation()
+                } label: {
+                    HStack(spacing: 6) {
+                        if isLocating {
+                            ProgressView().scaleEffect(0.7).tint(.white)
+                        } else {
+                            Image(systemName: "location.fill")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        Text(isLocating ? "Locating…" : "Current location")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(isLocating ? Color.textMuted : Color.accentPrimary)
+                    )
+                }
+                .buttonStyle(BounceButtonStyle())
+                .disabled(isLocating)
+
+                // Pick on map
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    showMapPicker = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "map.fill")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("Pick on map")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(Color.accentPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color.accentPrimary.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .strokeBorder(Color.accentPrimary.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                }
+                .buttonStyle(BounceButtonStyle())
+            }
 
             // Search field
             HStack(spacing: 10) {
@@ -317,24 +457,6 @@ struct SavedLocationFormSheet: View {
                 ].compactMap { $0 }.joined(separator: ", ")
             }
         }
-    }
-
-    private func save() {
-        guard isValid else { return }
-
-        isSaving = true
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-
-        var location       = existing ?? SavedLocation(id: nil, label: "", address: "",
-                                                       latitude: 0, longitude: 0,
-                                                       isDefault: false, createdAt: Date())
-        location.label     = label.trimmingCharacters(in: .whitespaces)
-        location.address   = address.trimmingCharacters(in: .whitespaces)
-        location.latitude  = latitude
-        location.longitude = longitude
-        location.isDefault = isDefault
-
-        onSave(location)
     }
 }
 
