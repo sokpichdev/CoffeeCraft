@@ -36,7 +36,6 @@ struct MenuView: View {
     @State private var selectedProductToEdit: Product?
     @State private var showSearchSheet = false
     @State private var showBranchSheet      = false
-    @State private var showFulfillmentSheet  = false
     @State private var pendingFulfillmentBranch: Branch? = nil
 
     var isManager: Bool = false
@@ -82,23 +81,21 @@ struct MenuView: View {
             }
             // Map shortcut: branch already pre-selected, go straight to fulfillment.
             // Delay to ensure any in-progress sheet dismissal has completed.
+            // pendingMapBranch is already set post-dismiss (0.6s delay in MenuBranchSelectionSheet)
+            // so no extra delay needed here.
             if let mapBranch = orderEnv.pendingMapBranch {
                 pendingFulfillmentBranch = mapBranch
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-                    showFulfillmentSheet = true
-                }
             }
         }
         // Map tab "Order from here" sets pendingMapBranch after dismissing MenuBranchSelectionSheet.
         // We must wait for that sheet's dismiss animation to complete before presenting the next
         // sheet — iOS silently drops a sheet presentation that fires in the same run loop as a dismiss.
+        // pendingMapBranch is set by MenuBranchSelectionSheet AFTER dismiss() completes
+        // (with a 0.6s delay), so by the time this fires showBranchSheet is already false.
+        // No further delay needed — present FulfillmentPickerSheet immediately.
         .onChange(of: orderEnv.pendingMapBranch) { _, mapBranch in
             guard let branch = mapBranch else { return }
             pendingFulfillmentBranch = branch
-            // Small delay lets the branch sheet finish its dismiss animation first.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-                showFulfillmentSheet = true
-            }
         }
         .customNavigationBar(branchNavTitle) {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("magnifyingglass")) {
@@ -130,20 +127,19 @@ struct MenuView: View {
             MenuBranchSelectionSheet(onBranchSelected: { branch in
                 pendingFulfillmentBranch = branch
                 // Delay presentation until the branch sheet has fully dismissed.
-                // Setting showFulfillmentSheet in the same run loop as dismiss() is ignored by iOS.
+                // Delay so the branch sheet dismiss animation completes before presenting.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-                    showFulfillmentSheet = true
                 }
             })
             .environmentObject(orderEnv)
         }
-        .sheet(isPresented: $showFulfillmentSheet, onDismiss: {
-            pendingFulfillmentBranch = nil
-        }) {
-            if let branch = pendingFulfillmentBranch {
-                FulfillmentPickerSheet(branch: branch)
-                    .environmentObject(orderEnv)
-            }
+        // Use item: instead of isPresented: so the branch is guaranteed non-nil
+        // when the sheet content renders. With isPresented: there is a race where
+        // onDismiss sets pendingFulfillmentBranch = nil before the next presentation's
+        // content closure evaluates, producing a blank sheet.
+        .sheet(item: $pendingFulfillmentBranch) { branch in
+            FulfillmentPickerSheet(branch: branch)
+                .environmentObject(orderEnv)
         }
         .navigationDestination(for: Product.self) { product in
             ProductDetailView(product: product, allProducts: productVM.products)
