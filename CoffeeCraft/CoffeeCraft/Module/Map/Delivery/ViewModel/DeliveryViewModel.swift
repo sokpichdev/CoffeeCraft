@@ -155,8 +155,9 @@ final class DeliveryViewModel: ObservableObject {
             AppLog.firestore.info("[DeliveryViewModel] 🎉 Delivered!")
             // Release the VM from OrderEnvironment after a short delay
             // so DeliveryMapView can still show the celebration overlay.
+            let completedOrderId = session.orderId
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                OrderEnvironment.shared.clearDelivery()
+                OrderEnvironment.shared.clearDelivery(for: completedOrderId)
             }
         }
 

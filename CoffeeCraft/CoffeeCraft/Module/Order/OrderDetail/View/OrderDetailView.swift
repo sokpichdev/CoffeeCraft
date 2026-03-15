@@ -24,7 +24,7 @@ struct OrderDetailView: View {
     @State private var showReceipt        = false
     @State private var navigateToDelivery = false
     // Captured at activation time so navigationDestination always has a non-nil VM.
-    // Reading OrderEnvironment.shared.activeDeliveryVM inside navigationDestination is
+    // capturedDeliveryVM is set before navigateToDelivery = true
     // a race — it may still be nil when SwiftUI evaluates the destination closure.
     @State private var capturedDeliveryVM: DeliveryViewModel? = nil
     
@@ -79,10 +79,9 @@ struct OrderDetailView: View {
                     // Track delivery button — shown once the simulator is active
                     // for this specific order (status reached Ready).
                     if vm.order.isDeliveryOrder,
-                       OrderEnvironment.shared.activeDeliverySession?.orderId == vm.order.id,
-                       let trackVM = OrderEnvironment.shared.activeDeliveryVM {
+                       let orderId = vm.order.id,
+                       let trackVM = OrderEnvironment.shared.deliveryVM(for: orderId) {
                         TrackDeliveryButton {
-                            // Re-capture in case the user navigated back and returns
                             capturedDeliveryVM = trackVM
                             navigateToDelivery = true
                         }
@@ -108,7 +107,7 @@ struct OrderDetailView: View {
         .navigationDestination(isPresented: $navigateToDelivery) {
             // capturedDeliveryVM is set synchronously before navigateToDelivery = true,
             // so it is guaranteed non-nil here. The fallback should never be reached.
-            if let vm = capturedDeliveryVM ?? OrderEnvironment.shared.activeDeliveryVM {
+            if let vm = capturedDeliveryVM {
                 DeliveryMapView(vm: vm)
             }
         }
@@ -166,7 +165,8 @@ struct OrderDetailView: View {
         .onChange(of: vm.order.status) { _, newStatus in
             guard newStatus == "Ready",
                   vm.order.isDeliveryOrder,
-                  OrderEnvironment.shared.activeDeliveryVM == nil
+                  let orderId = vm.order.id,
+                  OrderEnvironment.shared.deliveryVM(for: orderId) == nil
             else { return }
 
             // 1. Activate simulator — reads coordinates from the order document
@@ -175,7 +175,7 @@ struct OrderDetailView: View {
 
             // 2. Capture VM directly into @State so navigationDestination always
             //    has a non-nil value regardless of SwiftUI's render timing.
-            capturedDeliveryVM = OrderEnvironment.shared.activeDeliveryVM
+            capturedDeliveryVM = OrderEnvironment.shared.deliveryVM(for: orderId)
 
             // 3. Navigate
             navigateToDelivery = true
