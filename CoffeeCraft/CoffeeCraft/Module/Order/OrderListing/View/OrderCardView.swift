@@ -48,6 +48,15 @@ struct OrderCardView: View {
                 detailedItemsSection
             }
             
+            // Live delivery banner — only when this card's order is actively being delivered
+            if order.isDeliveryOrder,
+               let sessionId = order.deliverySessionId,
+               OrderEnvironment.shared.activeDeliverySession?.orderId == sessionId {
+                LiveDeliveryBanner { onNavigate?() }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 8)
+            }
+
             Divider().padding(.horizontal)
             footerSection
             
