@@ -106,13 +106,10 @@ struct OrderDetailView: View {
         })
         .background(Color.bgSecondary)
         .navigationDestination(isPresented: $navigateToDelivery) {
-            if let vm = capturedDeliveryVM {
+            // capturedDeliveryVM is set synchronously before navigateToDelivery = true,
+            // so it is guaranteed non-nil here. The fallback should never be reached.
+            if let vm = capturedDeliveryVM ?? OrderEnvironment.shared.activeDeliveryVM {
                 DeliveryMapView(vm: vm)
-            } else {
-                // Fallback: try the singleton (should not normally be needed)
-                if let vm = OrderEnvironment.shared.activeDeliveryVM {
-                    DeliveryMapView(vm: vm)
-                }
             }
         }
         .customNavigationBar("Order Detail") {

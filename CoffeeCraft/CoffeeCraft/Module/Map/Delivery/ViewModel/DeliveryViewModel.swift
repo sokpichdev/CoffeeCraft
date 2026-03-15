@@ -21,38 +21,39 @@ import MapKit
 final class DeliveryViewModel: ObservableObject {
 
     // MARK: - Published State (drives DeliveryMapView)
+    // All view-driving properties must be @Published — ObservableObject only
+    // triggers a re-render when a @Published property changes.
 
-    var session: DeliverySession?
+    @Published var session: DeliverySession?
 
-    /// Current rider position — published separately so the map annotation
-    /// can update without re-rendering the whole view.
-    var riderCoordinate: CLLocationCoordinate2D?
+    /// Current rider position.
+    @Published var riderCoordinate: CLLocationCoordinate2D?
 
     /// Increments every simulator tick — use onChange(of: vm.tickCount)
     /// to react to position updates without needing CLLocationCoordinate2D: Equatable.
-    var tickCount: Int = 0
+    @Published var tickCount: Int = 0
 
     /// Current bearing (degrees, 0 = north) — drives RiderAnnotationView rotation.
-    var riderBearing: CLLocationDirection = 0
+    @Published var riderBearing: CLLocationDirection = 0
 
     /// Computed ETA updated each simulator tick.
-    var estimatedArrival: Date?
+    @Published var estimatedArrival: Date?
 
     /// True while the route is being fetched and the first tick has not fired.
-    var isLoading = false
+    @Published var isLoading = false
 
     /// Non-nil when something went wrong (route fetch failure, timeout, etc.).
-    var errorMessage: String?
+    @Published var errorMessage: String?
 
     /// True when the delivery has reached .delivered.
-    var isDelivered = false
+    @Published var isDelivered = false
 
     /// True when no Firestore update has arrived for > timeoutInterval seconds.
-    var isTimeout = false
+    @Published var isTimeout = false
 
     // MARK: - Route overlay — exposed for MapPolyline
 
-    var routePolyline: MKPolyline?
+    @Published var routePolyline: MKPolyline?
 
     // MARK: - Private
 
