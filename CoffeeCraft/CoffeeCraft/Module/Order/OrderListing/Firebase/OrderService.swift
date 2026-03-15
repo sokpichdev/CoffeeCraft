@@ -165,12 +165,24 @@ class OrderService: ObservableObject {
             orderData["branchId"]   = branch.id
             orderData["branchName"] = branch.name
         }
-        // Tag as delivery order when a session was started from MapView
-        if let session = OrderEnvironment.shared.activeDeliverySession {
-            orderData["deliveryType"]      = "delivery"
-            orderData["deliverySessionId"] = session.orderId
-        } else {
-            orderData["deliveryType"] = "pickup"
+        // Tag fulfillment mode. deliveryType drives the Ready-trigger in OrderDetailView.
+        // deliverySessionId is not written here — the session is created when status
+        // reaches "Ready" and activateDelivery() is called with the Firestore order id.
+        orderData["deliveryType"] = OrderEnvironment.shared.isDelivery ? "delivery" : "pickup"
+        if OrderEnvironment.shared.isDelivery {
+            // Snapshot delivery coordinates into Firestore so activateDelivery()
+            // can reconstruct the session after OrderEnvironment.clear() wipes memory.
+            if let addr = OrderEnvironment.shared.deliveryAddressLabel {
+                orderData["deliveryAddress"] = addr
+            }
+            if let dest = OrderEnvironment.shared.pendingDeliveryDestination {
+                orderData["deliveryDestinationLat"] = dest.latitude
+                orderData["deliveryDestinationLng"] = dest.longitude
+            }
+            if let branch = OrderEnvironment.shared.pendingDeliveryBranchCoordinate {
+                orderData["deliveryBranchLat"] = branch.latitude
+                orderData["deliveryBranchLng"] = branch.longitude
+            }
         }
         return orderData
     }

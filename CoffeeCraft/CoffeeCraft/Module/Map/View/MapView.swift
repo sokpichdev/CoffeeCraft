@@ -2,9 +2,13 @@
 //  MapView.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
-//  Glass bottom panel with ultraThinMaterial, floating recenter pill, animated offline toast.
-//  Phase 4: "Order from Here" builds a DeliverySession and navigates to DeliveryMapView.
+//  Map Module — Branch Explorer
+//
+//  The map is a read-only branch explorer. It shows branch locations, hours,
+//  amenities, and quick actions (Call, Directions). The ordering flow starts
+//  in the Menu tab — the Map's only ordering hook is the "Order from here"
+//  button in BranchDetailSheet, which calls orderEnv.preSelectBranch() and
+//  switches the app to the Menu tab via onSwitchToMenu.
 //
 
 import CoreLocation
@@ -13,12 +17,11 @@ import SwiftUI
 
 struct MapView: View {
 
-    @State private var viewModel         = MapViewModel()
-    @State private var localSearch       = ""
-    @State private var navigateToDelivery    = false
-    @State private var locationManager       = SavedLocationManager()
-    @State private var pendingBranch: Branch? = nil   // set when sheet is dismissed, before picker
-    @State private var showDestinationPicker = false
+    @State private var viewModel = MapViewModel()
+
+    /// Switches the root tab to .menu. Injected from RootView / TabBarView.
+    var onSwitchToMenu: (() -> Void)?
+
     @EnvironmentObject private var orderEnv: OrderEnvironment
 
     var body: some View {
@@ -34,7 +37,7 @@ struct MapView: View {
             }
             .ignoresSafeArea(edges: .bottom)
 
-            // ── Offline banner (top toast) ──────────────────────────
+            // ── Offline banner ──────────────────────────────────────
             if viewModel.isOffline {
                 VStack {
                     offlineBanner
@@ -55,7 +58,8 @@ struct MapView: View {
                         .padding(.bottom, viewModel.filteredBranches().isEmpty ? 180 : 318)
                         .padding(.trailing, 16)
                 }
-                .animation(.spring(response: 0.35, dampingFraction: 0.72), value: viewModel.filteredBranches().count)
+                .animation(.spring(response: 0.35, dampingFraction: 0.72),
+                           value: viewModel.filteredBranches().count)
             }
 
             // ── Bottom panel ────────────────────────────────────────
@@ -65,9 +69,6 @@ struct MapView: View {
         .onAppear {
             viewModel.requestLocationPermission()
             viewModel.fetchBranches()
-            if let userId = UserSession.shared.userId {
-                Task { await locationManager.fetchLocations(for: userId) }
-            }
         }
         .onDisappear {
             viewModel.stopListening()
@@ -78,17 +79,14 @@ struct MapView: View {
                 BranchDetailSheet(
                     branch: branch,
                     viewModel: viewModel,
-                    onPickupHere: {
-                        // Pickup: set branch + mode immediately, dismiss sheet.
-                        // orderEnv write is safe — MenuBranchSelectionSheet guards
-                        // on activeDeliverySession == nil before auto-dismissing.
-                        orderEnv.selectPickup(branch: branch)
+                    onOrderHere: {
+                        // 1. Pre-select the branch in OrderEnvironment.
+                        //    MenuView will detect pendingMapBranch and show FulfillmentPickerSheet.
+                        orderEnv.preSelectBranch(branch)
+                        // 2. Dismiss this sheet.
                         viewModel.isSheetPresented = false
-                    },
-                    onDeliverHere: {
-                        // Delivery: store branch, dismiss sheet, show destination picker.
-                        pendingBranch = branch
-                        viewModel.isSheetPresented = false
+                        // 3. Switch to the Menu tab.
+                        onSwitchToMenu?()
                     },
                     onDismiss: { viewModel.deselectBranch() }
                 )
@@ -98,74 +96,21 @@ struct MapView: View {
                 .presentationBackground(Color.bgPrimary)
             }
         }
-        // ── Destination picker — shown after "Order from Here" ────────
-        .sheet(isPresented: $showDestinationPicker) {
-            if let branch = pendingBranch {
-                DeliveryDestinationPicker(
-                    branch:          branch,
-                    locationManager: locationManager,
-                    userCoordinate:  viewModel.userLocation?.coordinate,
-                    onConfirm: { destination, addressLabel in
-                        showDestinationPicker = false
-                        orderEnv.selectDelivery(branch: branch, addressLabel: addressLabel)
-                        let orderId = generateOrderId()
-                        let session = DeliverySession(
-                            orderId:               orderId,
-                            branchId:              branch.id ?? "unknown",
-                            branchCoordinate:      branch.coordinate,
-                            destinationCoordinate: destination
-                        )
-                        orderEnv.startDelivery(session: session)
-                        navigateToDelivery = true
-                    },
-                    onCancel: {
-                        showDestinationPicker = false
-                        pendingBranch         = nil
-                    }
-                )
-                .presentationDetents([.medium, .large])
-                .presentationCornerRadius(26)
-                .presentationBackground(Color.bgPrimary)
-            }
-        }
-        // Show picker once BranchDetailSheet is fully dismissed
-        .onChange(of: viewModel.isSheetPresented) { _, isPresented in
-            if !isPresented, pendingBranch != nil {
-                showDestinationPicker = true
-            }
-        }
-        // ── Delivery tracking push ──────────────────────────────────
-        .navigationDestination(isPresented: $navigateToDelivery) {
-            if let vm = orderEnv.activeDeliveryVM {
-                DeliveryMapView(vm: vm)
-            }
-        }
         .customNavigationBar("Find a Branch", hideBackBtn: false)
-    }
-
-    // MARK: - Order ID helper
-
-    private func generateOrderId() -> String {
-        let formatter        = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let datePart         = formatter.string(from: Date())
-        let suffix           = String(format: "%03d", Int.random(in: 1 ... 999))
-        return "\(datePart)-\(suffix)"
     }
 
     // MARK: - Bottom Panel
 
     private var bottomPanel: some View {
         VStack(spacing: 0) {
-            // Search + filters
             VStack(spacing: 8) {
-                MapSearchBar(text: $localSearch) {
-                    viewModel.searchQuery = ""
+                MapSearchBar(text: .init(
+                    get: { viewModel.searchQuery },
+                    set: { viewModel.updateSearchQuery($0) }
+                )) {
+                    viewModel.updateSearchQuery("")
                 }
                 .padding(.horizontal, 16)
-                .onChange(of: localSearch) { _, new in
-                    viewModel.updateSearchQuery(new)
-                }
 
                 MapFilterChips(
                     activeFilters: $viewModel.activeFilters,
@@ -175,7 +120,6 @@ struct MapView: View {
             .padding(.top, 16)
             .padding(.bottom, 10)
 
-            // Branch strip or empty state
             if viewModel.filteredBranches().isEmpty {
                 emptyState
             } else {
@@ -188,17 +132,17 @@ struct MapView: View {
             }
         }
         .background(
-            // Layered glass background
             ZStack {
                 Color.bgPrimary.opacity(0.92)
                     .background(.ultraThinMaterial)
             }
             .clipShape(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .path(in: CGRect(x: -40, y: 0, width: UIScreen.main.bounds.width + 80, height: 500))
+                    .path(in: CGRect(x: -40, y: 0,
+                                    width: UIScreen.main.bounds.width + 80,
+                                    height: 500))
             )
             .overlay(alignment: .top) {
-                // Subtle top edge line
                 Capsule()
                     .fill(Color.borderColor.opacity(0.4))
                     .frame(width: 40, height: 3)
@@ -244,14 +188,9 @@ struct MapView: View {
                     .accessibilityHint("Double tap to view branch details")
                 }
             }
-            // ── Saved delivery address pins ─────────────────────────
-            ForEach(locationManager.locations) { location in
-                Annotation(location.label, coordinate: location.coordinate) {
-                    SavedLocationAnnotationView(location: location, isSelected: false)
-                        .accessibilityLabel("\(location.label): \(location.address)")
-                        .accessibilityHint("Saved delivery address")
-                }
-            }
+            // Note: Saved delivery address pins are NOT shown here.
+            // They are only relevant during delivery address selection
+            // in FulfillmentPickerSheet (DeliveryDestinationPicker).
         }
         .mapStyle(.standard(elevation: .realistic))
         .mapControls {
@@ -261,7 +200,7 @@ struct MapView: View {
         .onTapGesture { viewModel.deselectBranch() }
     }
 
-    // MARK: - Offline Banner (toast pill style)
+    // MARK: - Offline Banner
 
     private var offlineBanner: some View {
         HStack(spacing: 8) {
@@ -281,25 +220,23 @@ struct MapView: View {
         .accessibilityLabel("You are offline. Showing saved branch data.")
     }
 
-    // MARK: - Recenter Button (pill style)
+    // MARK: - Recenter Button
 
     private var recenterButton: some View {
         Button(action: viewModel.recenterOnUser) {
-            HStack(spacing: 6) {
-                Image(systemName: "location.fill")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color.accentPrimary)
-            }
-            .frame(width: 44, height: 44)
-            .background(
-                Circle()
-                    .fill(.regularMaterial)
-                    .overlay {
-                        Circle()
-                            .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
-                    }
-                    .shadow(color: .black.opacity(0.14), radius: 10, x: 0, y: 4)
-            )
+            Image(systemName: "location.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Color.accentPrimary)
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(.regularMaterial)
+                        .overlay {
+                            Circle()
+                                .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
+                        }
+                        .shadow(color: .black.opacity(0.14), radius: 10, x: 0, y: 4)
+                )
         }
         .buttonStyle(BounceButtonStyle())
         .accessibilityLabel("Re-center map on my location")

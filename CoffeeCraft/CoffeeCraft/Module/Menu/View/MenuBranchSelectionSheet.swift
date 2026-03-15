@@ -2,7 +2,8 @@
 //  MenuBranchSelectionSheet.swift
 //  CoffeeCraft
 //
-//  UI Enhanced — Apple-style row cards, shimmer loading, polished empty state.
+//  Presents a list of branches. When the user selects one, this sheet dismisses
+//  and FulfillmentPickerSheet is presented by MenuView to capture Pickup/Delivery.
 //
 
 import SwiftUI
@@ -15,6 +16,10 @@ struct MenuBranchSelectionSheet: View {
     @State private var isLoading = true
     @State private var searchText = ""
     @State private var navigateToMap = false
+
+    // Callback: MenuView uses this to know which branch was chosen so it can
+    // immediately present FulfillmentPickerSheet.
+    var onBranchSelected: ((Branch) -> Void)?
 
     private var filteredBranches: [Branch] {
         let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
@@ -51,19 +56,15 @@ struct MenuBranchSelectionSheet: View {
                 prompt: "Search by name or address"
             )
             .navigationDestination(isPresented: $navigateToMap) {
-                MapView().environmentObject(orderEnv)
+                MapView(onSwitchToMenu: {
+                    // Branch was pre-selected via map; dismiss this whole sheet stack.
+                    // MenuView will detect orderEnv.pendingMapBranch and show FulfillmentPickerSheet.
+                    dismiss()
+                })
+                .environmentObject(orderEnv)
             }
         }
         .onAppear { fetchBranches() }
-        .onChange(of: orderEnv.selectedBranch) { _, newBranch in
-            // Only dismiss when a branch is selected for ordering (not when
-            // the delivery flow sets it after the destination picker confirms).
-            // The delivery flow sets activeDeliverySession at the same time —
-            // if that's non-nil we're in delivery mode, so stay open.
-            if newBranch != nil && orderEnv.activeDeliverySession == nil {
-                dismiss()
-            }
-        }
     }
 
     // MARK: - Branch List
@@ -74,7 +75,8 @@ struct MenuBranchSelectionSheet: View {
                 ForEach(filteredBranches) { branch in
                     BranchRowCard(branch: branch) {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        orderEnv.select(branch: branch)
+                        // Dismiss first; MenuView's onDismiss will present the picker.
+                        onBranchSelected?(branch)
                         dismiss()
                     }
                 }

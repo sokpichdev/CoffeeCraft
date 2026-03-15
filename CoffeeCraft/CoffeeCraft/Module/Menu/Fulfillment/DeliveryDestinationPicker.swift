@@ -4,8 +4,8 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Delivery)
-//  Shown after "Order from Here" is tapped.
+//  Fulfillment Module
+//  Shown by FulfillmentPickerSheet when the user selects Delivery.
 //  Lets the user pick a saved address, use live GPS, or go add a new address.
 //
 

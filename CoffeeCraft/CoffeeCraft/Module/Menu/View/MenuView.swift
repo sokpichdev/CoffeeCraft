@@ -35,7 +35,9 @@ struct MenuView: View {
     @State private var showCartSheet = false
     @State private var selectedProductToEdit: Product?
     @State private var showSearchSheet = false
-    @State private var showBranchSheet = false
+    @State private var showBranchSheet      = false
+    @State private var showFulfillmentSheet  = false
+    @State private var pendingFulfillmentBranch: Branch? = nil
 
     var isManager: Bool = false
 
@@ -75,8 +77,27 @@ struct MenuView: View {
                 selectedSectionID = firstSection.id
             }
             // Auto-present branch sheet if no branch is selected yet
-            if orderEnv.selectedBranch == nil {
+            if orderEnv.selectedBranch == nil && orderEnv.pendingMapBranch == nil {
                 showBranchSheet = true
+            }
+            // Map shortcut: branch already pre-selected, go straight to fulfillment.
+            // Delay to ensure any in-progress sheet dismissal has completed.
+            if let mapBranch = orderEnv.pendingMapBranch {
+                pendingFulfillmentBranch = mapBranch
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    showFulfillmentSheet = true
+                }
+            }
+        }
+        // Map tab "Order from here" sets pendingMapBranch after dismissing MenuBranchSelectionSheet.
+        // We must wait for that sheet's dismiss animation to complete before presenting the next
+        // sheet — iOS silently drops a sheet presentation that fires in the same run loop as a dismiss.
+        .onChange(of: orderEnv.pendingMapBranch) { _, mapBranch in
+            guard let branch = mapBranch else { return }
+            pendingFulfillmentBranch = branch
+            // Small delay lets the branch sheet finish its dismiss animation first.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                showFulfillmentSheet = true
             }
         }
         .customNavigationBar(branchNavTitle) {
@@ -106,8 +127,23 @@ struct MenuView: View {
                 .environmentObject(favVM)
         }
         .sheet(isPresented: $showBranchSheet) {
-            MenuBranchSelectionSheet()
+            MenuBranchSelectionSheet(onBranchSelected: { branch in
+                pendingFulfillmentBranch = branch
+                // Delay presentation until the branch sheet has fully dismissed.
+                // Setting showFulfillmentSheet in the same run loop as dismiss() is ignored by iOS.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    showFulfillmentSheet = true
+                }
+            })
             .environmentObject(orderEnv)
+        }
+        .sheet(isPresented: $showFulfillmentSheet, onDismiss: {
+            pendingFulfillmentBranch = nil
+        }) {
+            if let branch = pendingFulfillmentBranch {
+                FulfillmentPickerSheet(branch: branch)
+                    .environmentObject(orderEnv)
+            }
         }
         .navigationDestination(for: Product.self) { product in
             ProductDetailView(product: product, allProducts: productVM.products)
@@ -129,6 +165,156 @@ struct MenuView: View {
         orderEnv.selectedBranchName ?? "Menu"
     }
 
+    // MARK: - Section View
+    private func sectionView(_ section: SectionData) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(section.name)
+                .font(.title3.bold())
+                .padding(.horizontal)
+                .frame(height: 23)
+                .foregroundColor(.textPrimary)
+
+            VStack(spacing: 10) {
+                ForEach(section.items) { product in
+                    NavigationLink(value: product) {
+                        MenuItemRow(item: product)
+                            .id("\(section.id)_\(product.id)")
+                            .contextMenu(isManager ? ContextMenu(menuItems: {
+                                Button("Edit", systemImage: "pencil") {
+                                    editTarget = EditTarget(sectionId: section.id, product: product)
+                                }
+                                Button("Remove", role: .destructive) {
+                                    Task { await productVM.deleteProduct(product) }
+                                }
+                                Button("Mark as Unavailable", systemImage: "nosign") {
+                                    Task { await productVM.markUnavailable(product) }
+                                }
+                            }) : nil)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if isManager {
+                    NavigationLink {
+                        handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
+                    } label: {
+                        Label("Add new item", systemImage: "plus.circle.fill")
+                            .foregroundColor(.accentPrimary)
+                    }
+                    .padding(.vertical, 6)
+                }
+            }
+            .padding(.horizontal)
+        }
+        .background(
+            GeometryReader { geo in
+                Color.clear.preference(
+                    key: SectionOffsetKey.self,
+                    value: [section.id: geo.frame(in: .named("scroll")).minY]
+                )
+            }
+        )
+    }
+}
+
+struct MenuSectionShimmerView: View {
+    let itemCount: Int
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ShimmerView(cornerRadius: 6)
+                .frame(width: 120, height: 23)
+                .padding(.horizontal)
+
+            VStack(spacing: 10) {
+                ForEach(0..<itemCount, id: \.self) { _ in
+                    menuItemRowShimmer
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+    
+    private var menuItemRowShimmer: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                ShimmerView(cornerRadius: 4)
+                    .frame(width: 130, height: 17)
+                ShimmerView(cornerRadius: 4)
+                    .frame(width: 55, height: 14)
+            }
+            Spacer()
+            ShimmerView(cornerRadius: 10)
+                .frame(width: 60, height: 60)
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.surfaceSub.opacity(0.4), lineWidth: 1)
+        )
+        .shadow(color: Color.surfaceSub.opacity(0.4), radius: 1)
+    }
+}
+
+extension MenuView {
+    // MARK: - Scroll Helpers
+    private func scrollToSection(_ id: String) {
+        guard let proxy = productScrollProxy else { return }
+
+        // Cancel any pending debounce task
+        scrollDebounceTask?.cancel()
+        
+        // Set programmatic scrolling flag
+        isScrollingProgrammatically = true
+        selectedSectionID = id
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            proxy.scrollTo(id, anchor: .top)
+        }
+
+        // Reset flag after animation completes with some buffer
+        scrollDebounceTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            if !Task.isCancelled {
+                isScrollingProgrammatically = false
+            }
+        }
+    }
+
+    private func updateVisibleSection(values: [String: CGFloat]) {
+        // Cancel previous debounce
+        scrollDebounceTask?.cancel()
+        
+        // Debounce the update to avoid jitter
+        scrollDebounceTask = Task {
+            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+            
+            if Task.isCancelled { return }
+            
+            // Find the section closest to the top with a threshold
+            let threshold: CGFloat = 100 // Adjust this value as needed
+            
+            let visibleSections = values.filter { $0.value >= -threshold && $0.value <= threshold }
+            
+            if let closestSection = visibleSections.min(by: { abs($0.value) < abs($1.value) }) {
+                if selectedSectionID != closestSection.key {
+                    selectedSectionID = closestSection.key
+                }
+            } else if let topSection = values.filter({ $0.value <= 0 }).max(by: { $0.value < $1.value }) {
+                // If no section is near top, use the one that just scrolled past
+                if selectedSectionID != topSection.key {
+                    selectedSectionID = topSection.key
+                }
+            }
+        }
+    }
+}
+
+extension MenuView {
     // MARK: - No Branch Selected View
     private var noBranchSelectedView: some View {
         VStack(spacing: 20) {
@@ -286,151 +472,5 @@ struct MenuView: View {
             }
         }
         .background(Color.bgPrimary.opacity(0.8))
-    }
-
-    // MARK: - Section View
-    private func sectionView(_ section: SectionData) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(section.name)
-                .font(.title3.bold())
-                .padding(.horizontal)
-                .frame(height: 23)
-                .foregroundColor(.textPrimary)
-
-            VStack(spacing: 10) {
-                ForEach(section.items) { product in
-                    NavigationLink(value: product) {
-                        MenuItemRow(item: product)
-                            .id("\(section.id)_\(product.id)")
-                            .contextMenu(isManager ? ContextMenu(menuItems: {
-                                Button("Edit", systemImage: "pencil") {
-                                    editTarget = EditTarget(sectionId: section.id, product: product)
-                                }
-                                Button("Remove", role: .destructive) {
-                                    Task { await productVM.deleteProduct(product) }
-                                }
-                                Button("Mark as Unavailable", systemImage: "nosign") {
-                                    Task { await productVM.markUnavailable(product) }
-                                }
-                            }) : nil)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if isManager {
-                    NavigationLink {
-                        handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
-                    } label: {
-                        Label("Add new item", systemImage: "plus.circle.fill")
-                            .foregroundColor(.accentPrimary)
-                    }
-                    .padding(.vertical, 6)
-                }
-            }
-            .padding(.horizontal)
-        }
-        .background(
-            GeometryReader { geo in
-                Color.clear.preference(
-                    key: SectionOffsetKey.self,
-                    value: [section.id: geo.frame(in: .named("scroll")).minY]
-                )
-            }
-        )
-    }
-
-    // MARK: - Scroll Helpers
-    private func scrollToSection(_ id: String) {
-        guard let proxy = productScrollProxy else { return }
-
-        // Cancel any pending debounce task
-        scrollDebounceTask?.cancel()
-        
-        // Set programmatic scrolling flag
-        isScrollingProgrammatically = true
-        selectedSectionID = id
-
-        withAnimation(.easeInOut(duration: 0.3)) {
-            proxy.scrollTo(id, anchor: .top)
-        }
-
-        // Reset flag after animation completes with some buffer
-        scrollDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-            if !Task.isCancelled {
-                isScrollingProgrammatically = false
-            }
-        }
-    }
-
-    private func updateVisibleSection(values: [String: CGFloat]) {
-        // Cancel previous debounce
-        scrollDebounceTask?.cancel()
-        
-        // Debounce the update to avoid jitter
-        scrollDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
-            
-            if Task.isCancelled { return }
-            
-            // Find the section closest to the top with a threshold
-            let threshold: CGFloat = 100 // Adjust this value as needed
-            
-            let visibleSections = values.filter { $0.value >= -threshold && $0.value <= threshold }
-            
-            if let closestSection = visibleSections.min(by: { abs($0.value) < abs($1.value) }) {
-                if selectedSectionID != closestSection.key {
-                    selectedSectionID = closestSection.key
-                }
-            } else if let topSection = values.filter({ $0.value <= 0 }).max(by: { $0.value < $1.value }) {
-                // If no section is near top, use the one that just scrolled past
-                if selectedSectionID != topSection.key {
-                    selectedSectionID = topSection.key
-                }
-            }
-        }
-    }
-}
-
-struct MenuSectionShimmerView: View {
-    let itemCount: Int
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ShimmerView(cornerRadius: 6)
-                .frame(width: 120, height: 23)
-                .padding(.horizontal)
-
-            VStack(spacing: 10) {
-                ForEach(0..<itemCount, id: \.self) { _ in
-                    menuItemRowShimmer
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-    
-    private var menuItemRowShimmer: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                ShimmerView(cornerRadius: 4)
-                    .frame(width: 130, height: 17)
-                ShimmerView(cornerRadius: 4)
-                    .frame(width: 55, height: 14)
-            }
-            Spacer()
-            ShimmerView(cornerRadius: 10)
-                .frame(width: 60, height: 60)
-        }
-        .padding(8)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.surfaceSub.opacity(0.4), lineWidth: 1)
-        )
-        .shadow(color: Color.surfaceSub.opacity(0.4), radius: 1)
     }
 }

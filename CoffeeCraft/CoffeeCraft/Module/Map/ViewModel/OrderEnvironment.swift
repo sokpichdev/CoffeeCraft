@@ -3,22 +3,24 @@
 //  CoffeeCraft
 //
 //  Created by Sok Pich
-//  Map Module — Phase 3 (Simplified)
 //
-//  Shared bridge: Map writes the selected branch, every other module reads it.
-//  Injected at app root so it's available everywhere without direct coupling.
+//  Shared order state injected at the app root.
 //
-//  Write (Map):   orderEnv.select(branch: branch)
-//  Read (Order):  orderEnv.selectedBranch
-//  Clear (Cart):  orderEnv.clear()  ← call this after a successful order
+//  Flow:
+//    1. Branch + fulfillment → MenuBranchSelectionSheet triggers FulfillmentPickerSheet
+//    2. Map shortcut         → MapView calls preSelectBranch(branch:)
+//                             MenuView detects pendingMapBranch and presents FulfillmentPickerSheet
+//    3. Change in cart       → CartView re-presents FulfillmentPickerSheet
+//    4. Order placed         → CartView calls clear()
+//    5. Order ready (delivery) → OrderDetailView calls activateDelivery(firestoreOrderId:)
 //
 
+import CoreLocation
 import SwiftUI
 
 // MARK: - FulfillmentMode
 
 /// Determines how an order will be fulfilled.
-/// Set when the user taps "Pickup from Here" or "Deliver to Me" in BranchDetailSheet.
 enum FulfillmentMode {
     case pickup   // User collects from branch
     case delivery // Rider delivers to user address
@@ -30,26 +32,39 @@ final class OrderEnvironment: ObservableObject {
 
     static let shared = OrderEnvironment()
 
-    // Full Branch object so downstream modules (Menu, Cart, Order)
-    // can display name/address without a separate Firestore lookup.
+    // MARK: - Branch
+
+    /// The branch the user is ordering from. Nil until fulfillment is confirmed.
     @Published var selectedBranch: Branch?
 
+    /// Set by the Map tab "Order from here" button.
+    /// MenuView watches this: when non-nil it presents FulfillmentPickerSheet
+    /// with this branch pre-loaded, then clears it.
+    @Published var pendingMapBranch: Branch?
+
     // MARK: - Fulfillment Mode
-    // Written by BranchDetailSheet CTA taps. Read by CartView + OrderService.
+    // Written only by FulfillmentPickerSheet (and CartView's "Change" flow).
 
     @Published var fulfillmentMode: FulfillmentMode = .pickup
 
-    // Delivery destination address label — shown in CartView delivery info card.
+    /// Delivery destination label shown in CartView.
     @Published var deliveryAddressLabel: String?
 
-    // MARK: - Active delivery (Phase 4)
-    // Hoisted here so DeliveryMapView can be re-entered from Order History
-    // without losing the live simulator state.
+    // MARK: - Pending delivery intent
+    // Set when FulfillmentPickerSheet confirms delivery address.
+    // Simulator starts only when order status reaches "Ready".
+
+    @Published var pendingDeliveryDestination: CLLocationCoordinate2D?
+    @Published var pendingDeliveryBranchCoordinate: CLLocationCoordinate2D?
+    @Published var pendingDeliveryBranchId: String?
+
+    // MARK: - Active delivery
+    // Populated only after order status = "Ready".
 
     @Published var activeDeliverySession: DeliverySession?
     var activeDeliveryVM: DeliveryViewModel?
 
-    // MARK: - Convenience accessors
+    // MARK: - Convenience
 
     var selectedBranchId: String?   { selectedBranch?.id   }
     var selectedBranchName: String? { selectedBranch?.name }
@@ -58,34 +73,68 @@ final class OrderEnvironment: ObservableObject {
 
     // MARK: - Actions
 
-    /// Call when user taps "Pickup from Here".
+    /// Map tab "Order from here" — stores a pending branch for MenuView to pick up.
+    /// Does NOT set selectedBranch; that happens only after fulfillment is confirmed.
+    func preSelectBranch(_ branch: Branch) {
+        pendingMapBranch = branch
+    }
+
+    /// FulfillmentPickerSheet confirmed Pickup.
     func selectPickup(branch: Branch) {
-        selectedBranch    = branch
-        fulfillmentMode   = .pickup
+        selectedBranch       = branch
+        fulfillmentMode      = .pickup
         deliveryAddressLabel = nil
+        pendingMapBranch     = nil
         clearDelivery()
     }
 
-    /// Call when user confirms delivery destination in DeliveryDestinationPicker.
-    func selectDelivery(branch: Branch, addressLabel: String) {
-        selectedBranch       = branch
-        fulfillmentMode      = .delivery
-        deliveryAddressLabel = addressLabel
+    /// FulfillmentPickerSheet confirmed Delivery + address.
+    func selectDelivery(branch: Branch, addressLabel: String,
+                        destination: CLLocationCoordinate2D) {
+        selectedBranch                  = branch
+        fulfillmentMode                 = .delivery
+        deliveryAddressLabel            = addressLabel
+        pendingDeliveryDestination      = destination
+        pendingDeliveryBranchCoordinate = branch.coordinate
+        pendingDeliveryBranchId         = branch.id
+        pendingMapBranch                = nil
     }
 
-    /// Legacy — kept for backward compat with MenuBranchSelectionSheet.
-    func select(branch: Branch) {
-        selectedBranch  = branch
-        fulfillmentMode = .pickup
-    }
-
+    /// Clears everything after a successful order is placed.
     func clear() {
-        selectedBranch       = nil
-        deliveryAddressLabel = nil
-        fulfillmentMode      = .pickup
+        selectedBranch                  = nil
+        deliveryAddressLabel            = nil
+        fulfillmentMode                 = .pickup
+        pendingDeliveryDestination      = nil
+        pendingDeliveryBranchCoordinate = nil
+        pendingDeliveryBranchId         = nil
+        pendingMapBranch                = nil
     }
 
-    func startDelivery(session: DeliverySession) {
+    /// Called by OrderDetailView when a delivery order reaches "Ready".
+    /// Coordinates are read from the Order model (written to Firestore at checkout)
+    /// so this works even after OrderEnvironment.clear() has been called.
+    func activateDelivery(order: Order) {
+        guard let firestoreOrderId = order.id,
+              let destLat    = order.deliveryDestinationLat,
+              let destLng    = order.deliveryDestinationLng,
+              let branchLat  = order.deliveryBranchLat,
+              let branchLng  = order.deliveryBranchLng,
+              let branchId   = order.branchId
+        else {
+            AppLog.firestore.error("[OrderEnvironment] activateDelivery: missing coordinates on order \(order.id ?? "?")")
+            return
+        }
+
+        let dest        = CLLocationCoordinate2D(latitude: destLat,   longitude: destLng)
+        let branchCoord = CLLocationCoordinate2D(latitude: branchLat, longitude: branchLng)
+
+        let session = DeliverySession(
+            orderId:               firestoreOrderId,
+            branchId:              branchId,
+            branchCoordinate:      branchCoord,
+            destinationCoordinate: dest
+        )
         let vm = DeliveryViewModel()
         activeDeliverySession = session
         activeDeliveryVM      = vm
