@@ -27,8 +27,14 @@ struct DeliveryMapView: View {
     // Passed in from MapView via OrderEnvironment — outlives this view.
     @ObservedObject var vm: DeliveryViewModel
 
-    @State private var cameraPosition: MapCameraPosition = .automatic
-    @State private var showConfetti  = false
+    @State private var cameraPosition:    MapCameraPosition = .automatic
+    @State private var showConfetti:      Bool = false
+    /// Set to true when the user pinches/pans the map manually.
+    /// Auto-zoom is paused until they tap the recenter button.
+    @State private var userHasInteracted: Bool = false
+    /// True only while fitCamera() is programmatically moving the camera,
+    /// so onMapCameraChange can distinguish auto-zoom from user interaction.
+    @State private var isAutoZooming:     Bool = false
 
     @Environment(\.dismiss) private var dismiss
 
@@ -64,6 +70,42 @@ struct DeliveryMapView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.78), value: vm.isTimeout)
+            }
+
+            // ── Recenter button — shown when user has panned/zoomed manually ──
+            if userHasInteracted && !vm.isDelivered {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button {
+                            userHasInteracted = false
+                            if let coord = vm.riderCoordinate {
+                                fitCamera(riderCoord: coord)
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "location.fill")
+                                    .font(.system(size: 13, weight: .semibold))
+                                Text("Follow rider")
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule()
+                                    .fill(Color.accentPrimary)
+                                    .shadow(color: Color.accentPrimary.opacity(0.4), radius: 8, x: 0, y: 3)
+                            )
+                        }
+                        .buttonStyle(BounceButtonStyle())
+                        .padding(.trailing, 16)
+                        .padding(.bottom, 120)
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: userHasInteracted)
             }
 
             // ── Delivered celebration ───────────────────────────────
@@ -143,6 +185,16 @@ struct DeliveryMapView: View {
         .mapControls {
             MapCompass()
             MapScaleView()
+            MapUserLocationButton()
+        }
+        .onMapCameraChange { _ in
+            // Any camera change initiated by the user (pinch, pan, double-tap)
+            // pauses auto-zoom so they can inspect the map freely.
+            // We detect user interaction by checking if the change didn't come
+            // from our own fitCamera() call — we set a flag before and after.
+            if !isAutoZooming {
+                userHasInteracted = true
+            }
         }
     }
 
@@ -301,12 +353,18 @@ struct DeliveryMapView: View {
     // Camera is positioned in onAppear using vm.session.
 
     /// Smoothly re-fits the camera to keep the rider in frame.
+    /// Only runs when the user hasn't manually interacted with the map.
     private func fitCamera(riderCoord: CLLocationCoordinate2D) {
-        guard let session = vm.session else { return }
+        guard !userHasInteracted, let session = vm.session else { return }
         let coords = [riderCoord, session.destinationCoordinate]
         let region = regionFitting(coords: coords, padding: 1.6)
+        isAutoZooming = true
         withAnimation(.easeInOut(duration: 0.6)) {
             cameraPosition = .region(region)
+        }
+        // Reset flag after animation so subsequent user interactions are detected
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            isAutoZooming = false
         }
     }
 
