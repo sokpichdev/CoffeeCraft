@@ -2,14 +2,7 @@
 //  SavedLocationManager.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Saved Locations)
-//  Manages the current user's saved delivery addresses.
-//
-//  Firestore path: users/{uid}/savedLocations/{locationId}
-//
-//  Rules enforced here (not just in the UI):
-//  • Max 10 locations per user
-//  • Exactly one default at a time — setDefault clears all others atomically
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import FirebaseFirestore

@@ -5,25 +5,6 @@
 //  Created by Sok Pich on 3/6/26.
 //
 
-//
-//  MapAnalytics.swift
-//  CoffeeCraft
-//
-//  Map Module — Phase 6
-//  Thin analytics wrapper for the Map module.
-//
-//  Currently logs events via AppLog (OSLog) so they appear in Xcode console
-//  and Console.app. When you add FirebaseAnalytics to the project, replace
-//  the AppLog.firestore lines with Analytics.logEvent(...) — no other
-//  files need to change.
-//
-//  Events fired:
-//    branch_selected      — user taps a pin or strip card
-//    branch_order_started — user taps "Order from Here"
-//    map_filter_applied   — user activates a filter chip
-//    map_searched         — user types in the search bar (fires on result)
-//
-
 import Foundation
 
 // MARK: - MapAnalytics

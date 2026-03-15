@@ -4,10 +4,6 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Saved Locations)
-//  Full list of the user's saved delivery addresses.
-//  Accessible from Account → Addresses.
-//
 
 import SwiftUI
 

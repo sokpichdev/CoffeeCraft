@@ -4,10 +4,6 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Saved Locations)
-//  Add or edit a saved delivery address.
-//  Uses MKLocalSearch for address autocomplete.
-//
 
 import CoreLocation
 import MapKit

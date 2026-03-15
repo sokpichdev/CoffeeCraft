@@ -2,13 +2,7 @@
 //  DeliverySession.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
-//  Encapsulates the full state of one active delivery.
-//  Written to Firestore at deliveries/{orderId} and synced in real-time
-//  by DeliveryViewModel's snapshot listener.
-//
-//  CLLocationCoordinate2D is not Codable by default — we use a flat
-//  lat/lng storage pattern to keep Firestore writes simple.
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import CoreLocation

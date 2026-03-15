@@ -4,7 +4,6 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Saved Locations)
 //  A named delivery address stored per-user in Firestore.
 //  Firestore path: users/{uid}/savedLocations/{locationId}
 //

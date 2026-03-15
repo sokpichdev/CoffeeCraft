@@ -4,10 +4,6 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Saved Locations)
-//  House-icon map pin for saved delivery addresses.
-//  Visually distinct from BranchAnnotationView (coffee cup) by shape and colour.
-//
 
 import SwiftUI
 

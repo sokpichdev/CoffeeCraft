@@ -4,16 +4,7 @@
 //
 //  Map Module — Phase 4 (Delivery)
 //
-//  Full-screen delivery tracking screen shown after an order is placed.
-//  Composes: live Map, RiderAnnotationView, route polyline, DeliveryStatusBar,
-//  delivered celebration overlay, and timeout / loading edge states.
-//
-//  Usage
-//  ──────────────────────────────────────────────────────────────────────────
-//  DeliveryMapView(vm: DeliveryViewModel)
-//
-//  The VM is owned by OrderEnvironment so it survives navigation back/forward.
-//  This view only drives the camera and confetti — it never starts or stops the VM.
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import CoreLocation

@@ -2,12 +2,7 @@
 //  DeliveryViewModel.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
-//
-//  Owns the active DeliverySession and drives DeliveryMapView.
-//  Connects the DeliverySimulator (dev/sim) to Firestore real-time listener
-//  so Phase 6 can swap the simulator for a real rider GPS feed with a
-//  single flag toggle.
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import CoreLocation

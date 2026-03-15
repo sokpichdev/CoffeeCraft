@@ -4,10 +4,6 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Delivery)
-//  Compact banner shown inside OrderCardView when the order has an active delivery.
-//  Tapping it navigates straight to DeliveryMapView via the OrdersView stack.
-//
 
 import SwiftUI
 
