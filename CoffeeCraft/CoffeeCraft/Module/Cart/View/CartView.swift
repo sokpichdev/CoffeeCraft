@@ -15,9 +15,9 @@ struct CartView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var editingItem: CartItem?
-    @State private var navigateToDelivery = false
     @StateObject private var orderService = OrderService()
     @StateObject private var productVM = ProductViewModel()
+    @State private var showFulfillmentSheet = false
 
     private var isDisableButton: Bool {
         cartManager.items.isEmpty || !cartManager.canCheckout(walletBalance: walletVM.wallet?.balance)
@@ -30,9 +30,13 @@ struct CartView: View {
                         // ── Fulfillment mode info card ──────────────────────────
                         if let branch = orderEnv.selectedBranch {
                             if orderEnv.isDelivery, let addr = orderEnv.deliveryAddressLabel {
-                                CartDeliveryInfoCard(branch: branch, addressLabel: addr)
+                                CartDeliveryInfoCard(branch: branch, addressLabel: addr) {
+                                    showFulfillmentSheet = true
+                                }
                             } else {
-                                CartBranchInfoCard(branch: branch)
+                                CartBranchInfoCard(branch: branch) {
+                                    showFulfillmentSheet = true
+                                }
                             }
                         }
 
@@ -93,14 +97,15 @@ struct CartView: View {
             .customNavigationBar("My Cart") {
                 ToolBarButton.back { dismiss() }
             }
-            .navigationDestination(isPresented: $navigateToDelivery) {
-                if let vm = OrderEnvironment.shared.activeDeliveryVM {
-                    DeliveryMapView(vm: vm)
-                }
-            }
 //            .task { await productVM.fetchProducts() }
         }
         .applyApiUIComponents()
+        .sheet(isPresented: $showFulfillmentSheet) {
+            if let branch = orderEnv.selectedBranch {
+                FulfillmentPickerSheet(branch: branch)
+                    .environmentObject(orderEnv)
+            }
+        }
     }
 
     // MARK: - Payment Toggle
@@ -201,16 +206,11 @@ struct CartView: View {
                     }
                 }
                 cartManager.clearCart(userId: UserSession.shared.userId ?? "")
-                if isDelivery {
-                    // Delivery: clear branch selection (session lives in activeDeliveryVM)
-                    // then push DeliveryMapView — user watches their order live.
-                    orderEnv.clear()
-                    navigateToDelivery = true
-                } else {
-                    // Pickup: clear everything and dismiss to orders list.
-                    orderEnv.clear()
-                    dismiss()
-                }
+                // Both modes: dismiss to orders list.
+                // For delivery, OrderDetailView watches the order status and
+                // activates the simulator + shows the track button when status = Ready.
+                orderEnv.clear()
+                dismiss()
             }
         }
     }
@@ -222,6 +222,7 @@ struct CartView: View {
 /// Shown whenever OrderEnvironment has a selectedBranch set.
 struct CartBranchInfoCard: View {
     let branch: Branch
+    var onChangeFulfillment: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 14) {
@@ -252,13 +253,20 @@ struct CartBranchInfoCard: View {
 
             Spacer()
 
-            HStack(spacing: 4) {
-                Circle()
-                    .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
-                    .frame(width: 7, height: 7)
-                Text(branch.isOpen ? "Open" : "Closed")
-                    .font(.custom("Nunito-SemiBold", size: 12))
-                    .foregroundColor(branch.isOpen ? .semanticSuccess : .semanticError)
+            VStack(alignment: .trailing, spacing: 6) {
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
+                        .frame(width: 7, height: 7)
+                    Text(branch.isOpen ? "Open" : "Closed")
+                        .font(.custom("Nunito-SemiBold", size: 12))
+                        .foregroundColor(branch.isOpen ? .semanticSuccess : .semanticError)
+                }
+                if onChangeFulfillment != nil {
+                    Button("Change") { onChangeFulfillment?() }
+                        .font(.custom("Nunito-SemiBold", size: 12))
+                        .foregroundColor(Color.accentPrimary)
+                }
             }
         }
         .padding(14)
@@ -284,6 +292,7 @@ struct CartBranchInfoCard: View {
 struct CartDeliveryInfoCard: View {
     let branch:       Branch
     let addressLabel: String
+    var onChangeFulfillment: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 14) {

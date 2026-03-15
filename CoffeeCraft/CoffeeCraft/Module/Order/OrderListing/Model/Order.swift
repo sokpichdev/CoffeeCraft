@@ -40,6 +40,14 @@ struct Order: Identifiable, Codable, Hashable, Equatable {
     var deliverySessionId: String?
     /// "delivery" | "pickup" — nil on old orders treated as pickup.
     var deliveryType: String?
+    /// Delivery destination coordinates — written at checkout, read by activateDelivery().
+    /// Stored in Firestore so they survive the OrderEnvironment.clear() after checkout.
+    var deliveryDestinationLat: Double?
+    var deliveryDestinationLng: Double?
+    var deliveryBranchLat: Double?
+    var deliveryBranchLng: Double?
+    /// Snapshot of the delivery address label shown in tracking UI.
+    var deliveryAddress: String?
 
     var isDeliveryOrder: Bool { deliveryType == "delivery" }
 

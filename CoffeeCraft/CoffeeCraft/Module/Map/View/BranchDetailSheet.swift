@@ -14,8 +14,7 @@ struct BranchDetailSheet: View {
 
     let branch: Branch
     let viewModel: MapViewModel
-    let onPickupHere:  () -> Void   // user wants to collect in store
-    let onDeliverHere: () -> Void   // user wants rider delivery
+    let onOrderHere: () -> Void   // hands off to Menu tab with branch pre-selected
     let onDismiss: () -> Void
 
     @State private var showHours = false
@@ -326,7 +325,6 @@ struct BranchDetailSheet: View {
     private var ctaButton: some View {
         Group {
             if !branch.isOpen {
-                // Closed — single disabled banner
                 HStack(spacing: 8) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 15, weight: .semibold))
@@ -341,68 +339,35 @@ struct BranchDetailSheet: View {
                 .accessibilityLabel("\(branch.name) is currently closed")
 
             } else {
-                // Open — two side-by-side CTAs
-                HStack(spacing: 10) {
-                    // ── Pickup ───────────────────────────────────────
-                    Button {
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        MapAnalytics.branchOrderStarted(
-                            branchId: branch.id ?? "unknown",
-                            branchName: branch.name
-                        )
-                        onPickupHere()
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "bag.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .symbolRenderingMode(.hierarchical)
-                            Text("Pickup")
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
-                        }
-                        .foregroundColor(Color.accentPrimary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color.accentPrimary.opacity(0.12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .strokeBorder(Color.accentPrimary.opacity(0.35), lineWidth: 1.5)
-                                )
-                        }
+                // Single CTA — hands off to the Menu tab with this branch pre-selected.
+                // Pickup vs Delivery is chosen in FulfillmentPickerSheet, not here.
+                Button {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    MapAnalytics.branchOrderStarted(
+                        branchId: branch.id ?? "unknown",
+                        branchName: branch.name
+                    )
+                    onOrderHere()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "cart.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .symbolRenderingMode(.hierarchical)
+                        Text("Order from here")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
                     }
-                    .buttonStyle(BounceButtonStyle())
-                    .accessibilityLabel("Pickup from \(branch.name)")
-                    .accessibilityHint("Order now and collect in store")
-
-                    // ── Delivery ─────────────────────────────────────
-                    Button {
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        MapAnalytics.branchOrderStarted(
-                            branchId: branch.id ?? "unknown",
-                            branchName: branch.name
-                        )
-                        onDeliverHere()
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "bicycle")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Deliver")
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background {
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color.accentPrimary)
-                                .shadow(color: Color.accentPrimary.opacity(0.4), radius: 10, x: 0, y: 4)
-                        }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.accentPrimary)
+                            .shadow(color: Color.accentPrimary.opacity(0.4), radius: 12, x: 0, y: 4)
                     }
-                    .buttonStyle(BounceButtonStyle())
-                    .accessibilityLabel("Deliver from \(branch.name)")
-                    .accessibilityHint("Rider brings your order to your address")
                 }
+                .buttonStyle(BounceButtonStyle())
+                .accessibilityLabel("Order from \(branch.name)")
+                .accessibilityHint("Switches to the Menu tab with this branch selected")
             }
         }
     }

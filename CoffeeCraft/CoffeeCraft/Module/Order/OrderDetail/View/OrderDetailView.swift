@@ -23,6 +23,10 @@ struct OrderDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     @State private var showReceipt        = false
     @State private var navigateToDelivery = false
+    // Captured at activation time so navigationDestination always has a non-nil VM.
+    // Reading OrderEnvironment.shared.activeDeliveryVM inside navigationDestination is
+    // a race — it may still be nil when SwiftUI evaluates the destination closure.
+    @State private var capturedDeliveryVM: DeliveryViewModel? = nil
     
     init(order: Order, isActive: Bool = false) {
         self.initialOrder = order
@@ -72,11 +76,14 @@ struct OrderDetailView: View {
                         walletAmountPaid: vm.order.walletAmountPaid
                     )
 
-                    // Track delivery button — shown when this order is
-                    // the currently active delivery in OrderEnvironment
+                    // Track delivery button — shown once the simulator is active
+                    // for this specific order (status reached Ready).
                     if vm.order.isDeliveryOrder,
-                       OrderEnvironment.shared.activeDeliverySession?.orderId == vm.order.deliverySessionId {
+                       OrderEnvironment.shared.activeDeliverySession?.orderId == vm.order.id,
+                       let trackVM = OrderEnvironment.shared.activeDeliveryVM {
                         TrackDeliveryButton {
+                            // Re-capture in case the user navigated back and returns
+                            capturedDeliveryVM = trackVM
                             navigateToDelivery = true
                         }
                     }
@@ -99,8 +106,13 @@ struct OrderDetailView: View {
         })
         .background(Color.bgSecondary)
         .navigationDestination(isPresented: $navigateToDelivery) {
-            if let vm = OrderEnvironment.shared.activeDeliveryVM {
+            if let vm = capturedDeliveryVM {
                 DeliveryMapView(vm: vm)
+            } else {
+                // Fallback: try the singleton (should not normally be needed)
+                if let vm = OrderEnvironment.shared.activeDeliveryVM {
+                    DeliveryMapView(vm: vm)
+                }
             }
         }
         .customNavigationBar("Order Detail") {
@@ -148,6 +160,29 @@ struct OrderDetailView: View {
             }
             // pre-load which items the user has already rated
             loadRatedProductIds()
+        }
+        // ── Delivery activation on status change ───────────────
+        // The real-time listener in OrderDetailViewModel fires this
+        // whenever the barista updates the order status in the admin panel.
+        // "Ready" is the trigger for delivery orders:
+        //   Pending → InProgress → Ready → (simulator starts) → Delivered
+        .onChange(of: vm.order.status) { _, newStatus in
+            guard newStatus == "Ready",
+                  vm.order.isDeliveryOrder,
+                  OrderEnvironment.shared.activeDeliveryVM == nil
+            else { return }
+
+            // 1. Activate simulator — reads coordinates from the order document
+            //    (written to Firestore at checkout) so it works after clear() wipes memory.
+            OrderEnvironment.shared.activateDelivery(order: vm.order)
+
+            // 2. Capture VM directly into @State so navigationDestination always
+            //    has a non-nil value regardless of SwiftUI's render timing.
+            capturedDeliveryVM = OrderEnvironment.shared.activeDeliveryVM
+
+            // 3. Navigate
+            navigateToDelivery = true
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
         .onDisappear {
             vm.stopListening()
