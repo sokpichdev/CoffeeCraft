@@ -78,11 +78,15 @@ struct MapView: View {
                 BranchDetailSheet(
                     branch: branch,
                     viewModel: viewModel,
-                    onOrderHere: {
-                        // Store branch for the destination picker.
-                        // Do NOT write orderEnv.selectedBranch here — that would
-                        // trigger MenuBranchSelectionSheet's dismiss observer and
-                        // collapse the whole sheet stack before we can navigate.
+                    onPickupHere: {
+                        // Pickup: set branch + mode immediately, dismiss sheet.
+                        // orderEnv write is safe — MenuBranchSelectionSheet guards
+                        // on activeDeliverySession == nil before auto-dismissing.
+                        orderEnv.selectPickup(branch: branch)
+                        viewModel.isSheetPresented = false
+                    },
+                    onDeliverHere: {
+                        // Delivery: store branch, dismiss sheet, show destination picker.
                         pendingBranch = branch
                         viewModel.isSheetPresented = false
                     },
@@ -101,9 +105,9 @@ struct MapView: View {
                     branch:          branch,
                     locationManager: locationManager,
                     userCoordinate:  viewModel.userLocation?.coordinate,
-                    onConfirm: { destination in
+                    onConfirm: { destination, addressLabel in
                         showDestinationPicker = false
-                        orderEnv.select(branch: branch)   // write env AFTER sheet stack is clean
+                        orderEnv.selectDelivery(branch: branch, addressLabel: addressLabel)
                         let orderId = generateOrderId()
                         let session = DeliverySession(
                             orderId:               orderId,

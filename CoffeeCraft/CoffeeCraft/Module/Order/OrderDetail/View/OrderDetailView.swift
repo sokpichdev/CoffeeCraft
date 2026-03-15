@@ -6,6 +6,7 @@
 //
 // The user's mental flow when opening an order detail is: who / when → what happened → what did I get → how much → now what?
 
+import MapKit
 import SwiftUI
 
 struct OrderDetailView: View {
@@ -36,6 +37,23 @@ struct OrderDetailView: View {
                     OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
                     
                     StatusTimelineView(status: vm.order.status ?? "")
+
+                    // Ready-for-pickup banner — only for pickup orders at Ready status
+                    if vm.order.deliveryType == "pickup",
+                       vm.order.status == "Ready",
+                       let branch = vm.order.branchName {
+                        PickupReadyBanner(branchName: branch) {
+                            // Open Apple Maps to the branch
+                            if let id = vm.order.branchId,
+                               let branch = MockBranchData.all.first(where: { $0.id == id }) {
+                                let item = MKMapItem(placemark: MKPlacemark(coordinate: branch.coordinate))
+                                item.name = branch.name
+                                item.openInMaps(launchOptions: [
+                                    MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+                                ])
+                            }
+                        }
+                    }
 
                     // passes rating context when order is Completed
                     OrderItemsCard(

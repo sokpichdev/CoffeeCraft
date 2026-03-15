@@ -19,7 +19,7 @@ struct DeliveryDestinationPicker: View {
     let branch:          Branch
     let locationManager: SavedLocationManager
     let userCoordinate:  CLLocationCoordinate2D?
-    let onConfirm:       (CLLocationCoordinate2D) -> Void
+    let onConfirm:       (CLLocationCoordinate2D, String) -> Void  // coord + address label
     let onCancel:        () -> Void
 
     @State private var selectedOption: DestinationOption = .currentLocation
@@ -36,6 +36,16 @@ struct DeliveryDestinationPicker: View {
             return userCoordinate
         case .saved(let loc):
             return loc.coordinate
+        }
+    }
+
+    // Human-readable address for the current selection (used by OrderEnvironment)
+    private var resolvedAddressLabel: String {
+        switch selectedOption {
+        case .currentLocation:
+            return "Current Location"
+        case .saved(let loc):
+            return loc.address
         }
     }
 
@@ -139,7 +149,8 @@ struct DeliveryDestinationPicker: View {
             Button {
                 guard let coord = resolvedCoordinate else { return }
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                onConfirm(coord)
+                let label = resolvedAddressLabel
+                onConfirm(coord, label)
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "bicycle")

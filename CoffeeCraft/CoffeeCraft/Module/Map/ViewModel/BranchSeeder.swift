@@ -31,73 +31,31 @@ struct BranchSeeder {
         // Document ID = branch.id — must match the strings in MockBranchData.
         let branches: [(id: String, data: [String: Any])] = [
 
+            // ── USA branches (full MKDirections routing available) ──────
             (
-                id: "branch_norodom",
+                id: "branch_sf_union_square",
                 data: [
-                    "name": "CoffeeCraft – Norodom",
-                    "address": "Norodom Blvd, near Independence Monument, Phnom Penh",
-                    "latitude": 11.5637,
-                    "longitude": 104.9230,
-                    "phone": "+855 23 456 001",
-                    "openingHours": "Mon–Sun  7:00 – 22:00",
+                    "name": "CoffeeCraft – Union Square",
+                    "address": "333 Post St, Union Square, San Francisco, CA",
+                    "latitude": 37.7881,
+                    "longitude": -122.4075,
+                    "phone": "+1 415 555 0101",
+                    "openingHours": "Mon–Sun  6:00 – 21:00",
                     "isOpen": true,
                     "amenities": ["wifi", "dine-in", "takeaway"]
                 ]
             ),
-
             (
-                id: "branch_riverside",
+                id: "branch_sf_soma",
                 data: [
-                    "name": "CoffeeCraft – Riverside",
-                    "address": "Sisowath Quay, Daun Penh, Phnom Penh",
-                    "latitude": 11.5696,
-                    "longitude": 104.9307,
-                    "phone": "+855 23 456 002",
-                    "openingHours": "Mon–Sun  7:00 – 23:00",
+                    "name": "CoffeeCraft – SoMa",
+                    "address": "680 Mission St, SoMa, San Francisco, CA",
+                    "latitude": 37.7872,
+                    "longitude": -122.4004,
+                    "phone": "+1 415 555 0102",
+                    "openingHours": "Mon–Fri  7:00 – 20:00  |  Sat–Sun  8:00 – 20:00",
                     "isOpen": true,
                     "amenities": ["wifi", "dine-in", "takeaway", "parking"]
-                ]
-            ),
-
-            (
-                id: "branch_toul_tom_poung",
-                data: [
-                    "name": "CoffeeCraft – TTP Market",
-                    "address": "Russian Market Area, Toul Tom Poung, Phnom Penh",
-                    "latitude": 11.5435,
-                    "longitude": 104.9218,
-                    "phone": "+855 23 456 003",
-                    "openingHours": "Mon–Fri  7:00 – 21:00  |  Sat–Sun  8:00 – 22:00",
-                    "isOpen": false,
-                    "amenities": ["wifi", "takeaway"]
-                ]
-            ),
-
-            (
-                id: "branch_olympia",
-                data: [
-                    "name": "CoffeeCraft – Olympia",
-                    "address": "Olympia City Mall, Phnom Penh",
-                    "latitude": 11.5612,
-                    "longitude": 104.9108,
-                    "phone": "+855 23 456 004",
-                    "openingHours": "Mon–Sun  9:00 – 21:30",
-                    "isOpen": true,
-                    "amenities": ["wifi", "dine-in", "takeaway", "parking"]
-                ]
-            ),
-
-            (
-                id: "branch_sen_sok",
-                data: [
-                    "name": "CoffeeCraft – Sen Sok",
-                    "address": "AEON Mall Sen Sok, Phnom Penh",
-                    "latitude": 11.5892,
-                    "longitude": 104.9019,
-                    "phone": "+855 23 456 005",
-                    "openingHours": "Mon–Sun  9:00 – 22:00",
-                    "isOpen": true,
-                    "amenities": ["wifi", "dine-in", "takeaway", "parking", "drive-thru"]
                 ]
             )
         ]

@@ -57,15 +57,15 @@ final class SavedLocationManager {
             #if DEBUG
             // Inject a mock "Home" address for simulator testing.
             // Coordinates match the mock userLocation in MapViewModel:
-            // Street 214, ~1.1 km south of branch_norodom via Norodom Blvd.
-            // MKDirections routes reliably between these two points.
+            // Moscone Center, ~1.4 km from Union Square branch via city streets.
+            // Apple Maps routes reliably between these two SF points.
             if fetched.isEmpty {
                 fetched = [SavedLocation(
                     id:        "debug_home",
                     label:     "Home (Debug)",
-                    address:   "Street 214, Tonle Bassac, Phnom Penh",
-                    latitude:  11.5528,
-                    longitude: 104.9237,
+                    address:   "747 Howard St, Moscone Center, San Francisco, CA",
+                    latitude:  37.7838,
+                    longitude: -122.4014,
                     isDefault: true,
                     createdAt: Date()
                 )]

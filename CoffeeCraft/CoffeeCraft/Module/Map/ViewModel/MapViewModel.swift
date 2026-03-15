@@ -106,15 +106,15 @@ final class MapViewModel: NSObject {
         authorizationStatus             = locationManager.authorizationStatus
 
         #if DEBUG
-        // Mock home location: Street 214, ~1.1 km south of branch_norodom via Norodom Blvd.
-        // MKDirections routes reliably between these two points.
-        // Remove or comment out when testing on a real device with GPS.
-        let mockHome = CLLocation(latitude: 11.5528, longitude: 104.9237)
+        // Mock user location: Moscone Center, San Francisco (~1.4 km from Union Square branch).
+        // Apple Maps has full routing data here — MKDirections returns a real polyline.
+        // Remove or comment when testing on a real device with GPS.
+        let mockHome = CLLocation(latitude: 37.7838, longitude: -122.4014)
         userLocation = mockHome
         cameraPosition = .region(MKCoordinateRegion(
             center: mockHome.coordinate,
-            latitudinalMeters: 1_500,
-            longitudinalMeters: 1_500
+            latitudinalMeters: 3_000,
+            longitudinalMeters: 3_000
         ))
         hasInitiallyLocated = true
         #endif

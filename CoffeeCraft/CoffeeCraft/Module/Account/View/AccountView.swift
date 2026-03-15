@@ -41,6 +41,9 @@ struct AccountView: View {
 //                        await CustomizationSeeder.seedCustomizations()
 //                    }
 //                }
+                Button("Seed branch") {
+                    Task { await BranchSeeder.seed() }
+                }
                 footerSection
             }
             .padding()
