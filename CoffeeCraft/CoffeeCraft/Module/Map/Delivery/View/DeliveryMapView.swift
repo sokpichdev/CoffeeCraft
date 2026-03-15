@@ -10,10 +10,10 @@
 //
 //  Usage
 //  ──────────────────────────────────────────────────────────────────────────
-//  DeliveryMapView(session: DeliverySession(...))
+//  DeliveryMapView(vm: DeliveryViewModel)
 //
-//  The view owns a DeliveryViewModel as a @State object. It starts the
-//  simulator on appear and stops it on disappear — no leaks.
+//  The VM is owned by OrderEnvironment so it survives navigation back/forward.
+//  This view only drives the camera and confetti — it never starts or stops the VM.
 //
 
 import CoreLocation
@@ -24,10 +24,9 @@ import SwiftUI
 
 struct DeliveryMapView: View {
 
-    // The initial session is passed in from the order confirmation flow.
-    let initialSession: DeliverySession
+    // Passed in from MapView via OrderEnvironment — outlives this view.
+    @ObservedObject var vm: DeliveryViewModel
 
-    @State private var vm            = DeliveryViewModel()
     @State private var cameraPosition: MapCameraPosition = .automatic
     @State private var showConfetti  = false
 
@@ -78,10 +77,15 @@ struct DeliveryMapView: View {
             ToolBarButton.back { dismiss() }
         }
         .onAppear {
-            startDelivery()
+            // VM is already running — just fit the camera to current session
+            if let session = vm.session {
+                let coords = [session.branchCoordinate, session.destinationCoordinate]
+                cameraPosition = .region(regionFitting(coords: coords, padding: 1.4))
+            }
         }
         .onDisappear {
-            vm.stopDelivery()
+            // Do NOT stop the VM — it lives in OrderEnvironment and must keep
+            // running so the user can return to this screen from Order History.
         }
         // CLLocationCoordinate2D is not Equatable — observe tickCount instead.
         // tickCount increments every simulator tick, so this fires at the same frequency.
@@ -293,14 +297,8 @@ struct DeliveryMapView: View {
 
     // MARK: - Helpers
 
-    private func startDelivery() {
-        vm.startDelivery(session: initialSession, useSimulator: true)
-
-        // Initial camera: show both branch and destination
-        let coords = [initialSession.branchCoordinate, initialSession.destinationCoordinate]
-        let region = regionFitting(coords: coords, padding: 1.4)
-        cameraPosition = .region(region)
-    }
+    // startDelivery() removed — VM lifecycle is owned by OrderEnvironment.
+    // Camera is positioned in onAppear using vm.session.
 
     /// Smoothly re-fits the camera to keep the rider in frame.
     private func fitCamera(riderCoord: CLLocationCoordinate2D) {
@@ -314,8 +312,10 @@ struct DeliveryMapView: View {
 
     private func regionFitting(coords: [CLLocationCoordinate2D], padding: Double) -> MKCoordinateRegion {
         guard !coords.isEmpty else {
+            let fallback = vm.session?.branchCoordinate
+                ?? CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282)
             return MKCoordinateRegion(
-                center: initialSession.branchCoordinate,
+                center: fallback,
                 latitudinalMeters: 1000, longitudinalMeters: 1000
             )
         }

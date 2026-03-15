@@ -24,6 +24,7 @@ struct AccountView: View {
     @State private var showColorTheme = false
     @State private var showFavorites = false
     @State private var showAnnouncements = false
+    @State private var showAddresses = false
     @State private var showAuth = false
     
     var body: some View {
@@ -92,6 +93,9 @@ struct AccountView: View {
         }
         .navigationDestination(isPresented: $showAnnouncements) {
             AnnouncementsListView().environmentObject(announcementVM)
+        }
+        .navigationDestination(isPresented: $showAddresses) {
+            SavedLocationsView()
         }
         .navigationDestination(isPresented: $showAuth) {
             AuthView().environmentObject(authVM)
@@ -302,7 +306,13 @@ struct AccountView: View {
                 }
             }
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Addresses", systemImage: "location.fill")
+            RowInSectionView(title: "Addresses", systemImage: "location.fill") {
+                if userSession.isLoggedIn {
+                    showAddresses = true
+                } else {
+                    showAuth = true
+                }
+            }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Vouchers", systemImage: "ticket.fill", badgeCount: 2)
         }
