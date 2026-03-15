@@ -2,14 +2,7 @@
 //  RiderAnnotationView.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
-//
-//  Animated map pin for the delivery rider.
-//  - Rotates to face direction of travel via `bearing` (0–360°, 0 = north).
-//  - Coordinate transitions animate with .linear(duration: 1.8) to glide
-//    smoothly between 2-second timer ticks without teleporting.
-//  - Bounces on .riderAssigned state transition.
-//  - Shows a pulsing glow ring while en-route.
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import SwiftUI

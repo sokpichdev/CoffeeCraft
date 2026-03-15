@@ -2,25 +2,7 @@
 //  DeliverySimulator.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
-//
-//  Responsibilities
-//  ──────────────────────────────────────────────────────────────────────────
-//  1. Fetch a real driving route (branch → destination) via MKDirections.
-//  2. Sample the polyline into coordinate steps every ~stepDistanceMeters.
-//  3. Fire a Timer every tickInterval seconds.
-//  4. Advance riderCoordinate by one step per tick.
-//  5. Compute bearing so the rider pin rotates to face direction of travel.
-//  6. Publish (coordinate, bearing) to DeliveryViewModel via onUpdate.
-//  7. Estimate arrival time from remaining steps × tickInterval.
-//
-//  Usage
-//  ──────────────────────────────────────────────────────────────────────────
-//  let sim = DeliverySimulator()
-//  sim.onUpdate = { coord, bearing, eta in ... }
-//  await sim.start(from: branchCoord, to: destinationCoord)
-//  // later:
-//  sim.stop()
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import CoreLocation

@@ -2,11 +2,7 @@
 //  Branch.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 6
-//  Added: estimatedWaitMinutes — set by staff via admin panel.
-//  nil means no wait time posted; 0 means "no wait right now".
-//  All other fields unchanged — fully backward compatible.
-//
+//  Created by Sok Pich on 06/03/2026.
 
 import CoreLocation
 import FirebaseFirestore

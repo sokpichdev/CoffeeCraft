@@ -2,12 +2,9 @@
 //  DeliveryStatusBar.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
+//  Created by Sok Pich on 15/03/2026.
 //
-//  Animated step-progress strip rendered below the live map.
-//  Shows all 6 DeliveryStatus steps as dots connected by a fill line.
-//  Each dot fills left-to-right as status advances.
-//
+
 
 import SwiftUI
 

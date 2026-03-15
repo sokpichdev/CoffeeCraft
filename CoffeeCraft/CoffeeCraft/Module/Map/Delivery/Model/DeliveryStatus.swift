@@ -2,9 +2,7 @@
 //  DeliveryStatus.swift
 //  CoffeeCraft
 //
-//  Map Module — Phase 4 (Delivery)
-//  6-state delivery lifecycle used by DeliverySession, DeliveryViewModel,
-//  DeliveryStatusBar, and Firestore's deliveries/{orderId} document.
+//  Created by Sok Pich on 15/03/2026.
 //
 
 import SwiftUI

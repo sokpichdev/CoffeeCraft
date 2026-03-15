@@ -4,9 +4,6 @@
 //
 //  Created by Sok Pich on 15/03/2026.
 //
-//  Map Module — Phase 4 (Delivery)
-//  Shown in OrderDetailView when this order has an active delivery session.
-//
 
 import SwiftUI
 
