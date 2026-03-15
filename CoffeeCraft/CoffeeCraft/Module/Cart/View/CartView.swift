@@ -15,6 +15,7 @@ struct CartView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var editingItem: CartItem?
+    @State private var navigateToDelivery = false
     @StateObject private var orderService = OrderService()
     @StateObject private var productVM = ProductViewModel()
 
@@ -26,9 +27,13 @@ struct CartView: View {
             ZStack(alignment: .bottom) {
                 CustomRefreshScrollView({
                     VStack(spacing: 12) {
-                        // ── Branch info card (shown when a branch is selected) ──
+                        // ── Fulfillment mode info card ──────────────────────────
                         if let branch = orderEnv.selectedBranch {
-                            CartBranchInfoCard(branch: branch)
+                            if orderEnv.isDelivery, let addr = orderEnv.deliveryAddressLabel {
+                                CartDeliveryInfoCard(branch: branch, addressLabel: addr)
+                            } else {
+                                CartBranchInfoCard(branch: branch)
+                            }
                         }
 
                         ForEach(cartManager.items) { item in
@@ -87,6 +92,11 @@ struct CartView: View {
             }
             .customNavigationBar("My Cart") {
                 ToolBarButton.back { dismiss() }
+            }
+            .navigationDestination(isPresented: $navigateToDelivery) {
+                if let vm = OrderEnvironment.shared.activeDeliveryVM {
+                    DeliveryMapView(vm: vm)
+                }
             }
 //            .task { await productVM.fetchProducts() }
         }
@@ -165,12 +175,17 @@ struct CartView: View {
     // MARK: - Place Order
 
     private func confirmAndPlaceOrder() {
-        let message = cartManager.paymentMethod == .wallet
+        let isDelivery = orderEnv.isDelivery
+        let modeNote   = isDelivery
+            ? "Rider will deliver to \(orderEnv.deliveryAddressLabel ?? "your address")"
+            : "Pick up at \(orderEnv.selectedBranchName ?? "the store")"
+        let payNote    = cartManager.paymentMethod == .wallet
             ? "\(cartManager.total.currencyFormatted) will be deducted from your wallet"
             : String(format: "Total: $%.2f — pay at the counter", cartManager.total)
+        let message    = "\(modeNote)\n\(payNote)"
 
         AlertManager.shared.showConfirmation(
-            title: "Confirm Order",
+            title: isDelivery ? "Confirm Delivery" : "Confirm Pickup",
             message: message,
             confirmTitle: "Place Order"
         ) {
@@ -186,8 +201,16 @@ struct CartView: View {
                     }
                 }
                 cartManager.clearCart(userId: UserSession.shared.userId ?? "")
-                orderEnv.clear()   // Phase 4 — reset selected branch after order
-                dismiss()
+                if isDelivery {
+                    // Delivery: clear branch selection (session lives in activeDeliveryVM)
+                    // then push DeliveryMapView — user watches their order live.
+                    orderEnv.clear()
+                    navigateToDelivery = true
+                } else {
+                    // Pickup: clear everything and dismiss to orders list.
+                    orderEnv.clear()
+                    dismiss()
+                }
             }
         }
     }
@@ -250,5 +273,75 @@ struct CartBranchInfoCard: View {
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Ordering from \(branch.name), \(branch.address), \(branch.isOpen ? "Open" : "Closed")")
+    }
+}
+
+
+// MARK: - CartDeliveryInfoCard
+
+/// Shown in CartView when fulfillmentMode == .delivery.
+/// Displays the delivery destination address with a rider icon.
+struct CartDeliveryInfoCard: View {
+    let branch:       Branch
+    let addressLabel: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            // Rider icon tile
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.semanticSuccess.opacity(0.12))
+                    .frame(width: 44, height: 44)
+                Image(systemName: "bicycle")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(Color.semanticSuccess)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Delivering to")
+                    .font(.custom("Nunito-Regular", size: 11))
+                    .foregroundColor(.textMuted)
+                    .textCase(.uppercase)
+                    .tracking(0.4)
+                Text(addressLabel)
+                    .font(.custom("Nunito-Bold", size: 14))
+                    .foregroundColor(.textPrimary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("From \(branch.name)")
+                    .font(.custom("Nunito-Regular", size: 12))
+                    .foregroundColor(.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            // Live indicator
+            VStack(spacing: 3) {
+                ZStack {
+                    Circle()
+                        .fill(Color.semanticSuccess.opacity(0.15))
+                        .frame(width: 28, height: 28)
+                    Circle()
+                        .fill(Color.semanticSuccess)
+                        .frame(width: 8, height: 8)
+                }
+                Text("LIVE")
+                    .font(.system(size: 9, weight: .black, design: .rounded))
+                    .foregroundColor(Color.semanticSuccess)
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.surfacePrimary)
+                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.semanticSuccess.opacity(0.3), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Delivering to \(addressLabel) from \(branch.name)")
     }
 }

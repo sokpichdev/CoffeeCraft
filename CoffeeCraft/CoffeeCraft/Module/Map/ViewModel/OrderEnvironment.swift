@@ -15,6 +15,15 @@
 
 import SwiftUI
 
+// MARK: - FulfillmentMode
+
+/// Determines how an order will be fulfilled.
+/// Set when the user taps "Pickup from Here" or "Deliver to Me" in BranchDetailSheet.
+enum FulfillmentMode {
+    case pickup   // User collects from branch
+    case delivery // Rider delivers to user address
+}
+
 // MARK: - OrderEnvironment
 
 final class OrderEnvironment: ObservableObject {
@@ -25,27 +34,55 @@ final class OrderEnvironment: ObservableObject {
     // can display name/address without a separate Firestore lookup.
     @Published var selectedBranch: Branch?
 
+    // MARK: - Fulfillment Mode
+    // Written by BranchDetailSheet CTA taps. Read by CartView + OrderService.
+
+    @Published var fulfillmentMode: FulfillmentMode = .pickup
+
+    // Delivery destination address label — shown in CartView delivery info card.
+    @Published var deliveryAddressLabel: String?
+
     // MARK: - Active delivery (Phase 4)
     // Hoisted here so DeliveryMapView can be re-entered from Order History
-    // without losing the live simulator state. The VM is started by MapView
-    // and stopped only when the order reaches .delivered or the user cancels.
+    // without losing the live simulator state.
 
     @Published var activeDeliverySession: DeliverySession?
     var activeDeliveryVM: DeliveryViewModel?
 
     // MARK: - Convenience accessors
 
-    var selectedBranchId: String? { selectedBranch?.id   }
+    var selectedBranchId: String?   { selectedBranch?.id   }
     var selectedBranchName: String? { selectedBranch?.name }
+    var isDelivery: Bool            { fulfillmentMode == .delivery }
+    var isPickup:   Bool            { fulfillmentMode == .pickup   }
 
     // MARK: - Actions
 
+    /// Call when user taps "Pickup from Here".
+    func selectPickup(branch: Branch) {
+        selectedBranch    = branch
+        fulfillmentMode   = .pickup
+        deliveryAddressLabel = nil
+        clearDelivery()
+    }
+
+    /// Call when user confirms delivery destination in DeliveryDestinationPicker.
+    func selectDelivery(branch: Branch, addressLabel: String) {
+        selectedBranch       = branch
+        fulfillmentMode      = .delivery
+        deliveryAddressLabel = addressLabel
+    }
+
+    /// Legacy — kept for backward compat with MenuBranchSelectionSheet.
     func select(branch: Branch) {
-        selectedBranch = branch
+        selectedBranch  = branch
+        fulfillmentMode = .pickup
     }
 
     func clear() {
-        selectedBranch = nil
+        selectedBranch       = nil
+        deliveryAddressLabel = nil
+        fulfillmentMode      = .pickup
     }
 
     func startDelivery(session: DeliverySession) {
