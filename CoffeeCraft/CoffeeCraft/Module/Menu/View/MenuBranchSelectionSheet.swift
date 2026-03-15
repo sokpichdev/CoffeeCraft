@@ -56,10 +56,20 @@ struct MenuBranchSelectionSheet: View {
                 prompt: "Search by name or address"
             )
             .navigationDestination(isPresented: $navigateToMap) {
-                MapView(onSwitchToMenu: {
-                    // Branch was pre-selected via map; dismiss this whole sheet stack.
-                    // MenuView will detect orderEnv.pendingMapBranch and show FulfillmentPickerSheet.
+                MapView(onSwitchToMenu: { branch in
+                    // Capture branch and orderEnv by value/reference into the closure
+                    // BEFORE calling dismiss(). @State vars on dismissed views go stale,
+                    // so we must not read @State vars inside the asyncAfter block.
+                    let capturedBranch = branch
+                    let capturedEnv    = orderEnv
+                    // Dismiss the entire sheet stack first.
                     dismiss()
+                    // After the dismiss animation completes, set pendingMapBranch.
+                    // MenuView's onChange fires only once showBranchSheet = false,
+                    // so FulfillmentPickerSheet won't be dropped by iOS.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        capturedEnv.preSelectBranch(capturedBranch)
+                    }
                 })
                 .environmentObject(orderEnv)
             }

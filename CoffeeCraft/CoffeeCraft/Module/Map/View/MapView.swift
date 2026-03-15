@@ -20,7 +20,9 @@ struct MapView: View {
     @State private var viewModel = MapViewModel()
 
     /// Switches the root tab to .menu. Injected from RootView / TabBarView.
-    var onSwitchToMenu: (() -> Void)?
+    /// Called when "Order from here" is tapped. Receives the chosen branch so the
+    /// caller can defer preSelectBranch() until after the sheet stack has dismissed.
+    var onSwitchToMenu: ((Branch) -> Void)?
 
     @EnvironmentObject private var orderEnv: OrderEnvironment
 
@@ -80,13 +82,14 @@ struct MapView: View {
                     branch: branch,
                     viewModel: viewModel,
                     onOrderHere: {
-                        // 1. Pre-select the branch in OrderEnvironment.
-                        //    MenuView will detect pendingMapBranch and show FulfillmentPickerSheet.
-                        orderEnv.preSelectBranch(branch)
-                        // 2. Dismiss this sheet.
+                        // 1. Dismiss BranchDetailSheet.
                         viewModel.isSheetPresented = false
-                        // 3. Switch to the Menu tab.
-                        onSwitchToMenu?()
+                        // 2. Dismiss MenuBranchSelectionSheet AND set pendingMapBranch.
+                        //    preSelectBranch must be called AFTER dismiss() so that
+                        //    MenuView's onChange fires only when showBranchSheet is already false.
+                        //    Setting it before causes iOS to drop the FulfillmentPickerSheet
+                        //    because two sheets can't present in the same run loop.
+                        onSwitchToMenu?(branch)
                     },
                     onDismiss: { viewModel.deselectBranch() }
                 )
