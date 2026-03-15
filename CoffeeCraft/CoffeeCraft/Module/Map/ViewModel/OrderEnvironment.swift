@@ -58,11 +58,27 @@ final class OrderEnvironment: ObservableObject {
     @Published var pendingDeliveryBranchCoordinate: CLLocationCoordinate2D?
     @Published var pendingDeliveryBranchId: String?
 
-    // MARK: - Active delivery
-    // Populated only after order status = "Ready".
+    // MARK: - Active deliveries
+    // Keyed by Firestore orderId so multiple concurrent delivery orders are each
+    // tracked independently. Populated when order status reaches "Ready".
 
-    @Published var activeDeliverySession: DeliverySession?
-    var activeDeliveryVM: DeliveryViewModel?
+    @Published var activeDeliverySessions: [String: DeliverySession] = [:]
+    private(set) var activeDeliveryVMs:    [String: DeliveryViewModel] = [:]
+
+    // MARK: - Legacy single-session accessors (used by views that track one order at a time)
+
+    /// The session for a specific order, or nil if not active.
+    func deliverySession(for orderId: String) -> DeliverySession? {
+        activeDeliverySessions[orderId]
+    }
+
+    /// The VM for a specific order, or nil if not active.
+    func deliveryVM(for orderId: String) -> DeliveryViewModel? {
+        activeDeliveryVMs[orderId]
+    }
+
+    /// Whether any delivery is currently active (used by legacy checks).
+    var hasActiveDelivery: Bool { !activeDeliveryVMs.isEmpty }
 
     // MARK: - Convenience
 
@@ -114,36 +130,48 @@ final class OrderEnvironment: ObservableObject {
     /// Called by OrderDetailView when a delivery order reaches "Ready".
     /// Coordinates are read from the Order model (written to Firestore at checkout)
     /// so this works even after OrderEnvironment.clear() has been called.
+    /// Each order gets its own DeliveryViewModel — multiple concurrent deliveries are supported.
     func activateDelivery(order: Order) {
-        guard let firestoreOrderId = order.id,
-              let destLat    = order.deliveryDestinationLat,
-              let destLng    = order.deliveryDestinationLng,
-              let branchLat  = order.deliveryBranchLat,
-              let branchLng  = order.deliveryBranchLng,
-              let branchId   = order.branchId
+        guard let orderId   = order.id,
+              let destLat   = order.deliveryDestinationLat,
+              let destLng   = order.deliveryDestinationLng,
+              let branchLat = order.deliveryBranchLat,
+              let branchLng = order.deliveryBranchLng,
+              let branchId  = order.branchId
         else {
             AppLog.firestore.error("[OrderEnvironment] activateDelivery: missing coordinates on order \(order.id ?? "?")")
             return
         }
 
+        // Guard: don't restart a session that's already running for this order
+        guard activeDeliveryVMs[orderId] == nil else { return }
+
         let dest        = CLLocationCoordinate2D(latitude: destLat,   longitude: destLng)
         let branchCoord = CLLocationCoordinate2D(latitude: branchLat, longitude: branchLng)
 
         let session = DeliverySession(
-            orderId:               firestoreOrderId,
+            orderId:               orderId,
             branchId:              branchId,
             branchCoordinate:      branchCoord,
             destinationCoordinate: dest
         )
         let vm = DeliveryViewModel()
-        activeDeliverySession = session
-        activeDeliveryVM      = vm
+        activeDeliverySessions[orderId] = session
+        activeDeliveryVMs[orderId]      = vm
         vm.startDelivery(session: session, useSimulator: true)
     }
 
+    /// Stop and remove the delivery session for a specific order.
+    func clearDelivery(for orderId: String) {
+        activeDeliveryVMs[orderId]?.stopDelivery()
+        activeDeliveryVMs.removeValue(forKey: orderId)
+        activeDeliverySessions.removeValue(forKey: orderId)
+    }
+
+    /// Stop all active deliveries (called on logout / full reset).
     func clearDelivery() {
-        activeDeliveryVM?.stopDelivery()
-        activeDeliveryVM      = nil
-        activeDeliverySession = nil
+        activeDeliveryVMs.values.forEach { $0.stopDelivery() }
+        activeDeliveryVMs.removeAll()
+        activeDeliverySessions.removeAll()
     }
 }

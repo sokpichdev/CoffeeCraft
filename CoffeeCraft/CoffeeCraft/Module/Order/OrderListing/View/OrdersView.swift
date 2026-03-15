@@ -12,7 +12,8 @@ struct OrdersView: View {
     @EnvironmentObject var coordinator: NotificationCoordinator
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedOrder: Order?
-    @State private var navigateToDelivery = false
+    @State private var navigateToDelivery  = false
+    @State private var capturedDeliveryVM: DeliveryViewModel? = nil
 
     var body: some View {
         ZStack {
@@ -33,7 +34,7 @@ struct OrdersView: View {
                 .environmentObject(cartManager)
         }
         .navigationDestination(isPresented: $navigateToDelivery) {
-            if let vm = OrderEnvironment.shared.activeDeliveryVM {
+            if let vm = capturedDeliveryVM {
                 DeliveryMapView(vm: vm)
             }
         }
@@ -102,8 +103,9 @@ struct OrdersView: View {
             onNavigate: {
                 // If this card has an active delivery, go straight to the map
                 if order.isDeliveryOrder,
-                   let sessionId = order.deliverySessionId,
-                   OrderEnvironment.shared.activeDeliverySession?.orderId == sessionId {
+                   let orderId = order.id,
+                   let trackVM = OrderEnvironment.shared.deliveryVM(for: orderId) {
+                    capturedDeliveryVM = trackVM
                     navigateToDelivery = true
                 } else {
                     navigateToDetail(order: order)
