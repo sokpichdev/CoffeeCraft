@@ -104,6 +104,20 @@ final class MapViewModel: NSObject {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter  = 10
         authorizationStatus             = locationManager.authorizationStatus
+
+        #if DEBUG
+        // Mock home location: Street 214, ~1.1 km south of branch_norodom via Norodom Blvd.
+        // MKDirections routes reliably between these two points.
+        // Remove or comment out when testing on a real device with GPS.
+        let mockHome = CLLocation(latitude: 11.5528, longitude: 104.9237)
+        userLocation = mockHome
+        cameraPosition = .region(MKCoordinateRegion(
+            center: mockHome.coordinate,
+            latitudinalMeters: 1_500,
+            longitudinalMeters: 1_500
+        ))
+        hasInitiallyLocated = true
+        #endif
     }
 
     // MARK: - Location

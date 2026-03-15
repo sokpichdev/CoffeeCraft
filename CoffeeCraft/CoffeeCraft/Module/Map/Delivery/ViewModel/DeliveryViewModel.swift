@@ -17,8 +17,8 @@ import MapKit
 
 // MARK: - DeliveryViewModel
 
-@Observable
-final class DeliveryViewModel {
+//@Observable
+final class DeliveryViewModel: ObservableObject {
 
     // MARK: - Published State (drives DeliveryMapView)
 

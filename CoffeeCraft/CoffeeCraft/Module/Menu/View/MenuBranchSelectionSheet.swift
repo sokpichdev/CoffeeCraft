@@ -56,7 +56,13 @@ struct MenuBranchSelectionSheet: View {
         }
         .onAppear { fetchBranches() }
         .onChange(of: orderEnv.selectedBranch) { _, newBranch in
-            if newBranch != nil { dismiss() }
+            // Only dismiss when a branch is selected for ordering (not when
+            // the delivery flow sets it after the destination picker confirms).
+            // The delivery flow sets activeDeliverySession at the same time —
+            // if that's non-nil we're in delivery mode, so stay open.
+            if newBranch != nil && orderEnv.activeDeliverySession == nil {
+                dismiss()
+            }
         }
     }
 

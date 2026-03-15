@@ -14,12 +14,13 @@ import Foundation
 
 enum MockBranchData {
     static let all: [Branch] = [
+        // ★ Placed on Norodom Blvd — well-routed in Apple Maps / MKDirections
         Branch(
-            id: "branch_bkk1",
-            name: "CoffeeCraft – BKK1",
-            address: "Street 278, Boeng Keng Kang 1, Phnom Penh",
-            latitude: 11.5564,
-            longitude: 104.9282,
+            id: "branch_norodom",
+            name: "CoffeeCraft – Norodom",
+            address: "Norodom Blvd, near Independence Monument, Phnom Penh",
+            latitude: 11.5637,
+            longitude: 104.9230,
             phone: "+855 23 456 001",
             openingHours: "Mon–Sun  7:00 – 22:00",
             isOpen: true,

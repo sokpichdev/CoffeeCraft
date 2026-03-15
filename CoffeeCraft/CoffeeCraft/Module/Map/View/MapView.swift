@@ -15,8 +15,10 @@ struct MapView: View {
 
     @State private var viewModel         = MapViewModel()
     @State private var localSearch       = ""
-    @State private var deliverySession:  DeliverySession? = nil
-    @State private var navigateToDelivery = false
+    @State private var navigateToDelivery    = false
+    @State private var locationManager       = SavedLocationManager()
+    @State private var pendingBranch: Branch? = nil   // set when sheet is dismissed, before picker
+    @State private var showDestinationPicker = false
     @EnvironmentObject private var orderEnv: OrderEnvironment
 
     var body: some View {
@@ -63,6 +65,9 @@ struct MapView: View {
         .onAppear {
             viewModel.requestLocationPermission()
             viewModel.fetchBranches()
+            if let userId = UserSession.shared.userId {
+                Task { await locationManager.fetchLocations(for: userId) }
+            }
         }
         .onDisappear {
             viewModel.stopListening()
@@ -74,9 +79,12 @@ struct MapView: View {
                     branch: branch,
                     viewModel: viewModel,
                     onOrderHere: {
-                        orderEnv.select(branch: branch)
+                        // Store branch for the destination picker.
+                        // Do NOT write orderEnv.selectedBranch here — that would
+                        // trigger MenuBranchSelectionSheet's dismiss observer and
+                        // collapse the whole sheet stack before we can navigate.
+                        pendingBranch = branch
                         viewModel.isSheetPresented = false
-                        launchDelivery(for: branch)
                     },
                     onDismiss: { viewModel.deselectBranch() }
                 )
@@ -86,41 +94,53 @@ struct MapView: View {
                 .presentationBackground(Color.bgPrimary)
             }
         }
+        // ── Destination picker — shown after "Order from Here" ────────
+        .sheet(isPresented: $showDestinationPicker) {
+            if let branch = pendingBranch {
+                DeliveryDestinationPicker(
+                    branch:          branch,
+                    locationManager: locationManager,
+                    userCoordinate:  viewModel.userLocation?.coordinate,
+                    onConfirm: { destination in
+                        showDestinationPicker = false
+                        orderEnv.select(branch: branch)   // write env AFTER sheet stack is clean
+                        let orderId = generateOrderId()
+                        let session = DeliverySession(
+                            orderId:               orderId,
+                            branchId:              branch.id ?? "unknown",
+                            branchCoordinate:      branch.coordinate,
+                            destinationCoordinate: destination
+                        )
+                        orderEnv.startDelivery(session: session)
+                        navigateToDelivery = true
+                    },
+                    onCancel: {
+                        showDestinationPicker = false
+                        pendingBranch         = nil
+                    }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationCornerRadius(26)
+                .presentationBackground(Color.bgPrimary)
+            }
+        }
+        // Show picker once BranchDetailSheet is fully dismissed
+        .onChange(of: viewModel.isSheetPresented) { _, isPresented in
+            if !isPresented, pendingBranch != nil {
+                showDestinationPicker = true
+            }
+        }
         // ── Delivery tracking push ──────────────────────────────────
-        // Uses the nearest ancestor NavigationStack — provided by
-        // CoffeeCraftApp (tab flow) or MenuBranchSelectionSheet (sheet flow).
         .navigationDestination(isPresented: $navigateToDelivery) {
-            if let session = deliverySession {
-                DeliveryMapView(initialSession: session)
+            if let vm = orderEnv.activeDeliveryVM {
+                DeliveryMapView(vm: vm)
             }
         }
         .customNavigationBar("Find a Branch", hideBackBtn: false)
     }
 
-    // MARK: - Launch Delivery
+    // MARK: - Order ID helper
 
-    /// Builds a DeliverySession from the selected branch + user location,
-    /// then pushes DeliveryMapView onto the navigation stack.
-    private func launchDelivery(for branch: Branch) {
-        let destination = viewModel.userLocation?.coordinate
-            ?? branch.coordinate          // fallback: deliver to branch itself
-
-        let orderId = generateOrderId()
-
-        let session = DeliverySession(
-            orderId:               orderId,
-            branchId:              branch.id ?? "unknown",
-            branchCoordinate:      branch.coordinate,
-            destinationCoordinate: destination
-        )
-
-        deliverySession    = session
-        navigateToDelivery = true
-
-        AppLog.firestore.info("[MapView] Launching delivery — order: \(orderId), branch: \(branch.name)")
-    }
-
-    /// Produces a human-readable order ID: YYYY-MM-DD-NNN (NNN = random 3-digit suffix).
     private func generateOrderId() -> String {
         let formatter        = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -218,6 +238,14 @@ struct MapView: View {
                         "\(branch.name), \(branch.isOpen ? "Open" : "Closed"), \(viewModel.distanceLabel(to: branch))"
                     )
                     .accessibilityHint("Double tap to view branch details")
+                }
+            }
+            // ── Saved delivery address pins ─────────────────────────
+            ForEach(locationManager.locations) { location in
+                Annotation(location.label, coordinate: location.coordinate) {
+                    SavedLocationAnnotationView(location: location, isSelected: false)
+                        .accessibilityLabel("\(location.label): \(location.address)")
+                        .accessibilityHint("Saved delivery address")
                 }
             }
         }
