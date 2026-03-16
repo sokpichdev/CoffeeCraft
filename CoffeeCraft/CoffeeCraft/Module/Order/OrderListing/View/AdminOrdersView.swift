@@ -103,37 +103,8 @@ struct ActiveOrdersContent: View {
                             OrderCardView(
                                 order: order,
                                 adminActions: {
-                                    AnyView(
-                                        HStack(spacing: 8) {
-                                            Button("Start") {
-                                                Task {
-                                                    _ = await vm.updateOrderStatus(order: order, status: "InProgress")
-                                                }
-                                            }
-                                            .disabled(order.status != "Pending")
-                                            
-                                            Button("Ready") {
-                                                Task {
-                                                    _ = await vm.updateOrderStatus(order: order, status: "Ready")
-                                                }
-                                            }
-                                            .disabled(order.status != "InProgress")
-                                            
-                                            Button("Complete") {
-                                                Task {
-                                                    let success = await vm.updateOrderStatus(order: order,
-                                                                                             status: "Completed")
-                                                    if success {
-                                                        ToastManager.shared.show(message: "Order Completed",
-                                                                                 type: .success)
-                                                    }
-                                                }
-                                            }
-                                            .disabled(order.status != "Ready")
-                                        }
-                                            .buttonStyle(.borderedProminent)
-                                            .tint(.accentPrimary)
-                                    )},
+                                    AnyView(AdminProgressButtons(order: order, vm: vm))
+                                },
                                 onNavigate: {
                                     selectedOrder = order
                                 }
@@ -299,5 +270,66 @@ struct MyOrdersContent: View {
                 cartManager: cartManager
             )
         }
+    }
+}
+
+// MARK: - AdminProgressButtons
+//
+// Inline action buttons shown on each card in the Active Orders list.
+// Branched for pickup vs delivery:
+//   Pickup:   Pending → InProgress → Ready → Completed
+//   Delivery: Pending → InProgress → Ready → OnDelivery → Completed
+
+private struct AdminProgressButtons: View {
+    let order: Order
+    @ObservedObject var vm: AdminOrdersViewModel
+
+    var body: some View {
+        HStack(spacing: 8) {
+            // Pending → InProgress (both types)
+            Button("Start") {
+                Task { _ = await vm.updateOrderStatus(order: order, status: "InProgress") }
+            }
+            .disabled(order.status != "Pending")
+
+            // InProgress → Ready (both types)
+            Button("Ready") {
+                Task { _ = await vm.updateOrderStatus(order: order, status: "Ready") }
+            }
+            .disabled(order.status != "InProgress")
+
+            if order.isDeliveryOrder {
+                // Ready → OnDelivery (delivery only)
+                Button("Dispatch") {
+                    Task { _ = await vm.updateOrderStatus(order: order, status: "OnDelivery") }
+                }
+                .disabled(order.status != "Ready")
+
+                // OnDelivery → Completed (delivery only)
+                Button("Delivered") {
+                    Task {
+                        let success = await vm.updateOrderStatus(order: order, status: "Completed")
+                        if success {
+                            ToastManager.shared.show(message: "Order Delivered", type: .success)
+                        }
+                    }
+                }
+                .disabled(order.status != "OnDelivery")
+
+            } else {
+                // Ready → Completed (pickup only)
+                Button("Complete") {
+                    Task {
+                        let success = await vm.updateOrderStatus(order: order, status: "Completed")
+                        if success {
+                            ToastManager.shared.show(message: "Order Completed", type: .success)
+                        }
+                    }
+                }
+                .disabled(order.status != "Ready")
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.accentPrimary)
     }
 }
