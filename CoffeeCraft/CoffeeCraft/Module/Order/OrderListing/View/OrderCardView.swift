@@ -245,11 +245,13 @@ struct OrderCardView: View {
     
     private static func computeStatusColor(_ status: String) -> Color {
         switch status {
-        case "Pending": return .orange
-        case "In Progress", "InProgress": return .blue
-        case "Ready": return .semanticSuccess
-        case "Done", "Completed": return .accentPrimary
-        default: return .accentPrimary
+        case "Pending":                   return .orange
+        case "In Progress", "InProgress": return .accentPrimary
+        case "Ready":                     return .semanticSuccess
+        case "OnDelivery":                return .blue
+        case "Done", "Completed":         return .textMuted
+        case "Cancelled":                 return .semanticError
+        default:                          return .textMuted
         }
     }
 }

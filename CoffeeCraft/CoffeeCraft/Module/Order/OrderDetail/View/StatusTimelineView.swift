@@ -2,39 +2,57 @@
 //  StatusTimelineView.swift
 //  CoffeeCraft
 //
-//  Created by Sok Pich on 2/24/26.
+//  Updated: branched timeline for pickup vs delivery orders.
+//  Pickup:  Pending → InProgress → Ready → Completed
+//  Delivery: Pending → InProgress → Ready → OnDelivery → Completed
 //
+
 import SwiftUI
 
 struct StatusTimelineView: View {
     let status: String
-    
-    private let statuses = [
-        ("Pending", "clock", "Order Received"),
-        ("InProgress", "flame", "Preparing"),
-        ("Ready", "cup.and.saucer.fill", "Ready for Pickup"),
-        ("Completed", "checkmark.circle.fill", "Completed")
+    let isDeliveryOrder: Bool
+
+    // MARK: - Step definitions
+
+    private static let pickupSteps: [(code: String, icon: String, title: String)] = [
+        ("Pending",    "clock",                  "Order Received"),
+        ("InProgress", "flame.fill",             "Preparing"),
+        ("Ready",      "checkmark.circle.fill",  "Ready for Pickup"),
+        ("Completed",  "bag.fill",               "Completed"),
     ]
-    
-    var currentStatusIndex: Int {
-        statuses.firstIndex { $0.0 == status } ?? 0
+
+    private static let deliverySteps: [(code: String, icon: String, title: String)] = [
+        ("Pending",    "clock",                  "Order Received"),
+        ("InProgress", "flame.fill",             "Preparing"),
+        ("Ready",      "checkmark.circle.fill",  "Ready"),
+        ("OnDelivery", "bicycle",                "On Delivery"),
+        ("Completed",  "bag.fill",               "Delivered"),
+    ]
+
+    private var steps: [(code: String, icon: String, title: String)] {
+        isDeliveryOrder ? Self.deliverySteps : Self.pickupSteps
     }
-    
+
+    var currentStatusIndex: Int {
+        steps.firstIndex { $0.code == status } ?? 0
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Order Progress")
                 .font(.title3).fontWeight(.bold)
                 .foregroundColor(.textPrimary)
-            
+
             VStack(spacing: 0) {
-                ForEach(Array(statuses.enumerated()), id: \.offset) { index, item in
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                     TimelineRow(
-                        icon: item.1,
-                        title: item.2,
-                        subtitle: statusSubtitle(for: item.0, index: index),
+                        icon: step.icon,
+                        title: step.title,
+                        subtitle: subtitle(for: step.code, index: index),
                         isCompleted: index <= currentStatusIndex,
                         isCurrent: index == currentStatusIndex,
-                        isLast: index == statuses.count - 1
+                        isLast: index == steps.count - 1
                     )
                 }
             }
@@ -46,18 +64,23 @@ struct StatusTimelineView: View {
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
         )
     }
-    
-    func statusSubtitle(for statusCode: String, index: Int) -> String? {
+
+    // MARK: - Subtitles
+
+    private func subtitle(for code: String, index: Int) -> String? {
         guard index == currentStatusIndex else { return nil }
-        switch statusCode {
-        case "Pending": return "Waiting to be prepared"
+        switch code {
+        case "Pending":    return "Waiting to be prepared"
         case "InProgress": return "Barista is working on it"
-        case "Ready": return "Come pick it up!"
-        case "Completed": return "Enjoy your coffee!"
-        default: return nil
+        case "Ready":      return isDeliveryOrder ? "Handing off to rider" : "Come pick it up!"
+        case "OnDelivery": return "Your order is on the way 🛵"
+        case "Completed":  return isDeliveryOrder ? "Delivered — enjoy!" : "Enjoy your coffee!"
+        default:           return nil
         }
     }
 }
+
+// MARK: - TimelineRow (unchanged)
 
 struct TimelineRow: View {
     let icon: String
@@ -85,7 +108,7 @@ struct TimelineRow: View {
                         Circle()
                             .fill(Color.bgSecondary)
                             .frame(width: indicatorSize - 3, height: indicatorSize - 3)
-                        
+
                         Circle()
                             .fill(isCompleted ? Color.semanticSuccess : Color.textMuted.opacity(0.2))
                             .frame(width: indicatorSize - 6, height: indicatorSize - 6)

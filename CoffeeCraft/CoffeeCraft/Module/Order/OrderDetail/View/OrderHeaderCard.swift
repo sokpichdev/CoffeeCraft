@@ -134,7 +134,7 @@ struct StatusBadge: View {
                 .fill(statusColor(status).opacity(0.2))
                 .frame(width: 8, height: 8)
             
-            Text(status == "InProgress" ? "In Progress" : status)
+            Text(StatusBadge.displayLabel(for: status))
                 .font(.footnote).fontWeight(.semibold)
                 .frame(height: 15)
         }
@@ -149,14 +149,24 @@ struct StatusBadge: View {
         )
     }
     
+    /// Human-readable label for a raw Firestore status string.
+    static func displayLabel(for status: String) -> String {
+        switch status {
+        case "InProgress":  return "In Progress"
+        case "OnDelivery":  return "On Delivery"
+        default:            return status
+        }
+    }
+
     func statusColor(_ status: String) -> Color {
         switch status {
-        case "Pending": return .orange
-        case "In Progress", "InProgress": return .blue
-        case "Ready": return .semanticSuccess
-        case "Done", "Completed": return .accentPrimary
-        case "Cancelled": return .semanticError   // Phase 5
-        default: return .accentPrimary
+        case "Pending":                   return .orange
+        case "In Progress", "InProgress": return .accentPrimary
+        case "Ready":                     return .semanticSuccess
+        case "OnDelivery":                return .blue
+        case "Done", "Completed":         return .textMuted
+        case "Cancelled":                 return .semanticError
+        default:                          return .textMuted
         }
     }
 }

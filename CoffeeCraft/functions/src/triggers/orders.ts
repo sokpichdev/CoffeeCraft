@@ -10,7 +10,14 @@ import {NotificationDoc} from "../lib/types";
 // ─────────────────────────────────────────────────────────
 /**
  * Fires when any order document is updated.
- * Sends inbox notification + FCM push to the customer when status changes.
+ *
+ * Notification rules by status + order type:
+ *   • Ready      + pickup   → "Your order is ready! Come pick it up ☕️"
+ *   • OnDelivery + delivery → "Your order is on the way 🛵"
+ *   • Completed  + any      → "Order completed ✅"
+ *   • Cancelled  + any      → "Your order has been cancelled"
+ *
+ * No notification is sent for Pending or InProgress transitions.
  */
 export const onOrderStatusChanged = onDocumentUpdated(
   "orders/{orderId}",
@@ -20,16 +27,20 @@ export const onOrderStatusChanged = onDocumentUpdated(
       if (!event.data) return;
 
       const before = event.data.before.data();
-      const after = event.data.after.data();
+      const after  = event.data.after.data();
       if (!before || !after) return;
 
       const beforeStatus: string = before.status;
-      const afterStatus: string = after.status;
+      const afterStatus: string  = after.status;
 
       if (beforeStatus === afterStatus) return;
 
+      // "delivery" | "pickup" — fall back to pickup for legacy orders
+      const deliveryType: string = after.deliveryType ?? "pickup";
+      const isDelivery = deliveryType === "delivery";
+
       logger.info(
-        `Order ${orderId}: "${beforeStatus}" → "${afterStatus}"`
+        `Order ${orderId} [${deliveryType}]: "${beforeStatus}" → "${afterStatus}"`
       );
 
       const userId: string = after.userId;
@@ -38,23 +49,42 @@ export const onOrderStatusChanged = onDocumentUpdated(
         return;
       }
 
-      // Map status → notification copy.
-      // Add new statuses here without touching anything else.
-      const statusMap: Record<
-        string,
-        {title: string; message: string}
-      > = {
+      // ── Notification copy map ────────────────────────────────────
+      // Key format: "<status>" or "<status>:<deliveryType>" for type-specific copy.
+      // Resolved in priority order: specific key first, then generic key.
+      type CopyEntry = { title: string; message: string };
+
+      const copyMap: Record<string, CopyEntry> = {
+        // Pickup-specific
+        "Ready:pickup": {
+          title: "Order ready for pickup ☕️",
+          message: `Your order #${orderId} is ready! Head to the branch to collect it.`,
+        },
+        // Delivery-specific
+        "OnDelivery:delivery": {
+          title: "Your order is on the way 🛵",
+          message: `Order #${orderId} has been picked up and is heading to you!`,
+        },
+        // Generic — applies to both types
         Completed: {
           title: "Order completed ✅",
           message: `Order #${orderId} has been completed. Enjoy!`,
         },
+        Cancelled: {
+          title: "Order cancelled",
+          message: `Your order #${orderId} has been cancelled. ` +
+            "If you paid by wallet, a refund has been issued.",
+        },
       };
 
-      const copy = statusMap[afterStatus];
+      // Resolve: try type-specific key first, fall back to generic
+      const specificKey = `${afterStatus}:${deliveryType}`;
+      const copy = copyMap[specificKey] ?? copyMap[afterStatus];
+
       if (!copy) {
         logger.info(
-          "No notification configured for status " +
-          `"${afterStatus}", skipping.`
+          `No notification configured for status "${afterStatus}" ` +
+          `[${deliveryType}], skipping.`
         );
         return;
       }
@@ -98,14 +128,16 @@ export const onOrderPlaced = onDocumentCreated(
         return;
       }
 
-      const totalPrice: number = data.totalPrice ?? 0;
-      const itemCount: number = Array.isArray(data.items) ?
+      const totalPrice: number  = data.totalPrice ?? 0;
+      const deliveryType: string = data.deliveryType ?? "pickup";
+      const itemCount: number   = Array.isArray(data.items) ?
         (data.items as { quantity?: number }[])
           .reduce((sum, item) => sum + (item.quantity ?? 1), 0) : 0;
       const orderNumber: number = data.orderId ?? orderId;
+      const typeLabel = deliveryType === "delivery" ? "🛵 Delivery" : "🏪 Pickup";
 
       logger.info(
-        `New order placed: #${orderNumber}, ` +
+        `New order placed: #${orderNumber} [${deliveryType}], ` +
         `total: $${totalPrice.toFixed(2)}, items: ${itemCount}`
       );
 
@@ -123,29 +155,31 @@ export const onOrderPlaced = onDocumentCreated(
 
       logger.info(`📋 Found ${managersSnapshot.size} manager(s) to notify`);
 
-      // 2. Build the notification once — same content for every manager
+      // 2. Build notification — same content for every manager
       const notification: NotificationDoc = {
         type: "order_status",
         title: "New Order Received ☕️",
         message: `🧾 Order #${orderNumber}\n` +
+          `${typeLabel}\n` +
           `☕️ ${itemCount} ${itemCount === 1 ? "item" : "items"}\n` +
           `💵 $${totalPrice.toFixed(2)}`,
-
         isRead: false,
         createdAt: admin.firestore.Timestamp.now(),
         payload: {
-          orderId: String(orderId),
-          orderNumber: String(orderNumber),
-          totalPrice: String(totalPrice),
-          itemCount: String(itemCount),
+          orderId:      String(orderId),
+          orderNumber:  String(orderNumber),
+          totalPrice:   String(totalPrice),
+          itemCount:    String(itemCount),
+          deliveryType: deliveryType,
         },
       };
 
       const fcmData: Record<string, string> = {
-        orderId: String(orderId),
-        orderNumber: String(orderNumber),
-        totalPrice: String(totalPrice),
-        itemCount: String(itemCount),
+        orderId:      String(orderId),
+        orderNumber:  String(orderNumber),
+        totalPrice:   String(totalPrice),
+        itemCount:    String(itemCount),
+        deliveryType: deliveryType,
       };
 
       // 3. Notify all managers in parallel

@@ -40,7 +40,10 @@ struct OrderDetailView: View {
                 VStack(spacing: 24) {
                     OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
                     
-                    StatusTimelineView(status: vm.order.status ?? "")
+                    StatusTimelineView(
+                        status: vm.order.status ?? "",
+                        isDeliveryOrder: vm.order.isDeliveryOrder
+                    )
 
                     // Ready-for-pickup banner — only for pickup orders at Ready status
                     if vm.order.deliveryType == "pickup",
@@ -158,23 +161,20 @@ struct OrderDetailView: View {
             loadRatedProductIds()
         }
         // ── Delivery activation on status change ───────────────
-        // The real-time listener in OrderDetailViewModel fires this
-        // whenever the barista updates the order status in the admin panel.
-        // "Ready" is the trigger for delivery orders:
-        //   Pending → InProgress → Ready → (simulator starts) → Delivered
+        // Activates the delivery simulator when the order moves to OnDelivery,
+        // i.e. the rider has been dispatched. This is more accurate than
+        // activating at Ready (which now just means "handed to rider").
         .onChange(of: vm.order.status) { _, newStatus in
-            guard newStatus == "Ready",
+            guard newStatus == "OnDelivery",
                   vm.order.isDeliveryOrder,
                   let orderId = vm.order.id,
                   OrderEnvironment.shared.deliveryVM(for: orderId) == nil
             else { return }
 
             // 1. Activate simulator — reads coordinates from the order document
-            //    (written to Firestore at checkout) so it works after clear() wipes memory.
             OrderEnvironment.shared.activateDelivery(order: vm.order)
 
-            // 2. Capture VM directly into @State so navigationDestination always
-            //    has a non-nil value regardless of SwiftUI's render timing.
+            // 2. Capture VM before navigating
             capturedDeliveryVM = OrderEnvironment.shared.deliveryVM(for: orderId)
 
             // 3. Navigate
