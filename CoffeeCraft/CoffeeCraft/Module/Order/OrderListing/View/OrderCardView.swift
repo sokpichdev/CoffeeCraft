@@ -10,6 +10,7 @@ struct OrderCardView: View {
     let order: Order
     var adminActions: (() -> AnyView)?
     var onNavigate: (() -> Void)?
+    var onTrackDelivery: (() -> Void)?
     var onReorder: (() -> Void)?
     
     /// Number of items to show in the preview stack before the +N badge
@@ -33,11 +34,12 @@ struct OrderCardView: View {
     init(order: Order,
          adminActions: (() -> AnyView)? = nil,
          onNavigate: (() -> Void)? = nil,
-         onReorder: (() -> Void)? = nil)
-    {
+         onTrackDelivery: (() -> Void)? = nil,
+         onReorder: (() -> Void)? = nil) {
         self.order = order
         self.adminActions = adminActions
         self.onNavigate = onNavigate
+        self.onTrackDelivery = onTrackDelivery
         self.onReorder = onReorder
         self.formattedOrderNumber = String(format: "%04d", order.orderId ?? 0)
         self.statusColorValue = OrderCardView.computeStatusColor(order.status ?? "")
@@ -56,7 +58,7 @@ struct OrderCardView: View {
             if order.isDeliveryOrder,
                let orderId = order.id,
                OrderEnvironment.shared.deliveryVM(for: orderId) != nil {
-                LiveDeliveryBanner { onNavigate?() }
+                LiveDeliveryBanner { onTrackDelivery?() }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 8)
             }
