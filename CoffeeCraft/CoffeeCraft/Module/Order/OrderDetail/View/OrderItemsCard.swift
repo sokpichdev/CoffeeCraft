@@ -14,8 +14,8 @@ struct OrderItemsCard: View {
     var onRateItem: ((CartItemData) -> Void)? // triggers RatingInputSheet
 
     private var isCompleted: Bool {
-        let s = orderStatus?.lowercased() ?? ""
-        return s == "completed" || s == "done"
+        let status = orderStatus?.lowercased() ?? ""
+        return status == "completed" || status == "done"
     }
 
     var body: some View {

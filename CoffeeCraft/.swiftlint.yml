@@ -22,6 +22,7 @@ excluded:
   - Carthage
   - DerivedData
   - .build
+  - AppLog.swift
 
 # MARK: - Line Length
 line_length:
@@ -56,6 +57,10 @@ identifier_name:
     - vm
     - x
     - y
+    - z
+    - i
+    - j
+    - k
 
 # MARK: - Nesting Depth
 nesting:

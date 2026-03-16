@@ -142,8 +142,8 @@ struct SalesAnalyticsView: View {
                 AxisMarks(position: .leading) { value in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 0.4))
                     AxisValueLabel {
-                        if let v = value.as(Double.self) {
-                            Text(v == 0 ? "$0" : "$\(Int(v))").font(.caption2)
+                        if let value = value.as(Double.self) {
+                            Text(value == 0 ? "$0" : "$\(Int(value))").font(.caption2)
                         }
                     }
                 }

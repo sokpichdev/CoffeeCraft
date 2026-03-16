@@ -17,7 +17,7 @@ struct MapPinPicker: View {
 
     let initialCoordinate: CLLocationCoordinate2D
     let onConfirm: (CLLocationCoordinate2D, String) -> Void
-    let onCancel:  () -> Void
+    let onCancel: () -> Void
 
     @State private var cameraPosition: MapCameraPosition
     @State private var pinnedCoordinate: CLLocationCoordinate2D
@@ -195,7 +195,6 @@ struct MapPinPicker: View {
                         ProgressView()
                             .scaleEffect(0.7)
                             .tint(Color.accentPrimary)
-
                     } else {
 
                         Image(systemName: "mappin.circle.fill")
@@ -235,7 +234,6 @@ struct MapPinPicker: View {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
 
                 onConfirm(pinnedCoordinate, addressLabel)
-
             } label: {
 
                 HStack(spacing: 8) {

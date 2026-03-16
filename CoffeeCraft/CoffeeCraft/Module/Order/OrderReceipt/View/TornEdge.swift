@@ -17,9 +17,9 @@ struct TornEdge: View {
     var body: some View {
         GeometryReader { geo in
             Path { path in
-                let w = geo.size.width
+                let width = geo.size.width
                 let segmentCount = 28
-                let segW = w / CGFloat(segmentCount)
+                let segW = width / CGFloat(segmentCount)
                 
                 switch position {
                 case .top:
@@ -30,13 +30,13 @@ struct TornEdge: View {
                         path.addLine(to: CGPoint(x: x + segW / 2, y: peak))
                         path.addLine(to: CGPoint(x: x + segW, y: 10))
                     }
-                    path.addLine(to: CGPoint(x: w, y: 40))
+                    path.addLine(to: CGPoint(x: width, y: 40))
                     path.addLine(to: CGPoint(x: 0, y: 40))
                     
                 case .bottom:
                     path.move(to: CGPoint(x: 0, y: 0))
-                    path.addLine(to: CGPoint(x: w, y: 0))
-                    path.addLine(to: CGPoint(x: w, y: 6))
+                    path.addLine(to: CGPoint(x: width, y: 0))
+                    path.addLine(to: CGPoint(x: width, y: 6))
                     for i in stride(from: segmentCount, through: 0, by: -1) {
                         let x = CGFloat(i) * segW
                         let peak: CGFloat = i % 2 == 0 ? 16 : 2

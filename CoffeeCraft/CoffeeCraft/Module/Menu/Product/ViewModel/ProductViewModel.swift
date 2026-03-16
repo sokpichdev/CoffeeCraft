@@ -84,7 +84,10 @@ class ProductViewModel: ObservableObject {
         sections = Dictionary(grouping: products, by: { $0.category })
             .map { category, items in SectionData(name: category, items: items) }
             .sorted { $0.name < $1.name }
-        AppLog.menu.debug("📂 Computed \(self.sections.count) section(s): \(self.sections.map { $0.name }.joined(separator: ", "))")
+        AppLog.menu.debug("""
+        📂 Computed \(self.sections.count) section(s): \
+        \(self.sections.map { $0.name }.joined(separator: ", "))
+        """)
     }
 
     // MARK: - Save Product (Create / Update)

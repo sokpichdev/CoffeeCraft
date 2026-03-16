@@ -22,7 +22,7 @@ struct FulfillmentPickerSheet: View {
 
     // Location dependencies for the delivery address step
     @State private var locationManager  = SavedLocationManager()
-    @State private var userCoordinate: CLLocationCoordinate2D? = nil
+    @State private var userCoordinate: CLLocationCoordinate2D?
     @State private var locationFetcher  = LocationFetcher()
 
     // Navigation inside the sheet
@@ -45,10 +45,10 @@ struct FulfillmentPickerSheet: View {
 
                 VStack(spacing: 12) {
                     modeCard(
-                        icon:     "bag.fill",
-                        title:    "Pickup",
+                        icon: "bag.fill",
+                        title: "Pickup",
                         subtitle: "Walk in and collect at the counter",
-                        color:    Color.accentPrimary
+                        color: Color.accentPrimary
                     ) {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         orderEnv.selectPickup(branch: branch)
@@ -56,10 +56,10 @@ struct FulfillmentPickerSheet: View {
                     }
 
                     modeCard(
-                        icon:     "bicycle",
-                        title:    "Delivery",
+                        icon: "bicycle",
+                        title: "Delivery",
                         subtitle: "Rider brings it to your door",
-                        color:    Color.semanticSuccess
+                        color: Color.semanticSuccess
                     ) {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         showAddressPicker = true
@@ -79,14 +79,14 @@ struct FulfillmentPickerSheet: View {
             // ignored inside a detent sheet, so push navigation is not an option.
             NavigationStack {
                 DeliveryDestinationPicker(
-                    branch:          branch,
+                    branch: branch,
                     locationManager: locationManager,
-                    userCoordinate:  userCoordinate,
+                    userCoordinate: userCoordinate,
                     onConfirm: { coordinate, label in
                         orderEnv.selectDelivery(
-                            branch:       branch,
+                            branch: branch,
                             addressLabel: label,
-                            destination:  coordinate
+                            destination: coordinate
                         )
                         showAddressPicker = false
                         dismiss()

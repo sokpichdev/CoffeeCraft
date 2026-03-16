@@ -35,7 +35,6 @@ import OSLog
 //   Type "Menu"      → show only menu logs
 //   Type "Order"     → show only order logs
 //   Type "❌"        → show only errors across all categories
-
 struct AppLog {
     
     // The app's unique identifier used to group logs in Console.app
@@ -115,12 +114,12 @@ struct AppLog {
         // and fall back to String(describing:) for enums without a raw type.
         if mirror.displayStyle == .enum {
             // Try common raw types in order: String → Int → Double → Bool
-            if let e = value as? any RawRepresentable {
-                let raw = e.rawValue
-                if let s = raw as? String { return s }
-                if let i = raw as? Int { return i }
-                if let d = raw as? Double { return d }
-                if let b = raw as? Bool { return b }
+            if let enumValue = value as? any RawRepresentable {
+                let raw = enumValue.rawValue
+                if let stringValue = raw as? String { return stringValue }
+                if let intValue = raw as? Int { return intValue }
+                if let doubleValue = raw as? Double { return doubleValue }
+                if let boolValue = raw as? Bool { return boolValue }
             }
             // Non-RawRepresentable enum (e.g. associated values) — use case name as string
             return String(describing: value)

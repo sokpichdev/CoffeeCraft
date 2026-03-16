@@ -77,9 +77,10 @@ final class BranchRepository {
             .document(branchId)
             .updateData(data)
 
-        AppLog.firestore.info(
-            "[BranchRepository] ✅ Wait time updated — branch: \(branchId), value: \(waitMinutes.map { "\($0) min" } ?? "cleared")"
-        )
+        AppLog.firestore.info("""
+                            [BranchRepository] ✅ Wait time updated — branch: \(branchId), \
+                            value: \(waitMinutes.map { "\($0) min" } ?? "cleared")
+                            """)
     }
 
     // MARK: - Stop

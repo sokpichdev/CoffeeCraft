@@ -15,7 +15,7 @@ final class SavedLocationManager {
 
     // MARK: - State
 
-    var locations:   [SavedLocation] = []
+    var locations: [SavedLocation] = []
     var isLoading  = false
     var errorMessage: String?
 
@@ -54,10 +54,10 @@ final class SavedLocationManager {
             // Apple Maps routes reliably between these two SF points.
             if fetched.isEmpty {
                 fetched = [SavedLocation(
-                    id:        "debug_home",
-                    label:     "Home (Debug)",
-                    address:   "747 Howard St, Moscone Center, San Francisco, CA",
-                    latitude:  37.7838,
+                    id: "debug_home",
+                    label: "Home (Debug)",
+                    address: "747 Howard St, Moscone Center, San Francisco, CA",
+                    latitude: 37.7838,
                     longitude: -122.4014,
                     isDefault: true,
                     createdAt: Date()

@@ -36,7 +36,7 @@ struct MenuView: View {
     @State private var selectedProductToEdit: Product?
     @State private var showSearchSheet = false
     @State private var showBranchSheet      = false
-    @State private var pendingFulfillmentBranch: Branch? = nil
+    @State private var pendingFulfillmentBranch: Branch?
 
     var isManager: Bool = false
 

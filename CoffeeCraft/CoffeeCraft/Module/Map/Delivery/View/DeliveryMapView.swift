@@ -18,14 +18,14 @@ struct DeliveryMapView: View {
     // Passed in from MapView via OrderEnvironment — outlives this view.
     @ObservedObject var vm: DeliveryViewModel
 
-    @State private var cameraPosition:    MapCameraPosition = .automatic
-    @State private var showConfetti:      Bool = false
+    @State private var cameraPosition: MapCameraPosition = .automatic
+    @State private var showConfetti: Bool = false
     /// Set to true when the user pinches/pans the map manually.
     /// Auto-zoom is paused until they tap the recenter button.
     @State private var userHasInteracted: Bool = false
     /// True only while fitCamera() is programmatically moving the camera,
     /// so onMapCameraChange can distinguish auto-zoom from user interaction.
-    @State private var isAutoZooming:     Bool = false
+    @State private var isAutoZooming: Bool = false
 
     @Environment(\.dismiss) private var dismiss
 
@@ -53,8 +53,8 @@ struct DeliveryMapView: View {
                     }
 
                     DeliveryStatusBar(
-                        status:           session.status,
-                        orderId:          session.orderId,
+                        status: session.status,
+                        orderId: session.orderId,
                         estimatedArrival: vm.estimatedArrival
                     )
                     .padding(.horizontal, 0)
@@ -155,7 +155,7 @@ struct DeliveryMapView: View {
             if let coord = vm.riderCoordinate, let session = vm.session {
                 Annotation("Rider", coordinate: coord) {
                     RiderAnnotationView(
-                        status:  session.status,
+                        status: session.status,
                         bearing: vm.riderBearing
                     )
                     // Smooth coordinate glide — MapKit moves the annotation,
@@ -373,11 +373,13 @@ struct DeliveryMapView: View {
         let minLat = lats.min()!, maxLat = lats.max()!
         let minLng = lngs.min()!, maxLng = lngs.max()!
         let center = CLLocationCoordinate2D(
-            latitude:  (minLat + maxLat) / 2,
+            latitude: (minLat + maxLat) / 2,
             longitude: (minLng + maxLng) / 2
         )
         let latDelta = max((maxLat - minLat) * padding, 0.005)
         let lngDelta = max((maxLng - minLng) * padding, 0.005)
-        return MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lngDelta))
+        return MKCoordinateRegion(center: center,
+                                  span: MKCoordinateSpan(latitudeDelta: latDelta,
+                                                         longitudeDelta: lngDelta))
     }
 }

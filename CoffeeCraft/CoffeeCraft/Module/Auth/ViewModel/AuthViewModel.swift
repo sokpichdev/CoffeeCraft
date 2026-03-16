@@ -268,7 +268,8 @@ extension AuthViewModel {
         } else if !password.containsNumber() {
             passwordValidation = .init(isValid: false, message: "Password must contain at least one number")
         } else if !password.containsSpecialCharacter() {
-            passwordValidation = .init(isValid: false, message: "Password must contain at least one special character (!@#$%^&*)")
+            passwordValidation = .init(isValid: false,
+                                       message: "Password must contain at least one special character (!@#$%^&*)")
         } else if password.contains(" ") {
             passwordValidation = .init(isValid: false, message: "Password cannot contain spaces")
         } else {

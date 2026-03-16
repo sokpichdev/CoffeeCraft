@@ -12,7 +12,7 @@ import MapKit
 
 // MARK: - DeliveryViewModel
 
-//@Observable
+// @Observable
 final class DeliveryViewModel: ObservableObject {
 
     // MARK: - Published State (drives DeliveryMapView)
@@ -55,7 +55,7 @@ final class DeliveryViewModel: ObservableObject {
     private let simulator    = DeliverySimulator()
     private let db           = Firestore.firestore()
     private var firestoreListener: ListenerRegistration?
-    private var timeoutTask:       Task<Void, Never>?
+    private var timeoutTask: Task<Void, Never>?
 
     /// Interval (seconds) with no Firestore update before showing "lost track" UI.
     private let timeoutInterval: TimeInterval = 90
@@ -112,13 +112,13 @@ final class DeliveryViewModel: ObservableObject {
     /// Manually advances status by one step.
     /// In production this is driven by Firestore writes from the rider app.
     func advanceStatus() {
-        guard var s = session else { return }
+        guard var ses = session else { return }
         let all     = DeliveryStatus.allCases
-        guard let idx = all.firstIndex(of: s.status), idx + 1 < all.count else { return }
-        s.status = all[idx + 1]
-        session  = s
-        writeToFirestore(s)
-        AppLog.firestore.info("[DeliveryViewModel] Status advanced → \(s.status.rawValue)")
+        guard let idx = all.firstIndex(of: ses.status), idx + 1 < all.count else { return }
+        ses.status = all[idx + 1]
+        session  = ses
+        writeToFirestore(ses)
+        AppLog.firestore.info("[DeliveryViewModel] Status advanced → \(ses.status.rawValue)")
     }
 
     // MARK: - Simulator
@@ -142,10 +142,10 @@ final class DeliveryViewModel: ObservableObject {
         simulator.onDelivered = { [weak self] in
             guard let self else { return }
             self.isDelivered = true
-            var s = session
-            s.status = .delivered
-            self.session = s
-            self.writeToFirestore(s)
+            var ses = session
+            ses.status = .delivered
+            self.session = ses
+            self.writeToFirestore(ses)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             AppLog.firestore.info("[DeliveryViewModel] 🎉 Delivered!")
             // Release the VM from OrderEnvironment after a short delay
@@ -231,9 +231,9 @@ final class DeliveryViewModel: ObservableObject {
         db.collection("deliveries")
             .document(orderId)
             .updateData([
-                "riderLatitude":  coord.latitude,
+                "riderLatitude": coord.latitude,
                 "riderLongitude": coord.longitude,
-                "updatedAt":      Date(),
+                "updatedAt": Date()
             ]) { _ in }
     }
 

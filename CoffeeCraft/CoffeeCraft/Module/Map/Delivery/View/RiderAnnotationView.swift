@@ -11,7 +11,7 @@ import SwiftUI
 
 struct RiderAnnotationView: View {
 
-    let status:  DeliveryStatus
+    let status: DeliveryStatus
     let bearing: CLLocationDirection  // 0–360°
 
     @State private var isPulsing    = false

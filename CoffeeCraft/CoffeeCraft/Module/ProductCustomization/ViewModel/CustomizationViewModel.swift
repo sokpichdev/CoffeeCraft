@@ -29,7 +29,8 @@ class CustomizationViewModel: ObservableObject {
                 
                 if let error = error {
                     AppLog.menu.error("❌ fetchCustomizations — error: \(error.localizedDescription)")
-                    AlertManager.shared.showError(title: "Failed to load customizations", message: error.localizedDescription)
+                    AlertManager.shared.showError(title: "Failed to load customizations",
+                                                  message: error.localizedDescription)
                     return
                 }
                 
@@ -50,7 +51,10 @@ class CustomizationViewModel: ObservableObject {
                     let options = optionsData.compactMap { optionDict -> CustomizationOption? in
                         guard let optionName = optionDict["name"] as? String,
                               let price = optionDict["price"] as? Double else {
-                            AppLog.menu.warning("⚠️ fetchCustomizations — skipped malformed option in doc: \(doc.documentID)")
+                            AppLog.menu.warning("""
+                                                ⚠️ fetchCustomizations — skipped \
+                                                malformed option in doc: \(doc.documentID)
+                                                """)
                             return nil
                         }
                         return CustomizationOption(name: optionName, price: price)
@@ -68,7 +72,10 @@ class CustomizationViewModel: ObservableObject {
     // Save a new customization category to Firestore
     func saveCustomization(_ category: CustomizationCategory) async {
         let customID = category.name.lowercased().replacingOccurrences(of: " ", with: "_")
-        AppLog.menu.debug("💾 saveCustomization — name: \(category.name), docId: \(customID), options: \(category.options.count)")
+        AppLog.menu.debug("""
+                          💾 saveCustomization — name: \(category.name), \
+                          docId: \(customID), options: \(category.options.count)
+                          """)
 
         let options = category.options.map { option in
             ["name": option.name, "price": option.price]

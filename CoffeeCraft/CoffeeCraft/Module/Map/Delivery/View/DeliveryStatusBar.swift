@@ -5,7 +5,6 @@
 //  Created by Sok Pich on 15/03/2026.
 //
 
-
 import SwiftUI
 
 // MARK: - DeliveryStatusBar
@@ -69,7 +68,7 @@ struct DeliveryStatusBar: View {
         let doneIndex = status.stepIndex
 
         return GeometryReader { geo in
-            let dotSize:  CGFloat = 10
+            let dotSize: CGFloat = 10
             let spacing = (geo.size.width - dotSize * CGFloat(steps.count))
                           / CGFloat(steps.count - 1)
 
@@ -97,9 +96,9 @@ struct DeliveryStatusBar: View {
                 HStack(spacing: spacing) {
                     ForEach(Array(steps.enumerated()), id: \.offset) { idx, step in
                         StepDot(
-                            icon:   step.icon,
+                            icon: step.icon,
                             filled: idx <= doneIndex,
-                            size:   dotSize
+                            size: dotSize
                         )
                     }
                 }
@@ -134,9 +133,9 @@ struct DeliveryStatusBar: View {
 
 private struct StepDot: View {
 
-    let icon:   String
+    let icon: String
     let filled: Bool
-    let size:   CGFloat
+    let size: CGFloat
 
     var body: some View {
         ZStack {

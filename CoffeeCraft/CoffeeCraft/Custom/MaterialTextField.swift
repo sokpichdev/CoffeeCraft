@@ -298,7 +298,8 @@ public class MaterialTextFeild: UITextField {
         let size = floatingLabelSize(with: label.text ?? "", maxWidth: maxWidth, font: normalFont)
         let starSize = floatingLabelSize(with: "*", maxWidth: maxWidth, font: normalFont)
         let originY = rect.midY - (0.5 * size.height)
-        return CGRect(x: leftView == nil ? size.width+117 : size.width+leftPaddingWithImage, y: originY, width: starSize.width, height: starSize.height)
+        return CGRect(x: leftView == nil ? size.width+117 : size.width+leftPaddingWithImage,
+                      y: originY, width: starSize.width, height: starSize.height)
     }
     
     private var labelFrameFloating: CGRect {

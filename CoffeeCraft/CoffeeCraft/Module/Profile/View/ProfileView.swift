@@ -198,7 +198,9 @@ struct ProfileView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.75), Color.accentPrimary.opacity(0.5)],
+                            colors: [Color.accentPrimary,
+                                     Color.accentPrimary.opacity(0.75),
+                                     Color.accentPrimary.opacity(0.5)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )

@@ -156,7 +156,10 @@ extension RatingService {
         after cursor: Any? = nil
     ) async throws -> (reviews: [Review], lastDocument: DocumentSnapshot?) {
 
-        AppLog.firestore.debug("🔍 RatingService.fetchReviews — productId: \(productId), limit: \(limit), hasCursor: \(cursor != nil)")
+        AppLog.firestore.debug("""
+                               🔍 RatingService.fetchReviews — productId: \(productId), \
+                               limit: \(limit), hasCursor: \(cursor != nil)
+                               """)
 
         // Build sort — mostHelpful: helpfulCount DESC + createdAt tiebreaker
         //              newest:      createdAt DESC only (no duplicate field)
@@ -255,7 +258,10 @@ extension RatingService {
                 let newAvg = (oldAvg * Double(oldCount) + Double(score)) / Double(newCount)
                 let rounded = (newAvg * 10).rounded() / 10   // round to 1 decimal place
 
-                AppLog.firestore.debug("📊 avg update: \(oldAvg) × \(oldCount) + \(score) → \(rounded) (\(newCount) ratings)")
+                AppLog.firestore.debug("""
+                                       📊 avg update: \(oldAvg) × \(oldCount) + \
+                                       \(score) → \(rounded) (\(newCount) ratings)
+                                       """)
 
                 transaction.updateData([
                     "avgRating": rounded,

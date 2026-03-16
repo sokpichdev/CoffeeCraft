@@ -72,7 +72,10 @@ final class DeliverySimulator {
                 self.currentStepIndex = 0
                 self.isRunning        = true
                 self.startTimer()
-                AppLog.firestore.warning("[DeliverySimulator] ⚠ Using fallback straight-line route (\(fallback.count) steps)")
+                AppLog.firestore.warning("""
+                                         [DeliverySimulator] ⚠ Using fallback \
+                                         straight-line route (\(fallback.count) steps)
+                                         """)
             }
         }
     }
@@ -153,7 +156,7 @@ final class DeliverySimulator {
 
         guard coords.count >= 2 else { return coords }
 
-        var result:    [CLLocationCoordinate2D] = [coords[0]]
+        var result: [CLLocationCoordinate2D] = [coords[0]]
         var carryOver: Double = 0
 
         for i in 1 ..< coords.count {
@@ -186,10 +189,10 @@ final class DeliverySimulator {
         let stepCount = max(Int(totalDistance / stepDistanceMeters), 20)
 
         return (0 ... stepCount).map { i in
-            let t = Double(i) / Double(stepCount)
+            let progress = Double(i) / Double(stepCount)
             return CLLocationCoordinate2D(
-                latitude:  origin.latitude  + (destination.latitude  - origin.latitude)  * t,
-                longitude: origin.longitude + (destination.longitude - origin.longitude) * t
+                latitude: origin.latitude  + (destination.latitude  - origin.latitude)  * progress,
+                longitude: origin.longitude + (destination.longitude - origin.longitude) * progress
             )
         }
     }

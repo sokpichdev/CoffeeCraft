@@ -379,7 +379,8 @@ final class CartItemTests: XCTestCase {
     func testBulkOrderCalculation() {
         let products = [
             CartItem(id: UUID(), product: baseProduct, selections: [:], extras: [], quantity: 5),
-            CartItem(id: UUID(), product: productWithCustomizations, selections: ["Size": "Large"], extras: ["Extra Shot"], quantity: 3),
+            CartItem(id: UUID(), product: productWithCustomizations,
+                     selections: ["Size": "Large"], extras: ["Extra Shot"], quantity: 3),
             CartItem(id: UUID(), product: baseProduct, selections: [:], extras: [], quantity: 2)
         ]
         

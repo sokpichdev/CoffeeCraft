@@ -142,7 +142,8 @@ final class CartManagerTests: XCTestCase {
     func testClearCart() async {
         // Add multiple items
         cartManager.items.append(CartItem(id: UUID(), product: sampleProduct, selections: [:], extras: [], quantity: 1))
-        cartManager.items.append(CartItem(id: UUID(), product: customizableProduct, selections: [:], extras: [], quantity: 2))
+        cartManager.items.append(CartItem(id: UUID(), product: customizableProduct,
+                                          selections: [:], extras: [], quantity: 2))
         
         // Set payment method to wallet
         cartManager.paymentMethod = .wallet
@@ -210,7 +211,8 @@ final class CartManagerTests: XCTestCase {
     
     func testTotalWithMultipleItems() async {
         cartManager.items.append(CartItem(id: UUID(), product: sampleProduct, selections: [:], extras: [], quantity: 2))
-        cartManager.items.append(CartItem(id: UUID(), product: customizableProduct, selections: [:], extras: [], quantity: 1))
+        cartManager.items.append(CartItem(id: UUID(), product: customizableProduct,
+                                          selections: [:], extras: [], quantity: 1))
         
         let total = cartManager.total
         // Item 1: $3.00 × 2 = $6.00
@@ -307,7 +309,8 @@ final class CartManagerTests: XCTestCase {
     func testBatchReorderMergeExisting() async {
         // Setup: existing item in cart
         let existingItemId = UUID()
-        let existingItem = CartItem(id: existingItemId, product: sampleProduct, selections: [:], extras: [], quantity: 2)
+        let existingItem = CartItem(id: existingItemId, product: sampleProduct,
+                                    selections: [:], extras: [], quantity: 2)
         cartManager.items.append(existingItem)
         
         // Merge: add 3 more to existing item
@@ -360,12 +363,15 @@ final class CartManagerTests: XCTestCase {
     func testBatchReorderCombined() async {
         // Setup: one existing item
         let existingItemId = UUID()
-        let existingItem = CartItem(id: existingItemId, product: sampleProduct, selections: [:], extras: [], quantity: 1)
+        let existingItem = CartItem(id: existingItemId, product: sampleProduct,
+                                    selections: [:], extras: [], quantity: 1)
         cartManager.items.append(existingItem)
         
         // Merge + Add
         let merges = [(existing: existingItem, additionalQty: 2)]
-        let additions = [(product: customizableProduct, selections: [:] as [String: String], extras: [] as [String], quantity: 3)]
+        let additions = [(product: customizableProduct,
+                          selections: [:] as [String: String],
+                          extras: [] as [String], quantity: 3)]
         
         // Execute merges
         for (item, additionalQty) in merges {
@@ -401,7 +407,11 @@ final class CartManagerTests: XCTestCase {
     func testCompleteCheckoutFlow() async {
         // 1. Add items to cart
         cartManager.items.append(CartItem(id: UUID(), product: sampleProduct, selections: [:], extras: [], quantity: 2))
-        cartManager.items.append(CartItem(id: UUID(), product: customizableProduct, selections: ["Size": "Large"], extras: ["Shot"], quantity: 1))
+        cartManager.items.append(CartItem(id: UUID(),
+                                          product: customizableProduct,
+                                          selections: ["Size": "Large"],
+                                          extras: ["Shot"],
+                                          quantity: 1))
         
         // 2. Verify total
         let expectedTotal = (3.00 * 2) + (4.00 + 1.00 + 1.00)  // $12.00

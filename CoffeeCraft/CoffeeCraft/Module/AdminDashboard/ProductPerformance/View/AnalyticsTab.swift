@@ -1,3 +1,4 @@
+import Charts
 //
 //  AnalyticsTab.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 3/14/26.
 //
 import SwiftUI
-import Charts
 // MARK: - Analytics Tab (Donut + Scatter)
 
 struct AnalyticsTab: View {
@@ -164,7 +164,9 @@ struct AnalyticsTab: View {
     }
     
     private func categoryColor(_ category: String, in stats: [CategoryRevenueStat]) -> Color {
-            let palette: [Color] = [.accentPrimary, .semanticSuccess, .accentGold, .orange, .teal, .semanticError, .yellow, .pink]
+            let palette: [Color] = [.accentPrimary, .semanticSuccess,
+                                    .accentGold, .orange, .teal,
+                                    .semanticError, .yellow, .pink]
             let idx = stats.firstIndex(where: { $0.category == category }) ?? 0
             return palette[idx % palette.count]
         }

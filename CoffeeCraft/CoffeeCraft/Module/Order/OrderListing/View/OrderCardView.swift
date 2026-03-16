@@ -30,7 +30,11 @@ struct OrderCardView: View {
         return status == "completed" || status == "done"
     }
 
-    init(order: Order, adminActions: (() -> AnyView)? = nil, onNavigate: (() -> Void)? = nil, onReorder: (() -> Void)? = nil) {
+    init(order: Order,
+         adminActions: (() -> AnyView)? = nil,
+         onNavigate: (() -> Void)? = nil,
+         onReorder: (() -> Void)? = nil)
+    {
         self.order = order
         self.adminActions = adminActions
         self.onNavigate = onNavigate

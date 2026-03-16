@@ -15,22 +15,22 @@ struct SavedLocationFormSheet: View {
 
     // Pass nil to create a new location; pass an existing one to edit.
     var existing: SavedLocation?
-    let onSave:   (SavedLocation) -> Void
+    let onSave: (SavedLocation) -> Void
     let onCancel: () -> Void
 
     // MARK: - Form State
 
-    @State private var label:     String = ""
-    @State private var address:   String = ""
-    @State private var latitude:  Double = 0
+    @State private var label: String = ""
+    @State private var address: String = ""
+    @State private var latitude: Double = 0
     @State private var longitude: Double = 0
     @State private var isDefault: Bool   = false
-    @State private var isSaving:  Bool   = false
+    @State private var isSaving: Bool   = false
 
     // MARK: - Address Search State
 
-    @State private var searchQuery:    String = ""
-    @State private var searchResults:  [MKLocalSearchCompletion] = []
+    @State private var searchQuery: String = ""
+    @State private var searchResults: [MKLocalSearchCompletion] = []
     @State private var showSuggestions = false
     @State private var isSearching     = false
 
@@ -90,11 +90,11 @@ struct SavedLocationFormSheet: View {
             )
         }
         .onAppear { prefill() }
-        .onChange(of: searchQuery) { _, q in
-            if q.count >= 2 {
+        .onChange(of: searchQuery) { _, query in
+            if query.count >= 2 {
                 isSearching    = true
                 showSuggestions = true
-                completer.search(query: q) { results in
+                completer.search(query: query) { results in
                     searchResults  = results
                     isSearching    = false
                 }
@@ -106,8 +106,6 @@ struct SavedLocationFormSheet: View {
     }
 
     // MARK: - Label Section
-
-    
 
     private func useCurrentLocation() {
         isLocating = true
@@ -449,7 +447,7 @@ extension SavedLocationFormSheet {
                 self.address   = [
                     item.placemark.name,
                     item.placemark.thoroughfare,
-                    item.placemark.locality,
+                    item.placemark.locality
                 ].compactMap { $0 }.joined(separator: ", ")
             }
         }
@@ -469,8 +467,8 @@ private final class AddressCompleter: NSObject, MKLocalSearchCompleterDelegate {
         completer.delegate     = self
         completer.resultTypes  = .address
         completer.region       = MKCoordinateRegion(
-            center:  CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282), // Phnom Penh
-            span:    MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+            center: CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282), // Phnom Penh
+            span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
         )
     }
 

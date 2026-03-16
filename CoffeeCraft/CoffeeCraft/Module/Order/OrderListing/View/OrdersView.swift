@@ -13,7 +13,7 @@ struct OrdersView: View {
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedOrder: Order?
     @State private var navigateToDelivery  = false
-    @State private var capturedDeliveryVM: DeliveryViewModel? = nil
+    @State private var capturedDeliveryVM: DeliveryViewModel?
 
     var body: some View {
         ZStack {

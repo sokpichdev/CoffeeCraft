@@ -130,7 +130,10 @@ class OrderViewModel: ObservableObject {
             lastDocument = snapshot.documents.last
             hasMorePages = snapshot.documents.count == pageSize
 
-            AppLog.order.debug("✅ loadMore — appended \(unique.count) order(s), total: \(self.orders.count), hasMore: \(self.hasMorePages)")
+            AppLog.order.debug("""
+                               ✅ loadMore — appended \(unique.count) order(s), \
+                               total: \(self.orders.count), hasMore: \(self.hasMorePages)
+                               """)
             AppLog.printList(unique, label: "Orders Next Page", logger: AppLog.order)
 
             // Re-attach listener so it now covers ALL loaded orders, not just the first page.

@@ -103,12 +103,15 @@ final class DashboardHomeViewModel: ObservableObject {
 
             let (fetchedSummary, page) = try await (summaryResult, firstPage)
 
-            summary      = fetchedSummary
-            liveItems    = page.items         // seed the visible feed
+            summary = fetchedSummary
+            liveItems = page.items         // seed the visible feed
             lastDocument = page.lastDocument  // ← cursor set on load, not on first scroll
             hasMorePages = page.hasMore
 
-            AppLog.dashboard.debug("✅ loadSummary — items: \(page.items.count), hasMore: \(page.hasMore), cursor: \(page.lastDocument?.documentID ?? "nil")")
+            AppLog.dashboard.debug("""
+                ✅ loadSummary — items: \(page.items.count), \
+                hasMore: \(page.hasMore), cursor: \(page.lastDocument?.documentID ?? "nil")
+                """)
         } catch {
             AlertManager.shared.showConfirmation(
                 title: "Failed to load dashboard",
@@ -153,7 +156,10 @@ final class DashboardHomeViewModel: ObservableObject {
             lastDocument = page.lastDocument
             hasMorePages = page.hasMore
 
-            AppLog.dashboard.debug("✅ loadMoreActivity — added \(newItems.count), total: \(self.allActivity.count), hasMore: \(page.hasMore)")
+            AppLog.dashboard.debug("""
+                                    ✅ loadMoreActivity — added \(newItems.count), \
+                                    total: \(self.allActivity.count), hasMore: \(page.hasMore)
+                                    """)
 
             // Grow the listener window to cover all loaded orders
             reattachLiveListener()

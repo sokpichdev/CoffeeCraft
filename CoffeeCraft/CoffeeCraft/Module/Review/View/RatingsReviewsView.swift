@@ -283,7 +283,10 @@ private extension RatingsReviewsView {
             .background(
                 RoundedRectangle(cornerRadius: 14)
                     .fill(Color.accentPrimary.opacity(0.08))
-                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(Color.accentPrimary.opacity(0.2), lineWidth: 1)
+                    )
             )
         }
         .buttonStyle(.plain)

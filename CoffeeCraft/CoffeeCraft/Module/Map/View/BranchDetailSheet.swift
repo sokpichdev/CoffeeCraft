@@ -337,7 +337,6 @@ struct BranchDetailSheet: View {
                 .frame(height: 54)
                 .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.textMuted))
                 .accessibilityLabel("\(branch.name) is currently closed")
-
             } else {
                 // Single CTA — hands off to the Menu tab with this branch pre-selected.
                 // Pickup vs Delivery is chosen in FulfillmentPickerSheet, not here.

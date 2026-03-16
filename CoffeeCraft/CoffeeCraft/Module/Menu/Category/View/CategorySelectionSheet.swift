@@ -57,7 +57,8 @@ struct CategorySelectionSheet: View {
                             }) {
                                 HStack {
                                     Text(category)
-                                        .foregroundColor(category == tempSelectedCategory ? .accentPrimary : .primary) // Highlight selected text
+                                        .foregroundColor(category == tempSelectedCategory ?
+                                                        .accentPrimary : .primary) // Highlight selected text
                                         .fontWeight(category == tempSelectedCategory ? .semibold : .regular)
                                     
                                     Spacer()
@@ -69,7 +70,8 @@ struct CategorySelectionSheet: View {
                                 }
                                 .padding()
                                 .padding(.horizontal)
-                                .background(category == tempSelectedCategory ? Color.accentPrimary.opacity(0.1) : Color.clear)
+                                .background(category == tempSelectedCategory ?
+                                            Color.accentPrimary.opacity(0.1) : Color.clear)
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)

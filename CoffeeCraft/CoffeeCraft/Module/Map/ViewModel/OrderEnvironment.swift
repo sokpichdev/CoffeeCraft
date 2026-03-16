@@ -63,7 +63,7 @@ final class OrderEnvironment: ObservableObject {
     // tracked independently. Populated when order status reaches "Ready".
 
     @Published var activeDeliverySessions: [String: DeliverySession] = [:]
-    private(set) var activeDeliveryVMs:    [String: DeliveryViewModel] = [:]
+    private(set) var activeDeliveryVMs: [String: DeliveryViewModel] = [:]
 
     // MARK: - Legacy single-session accessors (used by views that track one order at a time)
 
@@ -82,10 +82,10 @@ final class OrderEnvironment: ObservableObject {
 
     // MARK: - Convenience
 
-    var selectedBranchId: String?   { selectedBranch?.id   }
+    var selectedBranchId: String? { selectedBranch?.id   }
     var selectedBranchName: String? { selectedBranch?.name }
-    var isDelivery: Bool            { fulfillmentMode == .delivery }
-    var isPickup:   Bool            { fulfillmentMode == .pickup   }
+    var isDelivery: Bool { fulfillmentMode == .delivery }
+    var isPickup: Bool { fulfillmentMode == .pickup   }
 
     // MARK: - Actions
 
@@ -146,13 +146,13 @@ final class OrderEnvironment: ObservableObject {
         // Guard: don't restart a session that's already running for this order
         guard activeDeliveryVMs[orderId] == nil else { return }
 
-        let dest        = CLLocationCoordinate2D(latitude: destLat,   longitude: destLng)
+        let dest        = CLLocationCoordinate2D(latitude: destLat, longitude: destLng)
         let branchCoord = CLLocationCoordinate2D(latitude: branchLat, longitude: branchLng)
 
         let session = DeliverySession(
-            orderId:               orderId,
-            branchId:              branchId,
-            branchCoordinate:      branchCoord,
+            orderId: orderId,
+            branchId: branchId,
+            branchCoordinate: branchCoord,
             destinationCoordinate: dest
         )
         let vm = DeliveryViewModel()
