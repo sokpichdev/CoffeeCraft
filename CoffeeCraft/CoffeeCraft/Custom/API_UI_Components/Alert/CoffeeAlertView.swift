@@ -8,6 +8,7 @@ import SwiftUI
 
 struct CoffeeAlertView: View {
     var alertModel: AlertModel
+    var isAutoDimiss: Bool = true
     let onDismiss: () -> Void
     
     @State private var scale: CGFloat = 0.8
@@ -74,7 +75,7 @@ struct CoffeeAlertView: View {
             animateAppearance()
             
             // Auto-dismiss for success alerts (only if single button)
-            if alertModel.type == .success && !alertModel.hasTwoButtons {
+            if alertModel.type == .success && !alertModel.hasTwoButtons && isAutoDimiss {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     dismissAlert()
                 }
