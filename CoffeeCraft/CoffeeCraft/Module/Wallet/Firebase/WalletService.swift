@@ -159,7 +159,10 @@ final class WalletService {
             throw WalletError.invalidAmount
         }
 
-        AppLog.firestore.debug("🛍️ WalletService.deductForOrder — userId: \(userId), amount: \(amount), orderId: \(orderId)")
+        AppLog.firestore.debug("""
+                               🛍️ WalletService.deductForOrder — userId: \(userId), \
+                               amount: \(amount), orderId: \(orderId)
+                               """)
 
         let walletRef = walletsRef.document(userId)
         let txRef     = transactionsRef.document()
@@ -201,7 +204,10 @@ final class WalletService {
                 )
                 transaction.setData(tx.toFirestoreData(), forDocument: txRef)
 
-                AppLog.firestore.debug("✅ deductForOrder transaction prepared — before: \(current), after: \(newBalance)")
+                AppLog.firestore.debug("""
+                                       ✅ deductForOrder transaction prepared — \
+                                       before: \(current), after: \(newBalance)
+                                       """)
                 return nil
             } catch {
                 errorPointer?.pointee = error as NSError

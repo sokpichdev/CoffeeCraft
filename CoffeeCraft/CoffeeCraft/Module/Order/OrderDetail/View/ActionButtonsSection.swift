@@ -17,8 +17,8 @@ struct ActionButtonsSection: View {
     var onCancel: (() -> Void)?
 
     private var isCompleted: Bool {
-        let s = order.status?.lowercased() ?? ""
-        return s == "completed" || s == "done"
+        let status = order.status?.lowercased() ?? ""
+        return status == "completed" || status == "done"
     }
     private var isCancelled: Bool { order.status?.lowercased() == "cancelled" }
     private var canCancel: Bool {
@@ -63,9 +63,13 @@ struct ActionButtonsSection: View {
                 HStack(spacing: 10) {
                     Image(systemName: "xmark.circle.fill").foregroundColor(Color.semanticError.opacity(0.8))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Order Cancelled").font(.subheadline.weight(.semibold)).foregroundColor(Color.semanticError)
+                        Text("Order Cancelled")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(Color.semanticError)
                         if order.wasWalletPayment, let amount = order.walletAmountPaid {
-                            Text("+\(amount.currencyFormatted) refunded to your wallet").font(.caption).foregroundColor(.secondary)
+                            Text("+\(amount.currencyFormatted) refunded to your wallet")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                     }
                     Spacer()
@@ -73,7 +77,10 @@ struct ActionButtonsSection: View {
                 .padding(14)
                 .background(Color.semanticError.opacity(0.07))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.semanticError.opacity(0.2), lineWidth: 1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color.semanticError.opacity(0.2), lineWidth: 1)
+                )
             }
         }
     }

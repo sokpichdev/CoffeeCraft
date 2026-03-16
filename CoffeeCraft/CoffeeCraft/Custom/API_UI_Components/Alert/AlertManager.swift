@@ -51,7 +51,8 @@ class AlertManager: ObservableObject {
         show(title: title, message: message, type: .warning)
     }
     
-    func showNoInternet(title: String = "No Connection", message: String = "Please check your internet connection and try again.") {
+    func showNoInternet(title: String = "No Connection",
+                        message: String = "Please check your internet connection and try again.") {
         show(title: title, message: message, type: .error)
     }
     

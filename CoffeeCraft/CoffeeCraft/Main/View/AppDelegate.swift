@@ -210,7 +210,8 @@ extension AppDelegate {
     private func configureCrashlytics() {
         let enabled = currentEnv != .dev
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(enabled)
-        AppLog.firestore.debug("🔥 Crashlytics collection \(enabled ? "enabled" : "disabled") for env: \(self.currentEnv)")
+        AppLog.firestore.debug(
+            "🔥 Crashlytics collection \(enabled ? "enabled" : "disabled") for env: \(self.currentEnv)")
     }
 
     // MARK: Firestore Persistence

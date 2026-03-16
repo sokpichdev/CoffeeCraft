@@ -278,7 +278,10 @@ struct MyOrdersContent: View {
             
             AlertManager.shared.showConfirmation(
                 title: "Items Already in Cart",
-                message: "\(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart with the same options. Quantities will be combined.",
+                message: """
+                \(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart with \
+                the same options. Quantities will be combined.
+                """,
                 confirmTitle: "Add to Cart",
                 cancelTitle: "Cancel"
             ) {

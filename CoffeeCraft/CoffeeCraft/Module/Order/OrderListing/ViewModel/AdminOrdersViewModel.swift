@@ -39,7 +39,10 @@ class AdminOrdersViewModel: ObservableObject {
         guard pageNum > 1 || allOrders.isEmpty else { return }
         guard hasMoreAllOrders || pageNum == 1 else { return }
 
-        AppLog.order.debug("📋 fetchAllOrders — page: \(pageNum), cursor: \(self.lastAllOrdersDocument?.documentID ?? "none")")
+        AppLog.order.debug("""
+                           📋 fetchAllOrders — page: \(pageNum), \
+                           cursor: \(self.lastAllOrdersDocument?.documentID ?? "none")
+                           """)
 
         if pageNum == 1 { isLoadingAllOrders = true }
 

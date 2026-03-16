@@ -19,18 +19,18 @@ struct DeliverySession {
 
     // MARK: - Coordinates (flat storage, Codable-friendly)
 
-    let branchLatitude:  Double
+    let branchLatitude: Double
     let branchLongitude: Double
 
     /// The delivery destination — from SavedLocation or live GPS at order time.
     /// Stored once at order placement so simulation is stable even if the
     /// user's device moves.
-    let destinationLatitude:  Double
+    let destinationLatitude: Double
     let destinationLongitude: Double
 
     /// Current rider position — updated every ~2 s by the simulator and by
     /// Firestore when a real rider GPS feed is available (Phase 6).
-    var riderLatitude:  Double
+    var riderLatitude: Double
     var riderLongitude: Double
 
     // MARK: - Status & Timing
@@ -40,7 +40,7 @@ struct DeliverySession {
 
     // MARK: - Rider Info (optional — nil until riderAssigned)
 
-    var riderName:  String?
+    var riderName: String?
     var riderPhone: String?
 
     // MARK: - Computed Coordinates
@@ -66,36 +66,36 @@ struct DeliverySession {
     /// Creates a Firestore-writable dictionary for deliveries/{orderId}.
     func asFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
-            "orderId":              orderId,
-            "branchId":             branchId,
-            "branchLatitude":       branchLatitude,
-            "branchLongitude":      branchLongitude,
-            "destinationLatitude":  destinationLatitude,
+            "orderId": orderId,
+            "branchId": branchId,
+            "branchLatitude": branchLatitude,
+            "branchLongitude": branchLongitude,
+            "destinationLatitude": destinationLatitude,
             "destinationLongitude": destinationLongitude,
-            "riderLatitude":        riderLatitude,
-            "riderLongitude":       riderLongitude,
-            "status":               status.rawValue,
-            "updatedAt":            Date(),
+            "riderLatitude": riderLatitude,
+            "riderLongitude": riderLongitude,
+            "status": status.rawValue,
+            "updatedAt": Date()
         ]
         if let eta  = estimatedArrival { data["estimatedArrival"] = eta }
-        if let name = riderName        { data["riderName"]        = name }
-        if let ph   = riderPhone       { data["riderPhone"]       = ph   }
+        if let name = riderName { data["riderName"]        = name }
+        if let ph   = riderPhone { data["riderPhone"]       = ph   }
         return data
     }
 
     /// Initialises a session from a Firestore snapshot dictionary.
     /// Returns nil when required fields are missing.
-    init?(firestoreData d: [String: Any]) {
+    init?(firestoreData data: [String: Any]) {
         guard
-            let orderId              = d["orderId"]              as? String,
-            let branchId             = d["branchId"]             as? String,
-            let branchLat            = d["branchLatitude"]        as? Double,
-            let branchLng            = d["branchLongitude"]       as? Double,
-            let destLat              = d["destinationLatitude"]   as? Double,
-            let destLng              = d["destinationLongitude"]  as? Double,
-            let riderLat             = d["riderLatitude"]         as? Double,
-            let riderLng             = d["riderLongitude"]        as? Double,
-            let statusRaw            = d["status"]                as? String,
+            let orderId              = data["orderId"]              as? String,
+            let branchId             = data["branchId"]             as? String,
+            let branchLat            = data["branchLatitude"]        as? Double,
+            let branchLng            = data["branchLongitude"]       as? Double,
+            let destLat              = data["destinationLatitude"]   as? Double,
+            let destLng              = data["destinationLongitude"]  as? Double,
+            let riderLat             = data["riderLatitude"]         as? Double,
+            let riderLng             = data["riderLongitude"]        as? Double,
+            let statusRaw            = data["status"]                as? String,
             let status               = DeliveryStatus(rawValue: statusRaw)
         else { return nil }
 
@@ -108,10 +108,10 @@ struct DeliverySession {
         self.riderLatitude        = riderLat
         self.riderLongitude       = riderLng
         self.status               = status
-        self.riderName            = d["riderName"]  as? String
-        self.riderPhone           = d["riderPhone"] as? String
+        self.riderName            = data["riderName"]  as? String
+        self.riderPhone           = data["riderPhone"] as? String
 
-        if let ts = d["estimatedArrival"] as? Date {
+        if let ts = data["estimatedArrival"] as? Date {
             self.estimatedArrival = ts
         } else {
             self.estimatedArrival = nil
@@ -120,12 +120,12 @@ struct DeliverySession {
 
     /// Convenience init used when the simulator creates a fresh session.
     init(
-        orderId:              String,
-        branchId:             String,
-        branchCoordinate:     CLLocationCoordinate2D,
+        orderId: String,
+        branchId: String,
+        branchCoordinate: CLLocationCoordinate2D,
         destinationCoordinate: CLLocationCoordinate2D,
-        riderName:            String?  = "Dara",
-        riderPhone:           String?  = "+855 12 345 678"
+        riderName: String?  = "Dara",
+        riderPhone: String?  = "+855 12 345 678"
     ) {
         self.orderId              = orderId
         self.branchId             = branchId

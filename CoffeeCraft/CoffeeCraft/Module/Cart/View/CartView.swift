@@ -222,7 +222,7 @@ struct CartView: View {
 /// Shown whenever OrderEnvironment has a selectedBranch set.
 struct CartBranchInfoCard: View {
     let branch: Branch
-    var onChangeFulfillment: (() -> Void)? = nil
+    var onChangeFulfillment: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 14) {
@@ -284,15 +284,14 @@ struct CartBranchInfoCard: View {
     }
 }
 
-
 // MARK: - CartDeliveryInfoCard
 
 /// Shown in CartView when fulfillmentMode == .delivery.
 /// Displays the delivery destination address with a rider icon.
 struct CartDeliveryInfoCard: View {
-    let branch:       Branch
+    let branch: Branch
     let addressLabel: String
-    var onChangeFulfillment: (() -> Void)? = nil
+    var onChangeFulfillment: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 14) {

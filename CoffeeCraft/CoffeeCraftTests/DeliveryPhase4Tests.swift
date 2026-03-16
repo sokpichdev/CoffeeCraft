@@ -5,7 +5,7 @@
 //  Created by Sok Pich on 15/03/2026.
 //
 
-
+@testable import CoffeeCraft
 //
 //  DeliveryPhase4Tests.swift
 //  CoffeeCraftTests
@@ -34,11 +34,8 @@
 //    straight-line logic is verified through direct method calls.
 //  • MainActor isolation — @Observable ViewModel tests run on @MainActor.
 //  • No mocking framework — pure XCTest + CoreLocation.
-//
-
-import CoreLocation
+// import CoreLocation
 import XCTest
-@testable import CoffeeCraft
 
 // MARK: - Shared test fixtures
 
@@ -47,16 +44,16 @@ private let homeCoord   = CLLocationCoordinate2D(latitude: 11.5564, longitude: 1
 
 private func makeSession(
     orderId: String = "2026-03-15-001",
-    status:  DeliveryStatus = .orderPlaced
+    status: DeliveryStatus = .orderPlaced
 ) -> DeliverySession {
-    var s = DeliverySession(
-        orderId:               orderId,
-        branchId:              "branch_riverside",
-        branchCoordinate:      branchCoord,
+    var session = DeliverySession(
+        orderId: orderId,
+        branchId: "branch_riverside",
+        branchCoordinate: branchCoord,
         destinationCoordinate: homeCoord
     )
-    s.status = status
-    return s
+    session.status = status
+    return session
 }
 
 // MARK: ─────────────────────────────────────────────────────────────────────
@@ -72,12 +69,12 @@ final class DeliveryStatusTests: XCTestCase {
         let cases = DeliveryStatus.allCases
         XCTAssertEqual(cases.count, 6, "Expected exactly 6 delivery states")
 
-        XCTAssertEqual(DeliveryStatus.orderPlaced.rawValue,   "orderPlaced")
+        XCTAssertEqual(DeliveryStatus.orderPlaced.rawValue, "orderPlaced")
         XCTAssertEqual(DeliveryStatus.riderAssigned.rawValue, "riderAssigned")
-        XCTAssertEqual(DeliveryStatus.pickedUp.rawValue,      "pickedUp")
-        XCTAssertEqual(DeliveryStatus.enRoute.rawValue,       "enRoute")
-        XCTAssertEqual(DeliveryStatus.arriving.rawValue,      "arriving")
-        XCTAssertEqual(DeliveryStatus.delivered.rawValue,     "delivered")
+        XCTAssertEqual(DeliveryStatus.pickedUp.rawValue, "pickedUp")
+        XCTAssertEqual(DeliveryStatus.enRoute.rawValue, "enRoute")
+        XCTAssertEqual(DeliveryStatus.arriving.rawValue, "arriving")
+        XCTAssertEqual(DeliveryStatus.delivered.rawValue, "delivered")
     }
 
     // TC-2  progressFraction runs 0.0 → 1.0 and is strictly increasing
@@ -88,7 +85,7 @@ final class DeliveryStatusTests: XCTestCase {
 
         XCTAssertEqual(fractions.first!, 0.0, accuracy: 0.001,
                        "First status must have progressFraction 0.0")
-        XCTAssertEqual(fractions.last!,  1.0, accuracy: 0.001,
+        XCTAssertEqual(fractions.last!, 1.0, accuracy: 0.001,
                        "Last status must have progressFraction 1.0")
 
         for i in 1 ..< fractions.count {
@@ -125,7 +122,7 @@ final class DeliverySessionTests: XCTestCase {
     func test_convenienceInit_riderStartsAtBranch() {
         let session = makeSession()
 
-        XCTAssertEqual(session.riderLatitude,  branchCoord.latitude,  accuracy: 0.000001,
+        XCTAssertEqual(session.riderLatitude, branchCoord.latitude, accuracy: 0.000001,
                        "Rider latitude must match branch on init")
         XCTAssertEqual(session.riderLongitude, branchCoord.longitude, accuracy: 0.000001,
                        "Rider longitude must match branch on init")
@@ -133,7 +130,7 @@ final class DeliverySessionTests: XCTestCase {
                        "Initial status must be .orderPlaced")
         XCTAssertNil(session.estimatedArrival,
                      "estimatedArrival must be nil until the simulator starts")
-        XCTAssertEqual(session.riderName,  "Dara",            "Default riderName should be Dara")
+        XCTAssertEqual(session.riderName, "Dara", "Default riderName should be Dara")
         XCTAssertEqual(session.riderPhone, "+855 12 345 678", "Default riderPhone should be set")
     }
 
@@ -155,22 +152,22 @@ final class DeliverySessionTests: XCTestCase {
         let decoded = DeliverySession(firestoreData: dict)
 
         XCTAssertNotNil(decoded, "init?(firestoreData:) must succeed for a valid dictionary")
-        guard let d = decoded else { return }
+        guard let dc = decoded else { return }
 
-        XCTAssertEqual(d.orderId,  "2026-03-15-042",   "orderId must survive round-trip")
-        XCTAssertEqual(d.branchId, "branch_riverside",  "branchId must survive round-trip")
-        XCTAssertEqual(d.status,   .enRoute,            "status must survive round-trip")
+        XCTAssertEqual(dc.orderId, "2026-03-15-042", "orderId must survive round-trip")
+        XCTAssertEqual(dc.branchId, "branch_riverside", "branchId must survive round-trip")
+        XCTAssertEqual(dc.status, .enRoute, "status must survive round-trip")
 
-        XCTAssertEqual(d.branchLatitude,       branchCoord.latitude,  accuracy: 0.000001)
-        XCTAssertEqual(d.branchLongitude,      branchCoord.longitude, accuracy: 0.000001)
-        XCTAssertEqual(d.destinationLatitude,  homeCoord.latitude,    accuracy: 0.000001)
-        XCTAssertEqual(d.destinationLongitude, homeCoord.longitude,   accuracy: 0.000001)
-        XCTAssertEqual(d.riderLatitude,        11.5600,               accuracy: 0.000001)
-        XCTAssertEqual(d.riderLongitude,       104.9290,              accuracy: 0.000001)
+        XCTAssertEqual(dc.branchLatitude, branchCoord.latitude, accuracy: 0.000001)
+        XCTAssertEqual(dc.branchLongitude, branchCoord.longitude, accuracy: 0.000001)
+        XCTAssertEqual(dc.destinationLatitude, homeCoord.latitude, accuracy: 0.000001)
+        XCTAssertEqual(dc.destinationLongitude, homeCoord.longitude, accuracy: 0.000001)
+        XCTAssertEqual(dc.riderLatitude, 11.5600, accuracy: 0.000001)
+        XCTAssertEqual(dc.riderLongitude, 104.9290, accuracy: 0.000001)
 
-        XCTAssertEqual(d.riderName,  "Dara",            "riderName must survive round-trip")
-        XCTAssertEqual(d.riderPhone, "+855 12 345 678", "riderPhone must survive round-trip")
-        XCTAssertNotNil(d.estimatedArrival,             "estimatedArrival must survive round-trip")
+        XCTAssertEqual(dc.riderName, "Dara", "riderName must survive round-trip")
+        XCTAssertEqual(dc.riderPhone, "+855 12 345 678", "riderPhone must survive round-trip")
+        XCTAssertNotNil(dc.estimatedArrival, "estimatedArrival must survive round-trip")
     }
 
     // TC-6  init?(firestoreData:) returns nil gracefully when required fields are missing
@@ -179,14 +176,14 @@ final class DeliverySessionTests: XCTestCase {
     func test_firestoreInit_failsGracefullyOnMissingFields() {
         // Missing "status" — the most likely field to be absent on a corrupt document
         let missingStatus: [String: Any] = [
-            "orderId":              "2026-03-15-099",
-            "branchId":             "branch_riverside",
-            "branchLatitude":       11.5696,
-            "branchLongitude":      104.9307,
-            "destinationLatitude":  11.5564,
+            "orderId": "2026-03-15-099",
+            "branchId": "branch_riverside",
+            "branchLatitude": 11.5696,
+            "branchLongitude": 104.9307,
+            "destinationLatitude": 11.5564,
             "destinationLongitude": 104.9282,
-            "riderLatitude":        11.5696,
-            "riderLongitude":       104.9307,
+            "riderLatitude": 11.5696,
+            "riderLongitude": 104.9307
             // "status" intentionally omitted
         ]
         XCTAssertNil(DeliverySession(firestoreData: missingStatus),
@@ -244,11 +241,11 @@ final class DeliverySimulatorTests: XCTestCase {
     //       a broken formula would compute an asymmetric result.
     func test_bearing_reverseIsOpposite() {
         let sim = DeliverySimulator()
-        let a   = CLLocationCoordinate2D(latitude: 11.5696, longitude: 104.9307)
-        let b   = CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282)
+        let aa   = CLLocationCoordinate2D(latitude: 11.5696, longitude: 104.9307)
+        let bb   = CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282)
 
-        let forward = sim.bearing(from: a, to: b)
-        let reverse = sim.bearing(from: b, to: a)
+        let forward = sim.bearing(from: aa, to: bb)
+        let reverse = sim.bearing(from: bb, to: aa)
 
         let diff       = abs(forward - reverse)
         let normalised = min(diff, 360.0 - diff)
@@ -285,18 +282,18 @@ final class DeliveryViewModelTests: XCTestCase {
 
         vm.startDelivery(session: session, useSimulator: false)
 
-        XCTAssertNotNil(vm.session,                     "session must be set after startDelivery")
+        XCTAssertNotNil(vm.session, "session must be set after startDelivery")
         XCTAssertEqual(vm.session?.orderId, "2026-03-15-001")
-        XCTAssertTrue(vm.isLoading,                     "isLoading must be true before first tick")
-        XCTAssertFalse(vm.isDelivered,                  "isDelivered must start false")
-        XCTAssertFalse(vm.isTimeout,                    "isTimeout must start false")
-        XCTAssertNil(vm.errorMessage,                   "errorMessage must start nil")
-        XCTAssertEqual(vm.tickCount, 0,                 "tickCount must be 0 before any tick")
+        XCTAssertTrue(vm.isLoading, "isLoading must be true before first tick")
+        XCTAssertFalse(vm.isDelivered, "isDelivered must start false")
+        XCTAssertFalse(vm.isTimeout, "isTimeout must start false")
+        XCTAssertNil(vm.errorMessage, "errorMessage must start nil")
+        XCTAssertEqual(vm.tickCount, 0, "tickCount must be 0 before any tick")
 
         // Rider pinned at the branch on the very first frame
         
         if let riderCoordinate = vm.riderCoordinate {
-            XCTAssertEqual(riderCoordinate.latitude,  branchCoord.latitude,  accuracy: 0.000001,
+            XCTAssertEqual(riderCoordinate.latitude, branchCoord.latitude, accuracy: 0.000001,
                            "riderCoordinate.latitude must equal branch on start")
             XCTAssertEqual(riderCoordinate.longitude, branchCoord.longitude, accuracy: 0.000001,
                            "riderCoordinate.longitude must equal branch on start")
@@ -341,7 +338,7 @@ final class DeliveryViewModelTests: XCTestCase {
         vm.stopDelivery()
 
         XCTAssertFalse(vm.isDelivered, "isDelivered must be false after stop")
-        XCTAssertFalse(vm.isTimeout,   "isTimeout must be false after stop")
-        XCTAssertNil(vm.errorMessage,  "errorMessage must be nil after stop")
+        XCTAssertFalse(vm.isTimeout, "isTimeout must be false after stop")
+        XCTAssertNil(vm.errorMessage, "errorMessage must be nil after stop")
     }
 }

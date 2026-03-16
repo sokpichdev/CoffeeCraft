@@ -76,7 +76,9 @@ class ReorderManager: ObservableObject {
         orderItems.compactMap { findExactMatch($0, in: currentCart) != nil ? $0.name : nil }
     }
 
-    func analyzeItems(orderItems: [CartItemData], currentCart: [CartItem]) -> (toMerge: [(existing: CartItem, additionalQty: Int)], toAdd: [CartItemData]) {
+    func analyzeItems(orderItems: [CartItemData],
+                      currentCart: [CartItem]) -> (toMerge: [(existing: CartItem, additionalQty: Int)],
+                                                   toAdd: [CartItemData]) {
         var toMerge: [(existing: CartItem, additionalQty: Int)] = []
         var toAdd: [CartItemData] = []
 

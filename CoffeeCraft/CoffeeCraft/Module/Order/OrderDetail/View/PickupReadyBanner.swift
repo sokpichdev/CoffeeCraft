@@ -15,7 +15,7 @@ import SwiftUI
 
 struct PickupReadyBanner: View {
 
-    let branchName:  String
+    let branchName: String
     let onDirections: () -> Void
 
     @State private var isPulsing = false

@@ -22,11 +22,11 @@ struct MenuBranchSelectionSheet: View {
     var onBranchSelected: ((Branch) -> Void)?
 
     private var filteredBranches: [Branch] {
-        let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !q.isEmpty else { return branches }
+        let query = searchText.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !query.isEmpty else { return branches }
         return branches.filter {
-            $0.name.lowercased().contains(q) ||
-            $0.address.lowercased().contains(q)
+            $0.name.lowercased().contains(query) ||
+            $0.address.lowercased().contains(query)
         }
     }
 

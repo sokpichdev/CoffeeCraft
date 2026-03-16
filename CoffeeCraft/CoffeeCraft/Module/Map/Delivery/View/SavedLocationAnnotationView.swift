@@ -11,7 +11,7 @@ import SwiftUI
 
 struct SavedLocationAnnotationView: View {
 
-    let location:   SavedLocation
+    let location: SavedLocation
     let isSelected: Bool
 
     private let pinSize: CGFloat     = 40
@@ -38,7 +38,7 @@ struct SavedLocationAnnotationView: View {
                     .transition(
                         .asymmetric(
                             insertion: .scale(scale: 0.7, anchor: .bottom).combined(with: .opacity),
-                            removal:   .scale(scale: 0.7, anchor: .bottom).combined(with: .opacity)
+                            removal: .scale(scale: 0.7, anchor: .bottom).combined(with: .opacity)
                         )
                     )
                     .padding(.bottom, 5)

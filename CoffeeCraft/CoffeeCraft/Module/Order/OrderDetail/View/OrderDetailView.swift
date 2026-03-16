@@ -26,7 +26,7 @@ struct OrderDetailView: View {
     // Captured at activation time so navigationDestination always has a non-nil VM.
     // capturedDeliveryVM is set before navigateToDelivery = true
     // a race — it may still be nil when SwiftUI evaluates the destination closure.
-    @State private var capturedDeliveryVM: DeliveryViewModel? = nil
+    @State private var capturedDeliveryVM: DeliveryViewModel?
     
     init(order: Order, isActive: Bool = false) {
         self.initialOrder = order
@@ -218,8 +218,8 @@ struct OrderDetailView: View {
     }
 
     private var isCompletedOrder: Bool {
-        let s = vm.order.status?.lowercased() ?? ""
-        return s == "completed" || s == "done"
+        let status = vm.order.status?.lowercased() ?? ""
+        return status == "completed" || status == "done"
     }
 
     private func confirmCancel() {
@@ -249,7 +249,10 @@ struct OrderDetailView: View {
             
             AlertManager.shared.showConfirmation(
                 title: "Items Already in Cart",
-                message: "\(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart with the same options. Quantities will be combined.",
+                message: """
+                \(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart \
+                with the same options. Quantities will be combined.
+                """,
                 confirmTitle: "Add to Cart",
                 cancelTitle: "Cancel"
             ) {

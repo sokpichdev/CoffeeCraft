@@ -19,9 +19,9 @@ struct SavedLocation: Identifiable, Codable, Hashable {
     // MARK: - Stored Fields
 
     @DocumentID var id: String?
-    var label:     String      // "Home", "Work", "Mum's Place"
-    var address:   String      // Human-readable address from MKLocalSearch
-    var latitude:  Double
+    var label: String      // "Home", "Work", "Mum's Place"
+    var address: String      // Human-readable address from MKLocalSearch
+    var latitude: Double
     var longitude: Double
     var isDefault: Bool        // Pre-selected at checkout
     var createdAt: Date

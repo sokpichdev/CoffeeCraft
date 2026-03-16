@@ -35,7 +35,8 @@ class InboxViewModel: ObservableObject {
         guard pageNum > 1 || notifications.isEmpty else { return }
         guard hasMore || pageNum == 1 else { return }
 
-        AppLog.menu.debug("📋 fetchNotifications — uid: \(userId), page: \(pageNum), cursor: \(self.lastDocument?.documentID ?? "none")")
+        AppLog.menu.debug(
+            "📋 fetchNotif — uid: \(userId), page: \(pageNum), cursor: \(self.lastDocument?.documentID ?? "none")")
 
         if pageNum == 1 {
             isLoading = true
@@ -68,7 +69,8 @@ class InboxViewModel: ObservableObject {
             notifications.append(contentsOf: unique)
 
             AppLog.printList(unique, label: "Notifications Page \(pageNum)")
-            AppLog.menu.debug("✅ fetchNotifications — appended \(unique.count), total: \(self.notifications.count), hasMore: \(self.hasMore)")
+            AppLog.menu.debug(
+                "✅ fetchNotif — appended \(unique.count), total: \(self.notifications.count), hasMore: \(self.hasMore)")
 
             if pageNum == 1 { isLoading = false }
 
@@ -130,14 +132,14 @@ class InboxViewModel: ObservableObject {
                 for change in changes {
                     switch change.type {
                     case .added:
-                        if let n = try? change.document.data(as: AppNotification.self),
-                           !self.notifications.contains(where: { $0.id == n.id }) {
-                            self.notifications.insert(n, at: 0)
-                            if !n.isRead {
+                        if let notif = try? change.document.data(as: AppNotification.self),
+                           !self.notifications.contains(where: { $0.id == notif.id }) {
+                            self.notifications.insert(notif, at: 0)
+                            if !notif.isRead {
                                 self.unreadCount += 1
                                 self.syncAppIconBadge(self.unreadCount)
                             }
-                            AppLog.menu.debug("➕ Realtime — new notification: \(n.id ?? "nil")")
+                            AppLog.menu.debug("➕ Realtime — new notification: \(notif.id ?? "nil")")
                         }
 
                     case .modified:

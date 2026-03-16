@@ -40,12 +40,12 @@ final class MapViewModel: NSObject {
             ? base
             : base.filter { branch in activeFilters.allSatisfy { $0.matches(branch) } }
 
-        let q = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !q.isEmpty else { return afterFilters }
+        let query = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !query.isEmpty else { return afterFilters }
 
         return afterFilters.filter {
-            $0.name.lowercased().contains(q) ||
-            $0.address.lowercased().contains(q)
+            $0.name.lowercased().contains(query) ||
+            $0.address.lowercased().contains(query)
         }
     }
 
@@ -57,10 +57,10 @@ final class MapViewModel: NSObject {
             await MainActor.run {
                 self.searchQuery = query
                 // Fire analytics if query has results
-                let q = query.trimmingCharacters(in: .whitespaces)
-                if !q.isEmpty {
+                let query = query.trimmingCharacters(in: .whitespaces)
+                if !query.isEmpty {
                     MapAnalytics.mapSearched(
-                        query: q,
+                        query: query,
                         resultCount: self.filteredBranches().count
                     )
                 }
@@ -163,7 +163,7 @@ final class MapViewModel: NSObject {
     }
 
     func sortedBranches() -> [Branch] {
-        guard let userLocation else { return branches }
+//        guard let userLocation else { return branches }
         return branches.sorted { distance(to: $0) < distance(to: $1) }
     }
 
@@ -176,17 +176,17 @@ final class MapViewModel: NSObject {
     }
 
     func distanceKm(to branch: Branch) -> Double? {
-        let m = distance(to: branch)
-        guard m != .infinity else { return nil }
-        return m / 1_000
+        let distanceMeters = distance(to: branch)
+        guard distanceMeters != .infinity else { return nil }
+        return distanceMeters / 1_000
     }
 
     func distanceLabel(to branch: Branch) -> String {
-        let m = distance(to: branch)
-        guard m != .infinity else { return "" }
-        return m >= 1_000
-            ? String(format: "%.1f km", m / 1_000)
-            : String(format: "%.0f m", m)
+        let distanceMeters = distance(to: branch)
+        guard distanceMeters != .infinity else { return "" }
+        return distanceMeters >= 1_000
+            ? String(format: "%.1f km", distanceMeters / 1_000)
+            : String(format: "%.0f m", distanceMeters)
     }
 
     // MARK: - Selection

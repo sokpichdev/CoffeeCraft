@@ -13,8 +13,8 @@ struct SavedLocationsView: View {
 
     @State private var manager    = SavedLocationManager()
     @State private var showForm   = false
-    @State private var editTarget: SavedLocation? = nil
-    @State private var deleteTarget: SavedLocation? = nil
+    @State private var editTarget: SavedLocation?
+    @State private var deleteTarget: SavedLocation?
 
     @Environment(\.dismiss) private var dismiss
 
@@ -43,7 +43,7 @@ struct SavedLocationsView: View {
         .sheet(isPresented: $showForm) {
             SavedLocationFormSheet(
                 existing: editTarget,
-                onSave:   { handleSave($0) },
+                onSave: { handleSave($0) },
                 onCancel: { showForm = false }
             )
             .presentationDetents([.large])
@@ -52,7 +52,7 @@ struct SavedLocationsView: View {
         }
         .alert("Remove Address", isPresented: .constant(deleteTarget != nil)) {
             Button("Remove", role: .destructive) { confirmDelete() }
-            Button("Cancel",  role: .cancel)     { deleteTarget = nil }
+            Button("Cancel", role: .cancel) { deleteTarget = nil }
         } message: {
             if let loc = deleteTarget {
                 Text("\(loc.label) will be removed from your saved addresses.")
@@ -70,8 +70,8 @@ struct SavedLocationsView: View {
                     LocationRow(
                         location: location,
                         onSetDefault: { setDefault(location) },
-                        onEdit:       { startEdit(location) },
-                        onDelete:     { deleteTarget = location }
+                        onEdit: { startEdit(location) },
+                        onDelete: { deleteTarget = location }
                     )
 
                     if location.id != manager.locations.last?.id {
@@ -198,10 +198,10 @@ struct SavedLocationsView: View {
 
 private struct LocationRow: View {
 
-    let location:    SavedLocation
+    let location: SavedLocation
     let onSetDefault: () -> Void
-    let onEdit:       () -> Void
-    let onDelete:     () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
 
     var body: some View {
         HStack(spacing: 14) {

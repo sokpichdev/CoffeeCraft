@@ -22,11 +22,11 @@ import SwiftUI
 
 struct DeliveryDestinationPicker: View {
 
-    let branch:          Branch
+    let branch: Branch
     let locationManager: SavedLocationManager
-    let userCoordinate:  CLLocationCoordinate2D?
-    let onConfirm:       (CLLocationCoordinate2D, String) -> Void
-    let onCancel:        () -> Void
+    let userCoordinate: CLLocationCoordinate2D?
+    let onConfirm: (CLLocationCoordinate2D, String) -> Void
+    let onCancel: () -> Void
 
     @State private var selectedOption: DestinationOption = .currentLocation
     @State private var searchText    = ""
@@ -48,17 +48,20 @@ struct DeliveryDestinationPicker: View {
             switch (lhs, rhs) {
             case (.currentLocation, .currentLocation):
                 return true
-            case (.saved(let a), .saved(let b)):
-                return a == b
-            case (.searched(let a), .searched(let b)):
-                // MKMapItem equality: same placemark name + coordinate
-                return a.placemark.coordinate.latitude  == b.placemark.coordinate.latitude
-                    && a.placemark.coordinate.longitude == b.placemark.coordinate.longitude
-                    && a.name == b.name
-            case (.pinned(let coordA, let labelA), .pinned(let coordB, let labelB)):
-                return coordA.latitude  == coordB.latitude
-                    && coordA.longitude == coordB.longitude
-                    && labelA           == labelB
+
+            case (.saved(let lhsLocation), .saved(let rhsLocation)):
+                return lhsLocation == rhsLocation
+
+            case (.searched(let lhsItem), .searched(let rhsItem)):
+                return lhsItem.placemark.coordinate.latitude == rhsItem.placemark.coordinate.latitude
+                    && lhsItem.placemark.coordinate.longitude == rhsItem.placemark.coordinate.longitude
+                    && lhsItem.name == rhsItem.name
+
+            case (.pinned(let lhsCoord, let lhsLabel), .pinned(let rhsCoord, let rhsLabel)):
+                return lhsCoord.latitude == rhsCoord.latitude
+                    && lhsCoord.longitude == rhsCoord.longitude
+                    && lhsLabel == rhsLabel
+
             default:
                 return false
             }
@@ -274,10 +277,10 @@ extension DeliveryDestinationPicker {
     private var defaultOptions: some View {
             // Current GPS
             optionRow(
-                icon:       "location.fill",
-                iconColor:  Color.accentPrimary,
-                title:      "Current Location",
-                subtitle:   userCoordinate != nil
+                icon: "location.fill",
+                iconColor: Color.accentPrimary,
+                title: "Current Location",
+                subtitle: userCoordinate != nil
                                 ? "Use your GPS position now"
                                 : "Location unavailable",
                 isSelected: selectedOption == .currentLocation,
@@ -292,13 +295,13 @@ extension DeliveryDestinationPicker {
 
                 ForEach(locationManager.locations) { location in
                     optionRow(
-                        icon:       location.isDefault ? "house.fill" : "mappin.circle.fill",
-                        iconColor:  Color.accentGold,
-                        title:      location.label,
-                        subtitle:   location.address,
+                        icon: location.isDefault ? "house.fill" : "mappin.circle.fill",
+                        iconColor: Color.accentGold,
+                        title: location.label,
+                        subtitle: location.address,
                         isSelected: selectedOption == .saved(location),
                         isDisabled: false,
-                        badge:      location.isDefault ? "Default" : nil
+                        badge: location.isDefault ? "Default" : nil
                     ) {
                         selectedOption = .saved(location)
                     }
@@ -313,10 +316,10 @@ extension DeliveryDestinationPicker {
             if case .pinned(_, let label) = selectedOption {
                 Divider().padding(.leading, 60)
                 optionRow(
-                    icon:       "mappin.circle.fill",
-                    iconColor:  Color.semanticSuccess,
-                    title:      "Pinned location",
-                    subtitle:   label,
+                    icon: "mappin.circle.fill",
+                    iconColor: Color.semanticSuccess,
+                    title: "Pinned location",
+                    subtitle: label,
                     isSelected: true,
                     isDisabled: false
                 ) {}
@@ -341,10 +344,10 @@ extension DeliveryDestinationPicker {
         } else {
             ForEach(searchResults, id: \.self) { item in
                 optionRow(
-                    icon:       "mappin.circle.fill",
-                    iconColor:  Color.accentPrimary,
-                    title:      item.placemark.name ?? item.placemark.formattedAddress,
-                    subtitle:   item.placemark.formattedAddress,
+                    icon: "mappin.circle.fill",
+                    iconColor: Color.accentPrimary,
+                    title: item.placemark.name ?? item.placemark.formattedAddress,
+                    subtitle: item.placemark.formattedAddress,
                     isSelected: selectedOption == .searched(item),
                     isDisabled: false
                 ) {
@@ -440,14 +443,14 @@ extension DeliveryDestinationPicker {
     // MARK: - Option Row
 
     private func optionRow(
-        icon:       String,
-        iconColor:  Color,
-        title:      String,
-        subtitle:   String,
+        icon: String,
+        iconColor: Color,
+        title: String,
+        subtitle: String,
         isSelected: Bool,
         isDisabled: Bool,
-        badge:      String? = nil,
-        onTap:      @escaping () -> Void
+        badge: String? = nil,
+        onTap: @escaping () -> Void
     ) -> some View {
         Button(action: onTap) {
             HStack(spacing: 14) {
