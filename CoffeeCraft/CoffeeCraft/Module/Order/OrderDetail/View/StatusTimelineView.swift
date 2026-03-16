@@ -2,9 +2,7 @@
 //  StatusTimelineView.swift
 //  CoffeeCraft
 //
-//  Updated: branched timeline for pickup vs delivery orders.
-//  Pickup:  Pending → InProgress → Ready → Completed
-//  Delivery: Pending → InProgress → Ready → OnDelivery → Completed
+//  Pickup: 4 steps (no OnDelivery). Delivery: 5 steps.
 //
 
 import SwiftUI
@@ -13,29 +11,18 @@ struct StatusTimelineView: View {
     let status: String
     let isDeliveryOrder: Bool
 
-    // MARK: - Step definitions
-
-    private static let pickupSteps: [(code: String, icon: String, title: String)] = [
-        ("Pending",    "clock",                  "Order Received"),
-        ("InProgress", "flame.fill",             "Preparing"),
-        ("Ready",      "checkmark.circle.fill",  "Ready for Pickup"),
-        ("Completed",  "bag.fill",               "Completed"),
-    ]
-
-    private static let deliverySteps: [(code: String, icon: String, title: String)] = [
-        ("Pending",    "clock",                  "Order Received"),
-        ("InProgress", "flame.fill",             "Preparing"),
-        ("Ready",      "checkmark.circle.fill",  "Ready"),
-        ("OnDelivery", "bicycle",                "On Delivery"),
-        ("Completed",  "bag.fill",               "Delivered"),
-    ]
-
-    private var steps: [(code: String, icon: String, title: String)] {
-        isDeliveryOrder ? Self.deliverySteps : Self.pickupSteps
+    // Build steps from the enum so adding a new case here is automatic.
+    private var steps: [OrderStatus] {
+        if isDeliveryOrder {
+            return [.pending, .inProgress, .ready, .onDelivery, .completed]
+        } else {
+            return [.pending, .inProgress, .ready, .completed]
+        }
     }
 
-    var currentStatusIndex: Int {
-        steps.firstIndex { $0.code == status } ?? 0
+    private var currentIndex: Int {
+        let current = OrderStatus.from(status)
+        return steps.firstIndex(of: current) ?? 0
     }
 
     var body: some View {
@@ -48,10 +35,12 @@ struct StatusTimelineView: View {
                 ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                     TimelineRow(
                         icon: step.icon,
-                        title: step.title,
-                        subtitle: subtitle(for: step.code, index: index),
-                        isCompleted: index <= currentStatusIndex,
-                        isCurrent: index == currentStatusIndex,
+                        title: step.timelineTitle(isDelivery: isDeliveryOrder),
+                        subtitle: index == currentIndex
+                            ? step.timelineSubtitle(isDelivery: isDeliveryOrder)
+                            : nil,
+                        isCompleted: index <= currentIndex,
+                        isCurrent: index == currentIndex,
                         isLast: index == steps.count - 1
                     )
                 }
@@ -63,20 +52,6 @@ struct StatusTimelineView: View {
                 .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
         )
-    }
-
-    // MARK: - Subtitles
-
-    private func subtitle(for code: String, index: Int) -> String? {
-        guard index == currentStatusIndex else { return nil }
-        switch code {
-        case "Pending":    return "Waiting to be prepared"
-        case "InProgress": return "Barista is working on it"
-        case "Ready":      return isDeliveryOrder ? "Handing off to rider" : "Come pick it up!"
-        case "OnDelivery": return "Your order is on the way 🛵"
-        case "Completed":  return isDeliveryOrder ? "Delivered — enjoy!" : "Enjoy your coffee!"
-        default:           return nil
-        }
     }
 }
 
@@ -97,18 +72,15 @@ struct TimelineRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-
             ZStack {
                 if isCurrent {
                     ZStack {
                         Circle()
                             .fill(isCompleted ? Color.semanticSuccess : Color.textMuted.opacity(0.2))
                             .frame(width: indicatorSize, height: indicatorSize)
-
                         Circle()
                             .fill(Color.bgSecondary)
                             .frame(width: indicatorSize - 3, height: indicatorSize - 3)
-
                         Circle()
                             .fill(isCompleted ? Color.semanticSuccess : Color.textMuted.opacity(0.2))
                             .frame(width: indicatorSize - 6, height: indicatorSize - 6)
@@ -118,7 +90,6 @@ struct TimelineRow: View {
                         .fill(isCompleted ? Color.semanticSuccess : Color.bgSecondary)
                         .frame(width: circleSize, height: circleSize)
                 }
-
                 Image(systemName: isCompleted && !isCurrent ? "checkmark" : icon)
                     .font(.system(size: 14, weight: isCompleted ? .bold : .regular))
                     .foregroundColor(isCompleted ? .textPrimary : .textMuted).colorScheme(.dark)
@@ -129,7 +100,6 @@ struct TimelineRow: View {
                 Text(title)
                     .font(.system(size: 16, weight: isCurrent ? .semibold : .regular))
                     .foregroundColor(isCompleted ? .textPrimary : .textMuted)
-
                 if let subtitle {
                     Text(subtitle)
                         .font(.footnote).bold()
@@ -137,7 +107,6 @@ struct TimelineRow: View {
                         .transition(.opacity)
                 }
             }
-
             Spacer()
         }
         .padding(.bottom, isLast ? 0 : lineHeight)

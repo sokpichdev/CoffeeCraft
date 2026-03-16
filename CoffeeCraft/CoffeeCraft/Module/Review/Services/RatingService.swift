@@ -84,7 +84,7 @@ extension RatingService {
         // Works for orders placed after Phase 7's OrderService changes.
         let fastSnapshot = try await ordersRef()
             .whereField("userId", isEqualTo: userId)
-            .whereField("status", isEqualTo: "Completed")
+            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
             .whereField("productIds", arrayContains: productId)
             .limit(to: 1)
             .getDocuments()
@@ -101,7 +101,7 @@ extension RatingService {
         // Reads up to 30 orders — fine for a coffee shop context.
         let legacySnapshot = try await ordersRef()
             .whereField("userId", isEqualTo: userId)
-            .whereField("status", isEqualTo: "Completed")
+            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
             .order(by: "createdAt", descending: true)
             .limit(to: 30)
             .getDocuments()

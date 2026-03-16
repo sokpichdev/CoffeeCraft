@@ -2,9 +2,8 @@
 //  ActionButtonsSection.swift
 //  CoffeeCraft
 //
-//  Updated: branched manager flow for pickup vs delivery.
-//  Pickup:   Pending → InProgress → Ready → Completed
-//  Delivery: Pending → InProgress → Ready → OnDelivery → Completed
+//  nextStatus(isDelivery:) drives all transitions —
+//  no hardcoded status strings, no duplicated switch.
 //
 
 import SwiftUI
@@ -18,30 +17,22 @@ struct ActionButtonsSection: View {
     var onReorder: (() -> Void)?
     var onCancel: (() -> Void)?
 
-    // MARK: - Helpers
-
-    private var isCompleted: Bool {
-        let s = order.status?.lowercased() ?? ""
-        return s == "completed" || s == "done"
-    }
-    private var isCancelled: Bool { order.status?.lowercased() == "cancelled" }
+    private var orderStatus: OrderStatus { order.orderStatus }
     private var canCancel: Bool {
-        order.status == "Pending" && !isActive &&
+        orderStatus == .pending && !isActive &&
         order.userId == UserSession.shared.userId
     }
-
-    // MARK: - Body
 
     var body: some View {
         VStack(spacing: 12) {
 
-            // ── Manager progression buttons ─────────────────────────
-            if isActive && !isCompleted && !isCancelled {
+            // - Manager progression ─
+            if isActive && !orderStatus.isTerminal {
                 managerProgressButton
             }
 
-            // ── Reorder (customer, completed only) ──────────────────
-            if isCompleted {
+            // Reorder (customer, completed only) ─
+            if orderStatus == .completed {
                 CustomCoffeeButton(
                     title: "Reorder",
                     buttonImage: "arrow.clockwise",
@@ -49,7 +40,7 @@ struct ActionButtonsSection: View {
                 ) { onReorder?() }
             }
 
-            // ── Cancel (customer, Pending only) ─────────────────────
+            // Cancel (customer, pending only) ─
             if canCancel {
                 CustomCoffeeButton(
                     title: isCancelling ? "Cancelling..." : "Cancel Order",
@@ -60,10 +51,10 @@ struct ActionButtonsSection: View {
                 ) { onCancel?() }
             }
 
-            // ── Cancelled state banner ───────────────────────────────
-            if isCancelled {
+            // - Cancelled banner ─
+            if orderStatus == .cancelled {
                 HStack(spacing: 10) {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: OrderStatus.cancelled.icon)
                         .foregroundColor(Color.semanticError.opacity(0.8))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Order Cancelled")
@@ -71,8 +62,7 @@ struct ActionButtonsSection: View {
                             .foregroundColor(Color.semanticError)
                         if order.wasWalletPayment, let amount = order.walletAmountPaid {
                             Text("+\(amount.currencyFormatted) refunded to your wallet")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.caption).foregroundColor(.secondary)
                         }
                     }
                     Spacer()
@@ -88,55 +78,40 @@ struct ActionButtonsSection: View {
         }
     }
 
-    // MARK: - Manager progression button (branched by order type)
+    // MARK: - Manager Progress Button
 
     @ViewBuilder
     private var managerProgressButton: some View {
-        let status = order.status ?? ""
-        let isDelivery = order.isDeliveryOrder
-
-        if status == "Pending" {
+        // nextStatus(isDelivery:) returns nil for terminal/unsupported states.
+        if let next = orderStatus.nextStatus(isDelivery: order.isDeliveryOrder) {
             CustomCoffeeButton(
-                title: isUpdating ? "Updating..." : "Start Preparing",
-                buttonImage: "flame.fill",
-                bgColors: [.orange],
+                title: isUpdating ? "Updating..." : buttonTitle(for: next),
+                buttonImage: next.icon,
+                bgColors: [buttonColor(for: next)],
                 isDisabled: isUpdating
-            ) { onUpdateStatus?("InProgress") }
+            ) { onUpdateStatus?(next.rawValue) }
+        }
+    }
 
-        } else if status == "InProgress" {
-            CustomCoffeeButton(
-                title: isUpdating ? "Updating..." : "Mark as Ready",
-                buttonImage: "cup.and.saucer.fill",
-                bgColors: [.semanticSuccess],
-                isDisabled: isUpdating
-            ) { onUpdateStatus?("Ready") }
+    /// Button title for advancing to `next` — phrased as an action, not a state name.
+    private func buttonTitle(for next: OrderStatus) -> String {
+        switch next {
+        case .inProgress: return "Start Preparing"
+        case .ready: return "Mark as Ready"
+        case .onDelivery: return "Dispatch Rider"
+        case .completed: return order.isDeliveryOrder ? "Mark as Delivered" : "Complete Order"
+        default: return next.displayLabel
+        }
+    }
 
-        } else if status == "Ready" && isDelivery {
-            // Delivery: Ready → OnDelivery (hand off to rider)
-            CustomCoffeeButton(
-                title: isUpdating ? "Updating..." : "Dispatch Rider",
-                buttonImage: "bicycle",
-                bgColors: [.blue],
-                isDisabled: isUpdating
-            ) { onUpdateStatus?("OnDelivery") }
-
-        } else if status == "Ready" && !isDelivery {
-            // Pickup: Ready → Completed (customer collected)
-            CustomCoffeeButton(
-                title: isUpdating ? "Updating..." : "Complete Order",
-                buttonImage: "checkmark.circle.fill",
-                bgColors: [.accentPrimary],
-                isDisabled: isUpdating
-            ) { onUpdateStatus?("Completed") }
-
-        } else if status == "OnDelivery" {
-            // Delivery: OnDelivery → Completed (rider confirmed drop-off)
-            CustomCoffeeButton(
-                title: isUpdating ? "Updating..." : "Mark as Delivered",
-                buttonImage: "bag.fill",
-                bgColors: [.accentPrimary],
-                isDisabled: isUpdating
-            ) { onUpdateStatus?("Completed") }
+    /// Button background color — matches the destination status color.
+    private func buttonColor(for next: OrderStatus) -> Color {
+        switch next {
+        case .inProgress: return .orange
+        case .ready: return .semanticSuccess
+        case .onDelivery: return .blue
+        case .completed: return .accentPrimary
+        default: return .accentPrimary
         }
     }
 }

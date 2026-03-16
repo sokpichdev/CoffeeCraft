@@ -89,7 +89,7 @@ extension AnalyticsService {
                     do {
                         let snapshot = try await self.db.collection("orders")
                             .whereField("userId", isEqualTo: userId)
-                            .whereField("status", isEqualTo: "Completed")
+                            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
                             .getDocuments()
 
                         let count = snapshot.documents.count

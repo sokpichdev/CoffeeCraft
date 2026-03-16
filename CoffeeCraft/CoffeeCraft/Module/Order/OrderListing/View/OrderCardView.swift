@@ -42,9 +42,10 @@ struct OrderCardView: View {
         self.onTrackDelivery = onTrackDelivery
         self.onReorder = onReorder
         self.formattedOrderNumber = String(format: "%04d", order.orderId ?? 0)
-        self.statusColorValue = OrderCardView.computeStatusColor(order.status ?? "")
+        // Colour resolved from the shared enum — no local switch needed.
+        self.statusColorValue = order.orderStatus.color
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerSection
@@ -65,7 +66,7 @@ struct OrderCardView: View {
 
             Divider().padding(.horizontal)
             footerSection
-            
+
             if adminActions != nil {
                 Divider().padding(.horizontal)
                 adminActions?().padding()
@@ -83,7 +84,7 @@ struct OrderCardView: View {
         // Prevent animation from affecting scroll performance
         .drawingGroup(opaque: false)
     }
-    
+
     private var headerSection: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
@@ -101,10 +102,8 @@ struct OrderCardView: View {
                         .frame(height: 12)
                 }
             }
-            
             Spacer()
-            
-            StatusBadge(status: order.status ?? "")
+            StatusBadge(orderStatus: order.orderStatus)
         }
         .padding()
         .background(
@@ -116,7 +115,7 @@ struct OrderCardView: View {
         )
         .cornerRadius(24, corners: [.topLeft, .topRight])
     }
-    
+
     private var itemsPreviewSection: some View {
         HStack(spacing: 12) {
             // Stacked thumbnails area - shows either stack or expands into spacer
@@ -161,9 +160,9 @@ struct OrderCardView: View {
                 }
             }
             .opacity(isExpanded ? 0 : 1)
-            
+
             Spacer()
-            
+
             Button {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isExpanded.toggle()
@@ -187,22 +186,17 @@ struct OrderCardView: View {
         }
         .padding()
     }
-    
+
     private var detailedItemsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                DetailItemRow(
-                    item: item,
-                    index: index,
-                    isExpanded: isExpanded,
-                    namespace: animationNamespace,
-                    totalItems: itemCount
-                )
+                DetailItemRow(item: item, index: index, isExpanded: isExpanded,
+                              namespace: animationNamespace, totalItems: itemCount)
             }
         }
         .background(Color.textMuted.opacity(0.03))
     }
-    
+
     private var footerSection: some View {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
@@ -214,13 +208,9 @@ struct OrderCardView: View {
                     .font(.title3).fontWeight(.bold).fontDesign(.rounded)
                     .foregroundColor(.accentPrimary)
             }
-
             Spacer()
-
-            if isCompleted {
-                Button {
-                    onReorder?()
-                } label: {
+            if order.orderStatus == .completed {
+                Button { onReorder?() } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 11, weight: .bold))
@@ -242,18 +232,6 @@ struct OrderCardView: View {
         }
         .padding()
     }
-    
-    private static func computeStatusColor(_ status: String) -> Color {
-        switch status {
-        case "Pending":                   return .orange
-        case "In Progress", "InProgress": return .accentPrimary
-        case "Ready":                     return .semanticSuccess
-        case "OnDelivery":                return .blue
-        case "Done", "Completed":         return .textMuted
-        case "Cancelled":                 return .semanticError
-        default:                          return .textMuted
-        }
-    }
 }
 
 // MARK: - Detail Item Row (all items use matched geometry)
@@ -263,18 +241,10 @@ struct DetailItemRow: View {
     let isExpanded: Bool
     var namespace: Namespace.ID
     let totalItems: Int
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // ALL items use matched geometry - same animation for everyone
-            FlyingThumbnail(
-                url: item.imageURL ?? "",
-                index: index,
-                namespace: namespace,
-                size: 44,
-                cornerRadius: 8
-            )
-            
+            FlyingThumbnail(url: item.imageURL ?? "", index: index, namespace: namespace, size: 44, cornerRadius: 8)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
                     if let qty = item.quantity, qty > 1 {
@@ -289,14 +259,12 @@ struct DetailItemRow: View {
                         .lineLimit(1)
                         .foregroundColor(.textPrimary)
                 }
-                
                 if let selections = item.selections, !selections.isEmpty {
                     Text(selections.map { $0.value }.joined(separator: " • "))
                         .font(.caption2)
                         .foregroundColor(.textSecondary)
                         .lineLimit(1)
                 }
-                
                 if let extras = item.extras, !extras.isEmpty {
                     Text(extras.joined(separator: ", "))
                         .font(.caption2)
@@ -304,9 +272,7 @@ struct DetailItemRow: View {
                         .lineLimit(1)
                 }
             }
-            
             Spacer()
-            
             Text("$\(item.price ?? 0.0, specifier: "%.2f")")
                 .font(.subheadline)
                 .fontWeight(.semibold)
@@ -324,7 +290,6 @@ struct DetailItemRow: View {
 // MARK: - Overflow Badge
 struct OverflowBadge: View {
     let count: Int
-    
     var body: some View {
         Text("+\(count)")
             .font(.caption2)
@@ -336,7 +301,6 @@ struct OverflowBadge: View {
     }
 }
 
-// MARK: - Flying Thumbnail (unified for all items)
 struct FlyingThumbnail: View {
     let url: String
     let index: Int
@@ -346,7 +310,6 @@ struct FlyingThumbnail: View {
     var cornerRadius: CGFloat = 16
     var isCircle: Bool = false
     private var geometryId: String { "thumbnail-\(url)-\(index)" }
-    
     var body: some View {
         CachedThumbnail(url: url, size: size, cornerRadius: cornerRadius, isCircle: isCircle)
             .matchedGeometryEffect(

@@ -37,7 +37,7 @@ struct OrderQueueCard: View {
 
             Divider().background(Color.borderColor)
 
-            // Bottom: order ID + price + status + advance
+            // Bottom: order ID + price + status + advance button
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("#\(item.id.suffix(8).uppercased())")
@@ -61,7 +61,7 @@ struct OrderQueueCard: View {
                                 .scaleEffect(0.75)
                                 .frame(width: 36, height: 36)
                         } else {
-                            Image(systemName: next == .preparing ? "flame.fill" : "checkmark.circle.fill")
+                            Image(systemName: next.icon)
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 36, height: 36)
@@ -71,7 +71,11 @@ struct OrderQueueCard: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(isUpdating)
-                    .accessibilityLabel(item.status.advanceButtonLabel)
+                    .accessibilityLabel(
+                        item.isDeliveryOrder
+                            ? item.status.advanceButtonLabelDelivery
+                            : item.status.advanceButtonLabelPickup
+                    )
                 }
             }
         }
@@ -131,7 +135,6 @@ struct HistoryOrderRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Status indicator dot
             Circle()
                 .fill(item.status.color)
                 .frame(width: 9, height: 9)

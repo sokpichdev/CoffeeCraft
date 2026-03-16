@@ -63,7 +63,7 @@ extension AnalyticsService {
 
     private func revenueInRange(from start: Date, to end: Date) async throws -> Double {
         let snapshot = try await db.collection("orders")
-            .whereField("status", isEqualTo: "Completed")
+            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
             .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
             .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
             .getDocuments()
@@ -90,7 +90,7 @@ extension AnalyticsService {
             .getDocuments()
 
         async let activeSnap = db.collection("orders")
-            .whereField("status", in: ["Pending", "Preparing"])
+            .whereField("status", in: OrderStatus.activeRawValues)
             .getDocuments()
 
         let (today, yesterday, active) = try await (todaySnap, yesterdaySnap, activeSnap)

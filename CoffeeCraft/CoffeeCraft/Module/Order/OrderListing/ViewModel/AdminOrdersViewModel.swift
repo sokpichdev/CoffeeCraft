@@ -259,7 +259,7 @@ class AdminOrdersViewModel: ObservableObject {
 
         do {
             var fields: [String: Any] = ["status": status]
-            if status == "Completed" {
+            if OrderStatus.from(status) == .completed {
                 // Write server-side timestamp so avg fulfillment time in
                 // the Order Funnel is calculated from a reliable clock.
                 fields["completedAt"] = FieldValue.serverTimestamp()
@@ -281,8 +281,10 @@ class AdminOrdersViewModel: ObservableObject {
     }
 
     func applyLocalStatusChange(orderId: String, status: String) {
+        let isCompleted = OrderStatus.from(status) == .completed
+
         if let index = allOrders.firstIndex(where: { $0.id == orderId }) {
-            if status == "Completed" {
+            if isCompleted {
                 allOrders.remove(at: index)
                 AppLog.order.debug("🗑️ applyLocalStatusChange — removed completed order from allOrders: \(orderId)")
             } else {
@@ -292,7 +294,7 @@ class AdminOrdersViewModel: ObservableObject {
         }
 
         if let index = myOrders.firstIndex(where: { $0.id == orderId }) {
-            if status == "Completed" {
+            if isCompleted {
                 myOrders.remove(at: index)
                 AppLog.order.debug("🗑️ applyLocalStatusChange — removed completed order from myOrders: \(orderId)")
             } else {

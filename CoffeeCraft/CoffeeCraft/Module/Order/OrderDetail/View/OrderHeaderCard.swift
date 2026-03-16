@@ -25,10 +25,8 @@ struct OrderHeaderCard: View {
                             .foregroundColor(.textSecondary)
                     }
                 }
-                
                 Spacer()
-                
-                StatusBadge(status: order.status ?? "")
+                StatusBadge(orderStatus: order.orderStatus)
             }
             
             Divider()
@@ -62,15 +60,11 @@ struct OrderHeaderCard: View {
                 // Avatar placeholder
                 ZStack {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [.accentPrimary.opacity(0.8), .accentPrimary],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .fill(LinearGradient(
+                            colors: [.accentPrimary.opacity(0.8), .accentPrimary],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                        ))
                         .frame(width: 48, height: 48)
-                    
                     Text(String(userName.prefix(1).uppercased()))
                         .font(.title3).fontWeight(.bold)
                         .foregroundColor(.textPrimary).colorScheme(.dark)
@@ -125,48 +119,25 @@ struct OrderHeaderCard: View {
     }
 }
 
+// MARK: - StatusBadge
+// Accepts OrderStatus directly — no local switch, no string parsing.
+
 struct StatusBadge: View {
-    let status: String
-    
+    let orderStatus: OrderStatus
+
     var body: some View {
         HStack(spacing: 6) {
             Circle()
-                .fill(statusColor(status).opacity(0.2))
+                .fill(orderStatus.color.opacity(0.25))
                 .frame(width: 8, height: 8)
-            
-            Text(StatusBadge.displayLabel(for: status))
+            Text(orderStatus.displayLabel)
                 .font(.footnote).fontWeight(.semibold)
                 .frame(height: 15)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(statusColor(status).opacity(0.15))
-        .foregroundColor(statusColor(status))
+        .padding(.horizontal, 14).padding(.vertical, 8)
+        .background(orderStatus.color.opacity(0.15))
+        .foregroundColor(orderStatus.color)
         .cornerRadius(20)
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(statusColor(status).opacity(0.2), lineWidth: 1)
-        )
-    }
-    
-    /// Human-readable label for a raw Firestore status string.
-    static func displayLabel(for status: String) -> String {
-        switch status {
-        case "InProgress":  return "In Progress"
-        case "OnDelivery":  return "On Delivery"
-        default:            return status
-        }
-    }
-
-    func statusColor(_ status: String) -> Color {
-        switch status {
-        case "Pending":                   return .orange
-        case "In Progress", "InProgress": return .accentPrimary
-        case "Ready":                     return .semanticSuccess
-        case "OnDelivery":                return .blue
-        case "Done", "Completed":         return .textMuted
-        case "Cancelled":                 return .semanticError
-        default:                          return .textMuted
-        }
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(orderStatus.color.opacity(0.2), lineWidth: 1))
     }
 }
