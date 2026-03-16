@@ -13,7 +13,7 @@ struct OrdersView: View {
     @EnvironmentObject var cartManager: CartManager
     @State private var selectedOrder: Order?
     @State private var navigateToDelivery  = false
-    @State private var capturedDeliveryVM: DeliveryViewModel?
+    @State private var capturedDeliveryVM: DeliveryViewModel? = nil
 
     var body: some View {
         ZStack {
@@ -101,14 +101,15 @@ struct OrdersView: View {
         OrderCardView(
             order: order,
             onNavigate: {
-                // If this card has an active delivery, go straight to the map
-                if order.isDeliveryOrder,
-                   let orderId = order.id,
+                // Card tap always goes to order detail — user reads the order first
+                navigateToDetail(order: order)
+            },
+            onTrackDelivery: {
+                // Live banner tap goes straight to the delivery map
+                if let orderId = order.id,
                    let trackVM = OrderEnvironment.shared.deliveryVM(for: orderId) {
                     capturedDeliveryVM = trackVM
                     navigateToDelivery = true
-                } else {
-                    navigateToDetail(order: order)
                 }
             },
             onReorder: { handleReorder(for: order) }
