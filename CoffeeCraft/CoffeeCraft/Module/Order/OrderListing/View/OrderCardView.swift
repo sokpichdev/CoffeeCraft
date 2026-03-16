@@ -12,6 +12,11 @@ struct OrderCardView: View {
     var onNavigate: (() -> Void)?
     var onTrackDelivery: (() -> Void)?
     var onReorder: (() -> Void)?
+
+    /// Observing OrderEnvironment ensures the live-delivery banner appears
+    /// as soon as DeliveryRestoreService re-hydrates sessions on app relaunch,
+    /// without requiring the user to navigate away and back.
+    @ObservedObject private var orderEnv = OrderEnvironment.shared
     
     /// Number of items to show in the preview stack before the +N badge
     private let previewDisplayCount: Int = 5
@@ -55,10 +60,12 @@ struct OrderCardView: View {
                 detailedItemsSection
             }
             
-            // Live delivery banner — only when this card's order is actively being delivered
+            // Live delivery banner — only when this card's order is actively being delivered.
+            // Uses orderEnv (the @ObservedObject) so SwiftUI re-renders this card
+            // when DeliveryRestoreService populates activeDeliveryVMs on relaunch.
             if order.isDeliveryOrder,
                let orderId = order.id,
-               OrderEnvironment.shared.deliveryVM(for: orderId) != nil {
+               orderEnv.activeDeliveryVMs[orderId] != nil {
                 LiveDeliveryBanner { onTrackDelivery?() }
                     .padding(.horizontal, 12)
                     .padding(.bottom, 8)

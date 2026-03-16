@@ -63,7 +63,7 @@ final class OrderEnvironment: ObservableObject {
     // tracked independently. Populated when order status reaches "OnDelivery".
 
     @Published var activeDeliverySessions: [String: DeliverySession] = [:]
-    private(set) var activeDeliveryVMs: [String: DeliveryViewModel] = [:]
+    @Published private(set) var activeDeliveryVMs: [String: DeliveryViewModel] = [:]
 
     // MARK: - Legacy single-session accessors (used by views that track one order at a time)
 

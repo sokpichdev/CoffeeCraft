@@ -7,7 +7,6 @@
 //  The user's mental flow: who/when → progress → items → pricing → actions.
 //
 
-
 import MapKit
 import SwiftUI
 
@@ -29,6 +28,11 @@ struct OrderDetailView: View {
     // capturedDeliveryVM is set before navigateToDelivery = true
     // a race — it may still be nil when SwiftUI evaluates the destination closure.
     @State private var capturedDeliveryVM: DeliveryViewModel?
+
+    /// Observing OrderEnvironment makes the TrackDeliveryButton appear
+    /// as soon as DeliveryRestoreService re-hydrates the VM on relaunch,
+    /// without needing a status change to trigger onChange.
+    @ObservedObject private var orderEnv = OrderEnvironment.shared
     
     init(order: Order, isActive: Bool = false) {
         self.initialOrder = order
@@ -81,10 +85,12 @@ struct OrderDetailView: View {
                         walletAmountPaid: vm.order.walletAmountPaid
                     )
 
-                    // Delivery map track button — shown once simulator is active
+                    // Delivery map track button — shown once simulator is active.
+                    // Reads orderEnv (the @ObservedObject) so the button appears
+                    // immediately when DeliveryRestoreService populates the VM on relaunch.
                     if vm.order.isDeliveryOrder,
                        let orderId = vm.order.id,
-                       let trackVM = OrderEnvironment.shared.deliveryVM(for: orderId) {
+                       let trackVM = orderEnv.activeDeliveryVMs[orderId] {
                         TrackDeliveryButton {
                             capturedDeliveryVM = trackVM
                             navigateToDelivery = true
@@ -150,6 +156,16 @@ struct OrderDetailView: View {
         .onAppear {
             if let orderId = vm.order.id {
                 vm.startListening(orderId: orderId)
+
+                // If the app was relaunched while this order was OnDelivery,
+                // DeliveryRestoreService will have already populated the VM.
+                // onChange(of: status) won't fire because the status isn't
+                // changing — so we sync capturedDeliveryVM here instead.
+                if vm.order.isDeliveryOrder,
+                   OrderStatus.from(vm.order.status) == .onDelivery,
+                   let restoredVM = orderEnv.activeDeliveryVMs[orderId] {
+                    capturedDeliveryVM = restoredVM
+                }
             }
             if let userId = vm.order.userId, !userId.isEmpty {
                 vm.fetchUserInfo(userId: userId)

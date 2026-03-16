@@ -78,6 +78,8 @@ class AuthViewModel: ObservableObject {
             do {
                 try await fetchUserData(uid: uid)
                 isLoading = false
+                // Re-hydrate any delivery sessions that were active before the app was closed
+                await DeliveryRestoreService.shared.restoreActiveDeliveries(for: uid)
             } catch {
                 isLoading = false
                 UserSession.shared.clearUser()
@@ -160,6 +162,8 @@ class AuthViewModel: ObservableObject {
             isLoading = false
             AnalyticsService.shared.log(.login(method: "email"))
             AlertManager.shared.showSuccess(message: "Logged in successfully")
+            // Re-hydrate any in-flight deliveries for this account
+            await DeliveryRestoreService.shared.restoreActiveDeliveries(for: uid)
             return true
         } catch {
             Crashlytics.crashlytics().record(error: error)
@@ -203,6 +207,7 @@ class AuthViewModel: ObservableObject {
             do {
                 try authRepo.signOut()
                 UserSession.shared.clearUser()
+                OrderEnvironment.shared.clearDelivery()
                 AnalyticsService.shared.log(.logout)
                 AppLog.auth.debug("✅ logout — successful")
                 onResult(true)

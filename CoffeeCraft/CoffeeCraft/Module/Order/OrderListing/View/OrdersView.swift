@@ -15,6 +15,10 @@ struct OrdersView: View {
     @State private var navigateToDelivery  = false
     @State private var capturedDeliveryVM: DeliveryViewModel? = nil
 
+    /// Observing OrderEnvironment keeps capturedDeliveryVM in sync after
+    /// DeliveryRestoreService re-hydrates sessions on app relaunch.
+    @ObservedObject private var orderEnv = OrderEnvironment.shared
+
     var body: some View {
         ZStack {
             Color(uiColor: .systemGroupedBackground)
@@ -105,9 +109,11 @@ struct OrdersView: View {
                 navigateToDetail(order: order)
             },
             onTrackDelivery: {
-                // Live banner tap goes straight to the delivery map
+                // Live banner tap goes straight to the delivery map.
+                // Uses orderEnv (the @ObservedObject) so the VM is always
+                // the restored instance, not a stale closure capture.
                 if let orderId = order.id,
-                   let trackVM = OrderEnvironment.shared.deliveryVM(for: orderId) {
+                   let trackVM = orderEnv.activeDeliveryVMs[orderId] {
                     capturedDeliveryVM = trackVM
                     navigateToDelivery = true
                 }
