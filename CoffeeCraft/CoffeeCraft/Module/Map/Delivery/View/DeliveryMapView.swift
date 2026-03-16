@@ -101,8 +101,12 @@ struct DeliveryMapView: View {
 
             // ── Delivered celebration ───────────────────────────────
             if vm.isDelivered {
-                deliveredOverlay
-                    .transition(.scale(scale: 0.85).combined(with: .opacity))
+                CoffeeAlertView(alertModel: AlertModel(type: .success,
+                                                       title: "Delivered!",
+                                                       message: "Enjoy your coffee ☕"),
+                                isAutoDimiss: false) {
+                    dismiss()
+                }
             }
         }
         .ignoresSafeArea(edges: .bottom)
@@ -281,61 +285,6 @@ struct DeliveryMapView: View {
                 .shadow(color: Color.semanticWarning.opacity(0.35), radius: 10, x: 0, y: 4)
         )
         .accessibilityLabel("Rider tracking lost. Double tap Retry to resume.")
-    }
-
-    // MARK: - Delivered Overlay
-
-    private var deliveredOverlay: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(Color.semanticSuccess.opacity(0.15))
-                    .frame(width: 90, height: 90)
-
-                Circle()
-                    .fill(Color.semanticSuccess)
-                    .frame(width: 68, height: 68)
-                    .shadow(color: Color.semanticSuccess.opacity(0.4), radius: 14, x: 0, y: 5)
-
-                Image(systemName: "checkmark")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
-            }
-
-            Text("Delivered!")
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundColor(Color.textPrimary)
-
-            Text("Enjoy your coffee ☕")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color.textMuted)
-
-            Button {
-                dismiss()
-            } label: {
-                Text("Done")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .frame(width: 160, height: 50)
-                    .background(
-                        Capsule()
-                            .fill(Color.accentPrimary)
-                            .shadow(color: Color.accentPrimary.opacity(0.4), radius: 10, x: 0, y: 4)
-                    )
-            }
-            .buttonStyle(BounceButtonStyle())
-            .padding(.top, 4)
-        }
-        .padding(32)
-        .background(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(Color.bgPrimary)
-                .shadow(color: .black.opacity(0.18), radius: 30, x: 0, y: 10)
-        )
-        .padding(.horizontal, 32)
-        .padding(.bottom, 60)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Your order has been delivered. Tap Done to close.")
     }
 
     // MARK: - Helpers
