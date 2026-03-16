@@ -29,10 +29,10 @@ class OrderDetailViewModel: ObservableObject {
     deinit { orderListener?.remove() }
 
     /// Cancels a Pending order and refunds wallet balance if it was wallet-paid.
-    /// Guard: only callable when status == "Pending" — enforced in UI and here.
+    /// Guard: only callable when status == .pending — enforced in UI and here.
     func cancelOrder() async {
         guard let orderId = order.id else { return }
-        guard order.status == "Pending" else {
+        guard order.orderStatus == .pending else {
             AlertManager.shared.showError(message: "Only Pending orders can be cancelled.")
             return
         }
@@ -46,7 +46,7 @@ class OrderDetailViewModel: ObservableObject {
             // Step 1: Mark order Cancelled in Firestore
             try await db.collection("orders")
                 .document(orderId)
-                .updateData(["status": "Cancelled"])
+                .updateData(["status": OrderStatus.cancelled.rawValue])
 
             AppLog.order.debug("Order \(orderId) marked Cancelled")
 
@@ -88,7 +88,7 @@ class OrderDetailViewModel: ObservableObject {
     /// True only when the logged-in user owns this Pending order.
     /// Drives the Cancel button visibility in ActionButtonsSection.
     var canCancel: Bool {
-        order.status == "Pending" &&
+        order.orderStatus == .pending &&
         order.userId == UserSession.shared.userId
     }
 
@@ -159,7 +159,7 @@ class OrderDetailViewModel: ObservableObject {
         defer { isUpdatingStatus = false }
         do {
             var fields: [String: Any] = ["status": status]
-            if status == "Completed" {
+            if OrderStatus.from(status) == .completed {
                 // Write server-side timestamp so avg fulfillment time in
                 // the Order Funnel is calculated from a reliable clock.
                 fields["completedAt"] = FieldValue.serverTimestamp()

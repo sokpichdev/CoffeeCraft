@@ -11,14 +11,13 @@ import SwiftUI
 // MARK: - Order Queue Item
 
 /// Full order data used by the real-time queue and history table.
-/// Richer than `LiveOrderItem` — includes userId, branchId, and completedAt
-/// for funnel time calculation.
 struct OrderQueueItem: Identifiable {
     let id: String
     let customerName: String
     let userId: String
     let totalPrice: Double
     let status: OrderStatus
+    let isDeliveryOrder: Bool
     let timestamp: Date
     let completedAt: Date? // nil until order reaches Completed
     let itemCount: Int
@@ -46,16 +45,12 @@ struct OrderQueueItem: Identifiable {
     }
 
     /// The next logical status a manager can advance to.
-    /// Returns nil when no forward transition is available (Ready / Completed / Cancelled).
+    /// Delivery-aware: pickup stops at Ready → Completed,
+    /// delivery goes Ready → OnDelivery → Completed.
     var nextStatus: OrderStatus? {
-        switch status {
-        case .pending:   return .inProgress
-        case .inProgress: return .ready
-        default:         return nil
-        }
+        status.nextStatus(isDelivery: isDeliveryOrder)
     }
 }
-
 
 // MARK: - History Filter State
 
@@ -82,8 +77,8 @@ struct OrderFunnelData {
     let totalOrders: Int
     let completedCount: Int
     let cancelledCount: Int
-    let activeCount: Int            // Pending + Preparing + Ready
-    let avgFulfillmentMinutes: Double?   // nil when no completedAt data exists yet
+    let activeCount: Int // all isActive statuses
+    let avgFulfillmentMinutes: Double? // nil when no completedAt data exists yet
 
     var completionRate: Double {
         guard totalOrders > 0 else { return 0 }

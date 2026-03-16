@@ -14,11 +14,11 @@ extension AnalyticsService {
 
     // MARK: - Real-time Queue Listener
 
-    /// Attaches a live listener to all Pending + Preparing orders,
+    /// Attaches a live listener to all active orders (Pending, InProgress, Ready, OnDelivery),
     /// sorted oldest-first so the longest-waiting order is always at the top.
     func listenToOrderQueue(onChange: @escaping ([OrderQueueItem]) -> Void) -> ListenerRegistration {
         db.collection("orders")
-            .whereField("status", in: ["Pending", "Preparing"])
+            .whereField("status", in: OrderStatus.activeRawValues)
             .order(by: "timestamp", descending: false) // oldest first
             .addSnapshotListener { snapshot, _ in
                 guard let snapshot else { return }
@@ -99,7 +99,7 @@ extension AnalyticsService {
 
         switch filter.sortOrder {
         case .highest: items.sort { $0.totalPrice > $1.totalPrice }
-        case .lowest:  items.sort { $0.totalPrice < $1.totalPrice }
+        case .lowest: items.sort { $0.totalPrice < $1.totalPrice }
         default: break
         }
 
@@ -124,16 +124,14 @@ extension AnalyticsService {
             .getDocuments()
 
         let orders = snapshot.documents.map { $0.data() }
-        let completed = orders.filter { $0["status"] as? String == "Completed" }
-        let cancelled = orders.filter { $0["status"] as? String == "Cancelled" }
-        let active = orders.filter {
-            ["Pending", "Preparing", "Ready"].contains($0["status"] as? String ?? "")
-        }
+        let completed = orders.filter { $0["status"] as? String == OrderStatus.completed.rawValue }
+        let cancelled = orders.filter { $0["status"] as? String == OrderStatus.cancelled.rawValue }
+        let active = orders.filter { OrderStatus.from($0["status"] as? String).isActive }
 
         // Average fulfillment time — only for orders that have completedAt stored
         let fulfillmentTimes: [Double] = completed.compactMap { order in
             guard
-                let placedTs = (order["timestamp"]   as? Timestamp)?.dateValue(),
+                let placedTs = (order["timestamp"] as? Timestamp)?.dateValue(),
                 let completedTs = (order["completedAt"] as? Timestamp)?.dateValue()
             else { return nil }
             return completedTs.timeIntervalSince(placedTs) / 60 // minutes
@@ -189,6 +187,7 @@ extension AnalyticsService {
             userId: data["userId"] as? String ?? "",
             totalPrice: totalPrice,
             status: status,
+            isDeliveryOrder: (data["deliveryType"] as? String) == "delivery",
             timestamp: timestamp,
             completedAt: (data["completedAt"] as? Timestamp)?.dateValue(),
             itemCount: items.count,
@@ -197,8 +196,6 @@ extension AnalyticsService {
         )
     }
 }
-
-// MARK: - Pagination Model
 
 struct OrderHistoryPage {
     let items: [OrderQueueItem]

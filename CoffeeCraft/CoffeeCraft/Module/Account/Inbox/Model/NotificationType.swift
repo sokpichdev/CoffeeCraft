@@ -74,17 +74,21 @@ struct OrderStatusPayload {
     let orderId: String
     let status: String
 
-    var statusIcon: String {
-        switch status {
-        case "Completed": return "takeoutbag.and.cup.and.straw.fill"
-        default: return "clock.fill"
-        }
-    }
+    /// Typed representation — falls back to .pending for unrecognised values.
+    var orderStatus: OrderStatus { OrderStatus.from(status) }
 
-    var statusColor: String {   // map in view with Color(payload.statusColor)
-        switch status {
-        case "Completed": return "brown"
-        default: return "gray"
+    /// SF Symbol for the notification row icon.
+    var statusIcon: String { orderStatus.icon }
+
+    /// Named color string for use with Color(_:) in views.
+    var statusColor: String {
+        switch orderStatus {
+        case .pending:    return "orange"
+        case .inProgress: return "accentPrimary"
+        case .ready:      return "semanticSuccess"
+        case .onDelivery: return "blue"
+        case .completed:  return "brown"
+        case .cancelled:  return "semanticError"
         }
     }
 }

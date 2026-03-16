@@ -141,7 +141,7 @@ class OrderService: ObservableObject {
             "userId": userId,
             "timestamp": Timestamp(date: Date()),
             "totalPrice": total,
-            "status": "Pending",
+            "status": OrderStatus.pending.rawValue,
             "paymentMethod": paymentMethod.rawValue,
             "productIds": productIds,
             "items": cartItems.map { item -> [String: Any] in
@@ -165,9 +165,9 @@ class OrderService: ObservableObject {
             orderData["branchId"]   = branch.id
             orderData["branchName"] = branch.name
         }
-        // Tag fulfillment mode. deliveryType drives the Ready-trigger in OrderDetailView.
+        // Tag fulfillment mode. deliveryType drives the OnDelivery-trigger in OrderDetailView.
         // deliverySessionId is not written here — the session is created when status
-        // reaches "Ready" and activateDelivery() is called with the Firestore order id.
+        // reaches "OnDelivery" and activateDelivery() is called with the Firestore order id.
         orderData["deliveryType"] = OrderEnvironment.shared.isDelivery ? "delivery" : "pickup"
         if OrderEnvironment.shared.isDelivery {
             // Snapshot delivery coordinates into Firestore so activateDelivery()

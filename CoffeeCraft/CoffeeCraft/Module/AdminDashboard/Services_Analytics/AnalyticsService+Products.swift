@@ -52,7 +52,7 @@ extension AnalyticsService {
     private func fetchCompletedOrderItems(from start: Date,
                                            to end: Date) async throws -> ([String: (Int, Double)], Double, Int) {
         let snapshot = try await db.collection("orders")
-            .whereField("status", isEqualTo: "Completed")
+            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
             .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
             .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
             .getDocuments()

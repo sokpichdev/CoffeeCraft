@@ -1,10 +1,11 @@
-import FirebaseAuth
 //
 //  AdminOrdersView.swift
 //  CoffeeCraft
 //
 //  Created by Sok Pich on 10/23/25.
 //
+
+import FirebaseAuth
 import SwiftUI
 
 struct AdminOrdersView: View {
@@ -24,27 +25,18 @@ struct AdminOrdersView: View {
             .edgesIgnoringSafeArea(.bottom)
 
             VStack(spacing: 0) {
-                CustomSegmentedControl(
-                    selectedSegment: $selectedTab,
-                    segments: [.activeOrders, .myOrders]
-                ) {}
-                .padding()
+                CustomSegmentedControl(selectedSegment: $selectedTab, segments: [.activeOrders, .myOrders]) {}
+                    .padding()
 
                 if selectedTab == .activeOrders {
-                    ActiveOrdersContent(vm: vm)
-                        .environmentObject(cartManager)
-                        .padding(.horizontal)
+                    ActiveOrdersContent(vm: vm).environmentObject(cartManager).padding(.horizontal)
                 } else {
-                    MyOrdersContent(vm: vm)
-                        .environmentObject(cartManager)
-                        .padding(.horizontal)
+                    MyOrdersContent(vm: vm).environmentObject(cartManager).padding(.horizontal)
                 }
             }
         }
         .customNavigationBar("Orders") {
-            // Phase 6 — Wait time editor for any branch
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("clock.badge.fill")) {
-                // Default to first branch; in a real build, pick from a list
                 waitTimeBranch = MockBranchData.all.first
                 showWaitTimeEditor = true
             }
@@ -53,47 +45,39 @@ struct AdminOrdersView: View {
         .sheet(isPresented: $showWaitTimeEditor) {
             if let branch = waitTimeBranch {
                 BranchWaitTimeEditor(branch: branch)
-                    .presentationDetents([.medium])
-                    .presentationCornerRadius(24)
+                    .presentationDetents([.medium]).presentationCornerRadius(24)
             }
         }
     }
 }
 
 // MARK: - Active Orders Content
+
 struct ActiveOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @EnvironmentObject var cartManager: CartManager
     @State private var isPaginating = false
     @State private var selectedOrder: Order?
 
+    // Uses orderStatus.isActive — OnDelivery orders now correctly stay visible.
     private var filteredOrders: [Order] {
         vm.allOrders
-            .filter { $0.status != "Completed" }
-            .sorted(by: {
-                ($0.timestamp ?? .distantPast) > ($1.timestamp ?? .distantPast)
-            })
+            .filter { $0.orderStatus.isActive }
+            .sorted { ($0.timestamp ?? .distantPast) > ($1.timestamp ?? .distantPast) }
     }
 
     var body: some View {
         Group {
             if vm.isLoadingAllOrders {
-                ScrollView {
-                    OrderListShimmerView(showAdminActions: true)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                ScrollView { OrderListShimmerView(showAdminActions: true) }
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
             } else if filteredOrders.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.accentPrimary.opacity(0.8))
-                    Text("No Active Orders")
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 60)).foregroundColor(.accentPrimary.opacity(0.8))
+                    Text("No Active Orders").font(.title3).fontWeight(.semibold)
                     Text("All orders have been completed. New ones will appear here.")
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
+                        .multilineTextAlignment(.center).foregroundColor(.gray).padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -102,35 +86,24 @@ struct ActiveOrdersContent: View {
                         ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { _, order in
                             OrderCardView(
                                 order: order,
-                                adminActions: {
-                                    AnyView(AdminProgressButtons(order: order, vm: vm))
-                                },
-                                onNavigate: {
-                                    selectedOrder = order
-                                }
+                                adminActions: { AnyView(AdminProgressButtons(order: order, vm: vm)) },
+                                onNavigate: { selectedOrder = order }
                             )
                             .onAppear {
-                                guard vm.hasMoreAllOrders else { return }
-                                guard order.id == vm.allOrders.last?.id else { return }
-                                guard !isPaginating else { return }
-
+                                guard vm.hasMoreAllOrders,
+                                      order.id == vm.allOrders.last?.id,
+                                      !isPaginating else { return }
                                 isPaginating = true
                                 vm.allOrdersPage += 1
-
                                 Task {
                                     let timer = MinimumLoadingTime(0.5)
                                     try? await timer.waitIfNeeded()
-
                                     await vm.fetchAllOrders(pageNum: vm.allOrdersPage)
                                     isPaginating = false
                                 }
                             }
                         }
-
-                        if isPaginating {
-                            ProgressView()
-                                .padding()
-                        }
+                        if isPaginating { ProgressView().padding() }
                     }
                     .padding(.bottom)
                 }, onRefresh: {
@@ -141,17 +114,15 @@ struct ActiveOrdersContent: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
-        .task {
-            await vm.fetchAllOrders(pageNum: 1)
-        }
+        .task { await vm.fetchAllOrders(pageNum: 1) }
         .navigationDestination(item: $selectedOrder) { order in
-            OrderDetailView(order: order, isActive: true)
-                .environmentObject(cartManager)
+            OrderDetailView(order: order, isActive: true).environmentObject(cartManager)
         }
     }
 }
 
 // MARK: - My Orders Content
+
 struct MyOrdersContent: View {
     @ObservedObject var vm: AdminOrdersViewModel
     @EnvironmentObject var cartManager: CartManager
@@ -161,22 +132,15 @@ struct MyOrdersContent: View {
     var body: some View {
         Group {
             if vm.isLoadingMyOrders {
-                ScrollView {
-                    OrderListShimmerView(showAdminActions: false)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                ScrollView { OrderListShimmerView(showAdminActions: false) }
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
             } else if vm.myOrders.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.accentPrimary.opacity(0.7))
-                    Text("No Orders Yet")
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 60)).foregroundColor(.accentPrimary.opacity(0.7))
+                    Text("No Orders Yet").font(.title3).fontWeight(.semibold)
                     Text("Your coffee orders will appear here.")
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                        .foregroundColor(.gray).multilineTextAlignment(.center).padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -185,34 +149,24 @@ struct MyOrdersContent: View {
                         ForEach(Array(vm.myOrders.enumerated()), id: \.element.id) { _, order in
                             OrderCardView(
                                 order: order,
-                                onNavigate: {
-                                    selectedOrder = order
-                                }, onReorder: {
-                                    handleReorder(for: order)
-                                }
+                                onNavigate: { selectedOrder = order },
+                                onReorder: { handleReorder(for: order) }
                             )
                             .onAppear {
-                                guard vm.hasMoreMyOrders else { return }
-                                guard order.id == vm.myOrders.last?.id else { return }
-                                guard !isPaginating else { return }
-                                
+                                guard vm.hasMoreMyOrders,
+                                      order.id == vm.myOrders.last?.id,
+                                      !isPaginating else { return }
                                 isPaginating = true
                                 vm.myOrdersPage += 1
-                                
                                 Task {
                                     let timer = MinimumLoadingTime(0.5)
                                     try? await timer.waitIfNeeded()
-                                    
                                     await vm.fetchMyOrders(pageNum: vm.myOrdersPage)
                                     isPaginating = false
                                 }
                             }
                         }
-
-                        if isPaginating {
-                            ProgressView()
-                                .padding()
-                        }
+                        if isPaginating { ProgressView().padding() }
                     }
                     .padding(.bottom)
                 }, onRefresh: {
@@ -223,62 +177,41 @@ struct MyOrdersContent: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24))
             }
         }
-        .task {
-            await vm.fetchMyOrders(pageNum: 1)
-        }
+        .task { await vm.fetchMyOrders(pageNum: 1) }
         .navigationDestination(item: $selectedOrder) { order in
-            OrderDetailView(order: order)
-                .environmentObject(cartManager)
+            OrderDetailView(order: order).environmentObject(cartManager)
         }
     }
-    
+
     private func handleReorder(for order: Order) {
         guard let items = order.items as? [CartItemData] else { return }
-        
-        let hasDuplicates = ReorderManager.shared.hasDuplicates(
-            orderItems: items,
-            currentCart: cartManager.items
-        )
-        
+        let hasDuplicates = ReorderManager.shared.hasDuplicates(orderItems: items, currentCart: cartManager.items)
         if hasDuplicates {
-            let duplicateNames = ReorderManager.shared.getDuplicateNames(
-                orderItems: items,
-                currentCart: cartManager.items
-            )
+            let duplicateNames = ReorderManager.shared.getDuplicateNames(orderItems: items,
+                                                                         currentCart: cartManager.items)
             let itemList = duplicateNames.joined(separator: ", ")
-            
             AlertManager.shared.showConfirmation(
                 title: "Items Already in Cart",
                 message: """
                 \(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart with \
                 the same options. Quantities will be combined.
                 """,
-                confirmTitle: "Add to Cart",
-                cancelTitle: "Cancel"
-            ) {
-                executeReorder(for: order)
-            }
+                confirmTitle: "Add to Cart", cancelTitle: "Cancel"
+            ) { executeReorder(for: order) }
         } else {
             executeReorder(for: order)
         }
     }
-    
+
     private func executeReorder(for order: Order) {
-        Task {
-            await ReorderManager.shared.executeReorder(
-                order: order,
-                cartManager: cartManager
-            )
-        }
+        Task { await ReorderManager.shared.executeReorder(order: order, cartManager: cartManager) }
     }
 }
 
 // MARK: - AdminProgressButtons
 //
-// Inline action buttons shown on each card in the Active Orders list.
-// Branched for pickup vs delivery:
-//   Pickup:   Pending → InProgress → Ready → Completed
-//   Delivery: Pending → InProgress → Ready → OnDelivery → Completed
+// Uses nextStatus(isDelivery:) — automatically handles the
+// Pickup vs Delivery branch without a manual switch.
 
 private struct AdminProgressButtons: View {
     let order: Order
@@ -286,50 +219,52 @@ private struct AdminProgressButtons: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // Pending → InProgress (both types)
-            Button("Start") {
-                Task { _ = await vm.updateOrderStatus(order: order, status: "InProgress") }
-            }
-            .disabled(order.status != "Pending")
-
-            // InProgress → Ready (both types)
-            Button("Ready") {
-                Task { _ = await vm.updateOrderStatus(order: order, status: "Ready") }
-            }
-            .disabled(order.status != "InProgress")
-
-            if order.isDeliveryOrder {
-                // Ready → OnDelivery (delivery only)
-                Button("Dispatch") {
-                    Task { _ = await vm.updateOrderStatus(order: order, status: "OnDelivery") }
-                }
-                .disabled(order.status != "Ready")
-
-                // OnDelivery → Completed (delivery only)
-                Button("Delivered") {
+            ForEach(progressSteps, id: \.self) { step in
+                Button(buttonLabel(for: step)) {
                     Task {
-                        let success = await vm.updateOrderStatus(order: order, status: "Completed")
-                        if success {
-                            ToastManager.shared.show(message: "Order Delivered", type: .success)
+                        let success = await vm.updateOrderStatus(order: order, status: step.rawValue)
+                        if success && step == .completed {
+                            ToastManager.shared.show(
+                                message: order.isDeliveryOrder ? "Order Delivered" : "Order Completed",
+                                type: .success)
                         }
                     }
                 }
-                .disabled(order.status != "OnDelivery")
-
-            } else {
-                // Ready → Completed (pickup only)
-                Button("Complete") {
-                    Task {
-                        let success = await vm.updateOrderStatus(order: order, status: "Completed")
-                        if success {
-                            ToastManager.shared.show(message: "Order Completed", type: .success)
-                        }
-                    }
-                }
-                .disabled(order.status != "Ready")
+                .disabled(order.orderStatus != precedingStatus(of: step))
             }
         }
         .buttonStyle(.borderedProminent)
         .tint(.accentPrimary)
+    }
+
+    /// Ordered list of manager-advanceable steps for this order type.
+    private var progressSteps: [OrderStatus] {
+        if order.isDeliveryOrder {
+            return [.inProgress, .ready, .onDelivery, .completed]
+        } else {
+            return [.inProgress, .ready, .completed]
+        }
+    }
+
+    /// The status an order must be in before a button is enabled.
+    private func precedingStatus(of step: OrderStatus) -> OrderStatus {
+        switch step {
+        case .inProgress: return .pending
+        case .ready: return .inProgress
+        case .onDelivery: return .ready
+        case .completed: return order.isDeliveryOrder ? .onDelivery : .ready
+        default: return .pending
+        }
+    }
+
+    /// Short action label for each button.
+    private func buttonLabel(for step: OrderStatus) -> String {
+        switch step {
+        case .inProgress: return "Start"
+        case .ready: return "Ready"
+        case .onDelivery: return "Dispatch"
+        case .completed: return order.isDeliveryOrder ? "Delivered" : "Complete"
+        default: return step.displayLabel
+        }
     }
 }

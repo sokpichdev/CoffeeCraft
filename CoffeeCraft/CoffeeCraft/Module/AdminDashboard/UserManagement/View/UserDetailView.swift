@@ -283,7 +283,7 @@ private struct UserOrderRow: View {
         HStack(spacing: 12) {
             // Status dot
             Circle()
-                .fill(statusColor)
+                .fill(order.orderStatus.color)
                 .frame(width: 9, height: 9)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -307,16 +307,5 @@ private struct UserOrderRow: View {
             }
         }
         .padding(.vertical, 10)
-    }
-
-    private var statusColor: Color {
-        switch order.statusColor {
-        case .green: return .semanticSuccess
-        case .orange: return .orange
-        case .blue: return Color.accentPrimary
-        case .teal: return .teal
-        case .red: return .semanticError
-        case .secondary: return Color.textMuted
-        }
     }
 }

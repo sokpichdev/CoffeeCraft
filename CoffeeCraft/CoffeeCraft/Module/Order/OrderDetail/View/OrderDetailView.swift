@@ -4,7 +4,9 @@
 //
 //  Created by Sok Pich on 2/6/26.
 //
-// The user's mental flow when opening an order detail is: who / when → what happened → what did I get → how much → now what?
+//  The user's mental flow: who/when → progress → items → pricing → actions.
+//
+
 
 import MapKit
 import SwiftUI
@@ -21,7 +23,7 @@ struct OrderDetailView: View {
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var cartManager: CartManager
-    @State private var showReceipt        = false
+    @State private var showReceipt = false
     @State private var navigateToDelivery = false
     // Captured at activation time so navigationDestination always has a non-nil VM.
     // capturedDeliveryVM is set before navigateToDelivery = true
@@ -33,9 +35,9 @@ struct OrderDetailView: View {
         self.isActive = isActive
         _vm = StateObject(wrappedValue: OrderDetailViewModel(order: order))
     }
-    
+
     var body: some View {
-        CustomRefreshScrollView( {
+        CustomRefreshScrollView({
             VStack(spacing: 0) {
                 VStack(spacing: 24) {
                     OrderHeaderCard(order: vm.order, userName: vm.userName, isLoadingUser: vm.isLoadingUser)
@@ -45,9 +47,9 @@ struct OrderDetailView: View {
                         isDeliveryOrder: vm.order.isDeliveryOrder
                     )
 
-                    // Ready-for-pickup banner — only for pickup orders at Ready status
-                    if vm.order.deliveryType == "pickup",
-                       vm.order.status == "Ready",
+                    // Pickup-only: ready-for-pickup banner
+                    if !vm.order.isDeliveryOrder,
+                       vm.order.orderStatus == .ready,
                        let branch = vm.order.branchName {
                         PickupReadyBanner(branchName: branch) {
                             // Open Apple Maps to the branch
@@ -79,8 +81,7 @@ struct OrderDetailView: View {
                         walletAmountPaid: vm.order.walletAmountPaid
                     )
 
-                    // Track delivery button — shown once the simulator is active
-                    // for this specific order (status reached Ready).
+                    // Delivery map track button — shown once simulator is active
                     if vm.order.isDeliveryOrder,
                        let orderId = vm.order.id,
                        let trackVM = OrderEnvironment.shared.deliveryVM(for: orderId) {
@@ -108,11 +109,7 @@ struct OrderDetailView: View {
         })
         .background(Color.bgSecondary)
         .navigationDestination(isPresented: $navigateToDelivery) {
-            // capturedDeliveryVM is set synchronously before navigateToDelivery = true,
-            // so it is guaranteed non-nil here. The fallback should never be reached.
-            if let vm = capturedDeliveryVM {
-                DeliveryMapView(vm: vm)
-            }
+            if let vm = capturedDeliveryVM { DeliveryMapView(vm: vm) }
         }
         .customNavigationBar("Order Detail") {
             ToolBarButton.back {
@@ -128,7 +125,7 @@ struct OrderDetailView: View {
         .sheet(item: $selectedItemForRating) { item in
             RatingInputSheet(
                 vm: reviewVM,
-                productName: item.name    ?? "Item",
+                productName: item.name ?? "Item",
                 imageURL: item.imageURL ?? ""
             )
             .onAppear {
@@ -160,24 +157,16 @@ struct OrderDetailView: View {
             // pre-load which items the user has already rated
             loadRatedProductIds()
         }
-        // ── Delivery activation on status change ───────────────
-        // Activates the delivery simulator when the order moves to OnDelivery,
-        // i.e. the rider has been dispatched. This is more accurate than
-        // activating at Ready (which now just means "handed to rider").
+        // Delivery map activates when status reaches OnDelivery (rider dispatched)
         .onChange(of: vm.order.status) { _, newStatus in
-            guard newStatus == "OnDelivery",
+            guard OrderStatus.from(newStatus) == .onDelivery,
                   vm.order.isDeliveryOrder,
                   let orderId = vm.order.id,
                   OrderEnvironment.shared.deliveryVM(for: orderId) == nil
             else { return }
 
-            // 1. Activate simulator — reads coordinates from the order document
             OrderEnvironment.shared.activateDelivery(order: vm.order)
-
-            // 2. Capture VM before navigating
             capturedDeliveryVM = OrderEnvironment.shared.deliveryVM(for: orderId)
-
-            // 3. Navigate
             navigateToDelivery = true
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
@@ -186,15 +175,15 @@ struct OrderDetailView: View {
         }
     }
 
-    /// Queries Firestore for any products in this order that the current user
-    /// has already rated, so prompts show the correct "Rated / Rate" state
-    /// immediately without waiting for each item's sheet to open.
+    // MARK: - Helpers
+
+    private var isCompletedOrder: Bool { vm.order.orderStatus == .completed }
+
     private func loadRatedProductIds() {
-        guard
-            let userId     = UserSession.shared.userId,
-            let productIds = vm.order.productIds,
-            !productIds.isEmpty,
-            isCompletedOrder
+        guard let userId = UserSession.shared.userId,
+              let productIds = vm.order.productIds,
+              !productIds.isEmpty,
+              isCompletedOrder
         else { return }
 
         Task {
@@ -203,9 +192,7 @@ struct OrderDetailView: View {
                 for productId in productIds {
                     group.addTask {
                         let existing = try? await RatingService.shared.fetchUserRating(
-                            userId: userId,
-                            productId: productId
-                        )
+                            userId: userId, productId: productId)
                         return (productId, existing != nil)
                     }
                 }
@@ -215,11 +202,6 @@ struct OrderDetailView: View {
             }
             await MainActor.run { ratedProductIds = rated }
         }
-    }
-
-    private var isCompletedOrder: Bool {
-        let status = vm.order.status?.lowercased() ?? ""
-        return status == "completed" || status == "done"
     }
 
     private func confirmCancel() {
@@ -232,44 +214,28 @@ struct OrderDetailView: View {
 
     private func handleReorder() {
         guard let items = vm.order.items as? [CartItemData] else { return }
-        
-        // Check if any duplicates exist
         let hasDuplicates = ReorderManager.shared.hasDuplicates(
-            orderItems: items,
-            currentCart: cartManager.items
-        )
-        
+            orderItems: items, currentCart: cartManager.items)
         if hasDuplicates {
-            // Show confirmation that some items will be merged
             let duplicateNames = ReorderManager.shared.getDuplicateNames(
-                orderItems: items,
-                currentCart: cartManager.items
-            )
+                orderItems: items, currentCart: cartManager.items)
             let itemList = duplicateNames.joined(separator: ", ")
-            
             AlertManager.shared.showConfirmation(
                 title: "Items Already in Cart",
                 message: """
-                \(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your cart \
-                with the same options. Quantities will be combined.
+                \(itemList) \(duplicateNames.count == 1 ? "is" : "are") already in your \
+                cart with the same options. Quantities will be combined.
                 """,
-                confirmTitle: "Add to Cart",
-                cancelTitle: "Cancel"
-            ) {
-                executeReorder()
-            }
+                confirmTitle: "Add to Cart", cancelTitle: "Cancel"
+            ) { executeReorder() }
         } else {
-            // No duplicates, add directly
             executeReorder()
         }
     }
-    
+
     private func executeReorder() {
         Task {
-            await ReorderManager.shared.executeReorder(
-                order: vm.order,
-                cartManager: cartManager
-            )
+            await ReorderManager.shared.executeReorder(order: vm.order, cartManager: cartManager)
         }
     }
 }

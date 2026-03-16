@@ -12,7 +12,7 @@
 //                             MenuView detects pendingMapBranch and presents FulfillmentPickerSheet
 //    3. Change in cart       → CartView re-presents FulfillmentPickerSheet
 //    4. Order placed         → CartView calls clear()
-//    5. Order ready (delivery) → OrderDetailView calls activateDelivery(firestoreOrderId:)
+//    5. Order OnDelivery (delivery) → OrderDetailView calls activateDelivery(order:)
 //
 
 import CoreLocation
@@ -52,7 +52,7 @@ final class OrderEnvironment: ObservableObject {
 
     // MARK: - Pending delivery intent
     // Set when FulfillmentPickerSheet confirms delivery address.
-    // Simulator starts only when order status reaches "Ready".
+    // Simulator starts only when order status reaches "OnDelivery".
 
     @Published var pendingDeliveryDestination: CLLocationCoordinate2D?
     @Published var pendingDeliveryBranchCoordinate: CLLocationCoordinate2D?
@@ -60,7 +60,7 @@ final class OrderEnvironment: ObservableObject {
 
     // MARK: - Active deliveries
     // Keyed by Firestore orderId so multiple concurrent delivery orders are each
-    // tracked independently. Populated when order status reaches "Ready".
+    // tracked independently. Populated when order status reaches "OnDelivery".
 
     @Published var activeDeliverySessions: [String: DeliverySession] = [:]
     private(set) var activeDeliveryVMs: [String: DeliveryViewModel] = [:]
@@ -127,7 +127,7 @@ final class OrderEnvironment: ObservableObject {
         pendingMapBranch                = nil
     }
 
-    /// Called by OrderDetailView when a delivery order reaches "Ready".
+    /// Called by OrderDetailView when a delivery order reaches "OnDelivery".
     /// Coordinates are read from the Order model (written to Firestore at checkout)
     /// so this works even after OrderEnvironment.clear() has been called.
     /// Each order gets its own DeliveryViewModel — multiple concurrent deliveries are supported.

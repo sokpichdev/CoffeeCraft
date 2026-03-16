@@ -8,28 +8,24 @@ import SwiftUI
 
 struct OrderItemsCard: View {
     let items: [CartItemData]
-
     var orderStatus: String?
     var ratedProductIds: Set<String> = [] // productIds already rated by this user
     var onRateItem: ((CartItemData) -> Void)? // triggers RatingInputSheet
 
     private var isCompleted: Bool {
-        let status = orderStatus?.lowercased() ?? ""
-        return status == "completed" || status == "done"
+        OrderStatus.from(orderStatus) == .completed
     }
 
     var body: some View {
         let totalQty = items.reduce(0) { $0 + ($1.quantity ?? 1) }
 
         VStack(alignment: .leading, spacing: 16) {
-
             HStack {
                 Text("Items")
                     .font(.title3).fontWeight(.bold)
                     .foregroundColor(.textPrimary)
 
                 Spacer()
-
                 Text("\(totalQty) item\(items.count == 1 ? "" : "s")")
                     .font(.subheadline).fontWeight(.medium)
                     .foregroundColor(.textSecondary)
@@ -68,6 +64,8 @@ struct OrderItemsCard: View {
     }
 }
 
+// MARK: - OrderItemRow (unchanged)
+
 struct OrderItemRow: View {
     let item: CartItemData
     let isLast: Bool
@@ -76,7 +74,6 @@ struct OrderItemRow: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 AsyncImageCard(imageURL: item.imageURL, height: 56, width: 56, corner: 12)
-                
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 4) {
                         if let qty = item.quantity, qty > 1 {
@@ -197,21 +194,9 @@ private struct ItemRatingPrompt: View {
 
     private var ratedState: some View {
         HStack(spacing: 6) {
-            // Read-only filled stars at the user's actual score.
-            // We show 5 filled stars here as a "rated" indicator — the
-            // exact score is visible on the product detail review card.
-            StarRatingView(
-                mode: .readOnly(average: 5),
-                size: 14
-            )
-
-            Text("Rated")
-                .font(.caption.weight(.medium))
-                .foregroundColor(.textMuted)
-
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 12))
-                .foregroundColor(.accentGold)
+            StarRatingView(mode: .readOnly(average: 5), size: 14)
+            Text("Rated").font(.caption.weight(.medium)).foregroundColor(.textMuted)
+            Image(systemName: "checkmark.circle.fill").font(.system(size: 12)).foregroundColor(.accentGold)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 7)

@@ -11,9 +11,6 @@ import Foundation
 // MARK: - User Stat Item (List Row)
 
 /// Represents one customer in the User Management list.
-/// `totalOrders` and `totalSpent` start as `nil` and are filled in
-/// by a background enrichment pass after the page loads — so the list
-/// appears immediately and spend data populates progressively.
 struct UserStatItem: Identifiable {
     let id: String // userId (Firestore document ID)
     let name: String
@@ -45,15 +42,13 @@ struct UserStatItem: Identifiable {
     var initials: String {
         let parts = name.split(separator: " ")
         let first = parts.first?.prefix(1) ?? ""
-        let last  = parts.dropFirst().first?.prefix(1) ?? ""
+        let last = parts.dropFirst().first?.prefix(1) ?? ""
         return (first + last).uppercased()
     }
 }
 
 // MARK: - User Detail Data
 
-/// Full data shown on the User Detail screen.
-/// Loaded in a single parallel fetch (user doc + orders + wallet).
 struct UserDetailData {
     let user: UserStatItem
     let recentOrders: [UserOrderItem] // last 10
@@ -63,7 +58,7 @@ struct UserDetailData {
     var walletFormatted: String { walletBalance.asCurrency }
 }
 
-// MARK: - User Order Item (used in detail view order history)
+// MARK: - User Order Item
 
 /// Lightweight order summary shown in the User Detail order history list.
 struct UserOrderItem: Identifiable {
@@ -82,18 +77,8 @@ struct UserOrderItem: Identifiable {
         return formatter.string(from: timestamp)
     }
 
-    var statusColor: StatusColor {
-        switch status {
-        case "Completed": return .green
-        case "Pending": return .orange
-        case "Preparing": return .blue
-        case "Ready": return .teal
-        case "Cancelled": return .red
-        default: return .secondary
-        }
-    }
-
-    enum StatusColor { case green, orange, blue, teal, red, secondary }
+    /// Typed status — delegates to the shared OrderStatus enum.
+    var orderStatus: OrderStatus { OrderStatus.from(status) }
 }
 
 // MARK: - User List Page (pagination cursor)

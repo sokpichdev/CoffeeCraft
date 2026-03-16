@@ -27,20 +27,20 @@ export const onOrderStatusChanged = onDocumentUpdated(
       if (!event.data) return;
 
       const before = event.data.before.data();
-      const after  = event.data.after.data();
+      const after = event.data.after.data();
       if (!before || !after) return;
 
       const beforeStatus: string = before.status;
-      const afterStatus: string  = after.status;
+      const afterStatus: string = after.status;
 
       if (beforeStatus === afterStatus) return;
 
       // "delivery" | "pickup" — fall back to pickup for legacy orders
       const deliveryType: string = after.deliveryType ?? "pickup";
-      const isDelivery = deliveryType === "delivery";
 
       logger.info(
-        `Order ${orderId} [${deliveryType}]: "${beforeStatus}" → "${afterStatus}"`
+        `Order ${orderId} [${deliveryType}]: 
+        "${beforeStatus}" → "${afterStatus}"`
       );
 
       const userId: string = after.userId;
@@ -50,7 +50,8 @@ export const onOrderStatusChanged = onDocumentUpdated(
       }
 
       // ── Notification copy map ────────────────────────────────────
-      // Key format: "<status>" or "<status>:<deliveryType>" for type-specific copy.
+      // Key format: "<status>" or "<status>:<deliveryType>"
+      // for type-specific copy.
       // Resolved in priority order: specific key first, then generic key.
       type CopyEntry = { title: string; message: string };
 
@@ -58,19 +59,21 @@ export const onOrderStatusChanged = onDocumentUpdated(
         // Pickup-specific
         "Ready:pickup": {
           title: "Order ready for pickup ☕️",
-          message: `Your order #${orderId} is ready! Head to the branch to collect it.`,
+          message: `Your order #${orderId} is ready! 
+            Head to the branch to collect it.`,
         },
         // Delivery-specific
         "OnDelivery:delivery": {
           title: "Your order is on the way 🛵",
-          message: `Order #${orderId} has been picked up and is heading to you!`,
+          message: `Order #${orderId} has been picked up 
+            and is heading to you!`,
         },
         // Generic — applies to both types
-        Completed: {
+        "Completed": {
           title: "Order completed ✅",
           message: `Order #${orderId} has been completed. Enjoy!`,
         },
-        Cancelled: {
+        "Cancelled": {
           title: "Order cancelled",
           message: `Your order #${orderId} has been cancelled. ` +
             "If you paid by wallet, a refund has been issued.",
@@ -128,9 +131,9 @@ export const onOrderPlaced = onDocumentCreated(
         return;
       }
 
-      const totalPrice: number  = data.totalPrice ?? 0;
+      const totalPrice: number = data.totalPrice ?? 0;
       const deliveryType: string = data.deliveryType ?? "pickup";
-      const itemCount: number   = Array.isArray(data.items) ?
+      const itemCount: number = Array.isArray(data.items) ?
         (data.items as { quantity?: number }[])
           .reduce((sum, item) => sum + (item.quantity ?? 1), 0) : 0;
       const orderNumber: number = data.orderId ?? orderId;
@@ -166,19 +169,19 @@ export const onOrderPlaced = onDocumentCreated(
         isRead: false,
         createdAt: admin.firestore.Timestamp.now(),
         payload: {
-          orderId:      String(orderId),
-          orderNumber:  String(orderNumber),
-          totalPrice:   String(totalPrice),
-          itemCount:    String(itemCount),
+          orderId: String(orderId),
+          orderNumber: String(orderNumber),
+          totalPrice: String(totalPrice),
+          itemCount: String(itemCount),
           deliveryType: deliveryType,
         },
       };
 
       const fcmData: Record<string, string> = {
-        orderId:      String(orderId),
-        orderNumber:  String(orderNumber),
-        totalPrice:   String(totalPrice),
-        itemCount:    String(itemCount),
+        orderId: String(orderId),
+        orderNumber: String(orderNumber),
+        totalPrice: String(totalPrice),
+        itemCount: String(itemCount),
         deliveryType: deliveryType,
       };
 

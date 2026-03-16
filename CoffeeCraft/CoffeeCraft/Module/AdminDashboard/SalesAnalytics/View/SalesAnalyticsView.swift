@@ -188,13 +188,13 @@ struct SalesAnalyticsView: View {
     }
 
     private func statusColor(_ status: String) -> Color {
-        switch status {
-        case "Completed": return .semanticSuccess
-        case "Preparing": return Color.accentPrimary
-        case "Pending": return .orange
-        case "Ready": return .teal
-        case "Cancelled": return .semanticError
-        default: return .secondary
+        switch OrderStatus.from(status) {
+        case .completed: return .semanticSuccess
+        case .inProgress: return .accentPrimary
+        case .pending: return .orange
+        case .ready: return .semanticSuccess
+        case .onDelivery: return .blue
+        case .cancelled: return .semanticError
         }
     }
 

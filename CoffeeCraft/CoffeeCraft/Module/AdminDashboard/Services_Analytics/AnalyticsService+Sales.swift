@@ -52,8 +52,8 @@ extension AnalyticsService {
     // MARK: - Summary Aggregation
 
     private func computeSummary(from orders: [[String: Any]], period: SalesPeriod) -> SalesSummary {
-        let completed = orders.filter { $0["status"] as? String == "Completed" }
-        let cancelled = orders.filter { $0["status"] as? String == "Cancelled" }
+        let completed = orders.filter { $0["status"] as? String == OrderStatus.completed.rawValue }
+        let cancelled = orders.filter { $0["status"] as? String == OrderStatus.cancelled.rawValue }
 
         let totalRevenue = completed.reduce(0.0) { $0 + ($1["totalPrice"] as? Double ?? 0) }
         let avgOrderValue = completed.isEmpty ? 0 : totalRevenue / Double(completed.count)
@@ -82,7 +82,7 @@ extension AnalyticsService {
         var revenueMap: [Date: (Double, Int)] = [:]
         for order in orders {
             guard
-                order["status"] as? String == "Completed",
+                order["status"] as? String == OrderStatus.completed.rawValue,
                 let ts = (order["timestamp"] as? Timestamp)?.dateValue()
             else { continue }
 
@@ -112,8 +112,8 @@ extension AnalyticsService {
         let total = orders.count
         guard total > 0 else { return [] }
 
-        // Count each known status in a defined display order
-        let statusOrder = ["Completed", "Preparing", "Pending", "Ready", "Cancelled"]
+        // Display order follows the natural flow; OnDelivery inserted between Ready and Completed
+        let statusOrder: [OrderStatus] = [.completed, .inProgress, .pending, .ready, .onDelivery, .cancelled]
         var counts: [String: Int] = [:]
         for order in orders {
             let status = order["status"] as? String ?? "Unknown"
@@ -121,9 +121,9 @@ extension AnalyticsService {
         }
 
         return statusOrder.compactMap { status -> OrderStatusPoint? in
-            guard let count = counts[status], count > 0 else { return nil }
+            guard let count = counts[status.rawValue], count > 0 else { return nil }
             return OrderStatusPoint(
-                status: status,
+                status: status.displayLabel,
                 count: count,
                 percentage: (Double(count) / Double(total)) * 100
             )
@@ -143,7 +143,7 @@ extension AnalyticsService {
 
         for order in orders {
             guard
-                order["status"] as? String != "Cancelled",
+                order["status"] as? String != OrderStatus.cancelled.rawValue,
                 let ts = (order["timestamp"] as? Timestamp)?.dateValue()
             else { continue }
 
