@@ -49,53 +49,13 @@ struct OrderQueueItem: Identifiable {
     /// Returns nil when no forward transition is available (Ready / Completed / Cancelled).
     var nextStatus: OrderStatus? {
         switch status {
-        case .pending:   return .preparing
-        case .preparing: return .ready
+        case .pending:   return .inProgress
+        case .inProgress: return .ready
         default:         return nil
         }
     }
 }
 
-// MARK: - Order Status
-
-enum OrderStatus: String, CaseIterable, Identifiable {
-    case pending = "Pending"
-    case preparing = "Preparing"
-    case ready = "Ready"
-    case completed = "Completed"
-    case cancelled = "Cancelled"
-
-    var id: String { rawValue }
-
-    var color: Color {
-        switch self {
-        case .pending: return .orange
-        case .preparing: return .blue
-        case .ready: return .green
-        case .completed: return .gray
-        case .cancelled: return .red
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .pending: return "clock"
-        case .preparing: return "flame.fill"
-        case .ready: return "checkmark.circle.fill"
-        case .completed: return "archivebox.fill"
-        case .cancelled: return "xmark.circle.fill"
-        }
-    }
-
-    /// Label for the one-tap advance button shown on queue cards.
-    var advanceButtonLabel: String {
-        switch self {
-        case .pending: return "Start Preparing"
-        case .preparing: return "Mark Ready"
-        default: return ""
-        }
-    }
-}
 
 // MARK: - History Filter State
 
