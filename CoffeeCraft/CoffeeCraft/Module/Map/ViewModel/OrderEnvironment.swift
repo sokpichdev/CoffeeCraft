@@ -192,6 +192,15 @@ final class OrderEnvironment: ObservableObject {
                             """)
     }
 
+    /// Called when the app goes to background or is about to terminate.
+    /// Flushes the latest in-memory rider position for every active delivery
+    /// to Firestore in a single write per delivery, so restore reads fresh data.
+    func flushAllActiveDeliveries() {
+        guard !activeDeliveryVMs.isEmpty else { return }
+        activeDeliveryVMs.values.forEach { $0.flushPositionToFirestore() }
+        AppLog.firestore.info("[OrderEnvironment] Flushed \(self.activeDeliveryVMs.count) active delivery position(s) to Firestore")
+    }
+
     /// Stop and remove the delivery session for a specific order.
     func clearDelivery(for orderId: String) {
         activeDeliveryVMs[orderId]?.stopDelivery()
