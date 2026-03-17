@@ -15,7 +15,9 @@ final class DeliverySimulator {
 
     // MARK: - Configuration
 
-    /// Seconds between position ticks. Lower = smoother but more Firestore writes.
+    /// Seconds between position ticks — drives animation smoothness on screen.
+    /// Keep at 2 s for fluid rider movement. This does NOT equal Firestore write
+    /// frequency; position is only written to Firestore every firestoreWriteInterval.
     var tickInterval: TimeInterval = 2.0
 
     /// Approximate distance (metres) between sampled polyline steps.

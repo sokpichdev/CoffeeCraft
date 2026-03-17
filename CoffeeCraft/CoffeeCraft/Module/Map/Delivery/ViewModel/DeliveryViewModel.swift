@@ -62,6 +62,10 @@ final class DeliveryViewModel: ObservableObject {
     /// starts running. Cleared on the first simulator tick.
     private var isResumingFromRestore = false
 
+    /// In-memory store of the rider's latest coordinate.
+    /// Updated every simulator tick locally — Firestore is only written on background.
+    private var latestRiderCoord: CLLocationCoordinate2D?
+
     /// Interval (seconds) with no Firestore update before showing "lost track" UI.
     private let timeoutInterval: TimeInterval = 90
 
@@ -188,8 +192,11 @@ final class DeliveryViewModel: ObservableObject {
             self.estimatedArrival = eta
             self.tickCount        += 1
 
-            // ✅ On the very first tick, stamp simulationStartedAt so we can
-            // compute elapsed steps on restore after the app is killed.
+            // ✅ Store position locally — NO Firestore write per tick.
+            // Position is only persisted when the app goes to background (scenePhase).
+            self.latestRiderCoord = coord
+
+            // ✅ On the very first tick, stamp simulationStartedAt once.
             if !hasWrittenStartTime {
                 hasWrittenStartTime = true
                 let now = Date()
@@ -197,8 +204,6 @@ final class DeliveryViewModel: ObservableObject {
                 AppLog.firestore.info("[DeliveryViewModel] Stamped simulationStartedAt: \(now)")
             }
 
-            // Keep Firestore in sync with the simulator position
-            self.writeRiderPosition(orderId: session.orderId, coord: coord)
             self.resetTimeoutWatchdog()
         }
 
@@ -237,8 +242,7 @@ final class DeliveryViewModel: ObservableObject {
     private func resumeSimulator(session: DeliverySession) {
         simulator.onUpdate = { [weak self] coord, bearing, eta in
             guard let self else { return }
-            // First tick after restore — clear the guard flag so the Firestore
-            // listener can resume normal position updates if the simulator stops.
+            // Clear restore guard on first tick.
             self.isResumingFromRestore = false
             self.isLoading        = false
             self.riderCoordinate  = coord
@@ -246,7 +250,9 @@ final class DeliveryViewModel: ObservableObject {
             self.estimatedArrival = eta
             self.tickCount        += 1
 
-            self.writeRiderPosition(orderId: session.orderId, coord: coord)
+            // Store locally — Firestore only written on background/terminate.
+            self.latestRiderCoord = coord
+
             self.resetTimeoutWatchdog()
         }
 
@@ -335,6 +341,18 @@ final class DeliveryViewModel: ObservableObject {
     }
 
     // MARK: - Firestore Writes
+
+    /// Called when the app goes to background or is about to terminate.
+    /// Persists the latest in-memory rider position to Firestore in one write.
+    /// This is the ONLY place riderLatitude/riderLongitude is written during
+    /// a live delivery — everything else is kept in memory.
+    func flushPositionToFirestore() {
+        guard let session,
+              let coord = latestRiderCoord,
+              !isDelivered else { return }
+        writeRiderPosition(orderId: session.orderId, coord: coord)
+        AppLog.firestore.info("[DeliveryViewModel] Flushed position to Firestore on background: (\(coord.latitude), \(coord.longitude))")
+    }
 
     private func writeToFirestore(_ session: DeliverySession) {
         db.collection("deliveries")
