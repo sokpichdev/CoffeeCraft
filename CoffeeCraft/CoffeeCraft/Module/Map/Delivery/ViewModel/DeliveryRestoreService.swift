@@ -4,17 +4,6 @@
 //
 //  Created by Sok Pich on 3/16/26.
 //
-//  Queries Firestore for any orders still in "OnDelivery" status
-//  and re-activates their DeliveryViewModel in OrderEnvironment.
-//
-//  Called in two places:
-//    1. AuthViewModel.checkUser()  — app relaunch with an existing session
-//    2. AuthViewModel.login()      — fresh login
-//
-//  This is the fix for the bug where closing the app while a delivery
-//  is in progress causes the live tracking to disappear on relaunch.
-//  Since OrderEnvironment is in-memory only, it starts empty every launch.
-//  This service bridges that gap by reading the ground-truth from Firestore.
 //
 
 import FirebaseFirestore
@@ -29,13 +18,25 @@ final class DeliveryRestoreService {
 
     // MARK: - Restore
 
-    /// Fetches all orders with status "OnDelivery" for the given user
-    /// and activates a DeliveryViewModel for each one that isn't already running.
+    /// Fetches all orders with status "OnDelivery" for the given user,
+    /// loads their corresponding DeliverySession from Firestore,
+    /// and resumes each one from the correct mid-route position.
     ///
     /// Safe to call multiple times — OrderEnvironment guards against
     /// double-activation with `guard activeDeliveryVMs[orderId] == nil`.
     func restoreActiveDeliveries(for userId: String) async {
         AppLog.order.info("[DeliveryRestoreService] Checking for active deliveries — uid: \(userId)")
+
+        // Raise the restore flag BEFORE any await so activateDelivery() is blocked
+        // from the moment this function starts until all restores complete.
+        await MainActor.run { OrderEnvironment.shared.beginRestoring() }
+
+        defer {
+            Task { @MainActor in
+                OrderEnvironment.shared.endRestoring()
+                AppLog.order.debug("[DeliveryRestoreService] Restore complete — activateDelivery unblocked")
+            }
+        }
 
         do {
             let snapshot = try await db
@@ -53,15 +54,52 @@ final class DeliveryRestoreService {
 
             AppLog.order.info("[DeliveryRestoreService] Found \(activeOrders.count) active delivery order(s) — restoring.")
 
-            await MainActor.run {
-                for order in activeOrders {
-                    OrderEnvironment.shared.activateDelivery(order: order)
-                    AppLog.order.debug("[DeliveryRestoreService] Restored delivery for order: \(order.id ?? "?")")
+            for order in activeOrders {
+                guard let orderId = order.id else { continue }
+
+                do {
+                    // Fetch the deliveries/{orderId} document which holds the real
+                    // last-known riderLatitude/riderLongitude written every simulator tick.
+                    let deliveryDoc = try await db
+                        .collection("deliveries")
+                        .document(orderId)
+                        .getDocument()
+
+                    if let data = deliveryDoc.data(),
+                       let session = DeliverySession(firestoreData: data) {
+                        // Insert the VM and start it on the MainActor in a single
+                        // synchronous block — no async gap for OrderDetailView.onChange
+                        // to sneak in and call activateDelivery.
+                        await MainActor.run {
+                            OrderEnvironment.shared.resumeDelivery(order: order, session: session)
+                            AppLog.order.info("""
+                                            [DeliveryRestoreService] Restored order \(orderId) at \
+                                            (\(session.riderLatitude), \(session.riderLongitude))
+                                            """)
+                        }
+                    } else {
+                        // No delivery doc found — start fresh from branch.
+                        await MainActor.run {
+                            OrderEnvironment.shared.activateDelivery(order: order)
+                            AppLog.order.warning("""
+                                                [DeliveryRestoreService] No delivery doc for \(orderId) \
+                                                — fresh start from branch
+                                                """)
+                        }
+                    }
+                } catch {
+                    await MainActor.run {
+                        OrderEnvironment.shared.activateDelivery(order: order)
+                        AppLog.order.error("""
+                                        [DeliveryRestoreService] Fetch failed for \(orderId): \
+                                        \(error.localizedDescription) — fresh start from branch
+                                        """)
+                    }
                 }
             }
-
         } catch {
-            AppLog.order.error("[DeliveryRestoreService] Failed to fetch active deliveries: \(error.localizedDescription)")
+            AppLog.order.error(
+                "[DeliveryRestoreService] Failed to fetch active deliveries: \(error.localizedDescription)")
         }
     }
 }

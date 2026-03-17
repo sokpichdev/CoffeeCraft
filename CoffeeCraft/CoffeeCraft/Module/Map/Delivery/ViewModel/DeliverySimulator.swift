@@ -80,6 +80,81 @@ final class DeliverySimulator {
         }
     }
 
+    /// Resumes a previously-started simulation by jumping to the step that corresponds
+    /// to how much real time has elapsed since the simulation originally started.
+    ///
+    /// - Parameters:
+    ///   - lastKnownCoord:      The rider's last position written to Firestore.
+    ///   - destination:         The original delivery destination.
+    ///   - simulationStartedAt: Timestamp stored in Firestore when the simulator first fired.
+    ///                          If nil (older sessions), resumes from `lastKnownCoord` at step 0.
+    /// Resumes from the FULL original route (origin → destination) so the rider
+    /// follows the same road as the original polyline drawn on the map.
+    /// It then seeks to the step closest to lastKnownCoord rather than guessing
+    /// from elapsed time, which was unreliable because the resumed route is shorter
+    /// (lastKnown → dest) than the original (origin → dest) and step counts differ.
+    func resume(from origin: CLLocationCoordinate2D,
+                lastKnownCoord: CLLocationCoordinate2D,
+                to destination: CLLocationCoordinate2D) async {
+        stop()
+
+        do {
+            // ✅ Rebuild the FULL original route so the rider follows the same road.
+            let route = try await fetchRoute(from: origin, to: destination)
+            let steps = sampledCoordinates(from: route, stepDistance: stepDistanceMeters)
+
+            // ✅ Find the step closest to lastKnownCoord — this is where the rider
+            // actually is on the original route, regardless of elapsed time.
+            let resumeIndex = closestStepIndex(to: lastKnownCoord, in: steps)
+
+            AppLog.firestore.info("[DeliverySimulator] Resume — \(steps.count) steps, resuming at step \(resumeIndex) (closest to last known pos)")
+
+            await MainActor.run {
+                guard !steps.isEmpty else {
+                    AppLog.firestore.warning("[DeliverySimulator] Resume produced 0 steps — aborting")
+                    return
+                }
+                self.routeSteps       = steps
+                self.currentStepIndex = resumeIndex
+                self.isRunning        = true
+                self.startTimer()
+            }
+        } catch {
+            AppLog.firestore.error("[DeliverySimulator] Resume route fetch failed: \(error.localizedDescription)")
+            // Fallback: straight-line from lastKnownCoord to destination
+            let fallback = straightLineSteps(from: lastKnownCoord, to: destination)
+            await MainActor.run {
+                self.routeSteps       = fallback
+                self.currentStepIndex = 0
+                self.isRunning        = true
+                self.startTimer()
+                AppLog.firestore.warning("""
+                                        [DeliverySimulator] ⚠ Resume fallback \
+                                        straight-line (\(fallback.count) steps)
+                                        """)
+            }
+        }
+    }
+
+    /// Returns the index in `steps` whose coordinate is closest to `coord`.
+    private func closestStepIndex(to coord: CLLocationCoordinate2D,
+                                  in steps: [CLLocationCoordinate2D]) -> Int {
+        guard !steps.isEmpty else { return 0 }
+        let target = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+        var bestIndex = 0
+        var bestDistance = Double.greatestFiniteMagnitude
+        for (i, step) in steps.enumerated() {
+            let dis = CLLocation(latitude: step.latitude, longitude: step.longitude)
+                .distance(from: target)
+            if dis < bestDistance {
+                bestDistance = dis
+                bestIndex    = i
+            }
+        }
+        // Clamp so we never start on the very last step
+        return min(bestIndex, max(steps.count - 2, 0))
+    }
+
     /// Stops the timer and resets all state.
     func stop() {
         timer?.invalidate()
