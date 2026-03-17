@@ -57,6 +57,11 @@ final class DeliveryViewModel: ObservableObject {
     private var firestoreListener: ListenerRegistration?
     private var timeoutTask: Task<Void, Never>?
 
+    /// Set to true during resumeDelivery() so the Firestore listener's first
+    /// immediate snapshot does not overwrite riderCoordinate before the simulator
+    /// starts running. Cleared on the first simulator tick.
+    private var isResumingFromRestore = false
+
     /// Interval (seconds) with no Firestore update before showing "lost track" UI.
     private let timeoutInterval: TimeInterval = 90
 
@@ -74,8 +79,13 @@ final class DeliveryViewModel: ObservableObject {
         self.isTimeout       = false
         self.errorMessage    = nil
 
-        // Write initial document to Firestore so the listener fires immediately
+        // Write the delivery document skeleton (no riderLatitude/riderLongitude —
+        // asFirestoreData intentionally omits them to prevent clobbering).
+        // Then seed the rider start position separately as the branch coordinate.
+        // This is the ONLY place rider position is initialised to the branch.
+        // All subsequent position writes come from writeRiderPosition() each tick.
         writeToFirestore(session)
+        writeRiderPosition(orderId: session.orderId, coord: session.branchCoordinate)
 
         // Attach real-time listener (always — powers Phase 6 real rider)
         attachFirestoreListener(orderId: session.orderId)
@@ -85,6 +95,49 @@ final class DeliveryViewModel: ObservableObject {
         }
 
         AppLog.firestore.info("[DeliveryViewModel] Delivery started — order: \(session.orderId)")
+    }
+
+    // MARK: - Resume (app relaunch while delivery is in progress)
+
+    /// Call this when restoring an active delivery after the app was killed/backgrounded.
+    ///
+    /// Unlike `startDelivery`, this does NOT reset the rider marker to the branch.
+    /// Instead it:
+    ///   1. Sets `riderCoordinate` to the last position written to Firestore.
+    ///   2. Tells the simulator to rebuild the route from that position and skip
+    ///      forward by the number of steps that elapsed while the app was closed.
+    func resumeDelivery(session: DeliverySession, useSimulator: Bool = true) {
+        // Stop any previously running simulator (e.g. the placeholder from preSeedRestoredDelivery).
+        simulator.stop()
+
+        self.session         = session
+        // ✅ Immediately show rider at last-known Firestore position, not branch origin.
+        self.riderCoordinate = session.riderCoordinate
+        // ✅ Do NOT show the loading spinner on restore — we already have the rider
+        //    position and session from Firestore. isLoading = true is only correct
+        //    for startDelivery() where we genuinely have nothing to show yet.
+        //    Showing the spinner here causes "Finding your rider…" every time the
+        //    user reopens the app during an active delivery.
+        self.isLoading       = false
+        self.isDelivered     = session.status == .delivered
+        self.isTimeout       = false
+        self.errorMessage    = nil
+
+        // Set guard flag BEFORE attaching the listener. The listener fires its first
+        // snapshot immediately on attach. If the simulator hasn't started yet,
+        // isRunning == false and the listener would overwrite riderCoordinate with
+        // stale Firestore branch coords. This flag prevents that.
+        isResumingFromRestore = true
+
+        if useSimulator && !isDelivered {
+            resumeSimulator(session: session)
+        }
+
+        // Attach listener AFTER setting up the simulator so the first snapshot
+        // cannot race against the riderCoordinate we just set above.
+        attachFirestoreListener(orderId: session.orderId)
+
+        AppLog.firestore.info("[DeliveryViewModel] Delivery resumed — order: \(session.orderId), lastPos: (\(session.riderLatitude), \(session.riderLongitude))")
     }
 
     // MARK: - Stop
@@ -124,6 +177,9 @@ final class DeliveryViewModel: ObservableObject {
     // MARK: - Simulator
 
     private func startSimulator(session: DeliverySession) {
+        // Track whether we've recorded the simulation start time yet.
+        var hasWrittenStartTime = false
+
         simulator.onUpdate = { [weak self] coord, bearing, eta in
             guard let self else { return }
             self.isLoading        = false
@@ -132,9 +188,16 @@ final class DeliveryViewModel: ObservableObject {
             self.estimatedArrival = eta
             self.tickCount        += 1
 
+            // ✅ On the very first tick, stamp simulationStartedAt so we can
+            // compute elapsed steps on restore after the app is killed.
+            if !hasWrittenStartTime {
+                hasWrittenStartTime = true
+                let now = Date()
+                self.writeSimulationStartTime(orderId: session.orderId, startedAt: now)
+                AppLog.firestore.info("[DeliveryViewModel] Stamped simulationStartedAt: \(now)")
+            }
+
             // Keep Firestore in sync with the simulator position
-            var updated          = session
-            updated.riderCoordinate = coord
             self.writeRiderPosition(orderId: session.orderId, coord: coord)
             self.resetTimeoutWatchdog()
         }
@@ -157,12 +220,61 @@ final class DeliveryViewModel: ObservableObject {
         }
 
         Task {
-            // Fetch the route polyline for the map overlay at the same time
+            // Polyline drawn from branch → destination so the full route
+            // is visible on screen from the moment the delivery starts.
             await fetchRouteOverlay(from: session.branchCoordinate,
                                     to: session.destinationCoordinate)
             await simulator.start(from: session.branchCoordinate,
                                   to: session.destinationCoordinate)
             await MainActor.run { self.isLoading = false }
+        }
+
+        resetTimeoutWatchdog()
+    }
+
+    /// Resumes the simulator from the rider's last Firestore position,
+    /// skipping forward by the time elapsed since simulationStartedAt.
+    private func resumeSimulator(session: DeliverySession) {
+        simulator.onUpdate = { [weak self] coord, bearing, eta in
+            guard let self else { return }
+            // First tick after restore — clear the guard flag so the Firestore
+            // listener can resume normal position updates if the simulator stops.
+            self.isResumingFromRestore = false
+            self.isLoading        = false
+            self.riderCoordinate  = coord
+            self.riderBearing     = bearing
+            self.estimatedArrival = eta
+            self.tickCount        += 1
+
+            self.writeRiderPosition(orderId: session.orderId, coord: coord)
+            self.resetTimeoutWatchdog()
+        }
+
+        simulator.onDelivered = { [weak self] in
+            guard let self else { return }
+            self.isDelivered = true
+            var ses = session
+            ses.status = .delivered
+            self.session = ses
+            self.writeToFirestore(ses)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            AppLog.firestore.info("[DeliveryViewModel] 🎉 Delivered! (resumed)")
+            let completedOrderId = session.orderId
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                OrderEnvironment.shared.clearDelivery(for: completedOrderId)
+            }
+        }
+
+        Task {
+            // ✅ Always redraw the FULL original route (branch → dest) so the
+            // polyline on the map matches the route the simulator drives.
+            await fetchRouteOverlay(from: session.branchCoordinate,
+                                    to: session.destinationCoordinate)
+            // ✅ Simulator rebuilds full route then seeks to the step closest
+            // to the rider's last known position — no elapsed-time guessing.
+            await simulator.resume(from: session.branchCoordinate,
+                                   lastKnownCoord: session.riderCoordinate,
+                                   to: session.destinationCoordinate)
         }
 
         resetTimeoutWatchdog()
@@ -200,11 +312,19 @@ final class DeliveryViewModel: ObservableObject {
                 guard let data = snapshot?.data(),
                       let updated = DeliverySession(firestoreData: data) else { return }
 
-                // In Phase 6 (real rider), Firestore is the source of truth.
-                // In Phase 4 (simulator), the simulator writes to Firestore and we
-                // read it back — redundant but keeps the pipeline identical.
-                self.session         = updated
-                self.riderCoordinate = updated.riderCoordinate
+                // Update session metadata (status, ETA, rider info) from Firestore.
+                self.session = updated
+
+                // Only update riderCoordinate from Firestore when the simulator is NOT running.
+                // While the simulator runs it owns riderCoordinate — letting Firestore write it
+                // causes stuttering because the read-back lags 1-2 ticks behind.
+                //
+                // isResumingFromRestore guards against the listener's FIRST immediate snapshot
+                // (which fires before simulator.isRunning becomes true) overwriting the correct
+                // last-known position we restored from Firestore in resumeDelivery().
+                if !self.simulator.isRunning && !self.isResumingFromRestore {
+                    self.riderCoordinate = updated.riderCoordinate
+                }
 
                 if updated.status == .delivered {
                     self.isDelivered = true
@@ -226,15 +346,29 @@ final class DeliveryViewModel: ObservableObject {
             }
     }
 
+    /// Uses setData(merge: true) — NOT updateData — so the write succeeds even
+    /// if the deliveries document hasn't been created yet (e.g. first tick races
+    /// ahead of writeToFirestore, or a previous write silently failed).
+    /// updateData fails silently on a non-existent document, which is why
+    /// riderLatitude/riderLongitude were missing from Firestore.
     private func writeRiderPosition(orderId: String,
                                     coord: CLLocationCoordinate2D) {
         db.collection("deliveries")
             .document(orderId)
-            .updateData([
-                "riderLatitude": coord.latitude,
+            .setData([
+                "riderLatitude":  coord.latitude,
                 "riderLongitude": coord.longitude,
-                "updatedAt": Date()
-            ]) { _ in }
+                "updatedAt":      Date()
+            ], merge: true) { _ in }
+    }
+
+    /// Writes the moment the simulator fires its first tick.
+    /// Uses setData(merge: true) for the same reason — guarantees the field
+    /// is persisted even if the parent document doesn't exist yet.
+    private func writeSimulationStartTime(orderId: String, startedAt: Date) {
+        db.collection("deliveries")
+            .document(orderId)
+            .setData(["simulationStartedAt": startedAt], merge: true) { _ in }
     }
 
     // MARK: - Timeout Watchdog

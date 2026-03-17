@@ -4,16 +4,6 @@
 //
 //  Created by Sok Pich
 //
-//  Shared order state injected at the app root.
-//
-//  Flow:
-//    1. Branch + fulfillment → MenuBranchSelectionSheet triggers FulfillmentPickerSheet
-//    2. Map shortcut         → MapView calls preSelectBranch(branch:)
-//                             MenuView detects pendingMapBranch and presents FulfillmentPickerSheet
-//    3. Change in cart       → CartView re-presents FulfillmentPickerSheet
-//    4. Order placed         → CartView calls clear()
-//    5. Order OnDelivery (delivery) → OrderDetailView calls activateDelivery(order:)
-//
 
 import CoreLocation
 import SwiftUI
@@ -65,6 +55,11 @@ final class OrderEnvironment: ObservableObject {
     @Published var activeDeliverySessions: [String: DeliverySession] = [:]
     @Published private(set) var activeDeliveryVMs: [String: DeliveryViewModel] = [:]
 
+    /// True while DeliveryRestoreService is fetching active deliveries on app launch.
+    /// activateDelivery() silently skips when this is true — the restore flow
+    /// will populate the VM with the correct mid-route position instead.
+    @Published private(set) var isRestoring: Bool = false
+
     // MARK: - Legacy single-session accessors (used by views that track one order at a time)
 
     /// The session for a specific order, or nil if not active.
@@ -88,6 +83,15 @@ final class OrderEnvironment: ObservableObject {
     var isPickup: Bool { fulfillmentMode == .pickup   }
 
     // MARK: - Actions
+
+    // MARK: - Restore lifecycle
+
+    /// Called by DeliveryRestoreService at the start of restoreActiveDeliveries.
+    /// While true, activateDelivery() is blocked so it cannot race the restore.
+    func beginRestoring() { isRestoring = true }
+
+    /// Called by DeliveryRestoreService when all restores are complete.
+    func endRestoring() { isRestoring = false }
 
     /// Map tab "Order from here" — stores a pending branch for MenuView to pick up.
     /// Does NOT set selectedBranch; that happens only after fulfillment is confirmed.
@@ -143,6 +147,15 @@ final class OrderEnvironment: ObservableObject {
             return
         }
 
+        // Block activation during restore — DeliveryRestoreService will populate
+        // the VM with the correct mid-route position. Without this guard, the
+        // Firestore snapshot listener in OrderDetailView fires before restoreActiveDeliveries
+        // completes and calls activateDelivery, resetting the rider to the branch.
+        guard !isRestoring else {
+            AppLog.firestore.debug("[OrderEnvironment] activateDelivery skipped — restore in progress for order \(orderId)")
+            return
+        }
+
         // Guard: don't restart a session that's already running for this order
         guard activeDeliveryVMs[orderId] == nil else { return }
 
@@ -152,6 +165,7 @@ final class OrderEnvironment: ObservableObject {
         let session = DeliverySession(
             orderId: orderId,
             branchId: branchId,
+            userId: order.userId ?? "",
             branchCoordinate: branchCoord,
             destinationCoordinate: dest
         )
@@ -159,6 +173,23 @@ final class OrderEnvironment: ObservableObject {
         activeDeliverySessions[orderId] = session
         activeDeliveryVMs[orderId]      = vm
         vm.startDelivery(session: session, useSimulator: true)
+    }
+
+    /// Called by DeliveryRestoreService on app relaunch.
+    /// Inserts the VM into activeDeliveryVMs immediately (so OrderDetailView.onChange
+    /// sees it and skips activateDelivery), then calls resumeDelivery with the full
+    /// Firestore session so the rider starts at the correct mid-route position.
+    func resumeDelivery(order: Order, session: DeliverySession) {
+        guard let orderId = order.id else { return }
+        guard activeDeliveryVMs[orderId] == nil else { return }
+        let vm = DeliveryViewModel()
+        activeDeliverySessions[orderId] = session
+        activeDeliveryVMs[orderId]      = vm
+        vm.resumeDelivery(session: session, useSimulator: true)
+        AppLog.firestore.info("""
+                            [OrderEnvironment] Resumed delivery for order: \(orderId) at \
+                            (\(session.riderLatitude), \(session.riderLongitude))
+                            """)
     }
 
     /// Stop and remove the delivery session for a specific order.

@@ -6,6 +6,7 @@
 //
 
 import CoreLocation
+import FirebaseFirestore
 import Foundation
 
 // MARK: - DeliverySession
@@ -16,6 +17,8 @@ struct DeliverySession {
 
     let orderId: String
     let branchId: String
+
+    let userId: String
 
     // MARK: - Coordinates (flat storage, Codable-friendly)
 
@@ -38,6 +41,12 @@ struct DeliverySession {
     var status: DeliveryStatus
     var estimatedArrival: Date?
 
+    /// Timestamp written to Firestore the moment the simulator fires its first tick.
+    /// Used on restore to compute how many steps the rider has already travelled
+    /// so the simulation resumes mid-route instead of restarting from the branch.
+    /// Nil until the simulator actually starts moving.
+    var simulationStartedAt: Date?
+
     // MARK: - Rider Info (optional — nil until riderAssigned)
 
     var riderName: String?
@@ -56,7 +65,7 @@ struct DeliverySession {
     var riderCoordinate: CLLocationCoordinate2D {
         get { CLLocationCoordinate2D(latitude: riderLatitude, longitude: riderLongitude) }
         set {
-            riderLatitude  = newValue.latitude
+            riderLatitude = newValue.latitude
             riderLongitude = newValue.longitude
         }
     }
@@ -64,57 +73,72 @@ struct DeliverySession {
     // MARK: - Firestore Document Mapping
 
     /// Creates a Firestore-writable dictionary for deliveries/{orderId}.
+    ///
+    /// ⚠️ Does NOT include riderLatitude/riderLongitude — those are written
+    /// exclusively by DeliveryViewModel.writeRiderPosition() every simulator tick.
+    /// Keeping them out of this dict prevents the initial writeToFirestore() call
+    /// from clobbering the last saved rider position with the branch coordinates
+    /// when the app restarts and startDelivery() is called on a fresh session.
     func asFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
             "orderId": orderId,
             "branchId": branchId,
+            "userId": userId,
             "branchLatitude": branchLatitude,
             "branchLongitude": branchLongitude,
             "destinationLatitude": destinationLatitude,
             "destinationLongitude": destinationLongitude,
-            "riderLatitude": riderLatitude,
-            "riderLongitude": riderLongitude,
             "status": status.rawValue,
             "updatedAt": Date()
         ]
-        if let eta  = estimatedArrival { data["estimatedArrival"] = eta }
-        if let name = riderName { data["riderName"]        = name }
-        if let ph   = riderPhone { data["riderPhone"]       = ph   }
-        return data
-    }
+        if let eta = estimatedArrival { data["estimatedArrival"] = eta }
+        if let name = riderName { data["riderName"] = name }
+        if let ph = riderPhone { data["riderPhone"] = ph }
+        if let sat = simulationStartedAt { data["simulationStartedAt"] = sat }
+        return data }
 
     /// Initialises a session from a Firestore snapshot dictionary.
     /// Returns nil when required fields are missing.
     init?(firestoreData data: [String: Any]) {
         guard
-            let orderId              = data["orderId"]              as? String,
-            let branchId             = data["branchId"]             as? String,
-            let branchLat            = data["branchLatitude"]        as? Double,
-            let branchLng            = data["branchLongitude"]       as? Double,
-            let destLat              = data["destinationLatitude"]   as? Double,
-            let destLng              = data["destinationLongitude"]  as? Double,
-            let riderLat             = data["riderLatitude"]         as? Double,
-            let riderLng             = data["riderLongitude"]        as? Double,
-            let statusRaw            = data["status"]                as? String,
-            let status               = DeliveryStatus(rawValue: statusRaw)
+            let orderId = data["orderId"] as? String,
+            let branchId = data["branchId"] as? String,
+            let userId = data["userId"] as? String,
+            let branchLat = data["branchLatitude"] as? Double,
+            let branchLng = data["branchLongitude"] as? Double,
+            let destLat = data["destinationLatitude"] as? Double,
+            let destLng = data["destinationLongitude"] as? Double,
+            let riderLat = data["riderLatitude"] as? Double,
+            let riderLng = data["riderLongitude"] as? Double,
+            let statusRaw = data["status"] as? String,
+            let status = DeliveryStatus(rawValue: statusRaw)
         else { return nil }
 
-        self.orderId              = orderId
-        self.branchId             = branchId
-        self.branchLatitude       = branchLat
-        self.branchLongitude      = branchLng
-        self.destinationLatitude  = destLat
+        self.orderId = orderId
+        self.branchId = branchId
+        self.userId = userId
+        self.branchLatitude = branchLat
+        self.branchLongitude = branchLng
+        self.destinationLatitude = destLat
         self.destinationLongitude = destLng
-        self.riderLatitude        = riderLat
-        self.riderLongitude       = riderLng
-        self.status               = status
-        self.riderName            = data["riderName"]  as? String
-        self.riderPhone           = data["riderPhone"] as? String
+        self.riderLatitude = riderLat
+        self.riderLongitude = riderLng
+        self.status = status
+        self.riderName = data["riderName"] as? String
+        self.riderPhone = data["riderPhone"] as? String
 
-        if let ts = data["estimatedArrival"] as? Date {
-            self.estimatedArrival = ts
+        // Firestore returns Timestamp objects, not Swift Dates.
+        // We must call .dateValue() — casting directly with "as? Date" always fails.
+        if let ts = data["estimatedArrival"] as? Timestamp {
+            self.estimatedArrival = ts.dateValue()
         } else {
             self.estimatedArrival = nil
+        }
+
+        if let sat = data["simulationStartedAt"] as? Timestamp {
+            self.simulationStartedAt = sat.dateValue()
+        } else {
+            self.simulationStartedAt = nil
         }
     }
 
@@ -122,23 +146,26 @@ struct DeliverySession {
     init(
         orderId: String,
         branchId: String,
+        userId: String = "",
         branchCoordinate: CLLocationCoordinate2D,
         destinationCoordinate: CLLocationCoordinate2D,
-        riderName: String?  = "Dara",
-        riderPhone: String?  = "+855 12 345 678"
+        riderName: String? = "Dara",
+        riderPhone: String? = "+855 12 345 678"
     ) {
-        self.orderId              = orderId
-        self.branchId             = branchId
-        self.branchLatitude       = branchCoordinate.latitude
-        self.branchLongitude      = branchCoordinate.longitude
-        self.destinationLatitude  = destinationCoordinate.latitude
+        self.orderId = orderId
+        self.branchId = branchId
+        self.userId = userId
+        self.branchLatitude = branchCoordinate.latitude
+        self.branchLongitude = branchCoordinate.longitude
+        self.destinationLatitude = destinationCoordinate.latitude
         self.destinationLongitude = destinationCoordinate.longitude
         // Rider starts at the branch
-        self.riderLatitude        = branchCoordinate.latitude
-        self.riderLongitude       = branchCoordinate.longitude
-        self.status               = .orderPlaced
-        self.estimatedArrival     = nil
-        self.riderName            = riderName
-        self.riderPhone           = riderPhone
+        self.riderLatitude = branchCoordinate.latitude
+        self.riderLongitude = branchCoordinate.longitude
+        self.status = .orderPlaced
+        self.estimatedArrival = nil
+        self.simulationStartedAt = nil
+        self.riderName = riderName
+        self.riderPhone = riderPhone
     }
 }
