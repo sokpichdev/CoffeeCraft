@@ -223,10 +223,19 @@ private struct AdminProgressButtons: View {
                 Button(buttonLabel(for: step)) {
                     Task {
                         let success = await vm.updateOrderStatus(order: order, status: step.rawValue)
-                        if success && step == .completed {
+                        guard success else { return }
+
+                        switch step {
+                        case .onDelivery:
+                            OrderEnvironment.shared.activateDelivery(order: order)
+
+                        case .completed:
                             ToastManager.shared.show(
                                 message: order.isDeliveryOrder ? "Order Delivered" : "Order Completed",
                                 type: .success)
+
+                        default:
+                            break
                         }
                     }
                 }
