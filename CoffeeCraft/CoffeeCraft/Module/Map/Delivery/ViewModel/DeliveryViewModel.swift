@@ -83,13 +83,26 @@ final class DeliveryViewModel: ObservableObject {
         self.isTimeout       = false
         self.errorMessage    = nil
 
-        // Write the delivery document skeleton (no riderLatitude/riderLongitude —
-        // asFirestoreData intentionally omits them to prevent clobbering).
-        // Then seed the rider start position separately as the branch coordinate.
-        // This is the ONLY place rider position is initialised to the branch.
-        // All subsequent position writes come from writeRiderPosition() each tick.
-        writeToFirestore(session)
-        writeRiderPosition(orderId: session.orderId, coord: session.branchCoordinate)
+        // Write the delivery document AND the initial rider position in one
+        // combined setData(merge: true) call — 1 write instead of 2.
+        //
+        // asFirestoreData() omits riderLatitude/riderLongitude by design so that
+        // writeToFirestore() used elsewhere never clobbers a saved mid-route position.
+        // Here in startDelivery() we always want the rider to start at the branch,
+        // so we merge the coords in manually before writing.
+        //
+        // writeRiderPosition() is still used by flushPositionToFirestore() (on
+        // app-background) — that path is unchanged.
+        var initialData = session.asFirestoreData()
+        initialData["riderLatitude"]  = session.branchCoordinate.latitude
+        initialData["riderLongitude"] = session.branchCoordinate.longitude
+        db.collection("deliveries")
+            .document(session.orderId)
+            .setData(initialData, merge: true) { error in
+                if let error {
+                    AppLog.firestore.error("[DeliveryViewModel] Initial write failed: \(error.localizedDescription)")
+                }
+            }
 
         // Attach real-time listener (always — powers Phase 6 real rider)
         attachFirestoreListener(orderId: session.orderId)
