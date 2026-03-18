@@ -75,31 +75,46 @@ extension AnalyticsService {
 
     // MARK: - Background Enrichment
 
-    /// Fetches totalOrders + totalSpent for an array of users concurrently.
-    /// Returns a dict [userId → (orderCount, totalSpent)] for the caller to merge.
-    ///
-    /// Uses a TaskGroup so all N queries run in parallel rather than sequentially.
-    /// For a page of 20 users this takes ~1 round-trip instead of 20 serial ones.
     func enrichUsersWithOrderStats(
         userIds: [String]
     ) async -> [String: (Int, Double)] {
         await withTaskGroup(of: (String, Int, Double).self) { group in
             for userId in userIds {
                 group.addTask {
-                    do {
-                        let snapshot = try await self.db.collection("orders")
-                            .whereField("userId", isEqualTo: userId)
-                            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-                            .getDocuments()
+                    let ordersQuery = self.db.collection("orders")
+                        .whereField("userId", isEqualTo: userId)
+                        .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
 
-                        let count = snapshot.documents.count
-                        let spent = snapshot.documents.reduce(0.0) {
-                            $0 + ($1.data()["totalPrice"] as? Double ?? 0)
-                        }
-                        return (userId, count, spent)
+                    // Isolated try/catch — a sum failure does not zero the count.
+                    let count: Int
+                    do {
+                        let result = try await ordersQuery
+                            .count
+                            .getAggregation(source: .server)
+                        count = Int(truncating: result.count)
                     } catch {
-                        return (userId, 0, 0) // fail silently — list row shows "—"
+                        AppLog.dashboard.error("[enrichUsers] count ❌ \(userId): \(error.localizedDescription)")
+                        count = 0
                     }
+                    
+                    let spent: Double
+                    do {
+                        let sumField = AggregateField.sum("totalPrice")
+                        let result = try await ordersQuery
+                            .aggregate([sumField])
+                            .getAggregation(source: .server)
+                        spent = result.get(sumField) as? Double ?? 0
+                    } catch {
+                        AppLog.dashboard.error("[enrichUsers] sum ❌ \(userId): \(error.localizedDescription) — falling back to getDocuments()")
+                        // Fallback: fetch at most 200 docs and sum client-side.
+                        // Bounded cost; works on any SDK version.
+                        let snap = try? await ordersQuery.limit(to: 200).getDocuments()
+                        spent = snap?.documents.reduce(0.0) {
+                            $0 + ($1.data()["totalPrice"] as? Double ?? 0)
+                        } ?? 0
+                    }
+
+                    return (userId, count, spent)
                 }
             }
 
