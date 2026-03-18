@@ -105,8 +105,7 @@ struct OrdersView: View {
         OrderCardView(
             order: order,
             onNavigate: {
-                // Card tap always goes to order detail — user reads the order first
-                navigateToDetail(order: order)
+                selectedOrder = order
             },
             onTrackDelivery: {
                 // Live banner tap goes straight to the delivery map.
@@ -148,12 +147,6 @@ struct OrdersView: View {
         }
     }
 
-    // MARK: - Navigation
-
-    private func navigateToDetail(order: Order) {
-        selectedOrder = order
-    }
-
     // MARK: - Deep Link
 
     private func handleDeepLink() {
@@ -170,7 +163,7 @@ struct OrdersView: View {
 
     private func navigateToLinkedOrder(orderId: String) {
         guard let order = orderVM.orders.first(where: { $0.id == orderId }) else { return }
-        navigateToDetail(order: order)
+        selectedOrder = order
         coordinator.clearNavigation()
     }
 
