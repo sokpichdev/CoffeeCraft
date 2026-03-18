@@ -62,15 +62,16 @@ extension AnalyticsService {
     }
 
     private func revenueInRange(from start: Date, to end: Date) async throws -> Double {
-        let snapshot = try await db.collection("orders")
+        let sumField = AggregateField.sum("totalPrice")
+
+        let aggregation = try await db.collection("orders")
             .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
             .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
             .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
-            .getDocuments()
+            .aggregate([sumField])
+            .getAggregation(source: .server)
 
-        return snapshot.documents.reduce(0.0) { sum, doc in
-            sum + (doc.data()["totalPrice"] as? Double ?? 0)
-        }
+        return aggregation.get(sumField) as? Double ?? 0
     }
 
     // MARK: - Orders
