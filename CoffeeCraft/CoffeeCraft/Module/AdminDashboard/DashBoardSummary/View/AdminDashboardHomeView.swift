@@ -64,64 +64,66 @@ struct AdminDashboardHomeView: View {
     // MARK: - Revenue Card
 
     private var revenueCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            CustomSegmentedControl(selectedSegment: $vm.selectedPeriod, segments: [.today, .week, .month], onClick: {})
-
-            // Revenue label + amount
-            HStack(alignment: .lastTextBaseline, spacing: 4) {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.accentGold)
-                Text("Revenue")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.textSecondary)
-                    .tracking(0.4)
-            }
-            .padding(.bottom, 6)
-
-            if vm.isLoading {
-                ShimmerView()
-                    .frame(width: 160, height: 46)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .padding(.bottom, 16)
-            } else {
-                HStack(alignment: .lastTextBaseline, spacing: 6) {
-                    Text(vm.displayRevenue)
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.textPrimary)
-                    Text(vm.displayRevenueLabel)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color.textMuted)
-                        .padding(.bottom, 5)
-                }
-                .padding(.bottom, 16)
-            }
-
-            // Mini stats row
-            if !vm.isLoading, let summary = vm.summary {
-                Divider().background(Color.borderColor)
-
-                HStack(spacing: 0) {
-                    miniStat(label: "Today", value: summary.revenue.todayFormatted, color: .accentPrimary)
-                    revenueStatDivider
-                    miniStat(label: "Week", value: summary.revenue.thisWeekFormatted, color: .accentPrimary)
-                    revenueStatDivider
-                    miniStat(label: "Month", value: summary.revenue.thisMonthFormatted, color: .accentGold)
-                }
-                .padding(.top, 12)
-            }
-        }
-        .padding(18)
-        .background(Color.surfacePrimary)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        // Gold accent top border
-        .overlay(alignment: .top) {
+        VStack {
+            // Gold accent top border
             RoundedRectangle(cornerRadius: 3)
                 .fill(LinearGradient.brandGold)
-                .frame(height: 3)
-                .padding(.horizontal, 20)
+                .frame(height: 6)
+                .padding(.horizontal, -18)
                 .padding(.top, 0)
+            VStack(alignment: .leading, spacing: 0) {
+                CustomSegmentedControl(selectedSegment: $vm.selectedPeriod,
+                                       segments: [.today, .week, .month], onClick: {})
+
+                // Revenue label + amount
+                HStack(alignment: .lastTextBaseline, spacing: 4) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.accentGold)
+                    Text("Revenue")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.textSecondary)
+                        .tracking(0.4)
+                }
+                .padding(.bottom, 6)
+
+                if vm.isLoading {
+                    ShimmerView()
+                        .frame(width: 160, height: 46)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .padding(.bottom, 16)
+                } else {
+                    HStack(alignment: .lastTextBaseline, spacing: 6) {
+                        Text(vm.displayRevenue)
+                            .font(.system(size: 42, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.textPrimary)
+                        Text(vm.displayRevenueLabel)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.textMuted)
+                            .padding(.bottom, 5)
+                    }
+                    .padding(.bottom, 16)
+                }
+
+                // Mini stats row
+                if !vm.isLoading, let summary = vm.summary {
+                    Divider().background(Color.borderColor)
+
+                    HStack(spacing: 0) {
+                        miniStat(label: "Today", value: summary.revenue.todayFormatted, color: .accentPrimary)
+                        revenueStatDivider
+                        miniStat(label: "Week", value: summary.revenue.thisWeekFormatted, color: .accentPrimary)
+                        revenueStatDivider
+                        miniStat(label: "Month", value: summary.revenue.thisMonthFormatted, color: .accentGold)
+                    }
+                    .padding(.top, 12)
+                }
+            }
+            Spacer()
         }
+        .padding(EdgeInsets(top: 0, leading: 18, bottom: 18, trailing: 18))
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.borderColor, lineWidth: 1)
