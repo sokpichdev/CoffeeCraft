@@ -119,20 +119,50 @@ extension AnalyticsService {
     func fetchOrderFunnel() async throws -> OrderFunnelData {
         let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -29,
                                                    to: Calendar.current.startOfDay(for: Date()))!
-        let snapshot = try await db.collection("orders")
-            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: thirtyDaysAgo))
+        let startTimestamp = Timestamp(date: thirtyDaysAgo)
+        let ordersRef = db.collection("orders")
+
+        async let totalCountAgg = ordersRef
+            .whereField("timestamp", isGreaterThanOrEqualTo: startTimestamp)
+            .count
+            .getAggregation(source: .server)
+
+        async let completedCountAgg = ordersRef
+            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
+            .whereField("timestamp", isGreaterThanOrEqualTo: startTimestamp)
+            .count
+            .getAggregation(source: .server)
+
+        async let cancelledCountAgg = ordersRef
+            .whereField("status", isEqualTo: OrderStatus.cancelled.rawValue)
+            .whereField("timestamp", isGreaterThanOrEqualTo: startTimestamp)
+            .count
+            .getAggregation(source: .server)
+
+        // ── Fulfillment time (still needs document content) ───────────────────
+        // Capped at 100 most-recent completed orders so cost is bounded at
+        // ≤ 100 reads regardless of how many orders exist in the 30-day window.
+        async let recentCompletedSnap = ordersRef
+            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
+            .whereField("completedAt", isGreaterThanOrEqualTo: startTimestamp)
+            .order(by: "completedAt", descending: true)
+            .limit(to: 100)
             .getDocuments()
 
-        let orders = snapshot.documents.map { $0.data() }
-        let completed = orders.filter { $0["status"] as? String == OrderStatus.completed.rawValue }
-        let cancelled = orders.filter { $0["status"] as? String == OrderStatus.cancelled.rawValue }
-        let active = orders.filter { OrderStatus.from($0["status"] as? String).isActive }
+        let (totalResult, completedResult, cancelledResult, completedDocs) =
+            try await (totalCountAgg, completedCountAgg, cancelledCountAgg, recentCompletedSnap)
 
-        // Average fulfillment time — only for orders that have completedAt stored
-        let fulfillmentTimes: [Double] = completed.compactMap { order in
+        let totalOrders = Int(truncating: totalResult.count)
+        let completedCount = Int(truncating: completedResult.count)
+        let cancelledCount = Int(truncating: cancelledResult.count)
+        let activeCount = max(0, totalOrders - completedCount - cancelledCount)
+
+        // Average fulfillment time computed from the ≤100 document sample
+        let fulfillmentTimes: [Double] = completedDocs.documents.compactMap { doc in
+            let data = doc.data()
             guard
-                let placedTs = (order["timestamp"] as? Timestamp)?.dateValue(),
-                let completedTs = (order["completedAt"] as? Timestamp)?.dateValue()
+                let placedTs = (data["timestamp"] as? Timestamp)?.dateValue(),
+                let completedTs = (data["completedAt"] as? Timestamp)?.dateValue()
             else { return nil }
             return completedTs.timeIntervalSince(placedTs) / 60 // minutes
         }
@@ -142,10 +172,10 @@ extension AnalyticsService {
             : fulfillmentTimes.reduce(0, +) / Double(fulfillmentTimes.count)
 
         return OrderFunnelData(
-            totalOrders: orders.count,
-            completedCount: completed.count,
-            cancelledCount: cancelled.count,
-            activeCount: active.count,
+            totalOrders: totalOrders,
+            completedCount: completedCount,
+            cancelledCount: cancelledCount,
+            activeCount: activeCount,
             avgFulfillmentMinutes: avgFulfillment
         )
     }
