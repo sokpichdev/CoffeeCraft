@@ -107,20 +107,24 @@ extension AnalyticsService {
     private func fetchCustomerSummary() async throws -> CustomerSummary {
         let weekStart = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
 
-        async let newSnap = db.collection("users")
+        // New customers this week — count only, no documents downloaded
+        async let newCountAgg = db.collection("users")
             .whereField("role", isEqualTo: "customer")
             .whereField("createdAt", isGreaterThanOrEqualTo: Timestamp(date: weekStart))
-            .getDocuments()
+            .count
+            .getAggregation(source: .server)
 
-        async let totalSnap = db.collection("users")
+        // All-time customer total — count only, no documents downloaded
+        async let totalCountAgg = db.collection("users")
             .whereField("role", isEqualTo: "customer")
-            .getDocuments()
+            .count
+            .getAggregation(source: .server)
 
-        let (newUsers, totalUsers) = try await (newSnap, totalSnap)
+        let (newResult, totalResult) = try await (newCountAgg, totalCountAgg)
 
         return CustomerSummary(
-            newThisWeek: newUsers.documents.count,
-            totalCount: totalUsers.documents.count
+            newThisWeek: Int(truncating: newResult.count),
+            totalCount: Int(truncating: totalResult.count)
         )
     }
 
