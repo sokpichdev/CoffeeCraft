@@ -17,6 +17,8 @@ class InboxViewModel: ObservableObject {
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
     private let pageSize = 10
+    private let maxListenerWindow = 50
+    private var currentListenerLimit = 0
 
     /// Cursor pointing to the last document fetched.
     /// The next page query starts *after* this snapshot.
@@ -107,18 +109,21 @@ class InboxViewModel: ObservableObject {
     }
 
     private func setupRealtimeListener(userId: String) {
+        let newLimit = min(max(notifications.count, pageSize), maxListenerWindow)
+        guard newLimit != currentListenerLimit else {
+            AppLog.menu.debug("🔌 setupRealtimeListener — limit unchanged (\(newLimit)), skipping re-attach")
+            return
+        }
+        currentListenerLimit = newLimit
         listener?.remove()
 
-        // Limit grows with every loaded page so all visible notifications
-        // receive .added and .modified events in real time.
-        let listenLimit = max(notifications.count, pageSize)
-        AppLog.menu.debug("🔌 setupRealtimeListener — uid: \(userId), limit: \(listenLimit)")
+        AppLog.menu.debug("🔌 setupRealtimeListener — uid: \(userId), limit: \(newLimit)")
 
         listener = db.collection("users")
             .document(userId)
             .collection("notifications")
             .order(by: "createdAt", descending: true)
-            .limit(to: listenLimit)
+            .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
 
@@ -169,6 +174,7 @@ class InboxViewModel: ObservableObject {
         AppLog.menu.debug("🔄 refreshNotifications — clearing and re-fetching from page 1")
         listener?.remove()
         listener = nil
+        currentListenerLimit = 0
         notifications = []
         lastDocument = nil
         hasMore = true

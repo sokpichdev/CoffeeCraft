@@ -54,6 +54,8 @@ final class DashboardHomeViewModel: ObservableObject {
 
     private let service = AnalyticsService.shared
     private let pageSize = 10
+    private let maxListenerWindow = 50
+    private var currentListenerLimit = 0
     private var liveListener: ListenerRegistration?
 
     /// Firestore cursor pointing at the last document fetched.
@@ -130,6 +132,7 @@ final class DashboardHomeViewModel: ObservableObject {
     func refresh() async {
         liveListener?.remove()
         liveListener = nil
+        currentListenerLimit = 0
         await loadSummary()
         attachLiveListener()
     }
@@ -173,11 +176,17 @@ final class DashboardHomeViewModel: ObservableObject {
     // MARK: - Live Listener (growing-window, mirrors AdminOrdersViewModel)
 
     private func attachLiveListener() {
+        let newLimit = min(max(allActivity.count, pageSize), maxListenerWindow)
+        guard newLimit != currentListenerLimit else {
+            AppLog.dashboard.debug("🔌 attachLiveListener — limit unchanged (\(newLimit)), skipping re-attach")
+            return
+        }
+        currentListenerLimit = newLimit
         liveListener?.remove()
-        let limit = max(allActivity.count, pageSize)
-        AppLog.dashboard.debug("🔌 attachLiveListener — limit: \(limit)")
 
-        liveListener = service.listenToLiveActivity(limit: limit) { [weak self] items in
+        AppLog.dashboard.debug("🔌 attachLiveListener — limit: \(newLimit)")
+
+        liveListener = service.listenToLiveActivity(limit: newLimit) { [weak self] items in
             Task { @MainActor [weak self] in
                 self?.liveItems = items
             }
