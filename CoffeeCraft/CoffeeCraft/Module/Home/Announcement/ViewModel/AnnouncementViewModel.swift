@@ -17,9 +17,37 @@ class AnnouncementViewModel: ObservableObject {
     @Published var announcements: [Announcement] = []
     @Published var isLoading: Bool = false
     @Published var isAnnouncementsFetched: Bool = false
+
+    // MARK: - TTL Cache
+    // Announcements are updated at most once or twice a day by admins.
+    // Re-fetching on every Home tab switch wastes quota for data that
+    // almost never changes. A 5-minute TTL eliminates ~95% of repeat reads.
+    private var lastFetchDate: Date?
+    private let cacheTTL: TimeInterval = 300 // 5 minutes
+
+    /// Returns true when cached data is still fresh and a Firestore
+    /// round-trip can be skipped entirely.
+    private var isCacheValid: Bool {
+        guard let last = lastFetchDate, !announcements.isEmpty else { return false }
+        return Date().timeIntervalSince(last) < cacheTTL
+    }
+
+    /// Call this after any admin create / update / delete so the next
+    /// fetchAnnouncements() always gets fresh data from Firestore.
+    func invalidateCache() {
+        lastFetchDate = nil
+        AppLog.menu.debug("🗑️ AnnouncementViewModel — cache invalidated")
+    }
     
     // MARK: - Fetch All Announcements
     func fetchAnnouncements() async {
+        // Skip Firestore if cache is still fresh.
+        if isCacheValid {
+            AppLog.menu.debug("⚡ fetchAnnouncements — cache hit, skipping Firestore")
+            isAnnouncementsFetched = true
+            return
+        }
+
         isLoading = true
         isAnnouncementsFetched = false
         
@@ -39,6 +67,7 @@ class AnnouncementViewModel: ObservableObject {
 
             // Already @MainActor — no MainActor.run wrapper needed
             announcements = fetchedAnnouncements
+            lastFetchDate = Date()
             isAnnouncementsFetched = true
             isLoading = false
         } catch {
@@ -68,6 +97,7 @@ class AnnouncementViewModel: ObservableObject {
         AppLog.menu.debug("📡 Creating announcement: \(announcement.id ?? "no id")")
         do {
             try db.collection(collection).document(announcement.id ?? "").setData(from: announcement)
+            invalidateCache()
             AppLog.menu.debug("✅ Announcement created successfully")
         } catch {
             AppLog.menu.error("❌ Failed to create announcement: \(error.localizedDescription)")
@@ -80,6 +110,7 @@ class AnnouncementViewModel: ObservableObject {
         AppLog.menu.debug("📡 Updating announcement: \(announcement.id ?? "no id")")
         do {
             try db.collection(collection).document(announcement.id ?? "").setData(from: announcement, merge: true)
+            invalidateCache()
             AppLog.menu.debug("✅ Announcement updated successfully")
         } catch {
             AppLog.menu.error("❌ Failed to update announcement: \(error.localizedDescription)")
@@ -92,6 +123,7 @@ class AnnouncementViewModel: ObservableObject {
         AppLog.menu.debug("📡 Deleting announcement: \(id)")
         do {
             try await db.collection(collection).document(id).delete()
+            invalidateCache()
             AppLog.menu.debug("✅ Announcement deleted: \(id)")
         } catch {
             AppLog.menu.error("❌ Failed to delete announcement id \(id): \(error.localizedDescription)")
