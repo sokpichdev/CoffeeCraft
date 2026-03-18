@@ -24,6 +24,9 @@ class AdminOrdersViewModel: ObservableObject {
     private var allOrdersListener: ListenerRegistration?
     private var myOrdersListener: ListenerRegistration?
     private let pageSize = 10
+    private let maxListenerWindow = 50
+    private var currentAllOrdersLimit = 0
+    private var currentMyOrdersLimit  = 0
 
     private var lastAllOrdersDocument: DocumentSnapshot?
     private var lastMyOrdersDocument: DocumentSnapshot?
@@ -88,14 +91,19 @@ class AdminOrdersViewModel: ObservableObject {
     }
 
     private func setupAllOrdersListener() {
+        let newLimit = min(max(allOrders.count, pageSize), maxListenerWindow)
+        guard newLimit != currentAllOrdersLimit else {
+            AppLog.order.debug("🔌 setupAllOrdersListener — limit unchanged (\(newLimit)), skipping re-attach")
+            return
+        }
+        currentAllOrdersLimit = newLimit
         allOrdersListener?.remove()
 
-        let listenLimit = max(allOrders.count, pageSize)
-        AppLog.order.debug("🔌 setupAllOrdersListener — limit: \(listenLimit)")
+        AppLog.order.debug("🔌 setupAllOrdersListener — limit: \(newLimit)")
 
         allOrdersListener = db.collection("orders")
             .order(by: "timestamp", descending: true)
-            .limit(to: listenLimit)
+            .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
 
@@ -184,15 +192,20 @@ class AdminOrdersViewModel: ObservableObject {
     }
 
     private func setupMyOrdersListener(userId: String) {
+        let newLimit = min(max(myOrders.count, pageSize), maxListenerWindow)
+        guard newLimit != currentMyOrdersLimit else {
+            AppLog.order.debug("🔌 setupMyOrdersListener — limit unchanged (\(newLimit)), skipping re-attach")
+            return
+        }
+        currentMyOrdersLimit = newLimit
         myOrdersListener?.remove()
 
-        let listenLimit = max(myOrders.count, pageSize)
-        AppLog.order.debug("🔌 setupMyOrdersListener — uid: \(userId), limit: \(listenLimit)")
+        AppLog.order.debug("🔌 setupMyOrdersListener — uid: \(userId), limit: \(newLimit)")
 
         myOrdersListener = db.collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
-            .limit(to: listenLimit)
+            .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
 
@@ -230,6 +243,7 @@ class AdminOrdersViewModel: ObservableObject {
         AppLog.order.debug("🔄 refreshMyOrders")
         myOrdersListener?.remove()
         myOrdersListener = nil
+        currentMyOrdersLimit = 0
         myOrders = []
         lastMyOrdersDocument = nil
         hasMoreMyOrders = true
@@ -240,6 +254,7 @@ class AdminOrdersViewModel: ObservableObject {
         AppLog.order.debug("🔄 refreshAllOrders")
         allOrdersListener?.remove()
         allOrdersListener = nil
+        currentAllOrdersLimit = 0
         allOrders = []
         lastAllOrdersDocument = nil
         hasMoreAllOrders = true

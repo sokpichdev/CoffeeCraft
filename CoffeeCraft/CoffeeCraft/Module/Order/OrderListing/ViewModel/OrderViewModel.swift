@@ -34,6 +34,9 @@ class OrderViewModel: ObservableObject {
 
     private let db = Firestore.firestore()
     private let pageSize = 5
+    /// Listener window never grows beyond this — prevents O(n²) read cost on scroll.
+    private let maxListenerWindow = 50
+    private var currentListenerLimit = 0
 
     /// Cursor pointing to the last document fetched.
     /// The next page query starts *after* this snapshot.
@@ -179,19 +182,22 @@ class OrderViewModel: ObservableObject {
     ///   .added    → new order just placed (insert at top)
     ///   .modified → status change on existing order (update in place)
     private func setupRealtimeListener(userId: String) {
+        let newLimit = min(max(orders.count, pageSize), maxListenerWindow)
+        // Skip re-attach if the window hasn't grown — saves a full re-read.
+        guard newLimit != currentListenerLimit else {
+            AppLog.order.debug("🔌 setupRealtimeListener — limit unchanged (\(newLimit)), skipping re-attach")
+            return
+        }
+        currentListenerLimit = newLimit
         listener?.remove()
 
-        // Use current loaded count so the listener always covers everything visible.
-        // Fall back to pageSize on the very first attach (before orders are set).
-        let listenLimit = max(orders.count, pageSize)
-
-        AppLog.order.debug("🔌 setupRealtimeListener — attaching for uid: \(userId), limit: \(listenLimit)")
+        AppLog.order.debug("🔌 setupRealtimeListener — attaching for uid: \(userId), limit: \(newLimit)")
 
         listener = db
             .collection("orders")
             .whereField("userId", isEqualTo: userId)
             .order(by: "timestamp", descending: true)
-            .limit(to: listenLimit)
+            .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
 
