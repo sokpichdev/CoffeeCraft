@@ -21,7 +21,11 @@ struct SalesAnalyticsView: View {
                 CustomSegmentedControl(
                     selectedSegment: $vm.selectedPeriod,
                     segments: SalesPeriod.allCases,
-                    onClick: { Task { await vm.periodChanged() } }
+                    onClick: {
+                        Task {
+                            await vm.loadAnalytics()
+                        }
+                    }
                 )
                 .padding(.top, 8)
                 
@@ -48,7 +52,9 @@ struct SalesAnalyticsView: View {
                 dismiss()
             }
         }
-        .onAppear { vm.onAppear() }
+        .onAppear {
+            Task { await vm.loadAnalytics() }
+        }
     }
 
     // MARK: - Summary Stat Cards
@@ -164,7 +170,7 @@ struct SalesAnalyticsView: View {
                     x: .value("Count", point.count),
                     y: .value("Status", point.status)
                 )
-                .foregroundStyle(statusColor(point.status))
+                .foregroundStyle(OrderStatus.from(point.status).color)
                 .cornerRadius(5)
                 .annotation(position: .trailing, alignment: .leading) {
                     Text("\(point.count)  ·  \(String(format: "%.0f", point.percentage))%")
@@ -187,24 +193,13 @@ struct SalesAnalyticsView: View {
         }
     }
 
-    private func statusColor(_ status: String) -> Color {
-        switch OrderStatus.from(status) {
-        case .completed: return .semanticSuccess
-        case .inProgress: return .accentPrimary
-        case .pending: return .orange
-        case .ready: return .semanticSuccess
-        case .onDelivery: return .blue
-        case .cancelled: return .semanticError
-        }
-    }
-
     // MARK: - Peak Hours Heatmap
 
     private var peakHoursSection: some View {
         ChartCard(title: "Peak Ordering Hours",
                   subtitle: "6 am – 10 pm · Non-cancelled orders") {
             PeakHoursHeatmap(
-                points: vm.analyticsData?.peakHours ?? [],
+                matrix: vm.heatmapMatrix,
                 maxCount: vm.peakHourMax
             )
         }
