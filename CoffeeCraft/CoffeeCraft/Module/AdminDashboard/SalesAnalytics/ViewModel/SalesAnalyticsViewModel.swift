@@ -19,7 +19,10 @@ final class SalesAnalyticsViewModel: ObservableObject {
     // MARK: - Private
 
     private let service = AnalyticsService.shared
-
+    
+    private let hours = stride(from: 6, through: 22, by: 2).map { $0 }
+    private let weekdays = [1, 2, 3, 4, 5, 6, 7]
+    
     // MARK: - Computed — Chart helpers
 
     /// Max revenue value across all daily points — used to set chart y-axis domain.
@@ -37,14 +40,26 @@ final class SalesAnalyticsViewModel: ObservableObject {
         analyticsData?.peakHours.map(\.orderCount).max() ?? 1
     }
 
-    // MARK: - Lifecycle
+    // MARK: - Heatmap Optimized Data
 
-    func onAppear() {
-        Task { await loadAnalytics() }
+    var heatmapMatrix: [[Int]] {
+        guard let points = analyticsData?.peakHours else { return [] }
+
+        var grid = Array(
+            repeating: Array(repeating: 0, count: hours.count),
+            count: weekdays.count
+        )
+
+        for point in points {
+            if let row = weekdays.firstIndex(of: point.weekday),
+               let col = hours.firstIndex(of: point.hour) {
+                grid[row][col] = point.orderCount
+            }
+        }
+
+        return grid
     }
-
-    // MARK: - Load
-
+    
     func loadAnalytics() async {
         isLoading = true
         do {
@@ -61,10 +76,5 @@ final class SalesAnalyticsViewModel: ObservableObject {
             AppLog.dashboard.error("SalesAnalyticsViewModel \(error.localizedDescription)")
         }
         isLoading = false
-    }
-
-    /// Called when the period picker changes — reloads from Firestore for the new range.
-    func periodChanged() async {
-        await loadAnalytics()
     }
 }
