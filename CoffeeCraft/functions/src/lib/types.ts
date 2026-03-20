@@ -7,7 +7,8 @@ import * as admin from "firebase-admin";
 export type NotificationType =
   | "order_status"
   | "promotion"
-  | "reward"
+  | "reward" // loyalty-points milestone only
+  | "wallet" // topup | payment | refund transactions
   | "announcement";
 
 export interface NotificationDoc {
@@ -17,6 +18,13 @@ export interface NotificationDoc {
   isRead: boolean;
   createdAt: admin.firestore.Timestamp;
   payload: Record<string, string>;
+  /**
+   * When true, this notification is auto-deleted once its linked order
+   * reaches a terminal state (Completed or Cancelled).
+   * Transient notifications: "Ready for pickup",
+     "On the way", "Payment Confirmed".
+   */
+  isTransient?: boolean;
 }
 
 export interface FcmTokenObject {

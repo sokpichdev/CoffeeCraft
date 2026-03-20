@@ -12,11 +12,12 @@ import FirebaseFirestore
 // Add new cases here as you add new cloud function triggers.
 // ─────────────────────────────────────────────────────────────
 enum NotificationType: String, Codable {
-    case orderStatus = "order_status"
-    case promotion = "promotion"
-    case reward = "reward"
-    case announcement = "announcement"
-    case unknown // fallback — never crashes on unrecognised types
+    case orderStatus   = "order_status"
+    case promotion     = "promotion"
+    case reward        = "reward"        // loyalty-points milestone only
+    case wallet        = "wallet"        // topup | payment | refund
+    case announcement  = "announcement"
+    case unknown                         // fallback — never crashes on unrecognised types
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -31,6 +32,10 @@ struct AppNotification: Identifiable, Codable {
     let title: String
     let message: String
     let isRead: Bool
+    /// When true, this notification was tagged as transient on creation and
+    /// will be auto-deleted by the backend once its linked order reaches a
+    /// terminal state. The client removes it via the `.removed` listener event.
+    let isTransient: Bool
     let createdAt: Timestamp
     let payload: [String: String]?      // flexible — keys differ per type
 
@@ -53,6 +58,20 @@ struct AppNotification: Identifiable, Codable {
         return PromotionPayload(discountCode: code, expiresAt: expires)
     }
 
+    var walletPayload: WalletPayload? {
+        guard type == .wallet,
+              let txType = payload?["walletTxType"],
+              let amount = payload?["amount"],
+              let balanceAfter = payload?["balanceAfter"]
+        else { return nil }
+        return WalletPayload(
+            walletTxType: txType,
+            amount: Double(amount) ?? 0,
+            balanceAfter: Double(balanceAfter) ?? 0,
+            referenceId: payload?["referenceId"]
+        )
+    }
+
     var rewardPayload: RewardPayload? {
         guard type == .reward,
               let earned = payload?["pointsEarned"],
@@ -70,6 +89,39 @@ struct AppNotification: Identifiable, Codable {
 // Pure value types — no Firestore dependency.
 // Add a new struct for each new NotificationType.
 // ─────────────────────────────────────────────────────────────
+struct WalletPayload {
+    let walletTxType: String        // "topup" | "payment" | "refund" | "reward"
+    let amount: Double              // positive = credit, negative = debit
+    let balanceAfter: Double
+    let referenceId: String?        // orderId for payment / refund
+
+    /// Mirrors WalletTransactionType display logic without importing the wallet module.
+    var icon: String {
+        switch walletTxType {
+        case "topup":   return "arrow.down.circle.fill"
+        case "payment": return "cart.fill"
+        case "refund":  return "arrow.uturn.left.circle.fill"
+        default:        return "star.fill"
+        }
+    }
+
+    var iconColorName: String {
+        switch walletTxType {
+        case "topup":   return "semanticSuccess"
+        case "payment": return "semanticError"
+        case "refund":  return "activeTF"
+        default:        return "accentGold"
+        }
+    }
+
+    var formattedAmount: String {
+        let cc = Int(abs(amount))
+        return amount >= 0 ? "+\(cc) CC" : "-\(cc) CC"
+    }
+
+    var formattedBalance: String { "\(Int(balanceAfter)) CC" }
+}
+
 struct OrderStatusPayload {
     let orderId: String
     let status: String

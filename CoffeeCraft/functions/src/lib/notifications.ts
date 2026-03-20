@@ -25,7 +25,62 @@ export async function getUnreadCount(userId: string): Promise<number> {
 }
 
 // ─────────────────────────────────────────────────────────
-// HELPER: persist notification to Firestore + send FCM
+// HELPER: delete transient notifications for a completed/cancelled order
+// Queries all isTransient notifications for the user and removes any whose
+// payload.orderId or payload.referenceId matches the given orderId.
+// Called by onOrderStatusChanged when status reaches Completed or Cancelled.
+// ─────────────────────────────────────────────────────────
+/**
+ * Deletes all transient inbox notifications linked to a specific order.
+ * Covers order-status notifications (payload.orderId) and wallet payment
+ * confirmations (payload.referenceId).
+ *
+ * @param {string} userId  - The Firestore user document ID.
+ * @param {string} orderId - The order whose transient notifications to purge.
+ * @return {Promise<void>}
+ */
+export async function deleteTransientNotificationsForOrder(
+  userId: string,
+  orderId: string
+): Promise<void> {
+  const snapshot = await admin
+    .firestore()
+    .collection("users")
+    .doc(userId)
+    .collection("notifications")
+    .where("isTransient", "==", true)
+    .get();
+
+  if (snapshot.empty) {
+    logger.info(`🧹 No transient notifications to purge for order ${orderId}`);
+    return;
+  }
+
+  // Filter in-memory: match orderId in either payload key.
+  // Users have few transient notifications at any time so this is cheap.
+  const toDelete = snapshot.docs.filter((doc) => {
+    const payload = doc.data().payload as Record<string, string> | undefined;
+    return (
+      payload?.["orderId"] === orderId ||
+      payload?.["referenceId"] === orderId
+    );
+  });
+
+  if (toDelete.length === 0) {
+    logger.info(`🧹 No matching transient notifications for order ${orderId}`);
+    return;
+  }
+
+  const batch = admin.firestore().batch();
+  toDelete.forEach((doc) => batch.delete(doc.ref));
+  await batch.commit();
+
+  logger.info(
+    `🧹 Purged ${toDelete.length} transient notification(s) for order ${orderId}`
+  );
+}
+
+
 // Centralise here so every future trigger just calls this.
 // ─────────────────────────────────────────────────────────
 /**

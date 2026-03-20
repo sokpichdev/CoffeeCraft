@@ -52,7 +52,9 @@ export const onWalletTransactionCreated = onDocumentCreated(
       // amount is always positive for credits, negative for debits —
       // we use Math.abs() so the copy always reads as a positive number.
       // ──────────────────────────────────────────────────────────────────
-      type NotificationCopy = {title: string; message: string};
+      type NotificationCopy = {
+          title: string; message: string;
+          isTransient: boolean};
 
       const orderRef = referenceId ? `Order #${referenceId}` : "your order";
       const cancelRef = referenceId ?
@@ -63,18 +65,23 @@ export const onWalletTransactionCreated = onDocumentCreated(
         reward: {
           title: "🎉 Loyalty Reward!",
           message: `+${cc} CC added to your wallet.`,
+          isTransient: false, // milestone record — keep permanently
         },
         topup: {
           title: "✅ Wallet Topped Up",
           message: `+${cc} CC added successfully.`,
+          isTransient: false, // financial record — keep permanently
         },
         payment: {
           title: "🛍️ Payment Confirmed",
           message: `-${cc} CC used for ${orderRef}.`,
+          isTransient: true,
+          // purged when the linked order completes or cancels
         },
         refund: {
           title: "↩️ Refund Processed",
           message: `+${cc} CC refunded for ${cancelRef}.`,
+          isTransient: false, // important financial record — keep permanently
         },
       };
 
@@ -87,12 +94,15 @@ export const onWalletTransactionCreated = onDocumentCreated(
       }
 
       // ── Build and send ─────────────────────────────────────────────────
+      // "wallet" type routes to WalletNotificationRow on the client.
+      // "reward" is reserved exclusively for loyalty-points milestones.
       const notification: NotificationDoc = {
-        type: "reward", // RewardNotificationRow
+        type: "wallet", // WalletNotificationRow
         title: copy.title,
         message: copy.message,
         isRead: false,
         createdAt: admin.firestore.Timestamp.now(),
+        isTransient: copy.isTransient,
         payload: {
           txId,
           walletTxType: type,

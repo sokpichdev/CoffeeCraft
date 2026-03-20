@@ -161,7 +161,18 @@ class InboxViewModel: ObservableObject {
                             AppLog.menu.debug("✏️ Realtime — updated: \(updated.id ?? "nil"), isRead: \(updated.isRead)")
                         }
 
-                    default:
+                    case .removed:
+                        if let removed = try? change.document.data(as: AppNotification.self),
+                           let index = self.notifications.firstIndex(where: { $0.id == removed.id }) {
+                            self.notifications.remove(at: index)
+                            if !removed.isRead {
+                                self.unreadCount = max(0, self.unreadCount - 1)
+                                self.syncAppIconBadge(self.unreadCount)
+                            }
+                            AppLog.menu.debug("🗑️ Realtime — removed transient: \(removed.id ?? "nil")")
+                        }
+
+                    @unknown default:
                         break
                     }
                 }
@@ -288,6 +299,7 @@ class InboxViewModel: ObservableObject {
         notifications[index] = AppNotification(
             id: old.id, type: old.type, title: old.title,
             message: old.message, isRead: isRead,
+            isTransient: old.isTransient,
             createdAt: old.createdAt, payload: old.payload
         )
     }
