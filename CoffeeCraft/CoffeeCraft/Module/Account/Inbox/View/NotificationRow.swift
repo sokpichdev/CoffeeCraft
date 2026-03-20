@@ -16,6 +16,8 @@ struct NotificationRow: View {
                 OrderStatusNotificationRow(notification: notification)
             case .promotion:
                 PromotionNotificationRow(notification: notification)
+            case .wallet:
+                WalletNotificationRow(notification: notification)
             case .reward:
                 RewardNotificationRow(notification: notification)
             case .announcement:

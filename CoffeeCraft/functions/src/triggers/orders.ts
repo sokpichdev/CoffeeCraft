@@ -2,7 +2,9 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import {onDocumentUpdated, onDocumentCreated}
   from "firebase-functions/v2/firestore";
-import {sendAndSaveNotification} from "../lib/notifications";
+import {sendAndSaveNotification,
+  deleteTransientNotificationsForOrder}
+  from "../lib/notifications";
 import {NotificationDoc} from "../lib/types";
 
 // ─────────────────────────────────────────────────────────
@@ -53,30 +55,36 @@ export const onOrderStatusChanged = onDocumentUpdated(
       // Key format: "<status>" or "<status>:<deliveryType>"
       // for type-specific copy.
       // Resolved in priority order: specific key first, then generic key.
-      type CopyEntry = { title: string; message: string };
+      // isTransient: true  → auto-deleted when order reaches a terminal state.
+      // isTransient: false → kept in inbox permanently.
+      type CopyEntry = { title: string; message: string; isTransient: boolean };
 
       const copyMap: Record<string, CopyEntry> = {
-        // Pickup-specific
+        // Pickup-specific — transient: only useful until the customer collects
         "Ready:pickup": {
           title: "Order ready for pickup ☕️",
           message: `Your order #${orderId} is ready! 
             Head to the branch to collect it.`,
+          isTransient: true,
         },
-        // Delivery-specific
+        // Delivery-specific — transient: only useful while rider is en route
         "OnDelivery:delivery": {
           title: "Your order is on the way 🛵",
           message: `Order #${orderId} has been picked up 
             and is heading to you!`,
+          isTransient: true,
         },
-        // Generic — applies to both types
+        // Generic — persistent: worth keeping as a record
         "Completed": {
           title: "Order completed ✅",
           message: `Order #${orderId} has been completed. Enjoy!`,
+          isTransient: false,
         },
         "Cancelled": {
           title: "Order cancelled",
           message: `Your order #${orderId} has been cancelled. ` +
             "If you paid by wallet, a refund has been issued.",
+          isTransient: false,
         },
       };
 
@@ -99,7 +107,15 @@ export const onOrderStatusChanged = onDocumentUpdated(
         isRead: false,
         createdAt: admin.firestore.Timestamp.now(),
         payload: {orderId, status: afterStatus},
+        isTransient: copy.isTransient,
       };
+
+      // Purge previous transient notifications
+      // (Ready, OnDelivery, Payment Confirmed)
+      // before saving the terminal notification so the inbox stays clean.
+      if (afterStatus === "Completed" || afterStatus === "Cancelled") {
+        await deleteTransientNotificationsForOrder(userId, orderId);
+      }
 
       await sendAndSaveNotification(userId, notification, {
         orderId,
