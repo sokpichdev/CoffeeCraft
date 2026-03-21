@@ -221,6 +221,11 @@ class OrderViewModel: ObservableObject {
                             self.orders.insert(newOrder, at: 0)
                             AppLog.order.debug("➕ listener — new order inserted: \(id)")
                         }
+                        if newOrder.isDeliveryOrder,
+                           OrderStatus.from(newOrder.status) == .onDelivery {
+                            OrderEnvironment.shared.activateDelivery(order: newOrder)
+                            AppLog.order.debug("🛵 listener — activateDelivery for restored order: \(id)")
+                        }
 
                     case .modified:
                         guard let updated = try? change.document.data(as: Order.self),
@@ -230,6 +235,12 @@ class OrderViewModel: ObservableObject {
 
                         self.orders[index] = updated
                         AppLog.order.debug("✏️ listener — order updated: \(id), status: \(updated.status ?? "unknown")")
+
+                        if updated.isDeliveryOrder,
+                           OrderStatus.from(updated.status) == .onDelivery {
+                            OrderEnvironment.shared.activateDelivery(order: updated)
+                            AppLog.order.debug("🛵 listener — activateDelivery on status change: \(id)")
+                        }
 
                     default:
                         break
