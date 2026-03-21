@@ -16,7 +16,7 @@ struct UserStatItem: Identifiable {
     let name: String
     let email: String
     let joinDate: Date
-    let loyaltyPoints: Int
+    var loyaltyPoints: Int
 
     // Enriched asynchronously — nil while the enrichment query is in-flight
     var totalOrders: Int?

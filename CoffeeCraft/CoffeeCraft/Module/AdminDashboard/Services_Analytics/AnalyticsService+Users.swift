@@ -77,8 +77,8 @@ extension AnalyticsService {
 
     func enrichUsersWithOrderStats(
         userIds: [String]
-    ) async -> [String: (Int, Double)] {
-        await withTaskGroup(of: (String, Int, Double).self) { group in
+    ) async -> [String: (Int, Double, Int)] {
+        await withTaskGroup(of: (String, Int, Double, Int).self) { group in
             for userId in userIds {
                 group.addTask {
                     let ordersQuery = self.db.collection("orders")
@@ -113,14 +113,26 @@ extension AnalyticsService {
                             $0 + ($1.data()["totalPrice"] as? Double ?? 0)
                         } ?? 0
                     }
+                    
+                    let points: Int
+                    do {
+                        let cardSnap = try await self.db.collection("loyalty_cards")
+                            .whereField("ownerId", isEqualTo: userId)
+                            .limit(to: 1)
+                            .getDocuments()
+                        points = cardSnap.documents.first?.data()["points"] as? Int ?? 0
+                    } catch {
+                        AppLog.dashboard.error("[enrichUsers] points ❌ \(userId): \(error.localizedDescription)")
+                        points = 0
+                    }
 
-                    return (userId, count, spent)
+                    return (userId, count, spent, points)
                 }
             }
 
-            var result: [String: (Int, Double)] = [:]
-            for await (userId, count, spent) in group {
-                result[userId] = (count, spent)
+            var result: [String: (Int, Double, Int)] = [:]
+            for await (userId, count, spent, points) in group {
+                result[userId] = (count, spent, points)
             }
             return result
         }
