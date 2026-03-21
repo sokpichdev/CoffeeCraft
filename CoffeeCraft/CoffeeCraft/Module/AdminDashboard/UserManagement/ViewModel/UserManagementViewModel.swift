@@ -103,10 +103,11 @@ final class UserManagementViewModel: ObservableObject {
             guard !Task.isCancelled else { return }
 
             // Merge enrichment results back into the users array
-            for (userId, (count, spent)) in stats {
+            for (userId, (count, spent, points)) in stats {
                 if let idx = users.firstIndex(where: { $0.id == userId }) {
                     users[idx].totalOrders = count
                     users[idx].totalSpent = spent
+                    users[idx].loyaltyPoints = points
                 }
             }
         }
