@@ -48,10 +48,10 @@ class InboxViewModel: ObservableObject {
         }
 
         do {
-            var query: Query = db.collection("users")
+            var query: Query = db.collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("notifications")
-                .order(by: "createdAt", descending: true)
+                .collection(Firebase.Users.Notifications.collection)
+                .order(by: Firebase.Users.Notifications.createdAt, descending: true)
                 .limit(to: pageSize)
 
             if pageNum > 1, let cursor = lastDocument {
@@ -94,10 +94,10 @@ class InboxViewModel: ObservableObject {
     /// No notification documents are downloaded — only a single integer is returned.
     private func fetchUnreadCount(userId: String) async {
         do {
-            let query = db.collection("users")
+            let query = db.collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("notifications")
-                .whereField("isRead", isEqualTo: false)
+                .collection(Firebase.Users.Notifications.collection)
+                .whereField(Firebase.Users.Notifications.isRead, isEqualTo: false)
 
             let snapshot = try await query.count.getAggregation(source: .server)
             unreadCount = Int(truncating: snapshot.count)
@@ -119,10 +119,10 @@ class InboxViewModel: ObservableObject {
 
         AppLog.menu.debug("🔌 setupRealtimeListener — uid: \(userId), limit: \(newLimit)")
 
-        listener = db.collection("users")
+        listener = db.collection(Firebase.Users.collection)
             .document(userId)
-            .collection("notifications")
-            .order(by: "createdAt", descending: true)
+            .collection(Firebase.Users.Notifications.collection)
+            .order(by: Firebase.Users.Notifications.createdAt, descending: true)
             .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
@@ -214,11 +214,11 @@ class InboxViewModel: ObservableObject {
         syncAppIconBadge(unreadCount)
 
         do {
-            try await db.collection("users")
+            try await db.collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("notifications")
+                .collection(Firebase.Users.Notifications.collection)
                 .document(id)
-                .updateData(["isRead": true])
+                .updateData([Firebase.Users.Notifications.isRead: true])
             AppLog.menu.debug("✅ Marked notification as read: \(id)")
         } catch {
             AppLog.menu.error("❌ Failed to mark read: \(error.localizedDescription)")
@@ -244,11 +244,11 @@ class InboxViewModel: ObservableObject {
         let batch = db.batch()
         for noti in unread {
             guard let id = noti.id else { continue }
-            let ref = db.collection("users")
+            let ref = db.collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("notifications")
+                .collection(Firebase.Users.Notifications.collection)
                 .document(id)
-            batch.updateData(["isRead": true], forDocument: ref)
+            batch.updateData([Firebase.Users.Notifications.isRead: true], forDocument: ref)
         }
 
         do {
@@ -271,9 +271,9 @@ class InboxViewModel: ObservableObject {
         notifications.removeAll { $0.id == id }
 
         do {
-            try await db.collection("users")
+            try await db.collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("notifications")
+                .collection(Firebase.Users.Notifications.collection)
                 .document(id)
                 .delete()
             AppLog.menu.debug("🗑️ Deleted notification: \(id)")
@@ -284,7 +284,7 @@ class InboxViewModel: ObservableObject {
     // MARK: - Fetch Order
     func fetchOrder(orderId: String) async -> Order? {
         do {
-            let snapshot = try await db.collection("orders").document(orderId).getDocument()
+            let snapshot = try await db.collection(Firebase.Orders.collection).document(orderId).getDocument()
             return try snapshot.data(as: Order.self)
         } catch {
             AlertManager.shared.showError(message: error.localizedDescription)

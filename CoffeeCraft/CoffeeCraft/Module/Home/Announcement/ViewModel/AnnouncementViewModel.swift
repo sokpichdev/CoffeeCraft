@@ -12,7 +12,7 @@ import OSLog
 class AnnouncementViewModel: ObservableObject {
     
     private let db = Firestore.firestore()
-    private let collection = "announcements"
+    private let collection = Firebase.Announcements.collection
     
     @Published var announcements: [Announcement] = []
     @Published var isLoading: Bool = false
@@ -55,7 +55,7 @@ class AnnouncementViewModel: ObservableObject {
         
         do {
             let snapshot = try await db.collection(collection)
-                .order(by: "createdDate", descending: true)
+                .order(by: Firebase.Announcements.createdDate, descending: true)
                 .getDocuments()
             
             let fetchedAnnouncements = snapshot.documents.compactMap { document -> Announcement? in

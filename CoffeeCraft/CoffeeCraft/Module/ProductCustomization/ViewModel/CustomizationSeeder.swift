@@ -11,7 +11,7 @@ struct CustomizationSeeder {
 
     static func seedCustomizations() async {
         let db = Firestore.firestore()
-        let customizationsRef = db.collection("customizations")
+        let customizationsRef = db.collection(Firebase.Customizations.collection)
 
         for customization in customizationData {
             await saveCustomization(customization, ref: customizationsRef)

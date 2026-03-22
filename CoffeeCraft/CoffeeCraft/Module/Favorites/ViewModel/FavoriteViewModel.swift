@@ -54,11 +54,11 @@ class FavoriteViewModel: ObservableObject {
 //        AppLog.menu.debug("🔍 loadFavoriteState — productId: \(product.id), hash: \(hash)")
 
         let snapshot = try? await db
-            .collection("users")
+            .collection(Firebase.Users.collection)
             .document(userId)
-            .collection("favorites")
-            .whereField("productId", isEqualTo: product.id)
-            .whereField("customizationHash", isEqualTo: hash)
+            .collection(Firebase.Users.Favorites.collection)
+            .whereField(Firebase.Users.Favorites.productId, isEqualTo: product.id)
+            .whereField(Firebase.Users.Favorites.customizationHash, isEqualTo: hash)
             .getDocuments()
 
         isFavorite = !(snapshot?.documents.isEmpty ?? true)
@@ -90,13 +90,13 @@ class FavoriteViewModel: ObservableObject {
             AppLog.menu.debug("🔀 toggleFavorite — customizationHash: \(hash)")
 
             let ref = db
-                .collection("users")
+                .collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("favorites")
+                .collection(Firebase.Users.Favorites.collection)
 
             let snapshot = try await ref
-                .whereField("productId", isEqualTo: product.id)
-                .whereField("customizationHash", isEqualTo: hash)
+                .whereField(Firebase.Users.Favorites.productId, isEqualTo: product.id)
+                .whereField(Firebase.Users.Favorites.customizationHash, isEqualTo: hash)
                 .getDocuments()
 
             if let doc = snapshot.documents.first {
@@ -136,10 +136,10 @@ class FavoriteViewModel: ObservableObject {
 
         do {
             let snapshot = try await db
-                .collection("users")
+                .collection(Firebase.Users.collection)
                 .document(userId)
-                .collection("favorites")
-                .order(by: "createdAt", descending: true)
+                .collection(Firebase.Users.Favorites.collection)
+                .order(by: Firebase.Users.Favorites.createdAt, descending: true)
                 .getDocuments()
 
             favorites = snapshot.documents.compactMap { doc in

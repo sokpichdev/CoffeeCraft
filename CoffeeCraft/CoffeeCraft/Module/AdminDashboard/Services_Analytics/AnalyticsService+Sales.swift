@@ -41,9 +41,9 @@ extension AnalyticsService {
     /// Fetches all order documents in the date range regardless of status.
     /// Sorting happens client-side — we need all orders for every aggregation.
     private func fetchOrdersInRange(from start: Date, to end: Date) async throws -> [[String: Any]] {
-        let snapshot = try await db.collection("orders")
-            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
+        let snapshot = try await db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: start))
+            .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: Timestamp(date: end))
             .getDocuments()
 
         return snapshot.documents.map { $0.data() }

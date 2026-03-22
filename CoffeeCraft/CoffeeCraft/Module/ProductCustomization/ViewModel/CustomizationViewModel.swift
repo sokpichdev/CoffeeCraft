@@ -21,7 +21,7 @@ class CustomizationViewModel: ObservableObject {
         isLoading = true
         AppLog.menu.debug("🔍 fetchCustomizations — fetching all customization categories")
 
-        db.collection("customizations").getDocuments { [weak self] snapshot, error in
+        db.collection(Firebase.Customizations.collection).getDocuments { [weak self] snapshot, error in
             guard let self = self else { return }
             
             Task { @MainActor in
@@ -42,8 +42,8 @@ class CustomizationViewModel: ObservableObject {
                 
                 self.availableCustomizations = documents.compactMap { doc -> CustomizationCategory? in
                     let data = doc.data()
-                    guard let name = data["name"] as? String,
-                          let optionsData = data["options"] as? [[String: Any]] else {
+                    guard let name = data[Firebase.Customizations.name] as? String,
+                          let optionsData = data[Firebase.Customizations.options] as? [[String: Any]] else {
                         AppLog.menu.warning("⚠️ fetchCustomizations — skipped malformed doc: \(doc.documentID)")
                         return nil
                     }
@@ -87,7 +87,7 @@ class CustomizationViewModel: ObservableObject {
         ]
         
         do {
-            try await db.collection("customizations").document(customID).setData(data)
+            try await db.collection(Firebase.Customizations.collection).document(customID).setData(data)
             AppLog.menu.debug("✅ saveCustomization — saved: \(category.name)")
             fetchCustomizations()
         } catch {
@@ -102,7 +102,7 @@ class CustomizationViewModel: ObservableObject {
         AppLog.menu.debug("🗑️ deleteCustomization — name: \(category.name), docId: \(customID)")
 
         do {
-            try await db.collection("customizations").document(customID).delete()
+            try await db.collection(Firebase.Customizations.collection).document(customID).delete()
             AppLog.menu.debug("✅ deleteCustomization — deleted: \(category.name)")
             fetchCustomizations()
         } catch {

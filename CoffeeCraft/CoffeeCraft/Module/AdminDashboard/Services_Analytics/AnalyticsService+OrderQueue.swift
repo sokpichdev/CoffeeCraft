@@ -17,9 +17,9 @@ extension AnalyticsService {
     /// Attaches a live listener to all active orders (Pending, InProgress, Ready, OnDelivery),
     /// sorted oldest-first so the longest-waiting order is always at the top.
     func listenToOrderQueue(onChange: @escaping ([OrderQueueItem]) -> Void) -> ListenerRegistration {
-        db.collection("orders")
-            .whereField("status", in: OrderStatus.activeRawValues)
-            .order(by: "timestamp", descending: false) // oldest first
+        db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.status, in: OrderStatus.activeRawValues)
+            .order(by: Firebase.Orders.timestamp, descending: false) // oldest first
             .addSnapshotListener { snapshot, _ in
                 guard let snapshot else { return }
                 onChange(snapshot.documents.compactMap(self.mapToQueueItem))
@@ -32,13 +32,13 @@ extension AnalyticsService {
     /// Returns an `OrderHistoryPage` with cursor for subsequent pages.
     func fetchOrderHistory(filter: OrderHistoryFilter,
                            pageSize: Int = 20) async throws -> OrderHistoryPage {
-        var query: Query = db.collection("orders")
-            .order(by: "timestamp", descending: filter.sortOrder == .newest || filter.sortOrder == .oldest
+        var query: Query = db.collection(Firebase.Orders.collection)
+            .order(by: Firebase.Orders.timestamp, descending: filter.sortOrder == .newest || filter.sortOrder == .oldest
                    ? filter.sortOrder != .oldest
                    : true)
 
         if let status = filter.status {
-            query = query.whereField("status", isEqualTo: status.rawValue)
+            query = query.whereField(Firebase.Orders.status, isEqualTo: status.rawValue)
         }
 
         // Fetch page + 1 to detect hasMore
@@ -77,13 +77,13 @@ extension AnalyticsService {
     func fetchMoreOrderHistory(filter: OrderHistoryFilter,
                                after cursor: DocumentSnapshot,
                                pageSize: Int = 20) async throws -> OrderHistoryPage {
-        var query: Query = db.collection("orders")
-            .order(by: "timestamp", descending: filter.sortOrder != .oldest)
+        var query: Query = db.collection(Firebase.Orders.collection)
+            .order(by: Firebase.Orders.timestamp, descending: filter.sortOrder != .oldest)
             .start(afterDocument: cursor)
             .limit(to: pageSize + 1)
 
         if let status = filter.status {
-            query = query.whereField("status", isEqualTo: status.rawValue)
+            query = query.whereField(Firebase.Orders.status, isEqualTo: status.rawValue)
         }
 
         let snapshot = try await query.getDocuments()
@@ -120,22 +120,22 @@ extension AnalyticsService {
         let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -29,
                                                    to: Calendar.current.startOfDay(for: Date()))!
         let startTimestamp = Timestamp(date: thirtyDaysAgo)
-        let ordersRef = db.collection("orders")
+        let ordersRef = db.collection(Firebase.Orders.collection)
 
         async let totalCountAgg = ordersRef
-            .whereField("timestamp", isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: startTimestamp)
             .count
             .getAggregation(source: .server)
 
         async let completedCountAgg = ordersRef
-            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-            .whereField("timestamp", isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: startTimestamp)
             .count
             .getAggregation(source: .server)
 
         async let cancelledCountAgg = ordersRef
-            .whereField("status", isEqualTo: OrderStatus.cancelled.rawValue)
-            .whereField("timestamp", isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.cancelled.rawValue)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: startTimestamp)
             .count
             .getAggregation(source: .server)
 
@@ -143,9 +143,9 @@ extension AnalyticsService {
         // Capped at 100 most-recent completed orders so cost is bounded at
         // ≤ 100 reads regardless of how many orders exist in the 30-day window.
         async let recentCompletedSnap = ordersRef
-            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-            .whereField("completedAt", isGreaterThanOrEqualTo: startTimestamp)
-            .order(by: "completedAt", descending: true)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
+            .whereField(Firebase.Orders.completedAt, isGreaterThanOrEqualTo: startTimestamp)
+            .order(by: Firebase.Orders.completedAt, descending: true)
             .limit(to: 100)
             .getDocuments()
 
@@ -161,8 +161,8 @@ extension AnalyticsService {
         let fulfillmentTimes: [Double] = completedDocs.documents.compactMap { doc in
             let data = doc.data()
             guard
-                let placedTs = (data["timestamp"] as? Timestamp)?.dateValue(),
-                let completedTs = (data["completedAt"] as? Timestamp)?.dateValue()
+                let placedTs = (data[Firebase.Orders.timestamp] as? Timestamp)?.dateValue(),
+                let completedTs = (data[Firebase.Orders.completedAt] as? Timestamp)?.dateValue()
             else { return nil }
             return completedTs.timeIntervalSince(placedTs) / 60 // minutes
         }
@@ -192,7 +192,7 @@ extension AnalyticsService {
             fields["completedAt"] = Timestamp(date: Date())
         }
 
-        try await db.collection("orders").document(orderId).updateData(fields)
+        try await db.collection(Firebase.Orders.collection).document(orderId).updateData(fields)
     }
 
     // MARK: - Shared Mapper
@@ -202,27 +202,27 @@ extension AnalyticsService {
     private func mapToQueueItem(_ doc: DocumentSnapshot) -> OrderQueueItem? {
         let data = doc.data() ?? [:]
         guard
-            let timestamp = (data["timestamp"] as? Timestamp)?.dateValue(),
-            let totalPrice = data["totalPrice"] as? Double,
-            let statusRaw = data["status"] as? String,
+            let timestamp = (data[Firebase.Orders.timestamp] as? Timestamp)?.dateValue(),
+            let totalPrice = data[Firebase.Orders.totalPrice] as? Double,
+            let statusRaw = data[Firebase.Orders.status] as? String,
             let status = OrderStatus(rawValue: statusRaw)
         else { return nil }
 
-        let items = data["items"] as? [[String: Any]] ?? []
-        let itemNames: [String] = items.compactMap { $0["name"] as? String }
+        let items = data[Firebase.Orders.items] as? [[String: Any]] ?? []
+        let itemNames: [String] = items.compactMap { $0[Firebase.Orders.ItemField.name] as? String }
 
         return OrderQueueItem(
             id: doc.documentID,
-            customerName: data["customerName"] as? String ?? "Customer",
-            userId: data["userId"] as? String ?? "",
+            customerName: data[Firebase.Orders.customerName] as? String ?? "Customer",
+            userId: data[Firebase.Orders.userId] as? String ?? "",
             totalPrice: totalPrice,
             status: status,
-            isDeliveryOrder: (data["deliveryType"] as? String) == "delivery",
+            isDeliveryOrder: (data[Firebase.Orders.deliveryType] as? String) == "delivery",
             timestamp: timestamp,
-            completedAt: (data["completedAt"] as? Timestamp)?.dateValue(),
+            completedAt: (data[Firebase.Orders.completedAt] as? Timestamp)?.dateValue(),
             itemCount: items.count,
             itemNames: itemNames,
-            branchId: data["branchId"] as? String ?? ""
+            branchId: data[Firebase.Orders.branchId] as? String ?? ""
         )
     }
 }

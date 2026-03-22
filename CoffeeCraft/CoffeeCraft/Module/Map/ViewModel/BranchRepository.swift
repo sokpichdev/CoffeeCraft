@@ -27,7 +27,7 @@ final class BranchRepository {
     /// Calls `onUpdate` immediately and on every subsequent change.
     /// Falls back to MockBranchData when the collection is empty or offline.
     func listen(onUpdate: @escaping ([Branch]) -> Void) {
-        listener = db.collection("branches")
+        listener = db.collection(Firebase.Branches.collection)
             .addSnapshotListener { snapshot, error in
                 if let error {
                     AppLog.firestore.error(
@@ -73,7 +73,7 @@ final class BranchRepository {
             ? ["estimatedWaitMinutes": waitMinutes!]
             : ["estimatedWaitMinutes": FieldValue.delete()]
 
-        try await db.collection("branches")
+        try await db.collection(Firebase.Branches.collection)
             .document(branchId)
             .updateData(data)
 

@@ -113,15 +113,15 @@ extension WalletTransaction {
     /// Called inside WalletService runTransaction() closures.
     func toFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
-            "userId": userId,
-            "type": type.rawValue,
-            "amount": amount,
-            "balanceBefore": balanceBefore,
-            "balanceAfter": balanceAfter,
-            "description": description,
-            "timestamp": Timestamp(date: timestamp)
+            Firebase.WalletTransactions.userId:        userId,
+            Firebase.WalletTransactions.type:          type.rawValue,
+            Firebase.WalletTransactions.amount:        amount,
+            Firebase.WalletTransactions.balanceBefore: balanceBefore,
+            Firebase.WalletTransactions.balanceAfter:  balanceAfter,
+            Firebase.WalletTransactions.description:   description,
+            Firebase.WalletTransactions.timestamp:     Timestamp(date: timestamp)
         ]
-        if let referenceId { data["referenceId"] = referenceId }
+        if let referenceId { data[Firebase.WalletTransactions.referenceId] = referenceId }
         return data
     }
 }

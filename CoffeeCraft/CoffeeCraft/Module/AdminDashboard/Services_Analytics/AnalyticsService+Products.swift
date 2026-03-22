@@ -51,10 +51,10 @@ extension AnalyticsService {
     ///   - `totalUnits`: sum of all units sold
     private func fetchCompletedOrderItems(from start: Date,
                                            to end: Date) async throws -> ([String: (Int, Double)], Double, Int) {
-        let snapshot = try await db.collection("orders")
-            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
+        let snapshot = try await db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: start))
+            .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: Timestamp(date: end))
             .getDocuments()
 
         var itemMap: [String: (Int, Double)] = [:]
@@ -63,7 +63,7 @@ extension AnalyticsService {
 
         for doc in snapshot.documents {
             let data = doc.data()
-            let items = data["items"] as? [[String: Any]] ?? []
+            let items = data[Firebase.Orders.items] as? [[String: Any]] ?? []
 
             for item in items {
                 // Defensive field access — try both "productId" and "id" as fallback
@@ -95,7 +95,7 @@ extension AnalyticsService {
     /// Fetches the entire product catalog in one read.
     /// For a coffee shop with ~20–50 products this is always a single round-trip.
     private func fetchAllProducts() async throws -> [String: [String: Any]] {
-        let snapshot = try await db.collection("products").getDocuments()
+        let snapshot = try await db.collection(Firebase.Products.collection).getDocuments()
         var catalog: [String: [String: Any]] = [:]
         for doc in snapshot.documents {
             catalog[doc.documentID] = doc.data()
@@ -111,11 +111,11 @@ extension AnalyticsService {
 
         for (productId, (units, revenue)) in itemMap {
             let data = catalog[productId] ?? [:]
-            let name = data["name"] as? String ?? "Unknown Product"
-            let category = data["category"]  as? String ?? "Uncategorized"
-            let avgRating = data["avgRating"] as? Double ?? 0.0
-            let ratingCount = data["ratingCount"] as? Int ?? 0
-            let imageURL = data["imageURL"]  as? String
+            let name = data[Firebase.Products.name] as? String ?? "Unknown Product"
+            let category = data[Firebase.Products.category] as? String ?? "Uncategorized"
+            let avgRating = data[Firebase.Products.avgRating] as? Double ?? 0.0
+            let ratingCount = data[Firebase.Products.ratingCount] as? Int ?? 0
+            let imageURL = data[Firebase.Products.imageURL] as? String
 
             stats.append(ProductStatItem(
                 id: productId,

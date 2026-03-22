@@ -12,7 +12,7 @@ struct ProductSeeder {
 
     static func seedSampleProducts() async {
         let db = Firestore.firestore()
-        let productsRef = db.collection("products")
+        let productsRef = db.collection(Firebase.Products.collection)
 
         for product in sampleProducts {
             await saveProduct(product, ref: productsRef)

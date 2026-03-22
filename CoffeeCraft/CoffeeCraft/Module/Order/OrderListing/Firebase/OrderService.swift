@@ -137,51 +137,51 @@ class OrderService: ObservableObject {
         let productIds: [String] = cartItems.compactMap { $0.product.id }
 
         var orderData: [String: Any] = [
-            "orderId": orderNumber,
-            "userId": userId,
-            "timestamp": Timestamp(date: Date()),
-            "totalPrice": total,
-            "status": OrderStatus.pending.rawValue,
-            "paymentMethod": paymentMethod.rawValue,
-            "productIds": productIds,
-            "items": cartItems.map { item -> [String: Any] in
+            "\(Firebase.Orders.orderId)": orderNumber,
+            "\(Firebase.Orders.userId)": userId,
+            "\(Firebase.Orders.timestamp)": Timestamp(date: Date()),
+            "\(Firebase.Orders.totalPrice)": total,
+            "\(Firebase.Orders.status)": OrderStatus.pending.rawValue,
+            "\(Firebase.Orders.paymentMethod)": paymentMethod.rawValue,
+            "\(Firebase.Orders.productIds)": productIds,
+            "\(Firebase.Orders.items)": cartItems.map { item -> [String: Any] in
                 var dict: [String: Any] = [
-                    "productId": item.product.id,
-                    "name": item.product.name,
-                    "price": item.totalPrice,
-                    "imageURL": item.product.imageURL,
-                    "quantity": item.quantity
+                    Firebase.Orders.ItemField.productId: item.product.id,
+                    Firebase.Orders.ItemField.name:      item.product.name,
+                    Firebase.Orders.ItemField.price:     item.totalPrice,
+                    Firebase.Orders.ItemField.imageURL:  item.product.imageURL,
+                    Firebase.Orders.ItemField.quantity:  item.quantity
                 ]
-                if !item.selections.isEmpty { dict["selections"] = item.selections }
-                if !item.extras.isEmpty { dict["extras"] = item.extras }
+                if !item.selections.isEmpty { dict[Firebase.Orders.ItemField.selections] = item.selections }
+                if !item.extras.isEmpty     { dict[Firebase.Orders.ItemField.extras]     = item.extras }
                 return dict
             }
         ]
 
         if paymentMethod == .wallet {
-            orderData["walletAmountPaid"] = total
+            orderData[Firebase.Orders.walletAmountPaid] = total
         }
         if let branch = OrderEnvironment.shared.selectedBranch {
-            orderData["branchId"]   = branch.id
-            orderData["branchName"] = branch.name
+            orderData[Firebase.Orders.branchId] = branch.id
+            orderData[Firebase.Orders.branchName] = branch.name
         }
         // Tag fulfillment mode. deliveryType drives the OnDelivery-trigger in OrderDetailView.
         // deliverySessionId is not written here — the session is created when status
         // reaches "OnDelivery" and activateDelivery() is called with the Firestore order id.
-        orderData["deliveryType"] = OrderEnvironment.shared.isDelivery ? "delivery" : "pickup"
+        orderData[Firebase.Orders.deliveryType] = OrderEnvironment.shared.isDelivery ? "delivery" : "pickup"
         if OrderEnvironment.shared.isDelivery {
             // Snapshot delivery coordinates into Firestore so activateDelivery()
             // can reconstruct the session after OrderEnvironment.clear() wipes memory.
             if let addr = OrderEnvironment.shared.deliveryAddressLabel {
-                orderData["deliveryAddress"] = addr
+                orderData[Firebase.Orders.deliveryAddress] = addr
             }
             if let dest = OrderEnvironment.shared.pendingDeliveryDestination {
-                orderData["deliveryDestinationLat"] = dest.latitude
-                orderData["deliveryDestinationLng"] = dest.longitude
+                orderData[Firebase.Orders.deliveryDestinationLat] = dest.latitude
+                orderData[Firebase.Orders.deliveryDestinationLng] = dest.longitude
             }
             if let branch = OrderEnvironment.shared.pendingDeliveryBranchCoordinate {
-                orderData["deliveryBranchLat"] = branch.latitude
-                orderData["deliveryBranchLng"] = branch.longitude
+                orderData[Firebase.Orders.deliveryBranchLat] = branch.latitude
+                orderData[Firebase.Orders.deliveryBranchLng] = branch.longitude
             }
         }
         return orderData

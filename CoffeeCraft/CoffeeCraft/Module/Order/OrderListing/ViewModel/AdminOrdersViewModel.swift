@@ -50,8 +50,8 @@ class AdminOrdersViewModel: ObservableObject {
         if pageNum == 1 { isLoadingAllOrders = true }
 
         do {
-            var query: Query = db.collection("orders")
-                .order(by: "timestamp", descending: true)
+            var query: Query = db.collection(Firebase.Orders.collection)
+                .order(by: Firebase.Orders.timestamp, descending: true)
                 .limit(to: pageSize)
 
             if pageNum > 1, let cursor = lastAllOrdersDocument {
@@ -101,8 +101,8 @@ class AdminOrdersViewModel: ObservableObject {
 
         AppLog.order.debug("🔌 setupAllOrdersListener — limit: \(newLimit)")
 
-        allOrdersListener = db.collection("orders")
-            .order(by: "timestamp", descending: true)
+        allOrdersListener = db.collection(Firebase.Orders.collection)
+            .order(by: Firebase.Orders.timestamp, descending: true)
             .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
@@ -151,9 +151,9 @@ class AdminOrdersViewModel: ObservableObject {
         if pageNum == 1 { isLoadingMyOrders = true }
 
         do {
-            var query: Query = db.collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .order(by: "timestamp", descending: true)
+            var query: Query = db.collection(Firebase.Orders.collection)
+                .whereField(Firebase.Orders.userId, isEqualTo: userId)
+                .order(by: Firebase.Orders.timestamp, descending: true)
                 .limit(to: pageSize)
 
             if pageNum > 1, let cursor = lastMyOrdersDocument {
@@ -202,9 +202,9 @@ class AdminOrdersViewModel: ObservableObject {
 
         AppLog.order.debug("🔌 setupMyOrdersListener — uid: \(userId), limit: \(newLimit)")
 
-        myOrdersListener = db.collection("orders")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
+        myOrdersListener = db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.userId, isEqualTo: userId)
+            .order(by: Firebase.Orders.timestamp, descending: true)
             .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
@@ -273,13 +273,13 @@ class AdminOrdersViewModel: ObservableObject {
         guard let orderId = order.id else { return false }
 
         do {
-            var fields: [String: Any] = ["status": status]
+            var fields: [String: Any] = [Firebase.Orders.status: status]
             if OrderStatus.from(status) == .completed {
                 // Write server-side timestamp so avg fulfillment time in
                 // the Order Funnel is calculated from a reliable clock.
-                fields["completedAt"] = FieldValue.serverTimestamp()
+                fields[Firebase.Orders.completedAt] = FieldValue.serverTimestamp()
             }
-            try await db.collection("orders")
+            try await db.collection(Firebase.Orders.collection)
                 .document(orderId)
                 .updateData(fields)
 

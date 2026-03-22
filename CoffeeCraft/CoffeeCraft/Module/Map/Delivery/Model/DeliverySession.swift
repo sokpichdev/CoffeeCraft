@@ -81,36 +81,36 @@ struct DeliverySession {
     /// when the app restarts and startDelivery() is called on a fresh session.
     func asFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
-            "orderId": orderId,
-            "branchId": branchId,
-            "userId": userId,
-            "branchLatitude": branchLatitude,
-            "branchLongitude": branchLongitude,
-            "destinationLatitude": destinationLatitude,
-            "destinationLongitude": destinationLongitude,
-            "status": status.rawValue,
-            "updatedAt": Date()
+            Firebase.Deliveries.orderId:              orderId,
+            Firebase.Deliveries.branchId:             branchId,
+            Firebase.Deliveries.userId:               userId,
+            Firebase.Deliveries.branchLatitude:       branchLatitude,
+            Firebase.Deliveries.branchLongitude:      branchLongitude,
+            Firebase.Deliveries.destinationLatitude:  destinationLatitude,
+            Firebase.Deliveries.destinationLongitude: destinationLongitude,
+            Firebase.Deliveries.status:               status.rawValue,
+            Firebase.Deliveries.updatedAt:            Date()
         ]
-        if let eta = estimatedArrival { data["estimatedArrival"] = eta }
-        if let name = riderName { data["riderName"] = name }
-        if let ph = riderPhone { data["riderPhone"] = ph }
-        if let sat = simulationStartedAt { data["simulationStartedAt"] = sat }
+        if let eta = estimatedArrival { data[Firebase.Deliveries.estimatedArrival] = eta }
+        if let name = riderName { data[Firebase.Deliveries.riderName] = name }
+        if let ph = riderPhone { data[Firebase.Deliveries.riderPhone] = ph }
+        if let sat = simulationStartedAt { data[Firebase.Deliveries.simulationStartedAt] = sat }
         return data }
 
     /// Initialises a session from a Firestore snapshot dictionary.
     /// Returns nil when required fields are missing.
     init?(firestoreData data: [String: Any]) {
         guard
-            let orderId = data["orderId"] as? String,
-            let branchId = data["branchId"] as? String,
-            let userId = data["userId"] as? String,
-            let branchLat = data["branchLatitude"] as? Double,
-            let branchLng = data["branchLongitude"] as? Double,
-            let destLat = data["destinationLatitude"] as? Double,
-            let destLng = data["destinationLongitude"] as? Double,
-            let riderLat = data["riderLatitude"] as? Double,
-            let riderLng = data["riderLongitude"] as? Double,
-            let statusRaw = data["status"] as? String,
+            let orderId = data[Firebase.Deliveries.orderId] as? String,
+            let branchId = data[Firebase.Deliveries.branchId] as? String,
+            let userId = data[Firebase.Deliveries.userId] as? String,
+            let branchLat = data[Firebase.Deliveries.branchLatitude] as? Double,
+            let branchLng = data[Firebase.Deliveries.branchLongitude] as? Double,
+            let destLat = data[Firebase.Deliveries.destinationLatitude] as? Double,
+            let destLng = data[Firebase.Deliveries.destinationLongitude] as? Double,
+            let riderLat = data[Firebase.Deliveries.riderLatitude] as? Double,
+            let riderLng = data[Firebase.Deliveries.riderLongitude] as? Double,
+            let statusRaw = data[Firebase.Deliveries.status] as? String,
             let status = DeliveryStatus(rawValue: statusRaw)
         else { return nil }
 
@@ -124,18 +124,18 @@ struct DeliverySession {
         self.riderLatitude = riderLat
         self.riderLongitude = riderLng
         self.status = status
-        self.riderName = data["riderName"] as? String
-        self.riderPhone = data["riderPhone"] as? String
+        self.riderName = data[Firebase.Deliveries.riderName] as? String
+        self.riderPhone = data[Firebase.Deliveries.riderPhone] as? String
 
         // Firestore returns Timestamp objects, not Swift Dates.
         // We must call .dateValue() — casting directly with "as? Date" always fails.
-        if let ts = data["estimatedArrival"] as? Timestamp {
+        if let ts = data[Firebase.Deliveries.estimatedArrival] as? Timestamp {
             self.estimatedArrival = ts.dateValue()
         } else {
             self.estimatedArrival = nil
         }
 
-        if let sat = data["simulationStartedAt"] as? Timestamp {
+        if let sat = data[Firebase.Deliveries.simulationStartedAt] as? Timestamp {
             self.simulationStartedAt = sat.dateValue()
         } else {
             self.simulationStartedAt = nil

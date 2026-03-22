@@ -54,7 +54,7 @@ class CardViewModel: ObservableObject {
         
         // Listen to user document (activeCard + accessibleCards)
         activeListener?.remove()
-        activeListener = db.collection("users").document(userId)
+        activeListener = db.collection(Firebase.Users.collection).document(userId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
@@ -71,7 +71,7 @@ class CardViewModel: ObservableObject {
                 }
                 
                 // Update activeCard
-                if let activeCardNum = data["activeCard"] as? String {
+                if let activeCardNum = data[Firebase.Users.activeCard] as? String {
                     self.activeCardNumber = activeCardNum
                     LoyaltyCard.currentActiveCardNumber = activeCardNum
                     self.isActiveCardFetched = true
@@ -82,7 +82,7 @@ class CardViewModel: ObservableObject {
                 }
                 
                 // Fetch accessibleCards on login
-                if let accessibleCardNumbers = data["accessibleCards"] as? [String] {
+                if let accessibleCardNumbers = data[Firebase.Users.accessibleCards] as? [String] {
                     AppLog.firestore.debug("📋 accessibleCards from user doc: \(accessibleCardNumbers)")
                     Task {
                         await self.fetchAccessibleCards(accessibleCardNumbers)
@@ -95,8 +95,8 @@ class CardViewModel: ObservableObject {
         
         // Owned cards listener for real-time updates
         cardsListener?.remove()
-        cardsListener = db.collection("loyalty_cards")
-            .whereField("ownerId", isEqualTo: userId)
+        cardsListener = db.collection(Firebase.LoyaltyCards.collection)
+            .whereField(Firebase.LoyaltyCards.ownerId, isEqualTo: userId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
                 
@@ -125,8 +125,8 @@ class CardViewModel: ObservableObject {
 
         for chunk in chunks {
             do {
-                let snapshot = try await db.collection("loyalty_cards")
-                    .whereField("cardNumber", in: chunk)
+                let snapshot = try await db.collection(Firebase.LoyaltyCards.collection)
+                    .whereField(Firebase.LoyaltyCards.cardNumber, in: chunk)
                     .getDocuments()
 
                 let decoded = snapshot.documents.compactMap { try? $0.data(as: LoyaltyCard.self) }
@@ -153,7 +153,7 @@ class CardViewModel: ObservableObject {
         let cleanCardNumber = cardNumber.replacingOccurrences(of: " ", with: "")
         AppLog.firestore.debug("➕ addCard called — cardNumber: \(cleanCardNumber), userId: \(userId)")
         
-        let cardDoc = try await db.collection("loyalty_cards").document(cleanCardNumber).getDocument()
+        let cardDoc = try await db.collection(Firebase.LoyaltyCards.collection).document(cleanCardNumber).getDocument()
         
         guard let card = try? cardDoc.data(as: LoyaltyCard.self) else {
             AppLog.firestore.error("❌ addCard — invalid or non-existent card: \(cleanCardNumber)")
@@ -169,7 +169,7 @@ class CardViewModel: ObservableObject {
             throw CardError.noAccess
         }
         
-        try await db.collection("users").document(userId).updateData([
+        try await db.collection(Firebase.Users.collection).document(userId).updateData([
             "accessibleCards": FieldValue.arrayUnion([cleanCardNumber])
         ])
         
@@ -186,8 +186,8 @@ class CardViewModel: ObservableObject {
         AppLog.firestore.debug("🔍 Fetching shared cards for userId: \(userId)")
         
         do {
-            let snapshot = try await db.collection("loyalty_cards")
-                .whereField("sharedWith", arrayContains: userId)
+            let snapshot = try await db.collection(Firebase.LoyaltyCards.collection)
+                .whereField(Firebase.LoyaltyCards.sharedWith, arrayContains: userId)
                 .getDocuments()
             
             let sharedCards = snapshot.documents.compactMap { try? $0.data(as: LoyaltyCard.self) }
@@ -207,8 +207,8 @@ class CardViewModel: ObservableObject {
     func findUserId(byEmail email: String) async throws -> String? {
         AppLog.firestore.debug("🔍 findUserId — looking up email: \(email.lowercased())")
         
-        let query = db.collection("users")
-            .whereField("email", isEqualTo: email.lowercased())
+        let query = db.collection(Firebase.Users.collection)
+            .whereField(Firebase.Users.email, isEqualTo: email.lowercased())
             .limit(to: 1)
         
         let snapshot = try await query.getDocuments()
@@ -234,8 +234,8 @@ class CardViewModel: ObservableObject {
         isLoading = true
         defer { Task { @MainActor in isLoading = false } }
         
-        try await db.collection("users").document(userId).updateData([
-            "activeCard": card.cardNumber
+        try await db.collection(Firebase.Users.collection).document(userId).updateData([
+            Firebase.Users.activeCard: card.cardNumber
         ])
         
         AppLog.firestore.debug("✅ setActiveCard — activeCard updated to: \(card.cardNumber)")
@@ -249,8 +249,8 @@ class CardViewModel: ObservableObject {
         
         AppLog.firestore.debug("🤝 shareCard — sharing card \(card.cardNumber) with userId: \(userId)")
         
-        try await db.collection("loyalty_cards").document(card.id ?? "").updateData([
-            "sharedWith": FieldValue.arrayUnion([userId])
+        try await db.collection(Firebase.LoyaltyCards.collection).document(card.id ?? "").updateData([
+            Firebase.LoyaltyCards.sharedWith: FieldValue.arrayUnion([userId])
         ])
         
         AppLog.firestore.debug("✅ shareCard — card \(card.cardNumber) successfully shared with userId: \(userId)")
@@ -274,16 +274,16 @@ class CardViewModel: ObservableObject {
 
         AppLog.firestore.debug("⭐️ addPoints — adding \(amount) point(s) to card: \(card.cardNumber)")
 
-        let cardRef = db.collection("loyalty_cards").document(card.id ?? "")
+        let cardRef = db.collection(Firebase.LoyaltyCards.collection).document(card.id ?? "")
 
         // Use a transaction so we atomically read pointsBefore, write pointsAfter,
         // and detect a milestone crossing — safe even on shared cards with concurrent writers.
         let result = try await db.runTransaction { transaction, errorPointer -> Any? in
             do {
                 let snapshot    = try transaction.getDocument(cardRef)
-                let before      = snapshot.data()?["points"] as? Int ?? 0
+                let before      = snapshot.data()?[Firebase.LoyaltyCards.points] as? Int ?? 0
                 let after       = before + amount
-                transaction.updateData(["points": after], forDocument: cardRef)
+                transaction.updateData([Firebase.LoyaltyCards.points: after], forDocument: cardRef)
                 // Return [before, after] so the caller can detect milestone crossings
                 return [before, after] as NSArray
             } catch {
@@ -339,20 +339,20 @@ class CardViewModel: ObservableObject {
         let cardNumber = generateCardNumber()
         AppLog.firestore.debug("🆕 createInitialCard userName: \(userName), cardNumber: \(cardNumber)")
         
-        try await db.collection("loyalty_cards").document(cardNumber).setData([
-            "cardNumber": cardNumber,
-            "ownerId": userId,
-            "ownerName": userName,
-            "memberSince": formatMemberSince(Date()),
-            "points": 0,
-            "createdAt": Timestamp(date: Date()),
-            "sharedWith": [] as NSArray
+        try await db.collection(Firebase.LoyaltyCards.collection).document(cardNumber).setData([
+            Firebase.LoyaltyCards.cardNumber:  cardNumber,
+            Firebase.LoyaltyCards.ownerId:     userId,
+            Firebase.LoyaltyCards.ownerName:   userName,
+            Firebase.LoyaltyCards.memberSince: formatMemberSince(Date()),
+            Firebase.LoyaltyCards.points:      0,
+            Firebase.LoyaltyCards.createdAt:   Timestamp(date: Date()),
+            Firebase.LoyaltyCards.sharedWith:  [] as NSArray
         ])
         
-        try await db.collection("users").document(userId).setData([
-            "activeCard": cardNumber,
-            "accessibleCards": [cardNumber],
-            "updatedAt": Timestamp(date: Date())
+        try await db.collection(Firebase.Users.collection).document(userId).setData([
+            Firebase.Users.activeCard:      cardNumber,
+            Firebase.Users.accessibleCards: [cardNumber],
+            Firebase.Users.updatedAt:       Timestamp(date: Date())
         ], merge: true)
         
         AppLog.firestore.debug("✅ createInitialCard — card \(cardNumber) created and set as active for uid: \(userId)")

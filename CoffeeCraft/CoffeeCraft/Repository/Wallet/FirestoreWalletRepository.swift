@@ -21,7 +21,7 @@ struct FirestoreWalletRepository: WalletRepositoryProtocol {
     // MARK: - Wallet Listener
 
     func listenWallet(userId: String, onChange: @escaping (Wallet?) -> Void) -> () -> Void {
-        let registration = db.collection("wallets")
+        let registration = db.collection(Firebase.Wallets.collection)
             .document(userId)
             .addSnapshotListener { snapshot, error in
                 if let error {
@@ -40,9 +40,9 @@ struct FirestoreWalletRepository: WalletRepositoryProtocol {
     /// Only surfaces `.added` change events — existing transactions are immutable
     /// so `.modified` and `.removed` can never happen on this collection.
     func listenTransactions(userId: String, onChange: @escaping ([WalletTransaction]) -> Void) -> () -> Void {
-        let registration = db.collection("wallet_transactions")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
+        let registration = db.collection(Firebase.WalletTransactions.collection)
+            .whereField(Firebase.WalletTransactions.userId, isEqualTo: userId)
+            .order(by: Firebase.WalletTransactions.timestamp, descending: true)
             .limit(to: 50)
             .addSnapshotListener { snapshot, error in
                 if let error {

@@ -96,7 +96,7 @@ final class DeliveryViewModel: ObservableObject {
         var initialData = session.asFirestoreData()
         initialData["riderLatitude"]  = session.branchCoordinate.latitude
         initialData["riderLongitude"] = session.branchCoordinate.longitude
-        db.collection("deliveries")
+        db.collection(Firebase.Deliveries.collection)
             .document(session.orderId)
             .setData(initialData, merge: true) { error in
                 if let error {
@@ -318,7 +318,7 @@ final class DeliveryViewModel: ObservableObject {
     private func attachFirestoreListener(orderId: String) {
         firestoreListener?.remove()
         firestoreListener = db
-            .collection("deliveries")
+            .collection(Firebase.Deliveries.collection)
             .document(orderId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
@@ -368,7 +368,7 @@ final class DeliveryViewModel: ObservableObject {
     }
 
     private func writeToFirestore(_ session: DeliverySession) {
-        db.collection("deliveries")
+        db.collection(Firebase.Deliveries.collection)
             .document(session.orderId)
             .setData(session.asFirestoreData(), merge: true) { error in
                 if let error {
@@ -384,7 +384,7 @@ final class DeliveryViewModel: ObservableObject {
     /// riderLatitude/riderLongitude were missing from Firestore.
     private func writeRiderPosition(orderId: String,
                                     coord: CLLocationCoordinate2D) {
-        db.collection("deliveries")
+        db.collection(Firebase.Deliveries.collection)
             .document(orderId)
             .setData([
                 "riderLatitude":  coord.latitude,
@@ -397,9 +397,9 @@ final class DeliveryViewModel: ObservableObject {
     /// Uses setData(merge: true) for the same reason — guarantees the field
     /// is persisted even if the parent document doesn't exist yet.
     private func writeSimulationStartTime(orderId: String, startedAt: Date) {
-        db.collection("deliveries")
+        db.collection(Firebase.Deliveries.collection)
             .document(orderId)
-            .setData(["simulationStartedAt": startedAt], merge: true) { _ in }
+            .setData([Firebase.Deliveries.simulationStartedAt: startedAt], merge: true) { _ in }
     }
 
     // MARK: - Timeout Watchdog
