@@ -50,19 +50,19 @@ final class RatingService {
     private let db = Firestore.firestore()
 
     private func productsRef() -> CollectionReference {
-        db.collection("products")
+        db.collection(Firebase.Products.collection)
     }
 
     private func ratingsRef(productId: String) -> CollectionReference {
-        productsRef().document(productId).collection("ratings")
+        productsRef().document(productId).collection(Firebase.Products.Ratings.collection)
     }
 
     private func reviewsRef(productId: String) -> CollectionReference {
-        productsRef().document(productId).collection("reviews")
+        productsRef().document(productId).collection(Firebase.Products.Reviews.collection)
     }
 
     private func ordersRef() -> CollectionReference {
-        db.collection("orders")
+        db.collection(Firebase.Orders.collection)
     }
 }
 
@@ -83,9 +83,9 @@ extension RatingService {
         // ── Primary: fast indexed query on productIds flat array ─────────────
         // Works for orders placed after Phase 7's OrderService changes.
         let fastSnapshot = try await ordersRef()
-            .whereField("userId", isEqualTo: userId)
-            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-            .whereField("productIds", arrayContains: productId)
+            .whereField(Firebase.Orders.userId, isEqualTo: userId)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
+            .whereField(Firebase.Orders.productIds, arrayContains: productId)
             .limit(to: 1)
             .getDocuments()
 
@@ -100,15 +100,15 @@ extension RatingService {
         // Covers orders placed before productIds was added to the order doc.
         // Reads up to 30 orders — fine for a coffee shop context.
         let legacySnapshot = try await ordersRef()
-            .whereField("userId", isEqualTo: userId)
-            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-            .order(by: "createdAt", descending: true)
+            .whereField(Firebase.Orders.userId, isEqualTo: userId)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
+            .order(by: Firebase.Products.Reviews.createdAt, descending: true)
             .limit(to: 30)
             .getDocuments()
 
         for doc in legacySnapshot.documents {
-            let items = doc.data()["items"] as? [[String: Any]] ?? []
-            let containsProduct = items.contains { $0["productId"] as? String == productId }
+            let items = doc.data()[Firebase.Orders.items] as? [[String: Any]] ?? []
+            let containsProduct = items.contains { $0[Firebase.Orders.ItemField.productId] as? String == productId }
             if containsProduct {
                 AppLog.firestore.debug("✅ Proof of purchase found (legacy fallback) — orderId: \(doc.documentID)")
                 return doc.documentID
@@ -166,14 +166,14 @@ extension RatingService {
         var query: Query
         if sort == .mostHelpful {
             query = reviewsRef(productId: productId)
-                .whereField("isHidden", isEqualTo: false)
-                .order(by: "helpfulCount", descending: true)
-                .order(by: "createdAt", descending: true)
+                .whereField(Firebase.Products.Reviews.isHidden, isEqualTo: false)
+                .order(by: Firebase.Products.Reviews.helpfulCount, descending: true)
+                .order(by: Firebase.Products.Reviews.createdAt, descending: true)
                 .limit(to: limit)
         } else {
             query = reviewsRef(productId: productId)
-                .whereField("isHidden", isEqualTo: false)
-                .order(by: "createdAt", descending: true)
+                .whereField(Firebase.Products.Reviews.isHidden, isEqualTo: false)
+                .order(by: Firebase.Products.Reviews.createdAt, descending: true)
                 .limit(to: limit)
         }
 
@@ -264,8 +264,8 @@ extension RatingService {
                                        """)
 
                 transaction.updateData([
-                    "avgRating": rounded,
-                    "ratingCount": newCount,
+                    Firebase.Products.avgRating: rounded,
+                    Firebase.Products.ratingCount: newCount,
                     "ratingDistribution.\(score)": FieldValue.increment(Int64(1))
                 ], forDocument: productRef)
 
@@ -281,9 +281,9 @@ extension RatingService {
         // MARK: Step 2 — Write ratings/{userId}
         let now = Timestamp(date: Date())
         let ratingData: [String: Any] = [
-            "score": score,
-            "orderId": orderId,
-            "createdAt": now
+            Firebase.Products.Ratings.score:    score,
+            Firebase.Products.Ratings.orderId:  orderId,
+            Firebase.Products.Ratings.createdAt: now
             // reviewId intentionally omitted — patched in Step 4 if body provided
         ]
         try await ratingRef.setData(ratingData)
@@ -312,7 +312,7 @@ extension RatingService {
 
         // MARK: Step 4 — Patch reviewId back-reference into ratings/{userId}
         // This lets editRating() find the review doc on edit without an extra query.
-        try await ratingRef.updateData(["reviewId": reviewRef.documentID])
+        try await ratingRef.updateData([Firebase.Products.Ratings.reviewId: reviewRef.documentID])
 
         AppLog.firestore.info("✅ submitRating complete — score: \(score), reviewId: \(reviewRef.documentID)")
     }
@@ -412,8 +412,8 @@ extension RatingService {
         // MARK: Step 3 — Update ratings/{userId}
         let now = Timestamp(date: Date())
         try await ratingRef.updateData([
-            "score": newScore,
-            "updatedAt": now
+            Firebase.Products.Ratings.score: newScore,
+            Firebase.Products.Ratings.updatedAt: now
         ])
 
         AppLog.firestore.debug("✅ ratings/\(userId) updated — score: \(oldScore) → \(newScore)")
@@ -423,7 +423,7 @@ extension RatingService {
             let reviewRef = reviewsRef(productId: productId).document(reviewId)
             var reviewUpdate: [String: Any] = [
                 "rating": newScore,
-                "updatedAt": now
+                Firebase.Products.Ratings.updatedAt: now
             ]
             if let newTitle { reviewUpdate["title"] = newTitle }
             if let newBody { reviewUpdate["body"]  = newBody  }
@@ -445,7 +445,7 @@ extension RatingService {
             try await reviewRef.setData(try Firestore.Encoder().encode(review))
 
             // Patch back-reference
-            try await ratingRef.updateData(["reviewId": reviewRef.documentID])
+            try await ratingRef.updateData([Firebase.Products.Ratings.reviewId: reviewRef.documentID])
 
             AppLog.firestore.debug("✅ new review created during edit — reviewId: \(reviewRef.documentID)")
         }
@@ -491,16 +491,16 @@ extension RatingService {
                 if alreadyIn {
                     // Remove: un-helpful
                     transaction.updateData([
-                        "helpfulBy": FieldValue.arrayRemove([userId]),
-                        "helpfulCount": FieldValue.increment(Int64(-1))
+                        Firebase.Products.Reviews.helpfulBy: FieldValue.arrayRemove([userId]),
+                        Firebase.Products.Reviews.helpfulCount: FieldValue.increment(Int64(-1))
                     ], forDocument: reviewRef)
                     nowHelpful = false
                     AppLog.firestore.debug("👎 removed helpful — reviewId: \(reviewId)")
                 } else {
                     // Add: mark helpful
                     transaction.updateData([
-                        "helpfulBy": FieldValue.arrayUnion([userId]),
-                        "helpfulCount": FieldValue.increment(Int64(1))
+                        Firebase.Products.Reviews.helpfulBy: FieldValue.arrayUnion([userId]),
+                        Firebase.Products.Reviews.helpfulCount: FieldValue.increment(Int64(1))
                     ], forDocument: reviewRef)
                     nowHelpful = true
                     AppLog.firestore.debug("👍 added helpful — reviewId: \(reviewId)")

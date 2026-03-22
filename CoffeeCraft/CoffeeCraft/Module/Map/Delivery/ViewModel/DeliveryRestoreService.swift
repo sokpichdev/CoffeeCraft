@@ -40,9 +40,9 @@ final class DeliveryRestoreService {
 
         do {
             let snapshot = try await db
-                .collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .whereField("status", isEqualTo: OrderStatus.onDelivery.rawValue)
+                .collection(Firebase.Orders.collection)
+                .whereField(Firebase.Orders.userId, isEqualTo: userId)
+                .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.onDelivery.rawValue)
                 .getDocuments()
 
             let activeOrders = snapshot.documents.compactMap { try? $0.data(as: Order.self) }
@@ -61,7 +61,7 @@ final class DeliveryRestoreService {
                     // Fetch the deliveries/{orderId} document which holds the real
                     // last-known riderLatitude/riderLongitude written every simulator tick.
                     let deliveryDoc = try await db
-                        .collection("deliveries")
+                        .collection(Firebase.Deliveries.collection)
                         .document(orderId)
                         .getDocument()
 

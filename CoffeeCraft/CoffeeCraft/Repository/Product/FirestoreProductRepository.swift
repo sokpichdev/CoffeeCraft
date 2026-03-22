@@ -19,15 +19,15 @@ struct FirestoreProductRepository: ProductRepositoryProtocol {
     // MARK: - Fetch Once
 
     func fetchAll() async throws -> [Product] {
-        let snapshot = try await db.collection("products").getDocuments()
+        let snapshot = try await db.collection(Firebase.Products.collection).getDocuments()
         return snapshot.documents.map { parse($0) }
     }
 
     // MARK: - Real-time Listener
 
     func listen(onChange: @escaping ([Product]) -> Void) -> () -> Void {
-        let registration = db.collection("products")
-            .order(by: "category")
+        let registration = db.collection(Firebase.Products.collection)
+            .order(by: Firebase.Products.category)
             .addSnapshotListener { snapshot, error in
                 if let error {
                     AppLog.menu.error("❌ ProductRepository listener error: \(error.localizedDescription)")
@@ -48,24 +48,24 @@ struct FirestoreProductRepository: ProductRepositoryProtocol {
 
     func save(_ product: Product) async throws {
         let data: [String: Any] = [
-            "name": product.name,
-            "description": product.description,
-            "price": product.price,
-            "imageURL": product.imageURL,
-            "category": product.category,
-            "available": product.available,
-            "customizations": product.customizations ?? [:]
+            Firebase.Products.name: product.name,
+            Firebase.Products.description: product.description,
+            Firebase.Products.price: product.price,
+            Firebase.Products.imageURL: product.imageURL,
+            Firebase.Products.category: product.category,
+            Firebase.Products.available: product.available,
+            Firebase.Products.customizations: product.customizations ?? [:]
         ]
-        try await db.collection("products").document(product.id).setData(data)
+        try await db.collection(Firebase.Products.collection).document(product.id).setData(data)
     }
 
     func delete(_ product: Product) async throws {
-        try await db.collection("products").document(product.id).delete()
+        try await db.collection(Firebase.Products.collection).document(product.id).delete()
     }
 
     func markUnavailable(_ product: Product) async throws {
-        try await db.collection("products").document(product.id)
-            .updateData(["available": false])
+        try await db.collection(Firebase.Products.collection).document(product.id)
+            .updateData([Firebase.Products.available: false])
     }
 
     // MARK: - Parsing (private)
@@ -74,16 +74,16 @@ struct FirestoreProductRepository: ProductRepositoryProtocol {
         let data = doc.data()
         return Product(
             id: doc.documentID,
-            name: data["name"] as? String ?? "",
-            description: data["description"] as? String ?? "",
-            price: data["price"] as? Double ?? 0.0,
-            imageURL: data["imageURL"] as? String ?? "",
-            category: data["category"] as? String ?? "Others",
-            available: data["available"] as? Bool ?? true,
-            customizations: data["customizations"] as? [String: [String: Double]],
-            avgRating: data["avgRating"] as? Double,
-            ratingCount: data["ratingCount"] as? Int,
-            ratingDistribution: data["ratingDistribution"] as? [String: Int]
+            name: data[Firebase.Products.name] as? String ?? "",
+            description: data[Firebase.Products.description] as? String ?? "",
+            price: data[Firebase.Products.price] as? Double ?? 0.0,
+            imageURL: data[Firebase.Products.imageURL] as? String ?? "",
+            category: data[Firebase.Products.category] as? String ?? "Others",
+            available: data[Firebase.Products.available] as? Bool ?? true,
+            customizations: data[Firebase.Products.customizations] as? [String: [String: Double]],
+            avgRating: data[Firebase.Products.avgRating] as? Double,
+            ratingCount: data[Firebase.Products.ratingCount] as? Int,
+            ratingDistribution: data[Firebase.Products.ratingDistribution] as? [String: Int]
         )
     }
 }

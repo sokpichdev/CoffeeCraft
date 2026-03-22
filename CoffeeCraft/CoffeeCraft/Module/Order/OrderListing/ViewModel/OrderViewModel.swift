@@ -68,9 +68,9 @@ class OrderViewModel: ObservableObject {
 
         do {
             let snapshot = try await db
-                .collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .order(by: "timestamp", descending: true)
+                .collection(Firebase.Orders.collection)
+                .whereField(Firebase.Orders.userId, isEqualTo: userId)
+                .order(by: Firebase.Orders.timestamp, descending: true)
                 .limit(to: pageSize)
                 .getDocuments()
 
@@ -113,9 +113,9 @@ class OrderViewModel: ObservableObject {
 
         do {
             let snapshot = try await db
-                .collection("orders")
-                .whereField("userId", isEqualTo: userId)
-                .order(by: "timestamp", descending: true)
+                .collection(Firebase.Orders.collection)
+                .whereField(Firebase.Orders.userId, isEqualTo: userId)
+                .order(by: Firebase.Orders.timestamp, descending: true)
                 .start(afterDocument: cursor)
                 .limit(to: pageSize)
                 .getDocuments()
@@ -194,9 +194,9 @@ class OrderViewModel: ObservableObject {
         AppLog.order.debug("🔌 setupRealtimeListener — attaching for uid: \(userId), limit: \(newLimit)")
 
         listener = db
-            .collection("orders")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
+            .collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.userId, isEqualTo: userId)
+            .order(by: Firebase.Orders.timestamp, descending: true)
             .limit(to: newLimit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }

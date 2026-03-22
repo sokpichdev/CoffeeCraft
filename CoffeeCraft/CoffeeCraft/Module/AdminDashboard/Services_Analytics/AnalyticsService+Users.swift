@@ -18,9 +18,9 @@ extension AnalyticsService {
     /// Does NOT include totalOrders/totalSpent — call `enrichUsers` after.
     func fetchUserList(searchText: String = "",
                        pageSize: Int = 20) async throws -> UserListPage {
-        let query: Query = db.collection("users")
-            .whereField("role", isEqualTo: "customer")
-            .order(by: "createdAt", descending: true)
+        let query: Query = db.collection(Firebase.Users.collection)
+            .whereField(Firebase.Users.role, isEqualTo: "customer")
+            .order(by: Firebase.Users.createdAt, descending: true)
             .limit(to: pageSize + 1)
 
         let snapshot = try await query.getDocuments()
@@ -48,9 +48,9 @@ extension AnalyticsService {
     func fetchMoreUsers(after cursor: DocumentSnapshot,
                         searchText: String = "",
                         pageSize: Int = 20) async throws -> UserListPage {
-        let snapshot = try await db.collection("users")
-            .whereField("role", isEqualTo: "customer")
-            .order(by: "createdAt", descending: true)
+        let snapshot = try await db.collection(Firebase.Users.collection)
+            .whereField(Firebase.Users.role, isEqualTo: "customer")
+            .order(by: Firebase.Users.createdAt, descending: true)
             .start(afterDocument: cursor)
             .limit(to: pageSize + 1)
             .getDocuments()
@@ -81,9 +81,9 @@ extension AnalyticsService {
         await withTaskGroup(of: (String, Int, Double, Int).self) { group in
             for userId in userIds {
                 group.addTask {
-                    let ordersQuery = self.db.collection("orders")
-                        .whereField("userId", isEqualTo: userId)
-                        .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
+                    let ordersQuery = self.db.collection(Firebase.Orders.collection)
+                        .whereField(Firebase.Orders.userId, isEqualTo: userId)
+                        .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
 
                     // Isolated try/catch — a sum failure does not zero the count.
                     let count: Int
@@ -116,8 +116,8 @@ extension AnalyticsService {
                     
                     let points: Int
                     do {
-                        let cardSnap = try await self.db.collection("loyalty_cards")
-                            .whereField("ownerId", isEqualTo: userId)
+                        let cardSnap = try await self.db.collection(Firebase.LoyaltyCards.collection)
+                            .whereField(Firebase.LoyaltyCards.ownerId, isEqualTo: userId)
                             .limit(to: 1)
                             .getDocuments()
                         points = cardSnap.documents.first?.data()["points"] as? Int ?? 0
@@ -145,13 +145,13 @@ extension AnalyticsService {
     ///   - Last 10 orders (all statuses)
     ///   - Wallet balance
     func fetchUserDetail(userId: String, base: UserStatItem) async throws -> UserDetailData {
-        async let userDocFetch = db.collection("users").document(userId).getDocument()
-        async let ordersFetch = db.collection("orders")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "timestamp", descending: true)
+        async let userDocFetch = db.collection(Firebase.Users.collection).document(userId).getDocument()
+        async let ordersFetch = db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.userId, isEqualTo: userId)
+            .order(by: Firebase.Orders.timestamp, descending: true)
             .limit(to: 10)
             .getDocuments()
-        async let walletFetch = db.collection("wallets").document(userId).getDocument()
+        async let walletFetch = db.collection(Firebase.Wallets.collection).document(userId).getDocument()
 
         let (userDoc, ordersSnap, walletDoc) = try await (userDocFetch, ordersFetch, walletFetch)
 
@@ -160,12 +160,12 @@ extension AnalyticsService {
         let recentOrders: [UserOrderItem] = ordersSnap.documents.compactMap { doc in
             let data = doc.data()
             guard
-                let ts = (data["timestamp"] as? Timestamp)?.dateValue(),
-                let totalPrice = data["totalPrice"] as? Double,
-                let status = data["status"] as? String
+                let ts = (data[Firebase.Orders.timestamp] as? Timestamp)?.dateValue(),
+                let totalPrice = data[Firebase.Orders.totalPrice] as? Double,
+                let status = data[Firebase.Orders.status] as? String
             else { return nil }
 
-            let items = data["items"] as? [[String: Any]] ?? []
+            let items = data[Firebase.Orders.items] as? [[String: Any]] ?? []
             return UserOrderItem(
                 id: doc.documentID,
                 totalPrice: totalPrice,
@@ -211,9 +211,9 @@ extension AnalyticsService {
             "status": "pending"   // Cloud Function updates to "sent" / "failed"
         ]
 
-        try await db.collection("notifications")
+        try await db.collection(Firebase.NotificationQueue.collection)
             .document(userId)
-            .collection("queue")
+            .collection(Firebase.NotificationQueue.Queue.collection)
             .addDocument(data: notifData)
 
         AppLog.dashboard.info("Notification queued for userId: \(userId)")
@@ -225,16 +225,16 @@ extension AnalyticsService {
         let data = doc.data() ?? [:]
         // `name` is the only true required field — `createdAt` is optional so
         // accounts registered before the analytics fix still appear in the list.
-        guard let name = data["name"] as? String else { return nil }
+        guard let name = data[Firebase.Users.name] as? String else { return nil }
 
-        let createdAt = (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(timeIntervalSince1970: 0)
+        let createdAt = (data[Firebase.Users.createdAt] as? Timestamp)?.dateValue() ?? Date(timeIntervalSince1970: 0)
 
         return UserStatItem(
             id: doc.documentID,
             name: name,
-            email: data["email"] as? String ?? "",
+            email: data[Firebase.Users.email] as? String ?? "",
             joinDate: createdAt,
-            loyaltyPoints: data["loyaltyPoints"] as? Int ?? 0
+            loyaltyPoints: data[Firebase.Users.loyaltyPoints] as? Int ?? 0
         )
     }
 }

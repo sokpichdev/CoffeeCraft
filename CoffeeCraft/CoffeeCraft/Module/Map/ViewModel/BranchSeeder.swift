@@ -25,7 +25,7 @@ struct BranchSeeder {
 
     static func seed() async {
         let db  = Firestore.firestore()
-        let ref = db.collection("branches")
+        let ref = db.collection(Firebase.Branches.collection)
 
         // Each dict maps exactly to the Branch Codable model.
         // Document ID = branch.id — must match the strings in MockBranchData.

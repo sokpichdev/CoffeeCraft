@@ -27,23 +27,23 @@ extension AnalyticsService {
 
         // Step 2: Build the base collectionGroup query
         var query: Query = db.collectionGroup("reviews")
-            .order(by: "createdAt", descending: true)
+            .order(by: Firebase.Products.Reviews.createdAt, descending: true)
             .limit(to: pageSize + 1)
 
         // Rating filter — Firestore supports equality on collectionGroup
         if let stars = filter.rating {
             query = db.collectionGroup("reviews")
-                .whereField("rating", isEqualTo: stars)
-                .order(by: "createdAt", descending: true)
+                .whereField(Firebase.Products.Reviews.rating, isEqualTo: stars)
+                .order(by: Firebase.Products.Reviews.createdAt, descending: true)
                 .limit(to: pageSize + 1)
         }
 
         // Visibility filter
         switch filter.visibility {
         case .visible:
-            query = query.whereField("isHidden", isEqualTo: false)
+            query = query.whereField(Firebase.Products.Reviews.isHidden, isEqualTo: false)
         case .hidden:
-            query = query.whereField("isHidden", isEqualTo: true)
+            query = query.whereField(Firebase.Products.Reviews.isHidden, isEqualTo: true)
         case .all:
             break
         }
@@ -71,21 +71,21 @@ extension AnalyticsService {
         let productCatalog = try await fetchProductNameMap()
 
         var query: Query = db.collectionGroup("reviews")
-            .order(by: "createdAt", descending: true)
+            .order(by: Firebase.Products.Reviews.createdAt, descending: true)
             .start(afterDocument: cursor)
             .limit(to: pageSize + 1)
 
         if let stars = filter.rating {
             query = db.collectionGroup("reviews")
-                .whereField("rating", isEqualTo: stars)
-                .order(by: "createdAt", descending: true)
+                .whereField(Firebase.Products.Reviews.rating, isEqualTo: stars)
+                .order(by: Firebase.Products.Reviews.createdAt, descending: true)
                 .start(afterDocument: cursor)
                 .limit(to: pageSize + 1)
         }
 
         switch filter.visibility {
-        case .visible: query = query.whereField("isHidden", isEqualTo: false)
-        case .hidden: query = query.whereField("isHidden", isEqualTo: true)
+        case .visible: query = query.whereField(Firebase.Products.Reviews.isHidden, isEqualTo: false)
+        case .hidden: query = query.whereField(Firebase.Products.Reviews.isHidden, isEqualTo: true)
         case .all: break
         }
 
@@ -112,9 +112,9 @@ extension AnalyticsService {
                          reviewId: String,
                          hidden: Bool) async throws {
         try await db
-            .collection("products").document(productId)
-            .collection("reviews").document(reviewId)
-            .updateData(["isHidden": hidden])
+            .collection(Firebase.Products.collection).document(productId)
+            .collection(Firebase.Products.Reviews.collection).document(reviewId)
+            .updateData([Firebase.Products.Reviews.isHidden: hidden])
     }
 
     // MARK: - Review Analytics (per product)
@@ -123,18 +123,18 @@ extension AnalyticsService {
     func fetchReviewAnalytics(productId: String,
                               productName: String) async throws -> ReviewAnalyticsData {
         let snapshot = try await db
-            .collection("products").document(productId)
-            .collection("reviews")
-            .order(by: "createdAt", descending: false)
+            .collection(Firebase.Products.collection).document(productId)
+            .collection(Firebase.Products.Reviews.collection)
+            .order(by: Firebase.Products.Reviews.createdAt, descending: false)
             .getDocuments()
 
         let reviews = snapshot.documents.compactMap { doc -> (Int, Bool, Date)? in
             let data = doc.data()
             guard
-                let rating = data["rating"] as? Int,
-                let timestamp = (data["createdAt"] as? Timestamp)?.dateValue()
+                let rating = data[Firebase.Products.Reviews.rating] as? Int,
+                let timestamp = (data[Firebase.Products.Reviews.createdAt] as? Timestamp)?.dateValue()
             else { return nil }
-            let isHidden = data["isHidden"] as? Bool ?? false
+            let isHidden = data[Firebase.Products.Reviews.isHidden] as? Bool ?? false
             return (rating, isHidden, timestamp)
         }
 
@@ -160,12 +160,12 @@ extension AnalyticsService {
     /// Used to populate the product filter picker.
     func fetchReviewedProducts() async throws -> [ProductOption] {
         // Fetch product names cheaply — only name field needed
-        let snapshot = try await db.collection("products")
-            .order(by: "name")
+        let snapshot = try await db.collection(Firebase.Products.collection)
+            .order(by: Firebase.Products.name)
             .getDocuments()
 
         return snapshot.documents.compactMap { doc in
-            guard let name = doc.data()["name"] as? String else { return nil }
+            guard let name = doc.data()[Firebase.Products.name] as? String else { return nil }
             return ProductOption(id: doc.documentID, name: name)
         }
     }
@@ -173,10 +173,10 @@ extension AnalyticsService {
     // MARK: - Private Helpers
 
     private func fetchProductNameMap() async throws -> [String: String] {
-        let snapshot = try await db.collection("products").getDocuments()
+        let snapshot = try await db.collection(Firebase.Products.collection).getDocuments()
         var map: [String: String] = [:]
         for doc in snapshot.documents {
-            map[doc.documentID] = doc.data()["name"] as? String ?? "Unknown Product"
+            map[doc.documentID] = doc.data()[Firebase.Products.name] as? String ?? "Unknown Product"
         }
         return map
     }
@@ -185,9 +185,9 @@ extension AnalyticsService {
                                  productCatalog: [String: String]) -> ReviewItem? {
         let data = doc.data() ?? [:]
         guard
-            let rating = data["rating"] as? Int,
-            let comment = data["body"] as? String,
-            let timestamp = (data["createdAt"] as? Timestamp)?.dateValue()
+            let rating = data[Firebase.Products.Reviews.rating] as? Int,
+            let comment = data[Firebase.Products.Reviews.body] as? String,
+            let timestamp = (data[Firebase.Products.Reviews.createdAt] as? Timestamp)?.dateValue()
         else { return nil }
 
         // Extract productId from the document's parent path:
@@ -203,14 +203,14 @@ extension AnalyticsService {
             id: doc.documentID,
             productId: productId,
             productName: productName,
-            customerName: data["customerName"] as? String
-                          ?? data["userName"]  as? String
+            customerName: data[Firebase.Products.Reviews.customerName] as? String
+                          ?? data[Firebase.Products.Reviews.userName] as? String
                           ?? "Customer",
-            userId: data["userId"] as? String ?? "",
+            userId: data[Firebase.Products.Reviews.userId] as? String ?? "",
             rating: min(max(rating, 1), 5),   // clamp to valid range
             comment: comment,
             timestamp: timestamp,
-            isHidden: data["isHidden"] as? Bool ?? false
+            isHidden: data[Firebase.Products.Reviews.isHidden] as? Bool ?? false
         )
     }
 

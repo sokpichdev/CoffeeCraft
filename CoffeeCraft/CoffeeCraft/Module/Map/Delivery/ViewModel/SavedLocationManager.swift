@@ -30,7 +30,7 @@ final class SavedLocationManager {
     private let db = Firestore.firestore()
 
     private func collection(for userId: String) -> CollectionReference {
-        db.collection("users").document(userId).collection("savedLocations")
+        db.collection(Firebase.Users.collection).document(userId).collection(Firebase.Users.SavedLocations.collection)
     }
 
     // MARK: - Fetch
@@ -40,7 +40,7 @@ final class SavedLocationManager {
 
         do {
             let snapshot = try await collection(for: userId)
-                .order(by: "createdAt", descending: false)
+                .order(by: Firebase.Users.SavedLocations.createdAt, descending: false)
                 .getDocuments()
 
             var fetched = snapshot.documents.compactMap { doc -> SavedLocation? in
@@ -140,7 +140,7 @@ final class SavedLocationManager {
 
     func setDefault(id: String, for userId: String) async throws {
         try await clearOtherDefaults(except: id, for: userId)
-        try await collection(for: userId).document(id).updateData(["isDefault": true])
+        try await collection(for: userId).document(id).updateData([Firebase.Users.SavedLocations.isDefault: true])
         await fetchLocations(for: userId)
         AppLog.firestore.info("[SavedLocationManager] Set default → \(id)")
     }
@@ -151,7 +151,7 @@ final class SavedLocationManager {
         let currentDefaults = locations.filter { $0.isDefault && $0.id != keepId }
         for loc in currentDefaults {
             guard let id = loc.id else { continue }
-            try await collection(for: userId).document(id).updateData(["isDefault": false])
+            try await collection(for: userId).document(id).updateData([Firebase.Users.SavedLocations.isDefault: false])
         }
     }
 }

@@ -22,18 +22,18 @@ struct FirestoreOrderRepository: OrderRepositoryProtocol {
     /// Uses a Firestore transaction so concurrent orders never get the same number.
     func generateOrderNumber() async throws -> Int {
         let counterId  = String.todayCounterId
-        let counterRef = db.collection("counters").document(counterId)
+        let counterRef = db.collection(Firebase.Counters.collection).document(counterId)
 
         let result = try await db.runTransaction { transaction, errorPointer -> Any? in
             do {
                 let snapshot = try transaction.getDocument(counterRef)
                 if !snapshot.exists {
-                    transaction.setData(["current": 1], forDocument: counterRef)
+                    transaction.setData([Firebase.Counters.current: 1], forDocument: counterRef)
                     return 1
                 }
-                let current = snapshot.data()?["current"] as? Int ?? 0
+                let current = snapshot.data()?[Firebase.Counters.current] as? Int ?? 0
                 let next    = current + 1
-                transaction.updateData(["current": next], forDocument: counterRef)
+                transaction.updateData([Firebase.Counters.current: next], forDocument: counterRef)
                 return next
             } catch {
                 errorPointer?.pointee = error as NSError
@@ -54,6 +54,6 @@ struct FirestoreOrderRepository: OrderRepositoryProtocol {
     // MARK: - Write Order
 
     func writeOrder(orderData: [String: Any], orderId: String) async throws {
-        try await db.collection("orders").document(orderId).setData(orderData)
+        try await db.collection(Firebase.Orders.collection).document(orderId).setData(orderData)
     }
 }

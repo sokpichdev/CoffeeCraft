@@ -375,7 +375,7 @@ extension ReviewViewModel {
     private func refreshProductRatings() async {
         do {
             let doc = try await Firestore.firestore()
-                .collection("products").document(productId).getDocument()
+                .collection(Firebase.Products.collection).document(productId).getDocument()
             let avg = doc.data()?["avgRating"] as? Double ?? 0.0
             let count = doc.data()?["ratingCount"] as? Int ?? 0
             let dist = doc.data()?["ratingDistribution"] as? [String: Int] ?? [:]

@@ -28,7 +28,7 @@ class ReorderManager: ObservableObject {
 
     private func fetchProductById(_ id: String) async -> Product? {
         do {
-            let doc = try await db.collection("products").document(id).getDocument()
+            let doc = try await db.collection(Firebase.Products.collection).document(id).getDocument()
             return doc.exists ? parseProduct(doc) : nil
         } catch {
             AppLog.order.warning("⚠️ fetchProductById failed for '\(id)': \(error)")
@@ -39,8 +39,8 @@ class ReorderManager: ObservableObject {
     private func fetchProductByName(_ name: String) async -> Product? {
         guard !name.isEmpty else { return nil }
         do {
-            let snapshot = try await db.collection("products")
-                .whereField("name", isEqualTo: name)
+            let snapshot = try await db.collection(Firebase.Products.collection)
+                .whereField(Firebase.Products.name, isEqualTo: name)
                 .limit(to: 1)
                 .getDocuments()
             return snapshot.documents.first.map { parseProduct($0) }
@@ -56,13 +56,13 @@ class ReorderManager: ObservableObject {
         let data = snapshot.data() ?? [:]
         return Product(
             id: snapshot.documentID,
-            name: data["name"] as? String ?? "",
-            description: data["description"] as? String ?? "",
-            price: data["price"] as? Double ?? 0.0,
-            imageURL: data["imageURL"] as? String ?? "",
-            category: data["category"] as? String ?? "Others",
-            available: data["available"] as? Bool ?? true,
-            customizations: data["customizations"] as? [String: [String: Double]] ?? [:]
+            name: data[Firebase.Products.name] as? String ?? "",
+            description: data[Firebase.Products.description] as? String ?? "",
+            price: data[Firebase.Products.price] as? Double ?? 0.0,
+            imageURL: data[Firebase.Products.imageURL] as? String ?? "",
+            category: data[Firebase.Products.category] as? String ?? "Others",
+            available: data[Firebase.Products.available] as? Bool ?? true,
+            customizations: data[Firebase.Products.customizations] as? [String: [String: Double]] ?? [:]
         )
     }
 

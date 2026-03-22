@@ -27,7 +27,7 @@ class FCMTokenService {
             return
         }
 
-        let userRef = db.collection("users").document(userId)
+        let userRef = db.collection(Firebase.Users.collection).document(userId)
 
         userRef.getDocument { [weak self] snapshot, error in
             guard let self = self else { return }
@@ -40,26 +40,26 @@ class FCMTokenService {
             var tokensArray: [[String: Any]] = []
 
             if let data = snapshot?.data(),
-               let existing = data["fcmTokens"] as? [[String: Any]] {
+               let existing = data[Firebase.Users.fcmTokens] as? [[String: Any]] {
                 tokensArray = existing
             }
 
             let deviceId = self.deviceId
 
-            if let index = tokensArray.firstIndex(where: { $0["deviceId"] as? String == deviceId }) {
+            if let index = tokensArray.firstIndex(where: { $0[Firebase.Users.FcmTokenField.deviceId] as? String == deviceId }) {
                 tokensArray[index] = [
-                    "token": token,
-                    "deviceId": deviceId,
-                    "platform": "ios",
-                    "updatedAt": Timestamp(date: Date())
+                    Firebase.Users.FcmTokenField.token:     token,
+                    Firebase.Users.FcmTokenField.deviceId:  deviceId,
+                    Firebase.Users.FcmTokenField.platform:  "ios",
+                    Firebase.Users.FcmTokenField.updatedAt: Timestamp(date: Date())
                 ]
                 AppLog.firestore.info("🔄 Updating FCM token for device: \(deviceId)")
             } else {
                 tokensArray.append([
-                    "token": token,
-                    "deviceId": deviceId,
-                    "platform": "ios",
-                    "updatedAt": Timestamp(date: Date())
+                    Firebase.Users.FcmTokenField.token:     token,
+                    Firebase.Users.FcmTokenField.deviceId:  deviceId,
+                    Firebase.Users.FcmTokenField.platform:  "ios",
+                    Firebase.Users.FcmTokenField.updatedAt: Timestamp(date: Date())
                 ])
                 AppLog.firestore.info("➕ Adding new FCM token for device: \(deviceId)")
             }
@@ -87,19 +87,19 @@ class FCMTokenService {
             return
         }
 
-        let userRef = db.collection("users").document(userId)
+        let userRef = db.collection(Firebase.Users.collection).document(userId)
         let deviceId = self.deviceId
 
         do {
             let snapshot = try await userRef.getDocument()
 
             guard let data = snapshot.data(),
-                  var tokensArray = data["fcmTokens"] as? [[String: Any]] else {
+                  var tokensArray = data[Firebase.Users.fcmTokens] as? [[String: Any]] else {
                 AppLog.auth.warning("⚠️ No tokens found for user: \(userId)")
                 return
             }
 
-            tokensArray.removeAll { $0["deviceId"] as? String == deviceId }
+            tokensArray.removeAll { $0[Firebase.Users.FcmTokenField.deviceId] as? String == deviceId }
 
             if tokensArray.isEmpty {
                 // No devices left — remove the field entirely
@@ -128,7 +128,7 @@ class FCMTokenService {
         }
 
         do {
-            try await db.collection("users").document(userId).updateData([
+            try await db.collection(Firebase.Users.collection).document(userId).updateData([
                 "fcmTokens": FieldValue.delete(),
                 "updatedAt": FieldValue.serverTimestamp()
             ])
@@ -142,18 +142,18 @@ class FCMTokenService {
     func cleanupOldTokens(olderThanDays days: Int = 30) async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
 
-        let userRef = db.collection("users").document(userId)
+        let userRef = db.collection(Firebase.Users.collection).document(userId)
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
 
         do {
             let snapshot = try await userRef.getDocument()
 
             guard let data = snapshot.data(),
-                  var tokensArray = data["fcmTokens"] as? [[String: Any]] else { return }
+                  var tokensArray = data[Firebase.Users.fcmTokens] as? [[String: Any]] else { return }
 
             let originalCount = tokensArray.count
             tokensArray.removeAll { dict in
-                if let ts = dict["updatedAt"] as? Timestamp {
+                if let ts = dict[Firebase.Users.FcmTokenField.updatedAt] as? Timestamp {
                     return ts.dateValue() < cutoffDate
                 }
                 return false

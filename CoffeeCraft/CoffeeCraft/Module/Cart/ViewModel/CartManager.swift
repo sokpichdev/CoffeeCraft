@@ -78,7 +78,7 @@ class CartManager: ObservableObject {
     func saveCartToFirestore(userId: String, completion: (() -> Void)? = nil) {
         do {
             let data = try items.map { try Firestore.Encoder().encode($0) }
-            db.collection("carts").document(userId).setData(["items": data]) { [weak self] error in
+            db.collection(Firebase.Carts.collection).document(userId).setData([Firebase.Carts.items: data]) { [weak self] error in
                 guard self != nil else { return }
                 DispatchQueue.main.async {
                     if let error = error {
@@ -96,9 +96,9 @@ class CartManager: ObservableObject {
     }
 
     func loadCartFromFirestore(userId: String) {
-        db.collection("carts").document(userId).getDocument { [weak self] snapshot, error in
+        db.collection(Firebase.Carts.collection).document(userId).getDocument { [weak self] snapshot, error in
             if let error = error { AppLog.firestore.error("Error loading cart: \(error.localizedDescription)"); return }
-            guard let data = snapshot?.data(), let itemData = data["items"] as? [[String: Any]] else { return }
+            guard let data = snapshot?.data(), let itemData = data[Firebase.Carts.items] as? [[String: Any]] else { return }
             do {
                 let decoded = try itemData.map { try Firestore.Decoder().decode(CartItem.self, from: $0) }
                 DispatchQueue.main.async {
@@ -109,8 +109,8 @@ class CartManager: ObservableObject {
     }
 
     func loadCartFromFirestoreAsync(userId: String) async throws {
-        let snapshot = try await db.collection("carts").document(userId).getDocument()
-        guard let data = snapshot.data(), let itemData = data["items"] as? [[String: Any]] else { return }
+        let snapshot = try await db.collection(Firebase.Carts.collection).document(userId).getDocument()
+        guard let data = snapshot.data(), let itemData = data[Firebase.Carts.items] as? [[String: Any]] else { return }
         self.items = try itemData.map { try Firestore.Decoder().decode(CartItem.self, from: $0) }
     }
 }

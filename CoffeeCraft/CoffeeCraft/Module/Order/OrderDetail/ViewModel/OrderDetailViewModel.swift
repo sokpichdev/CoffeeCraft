@@ -44,9 +44,9 @@ class OrderDetailViewModel: ObservableObject {
 
         do {
             // Step 1: Mark order Cancelled in Firestore
-            try await db.collection("orders")
+            try await db.collection(Firebase.Orders.collection)
                 .document(orderId)
-                .updateData(["status": OrderStatus.cancelled.rawValue])
+                .updateData([Firebase.Orders.status: OrderStatus.cancelled.rawValue])
 
             AppLog.order.debug("Order \(orderId) marked Cancelled")
 
@@ -105,7 +105,7 @@ class OrderDetailViewModel: ObservableObject {
         hasAppeared = true
         
         // Listen to order changes in real-time
-        orderListener = db.collection("orders")
+        orderListener = db.collection(Firebase.Orders.collection)
             .document(orderId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
@@ -130,7 +130,7 @@ class OrderDetailViewModel: ObservableObject {
     
     func fetchUserInfo(userId: String) {
         isLoadingUser = true
-        db.collection("users").document(userId).getDocument { [weak self] snapshot, error in
+        db.collection(Firebase.Users.collection).document(userId).getDocument { [weak self] snapshot, error in
             guard let self else { return }
             Task { @MainActor in
                 defer { self.isLoadingUser = false }
@@ -158,13 +158,13 @@ class OrderDetailViewModel: ObservableObject {
         isUpdatingStatus = true
         defer { isUpdatingStatus = false }
         do {
-            var fields: [String: Any] = ["status": status]
+            var fields: [String: Any] = [Firebase.Orders.status: status]
             if OrderStatus.from(status) == .completed {
                 // Write server-side timestamp so avg fulfillment time in
                 // the Order Funnel is calculated from a reliable clock.
-                fields["completedAt"] = FieldValue.serverTimestamp()
+                fields[Firebase.Orders.completedAt] = FieldValue.serverTimestamp()
             }
-            try await db.collection("orders").document(orderId).updateData(fields)
+            try await db.collection(Firebase.Orders.collection).document(orderId).updateData(fields)
             AppLog.order.debug("updateOrderStatus — \(orderId) → \(status)")
         } catch {
             AppLog.order.error("updateOrderStatus error: \(error.localizedDescription)")

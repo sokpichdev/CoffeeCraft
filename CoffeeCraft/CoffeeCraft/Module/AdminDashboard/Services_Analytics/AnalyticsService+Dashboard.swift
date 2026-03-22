@@ -64,10 +64,10 @@ extension AnalyticsService {
     private func revenueInRange(from start: Date, to end: Date) async throws -> Double {
         let sumField = AggregateField.sum("totalPrice")
 
-        let aggregation = try await db.collection("orders")
-            .whereField("status", isEqualTo: OrderStatus.completed.rawValue)
-            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("timestamp", isLessThanOrEqualTo: Timestamp(date: end))
+        let aggregation = try await db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: start))
+            .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: Timestamp(date: end))
             .aggregate([sumField])
             .getAggregation(source: .server)
 
@@ -81,17 +81,17 @@ extension AnalyticsService {
         let todayStart = Calendar.current.startOfDay(for: now)
         let yesterdayStart = Calendar.current.date(byAdding: .day, value: -1, to: todayStart)!
 
-        async let todaySnap = db.collection("orders")
-            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: todayStart))
+        async let todaySnap = db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: todayStart))
             .getDocuments()
 
-        async let yesterdaySnap = db.collection("orders")
-            .whereField("timestamp", isGreaterThanOrEqualTo: Timestamp(date: yesterdayStart))
-            .whereField("timestamp", isLessThan: Timestamp(date: todayStart))
+        async let yesterdaySnap = db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: yesterdayStart))
+            .whereField(Firebase.Orders.timestamp, isLessThan: Timestamp(date: todayStart))
             .getDocuments()
 
-        async let activeSnap = db.collection("orders")
-            .whereField("status", in: OrderStatus.activeRawValues)
+        async let activeSnap = db.collection(Firebase.Orders.collection)
+            .whereField(Firebase.Orders.status, in: OrderStatus.activeRawValues)
             .getDocuments()
 
         let (today, yesterday, active) = try await (todaySnap, yesterdaySnap, activeSnap)
@@ -109,15 +109,15 @@ extension AnalyticsService {
         let weekStart = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
 
         // New customers this week — count only, no documents downloaded
-        async let newCountAgg = db.collection("users")
-            .whereField("role", isEqualTo: "customer")
-            .whereField("createdAt", isGreaterThanOrEqualTo: Timestamp(date: weekStart))
+        async let newCountAgg = db.collection(Firebase.Users.collection)
+            .whereField(Firebase.Users.role, isEqualTo: "customer")
+            .whereField(Firebase.Users.createdAt, isGreaterThanOrEqualTo: Timestamp(date: weekStart))
             .count
             .getAggregation(source: .server)
 
         // All-time customer total — count only, no documents downloaded
-        async let totalCountAgg = db.collection("users")
-            .whereField("role", isEqualTo: "customer")
+        async let totalCountAgg = db.collection(Firebase.Users.collection)
+            .whereField(Firebase.Users.role, isEqualTo: "customer")
             .count
             .getAggregation(source: .server)
 
@@ -142,8 +142,8 @@ extension AnalyticsService {
     /// a previous page's `lastDocument`. Use fetchFirstActivityPage() for
     /// the very first load.
     func fetchMoreActivity(after cursor: DocumentSnapshot?, pageSize: Int = 10) async throws -> ActivityPage {
-        var query: Query = db.collection("orders")
-            .order(by: "timestamp", descending: true)
+        var query: Query = db.collection(Firebase.Orders.collection)
+            .order(by: Firebase.Orders.timestamp, descending: true)
             .limit(to: pageSize + 1) // +1 to detect hasMore
 
         if let cursor { query = query.start(afterDocument: cursor) }
@@ -167,8 +167,8 @@ extension AnalyticsService {
         limit: Int = 10,
         onChange: @escaping ([LiveOrderItem]) -> Void
     ) -> ListenerRegistration {
-        db.collection("orders")
-            .order(by: "timestamp", descending: true)
+        db.collection(Firebase.Orders.collection)
+            .order(by: Firebase.Orders.timestamp, descending: true)
             .limit(to: limit)
             .addSnapshotListener { snapshot, _ in
                 guard let snapshot else { return }
@@ -181,15 +181,15 @@ extension AnalyticsService {
     private func mapToLiveOrderItem(_ doc: DocumentSnapshot) -> LiveOrderItem? {
         let data = doc.data() ?? [:]
         guard
-            let timestamp = (data["timestamp"] as? Timestamp)?.dateValue(),
-            let totalPrice = data["totalPrice"] as? Double,
-            let status = data["status"] as? String
+            let timestamp = (data[Firebase.Orders.timestamp] as? Timestamp)?.dateValue(),
+            let totalPrice = data[Firebase.Orders.totalPrice] as? Double,
+            let status = data[Firebase.Orders.status] as? String
         else { return nil }
 
-        let items = data["items"] as? [[String: Any]] ?? []
+        let items = data[Firebase.Orders.items] as? [[String: Any]] ?? []
         return LiveOrderItem(
             id: doc.documentID,
-            customerName: data["customerName"] as? String ?? "Customer",
+            customerName: data[Firebase.Orders.customerName] as? String ?? "Customer",
             totalPrice: totalPrice,
             status: status,
             timestamp: timestamp,
