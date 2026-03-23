@@ -43,7 +43,6 @@ private extension ReviewSectionView {
 
                 Spacer()
             }
-            .padding(.horizontal)
         }
         .buttonStyle(.plain)
     }
@@ -86,7 +85,6 @@ private extension ReviewSectionView {
                 }
             }
         }
-        .padding(.horizontal)
     }
 }
 
@@ -136,7 +134,7 @@ private extension ReviewSectionView {
                     seeAllCard
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 1)
             .padding(.vertical, 4)
         }
     }
@@ -184,7 +182,6 @@ private extension ReviewSectionView {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal)
     }
 
     var writeReviewButton: some View {
