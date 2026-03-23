@@ -165,7 +165,7 @@ struct ProductDetailView: View {
                                 showRatingSheet = true
                             }
                         )
-                        .padding(.horizontal, 16)
+//                        .padding(.horizontal, 16)
                         .padding(.top, 24)
 
                         Spacer(minLength: 180)
