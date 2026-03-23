@@ -29,8 +29,7 @@ struct MenuView: View {
     @State private var selectedSectionID: String?
     @State private var productScrollProxy: ScrollViewProxy?
     @State private var isScrollingProgrammatically = false
-    @State private var scrollDebounceTask: Task<Void, Never>?
-
+    @State private var programmaticResetTask: Task<Void, Never>?
     // MARK: - UI State
     @State private var showCartSheet = false
     @State private var selectedProductToEdit: Product?
@@ -88,7 +87,7 @@ struct MenuView: View {
             guard let branch = mapBranch else { return }
             pendingFulfillmentBranch = branch
         }
-        .customNavigationBar(branchNavTitle) {
+        .customNavigationBar("") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("magnifyingglass")) {
                 if UserSession.shared.isLoggedIn {
                     showSearchSheet = true
@@ -97,7 +96,7 @@ struct MenuView: View {
                 }
             }
             if let branchName = orderEnv.selectedBranchName {
-                ToolBarButton(placement: .principal, buttonType: .text(branchName), action: {
+                ToolBarButton(placement: .topBarLeading, buttonType: .text(branchName), action: {
                     showBranchSheet = true
                 })
             }
@@ -157,12 +156,6 @@ struct MenuView: View {
     // MARK: - Section View
     private func sectionView(_ section: SectionData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(section.name)
-                .font(.title3.bold())
-                .padding(.horizontal)
-                .frame(height: 23)
-                .foregroundColor(.textPrimary)
-
             VStack(spacing: 10) {
                 ForEach(section.items) { product in
                     NavigationLink(value: product) {
@@ -195,14 +188,6 @@ struct MenuView: View {
             }
             .padding(.horizontal)
         }
-        .background(
-            GeometryReader { geo in
-                Color.clear.preference(
-                    key: SectionOffsetKey.self,
-                    value: [section.id: geo.frame(in: .named("scroll")).minY]
-                )
-            }
-        )
     }
 }
 
@@ -254,49 +239,38 @@ extension MenuView {
     private func scrollToSection(_ id: String) {
         guard let proxy = productScrollProxy else { return }
 
-        // Cancel any pending debounce task
-        scrollDebounceTask?.cancel()
-        
-        // Set programmatic scrolling flag
+        programmaticResetTask?.cancel() // cancel any previous reset
+
         isScrollingProgrammatically = true
         selectedSectionID = id
 
-        withAnimation(.easeInOut(duration: 0.3)) {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
             proxy.scrollTo(id, anchor: .top)
         }
 
-        // Reset flag after animation completes with some buffer
-        scrollDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        // Separate task — never cancelled by scroll events
+        programmaticResetTask = Task {
+            try? await Task.sleep(nanoseconds: 600_000_000) // 0.6s
             if !Task.isCancelled {
                 isScrollingProgrammatically = false
             }
         }
     }
-
     private func updateVisibleSection(values: [String: CGFloat]) {
-        // Cancel previous debounce
-        scrollDebounceTask?.cancel()
-        
-        // Debounce the update to avoid jitter
-        scrollDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
-            
+        Task {
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms — smooth but not sluggish
             if Task.isCancelled { return }
             
-            // Find the section closest to the top with a threshold
-            let threshold: CGFloat = 100 // Adjust this value as needed
+            // Wider threshold to avoid flickering at section boundaries
+            let threshold: CGFloat = 10  // roughly one header height
             
-            let visibleSections = values.filter { $0.value >= -threshold && $0.value <= threshold }
-            
-            if let closestSection = visibleSections.min(by: { abs($0.value) < abs($1.value) }) {
-                if selectedSectionID != closestSection.key {
-                    selectedSectionID = closestSection.key
-                }
-            } else if let topSection = values.filter({ $0.value <= 0 }).max(by: { $0.value < $1.value }) {
-                // If no section is near top, use the one that just scrolled past
+            if let topSection = values
+                .filter({ $0.value <= threshold }) // sections that have reached the top
+                .max(by: { $0.value < $1.value }) { // the one closest to top without passing it
                 if selectedSectionID != topSection.key {
-                    selectedSectionID = topSection.key
+                    await MainActor.run {
+                        selectedSectionID = topSection.key
+                    }
                 }
             }
         }
@@ -414,9 +388,16 @@ extension MenuView {
             }
             .frame(width: 120)
             .background(Color.bgSecondary)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    if let current = selectedSectionID {
+                        sidebarProxy.scrollTo("sidebar_\(current)", anchor: .center)
+                    }
+                }
+            }
             .onChange(of: selectedSectionID) { _, newSection in
-                if let newSection = newSection, !isScrollingProgrammatically {
-                    withAnimation {
+                if let newSection, !isScrollingProgrammatically {
+                    withAnimation(.easeInOut(duration: 0.25)) {
                         sidebarProxy.scrollTo("sidebar_\(newSection)", anchor: .center)
                     }
                 }
@@ -439,10 +420,14 @@ extension MenuView {
                 .transition(.opacity)
             } else {
                 CustomRefreshScrollView({
-                    LazyVStack(alignment: .leading, spacing: 24) {
+                    LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
                         ForEach(productVM.sections) { section in
-                            sectionView(section)
-                                .id(section.id)
+                            Section {
+                                sectionView(section)
+                                    .id(section.id)
+                            } header: {
+                                sectionHeader(section)
+                            }
                         }
                     }
                     .padding(.bottom, 70)
@@ -461,5 +446,28 @@ extension MenuView {
             }
         }
         .background(Color.bgPrimary.opacity(0.8))
+    }
+
+    private func sectionHeader(_ section: SectionData) -> some View {
+        Text(section.name)
+            .font(.title3.bold())
+            .foregroundColor(.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            .frame(height: 40)
+            .background(Color.bgPrimary.opacity(0.95))
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color.borderColor.opacity(0.3))
+                    .frame(height: 0.5)
+            }
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(
+                        key: SectionOffsetKey.self,
+                        value: [section.id: geo.frame(in: .named("scroll")).minY]
+                    )
+                }
+            )
     }
 }
