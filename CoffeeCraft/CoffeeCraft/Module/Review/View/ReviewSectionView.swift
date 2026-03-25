@@ -16,12 +16,18 @@ struct ReviewSectionView: View {
     let onSeeAll: () -> Void
     let onWriteReview: () -> Void
 
+    /// Drives the push to ReviewDetailView when a card is tapped.
+    @State private var selectedReview: Review?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             seeAllHeader
             ratingRow
             previewScroll
             tapToRateBlock
+        }
+        .navigationDestination(item: $selectedReview) { review in
+            ReviewDetailView(review: review, vm: vm, isOwn: review.userId == UserSession.shared.userId)
         }
     }
 }
@@ -43,6 +49,7 @@ private extension ReviewSectionView {
 
                 Spacer()
             }
+            .padding(.horizontal)
         }
         .buttonStyle(.plain)
     }
@@ -129,8 +136,8 @@ private extension ReviewSectionView {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 12) {
                 ForEach(vm.reviews.prefix(3)) { review in
-                    ReviewCard(review: review, vm: vm)
-                        .frame(width: 280)
+                    ReviewCard(review: review, vm: vm, isOwn: review.userId == UserSession.shared.userId, onTap: { selectedReview = review } )
+                    .frame(width: (UIScreen.main.bounds.width * 0.95) - 32)
                 }
 
                 if vm.reviews.count >= 3 {
