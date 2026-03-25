@@ -61,7 +61,7 @@ struct UserRating: Identifiable, Codable {
 /// Auto-ID document. One per user per product (enforced by RatingService).
 /// Review text is optional — a user can submit stars without a body.
 /// isHidden allows admin moderation without deleting the document.
-struct Review: Identifiable, Codable {
+struct Review: Identifiable, Codable, Hashable {
     @DocumentID var id: String?
 
     /// Firebase UID of the author.
@@ -189,4 +189,72 @@ extension Review {
             isHidden: false
         )
     }
+}
+
+extension Review {
+    static let mockData: [Review] = [
+        Review(
+            id: UUID().uuidString,
+            userId: "u1",
+            userName: "Alexander The Coffee Enthusiast",
+            orderId: "order_001",
+            rating: 5,
+            title: "Absolutely incredible coffee experience with rich aroma and perfect balance",
+            body: """
+            This is by far one of the best coffee experiences I have ever had. \
+            The aroma hits you immediately, followed by a smooth and well-balanced flavor profile that doesn’t feel too bitter or too acidic. \
+            The barista clearly knows what they are doing, and every detail from presentation to taste feels premium.\
+
+            I also love the ambiance of the place—it makes you want to sit down, relax, and enjoy every sip slowly. \
+            Highly recommended for anyone who truly appreciates high-quality coffee and a cozy environment.
+            """,
+            helpfulCount: 12,
+            helpfulBy: [],
+            createdAt: Timestamp(date: Date().addingTimeInterval(-86400 * 2)),
+            updatedAt: nil,
+            isHidden: false
+        ),
+
+        Review(
+            id: UUID().uuidString,
+            userId: "u2",
+            userName: "Sophia Latte Lover",
+            orderId: "order_002",
+            rating: 4,
+            title: "Great taste overall but could improve consistency across different visits",
+            body: """
+            The coffee here is genuinely good and has a nice creamy texture, especially the latte which I usually order. \
+            However, I noticed that sometimes the taste can vary slightly depending on the day or who is preparing it.
+
+            That said, the overall experience is still very enjoyable and the staff are friendly. \
+            With a bit more consistency, this could easily become my go-to coffee spot every single day.
+            """,
+            helpfulCount: 7,
+            helpfulBy: [],
+            createdAt: Timestamp(date: Date().addingTimeInterval(-86400 * 5)),
+            updatedAt: Timestamp(date: Date().addingTimeInterval(-86400 * 3)),
+            isHidden: false
+        ),
+
+        Review(
+            id: UUID().uuidString,
+            userId: "u3",
+            userName: "Michael Espresso Fanatic",
+            orderId: "order_003",
+            rating: 5,
+            title: "Perfect espresso shot with bold flavor and smooth finish every time",
+            body: """
+            As someone who drinks espresso daily, I can confidently say this place delivers one of the 
+            most consistent and bold shots I’ve tried. The crema is rich, the flavor is deep, and there’s no harsh aftertaste.\
+
+            It’s clear they use high-quality beans and proper extraction techniques. Definitely a must-visit \
+            for espresso lovers who want something authentic and satisfying.
+            """,
+            helpfulCount: 20,
+            helpfulBy: [],
+            createdAt: Timestamp(date: Date().addingTimeInterval(-86400 * 10)),
+            updatedAt: nil,
+            isHidden: false
+        )
+    ]
 }

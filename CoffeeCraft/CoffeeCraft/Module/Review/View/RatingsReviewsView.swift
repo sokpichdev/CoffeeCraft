@@ -17,6 +17,8 @@ struct RatingsReviewsView: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    @State private var selectedReview: Review?
+
     var body: some View {
         CustomRefreshScrollView({
             VStack(alignment: .leading, spacing: 0) {
@@ -34,6 +36,9 @@ struct RatingsReviewsView: View {
         .background(Color.bgSecondary)
         .customNavigationBar("Ratings & Reviews") {
             ToolBarButton.back { dismiss() }
+        }
+        .navigationDestination(item: $selectedReview) { review in
+            ReviewDetailView(review: review, vm: vm, isOwn: review.userId == UserSession.shared.userId)
         }
     }
 }
@@ -225,8 +230,8 @@ private extension RatingsReviewsView {
 
             // Own review pinned at top
             if let own = ownReview {
-                ReviewCard(review: own, vm: vm, isOwn: true)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                ReviewCard(review: own, vm: vm, isOwn: true, onTap: { selectedReview = own } )
+                .transition(.opacity.combined(with: .move(edge: .top)))
 
                 if !otherReviews.isEmpty {
                     labelledDivider("Other reviews")
@@ -234,8 +239,8 @@ private extension RatingsReviewsView {
             }
 
             ForEach(otherReviews) { review in
-                ReviewCard(review: review, vm: vm)
-                    .transition(.opacity)
+                ReviewCard(review: review, vm: vm, onTap: { selectedReview = review } )
+                .transition(.opacity)
             }
 
             if vm.canLoadMore {
