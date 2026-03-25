@@ -85,6 +85,7 @@ private extension ReviewSectionView {
                 }
             }
         }
+        .padding(.horizontal)
     }
 }
 
@@ -94,13 +95,16 @@ private extension ReviewSectionView {
 
     @ViewBuilder
     var previewScroll: some View {
-        if vm.isLoadingReviews {
-            shimmerRow
-        } else if vm.reviews.isEmpty {
-            noReviewsLabel
-        } else {
-            reviewCardsScroll
+        Group {
+            if vm.isLoadingReviews {
+                shimmerRow
+            } else if vm.reviews.isEmpty {
+                noReviewsLabel
+            } else {
+                reviewCardsScroll
+            }
         }
+        .padding(.horizontal)
     }
 
     var shimmerRow: some View {
@@ -111,7 +115,6 @@ private extension ReviewSectionView {
                         .frame(width: 280)
                 }
             }
-            .padding(.horizontal, 1)
         }
     }
 
@@ -134,7 +137,6 @@ private extension ReviewSectionView {
                     seeAllCard
                 }
             }
-            .padding(.horizontal, 1)
             .padding(.vertical, 4)
         }
     }
@@ -182,6 +184,7 @@ private extension ReviewSectionView {
             }
         }
         .frame(maxWidth: .infinity)
+        .padding(.horizontal)
     }
 
     var writeReviewButton: some View {
