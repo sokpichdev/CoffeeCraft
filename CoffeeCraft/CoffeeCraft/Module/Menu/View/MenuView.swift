@@ -9,7 +9,7 @@ import FirebaseFirestore
 import SwiftUI
 
 struct MenuView: View {
-
+    
     // MARK: - ViewModels
     @EnvironmentObject var productVM: ProductViewModel
     @EnvironmentObject var cartManager: CartManager
@@ -17,14 +17,14 @@ struct MenuView: View {
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var orderEnv: OrderEnvironment
     @State private var showAuth = false
-
+    
     private struct EditTarget: Identifiable, Hashable {
         var id: String { product.id + sectionId }
         let sectionId: String
         let product: Product
     }
     @State private var editTarget: EditTarget?
-
+    
     // MARK: - Scroll Sync State
     @State private var selectedSectionID: String?
     @State private var productScrollProxy: ScrollViewProxy?
@@ -36,9 +36,9 @@ struct MenuView: View {
     @State private var showSearchSheet = false
     @State private var showBranchSheet      = false
     @State private var pendingFulfillmentBranch: Branch?
-
+    
     var isManager: Bool = false
-
+    
     // MARK: - Body
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -56,7 +56,7 @@ struct MenuView: View {
                         .ignoresSafeArea(edges: .top)
                     productList
                 }
-
+                
                 if !cartManager.items.isEmpty {
                     ViewCartButton(cartManager: cartManager) {
                         showCartSheet = true
@@ -145,49 +145,60 @@ struct MenuView: View {
             handleNavigateToEditProduct(sectionId: target.sectionId, product: target.product)
         }
     }
-
+    
     // MARK: - Branch Nav Title helper
     // Returns the tappable branch name or a plain "Menu" title.
     // Tapping the branch name re-opens the branch sheet.
     private var branchNavTitle: String {
         orderEnv.selectedBranchName ?? "Menu"
     }
-
+    
     // MARK: - Section View
     private func sectionView(_ section: SectionData) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(spacing: 10) {
-                ForEach(section.items) { product in
-                    NavigationLink(value: product) {
-                        MenuItemRow(item: product)
-                            .id("\(section.id)_\(product.id)")
-                            .contextMenu(isManager ? ContextMenu(menuItems: {
-                                Button("Edit", systemImage: "pencil") {
-                                    editTarget = EditTarget(sectionId: section.id, product: product)
-                                }
-                                Button("Remove", role: .destructive) {
-                                    Task { await productVM.deleteProduct(product) }
-                                }
-                                Button("Mark as Unavailable", systemImage: "nosign") {
-                                    Task { await productVM.markUnavailable(product) }
-                                }
-                            }) : nil)
-                    }
-                    .buttonStyle(.plain)
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(section.items) { product in
+                NavigationLink(value: product) {
+                    MenuItemRow(item: product)
+                        .id("\(section.id)_\(product.id)")
+                        .contextMenu(isManager ? ContextMenu(menuItems: {
+                            Button("Edit", systemImage: "pencil") {
+                                editTarget = EditTarget(sectionId: section.id, product: product)
+                            }
+                            Button("Remove", role: .destructive) {
+                                Task { await productVM.deleteProduct(product) }
+                            }
+                            Button("Mark as Unavailable", systemImage: "nosign") {
+                                Task { await productVM.markUnavailable(product) }
+                            }
+                        }) : nil)
                 }
-
-                if isManager {
-                    NavigationLink {
-                        handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
-                    } label: {
-                        Label("Add new item", systemImage: "plus.circle.fill")
-                            .foregroundColor(.accentPrimary)
-                    }
-                    .padding(.vertical, 6)
-                }
+                .buttonStyle(.plain)
             }
-            .padding(.horizontal)
+            
+            if isManager {
+                NavigationLink {
+                    handleNavigateToEditProduct(sectionId: section.id, product: Product.empty(in: section.id))
+                } label: {
+                    Label("Add new item", systemImage: "plus.circle.fill")
+                        .foregroundColor(.accentPrimary)
+                }
+                .padding(.vertical, 6)
+            }
         }
+        .padding(12)
+        .background(Color.bgPrimary)
+        .clipShape(
+            .rect(topLeadingRadius: 0, bottomLeadingRadius: 12,
+                  bottomTrailingRadius: 12, topTrailingRadius: 0)
+        )
+        .overlay(
+            UnevenRoundedRectangle(
+                topLeadingRadius: 0, bottomLeadingRadius: 12,
+                bottomTrailingRadius: 12, topTrailingRadius: 0
+            )
+            .strokeBorder(Color.borderColor, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
     }
 }
 
@@ -420,11 +431,12 @@ extension MenuView {
                 .transition(.opacity)
             } else {
                 CustomRefreshScrollView({
-                    LazyVStack(alignment: .leading, spacing: 24, pinnedViews: [.sectionHeaders]) {
+                    LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                         ForEach(productVM.sections) { section in
                             Section {
                                 sectionView(section)
                                     .id(section.id)
+                                    .padding(.bottom)
                             } header: {
                                 sectionHeader(section)
                             }
@@ -445,6 +457,7 @@ extension MenuView {
                 .transition(.opacity)
             }
         }
+        .clipped()
         .background(Color.bgPrimary.opacity(0.8))
     }
 
@@ -453,14 +466,22 @@ extension MenuView {
             .font(.title3.bold())
             .foregroundColor(.textPrimary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
-            .frame(height: 40)
-            .background(Color.bgPrimary.opacity(0.95))
-            .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(Color.borderColor.opacity(0.3))
-                    .frame(height: 0.5)
-            }
+            .padding(.horizontal, 14)
+            .frame(height: 44)
+            .background(Color.bgPrimary)
+            .clipShape(
+                .rect(topLeadingRadius: 12, bottomLeadingRadius: 0,
+                      bottomTrailingRadius: 0, topTrailingRadius: 12)
+            )
+            .overlay(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 12, bottomLeadingRadius: 0,
+                    bottomTrailingRadius: 0, topTrailingRadius: 12
+                )
+                .strokeBorder(Color.borderColor, lineWidth: 0.5)
+            )
+            .background(Color.bgPrimary.opacity(0.8))
+            .padding(.horizontal, 12)
             .background(
                 GeometryReader { geo in
                     Color.clear.preference(
