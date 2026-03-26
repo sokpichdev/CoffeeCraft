@@ -30,6 +30,8 @@ class NotificationCoordinator: ObservableObject {
     @objc private func handleNavigateToOrder(_ notification: Notification) {
         guard let orderId = notification.userInfo?["orderId"] as? String else { return }
         AppLog.firestore.debug("🔔 NotificationCoordinator: Navigating to order: \(orderId)")
+        // NotificationCenter calls @objc selectors via the ObjC runtime, bypassing @MainActor
+        // isolation — explicitly marshal back to main thread for @Published mutations.
         Task { @MainActor in
             self.selectedOrderId = orderId
             self.shouldNavigateToOrders = true

@@ -18,6 +18,7 @@ enum FulfillmentMode {
 
 // MARK: - OrderEnvironment
 
+@MainActor
 final class OrderEnvironment: ObservableObject {
 
     static let shared = OrderEnvironment()

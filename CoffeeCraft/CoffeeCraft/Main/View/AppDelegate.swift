@@ -47,12 +47,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Persist the latest in-memory rider position before the OS may kill the app.
         // This is the primary flush trigger — fires reliably when user swipes app away.
-        OrderEnvironment.shared.flushAllActiveDeliveries()
+        Task { @MainActor in
+            OrderEnvironment.shared.flushAllActiveDeliveries()
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Secondary flush in case the app is force-quit without going to background first.
-        OrderEnvironment.shared.flushAllActiveDeliveries()
+        Task { @MainActor in
+            OrderEnvironment.shared.flushAllActiveDeliveries()
+        }
     }
     
     // MARK: - Notification Setup

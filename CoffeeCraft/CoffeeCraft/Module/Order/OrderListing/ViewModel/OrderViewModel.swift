@@ -223,7 +223,9 @@ class OrderViewModel: ObservableObject {
                         }
                         if newOrder.isDeliveryOrder,
                            OrderStatus.from(newOrder.status) == .onDelivery {
-                            OrderEnvironment.shared.activateDelivery(order: newOrder)
+                            Task { @MainActor in
+                                OrderEnvironment.shared.activateDelivery(order: newOrder)
+                            }
                             AppLog.order.debug("🛵 listener — activateDelivery for restored order: \(id)")
                         }
 
@@ -238,7 +240,9 @@ class OrderViewModel: ObservableObject {
 
                         if updated.isDeliveryOrder,
                            OrderStatus.from(updated.status) == .onDelivery {
-                            OrderEnvironment.shared.activateDelivery(order: updated)
+                            Task { @MainActor in
+                                OrderEnvironment.shared.activateDelivery(order: updated)
+                            }
                             AppLog.order.debug("🛵 listener — activateDelivery on status change: \(id)")
                         }
 
