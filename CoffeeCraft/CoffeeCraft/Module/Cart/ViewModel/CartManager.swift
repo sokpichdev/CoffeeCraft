@@ -80,7 +80,7 @@ class CartManager: ObservableObject {
             let data = try items.map { try Firestore.Encoder().encode($0) }
             db.collection(Firebase.Carts.collection).document(userId).setData([Firebase.Carts.items: data]) { [weak self] error in
                 guard self != nil else { return }
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     if let error = error {
                         AlertManager.shared.showError(message: error.localizedDescription)
                     } else {
@@ -89,9 +89,7 @@ class CartManager: ObservableObject {
                 }
             }
         } catch {
-            DispatchQueue.main.async {
-                AlertManager.shared.showError(title: "Encoding error", message: error.localizedDescription)
-            }
+            AlertManager.shared.showError(title: "Encoding error", message: error.localizedDescription)
         }
     }
 
@@ -101,8 +99,9 @@ class CartManager: ObservableObject {
             guard let data = snapshot?.data(), let itemData = data[Firebase.Carts.items] as? [[String: Any]] else { return }
             do {
                 let decoded = try itemData.map { try Firestore.Decoder().decode(CartItem.self, from: $0) }
-                DispatchQueue.main.async {
-                    self?.items = decoded; AppLog.printList(self?.items ?? [], label: "Fetched Carts")
+                Task { @MainActor in
+                    self?.items = decoded
+                    AppLog.printList(self?.items ?? [], label: "Fetched Carts")
                 }
             } catch { AppLog.firestore.error("Decoding error: \(error.localizedDescription)") }
         }
