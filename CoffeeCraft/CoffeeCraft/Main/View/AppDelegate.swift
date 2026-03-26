@@ -47,14 +47,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Persist the latest in-memory rider position before the OS may kill the app.
         // This is the primary flush trigger — fires reliably when user swipes app away.
-        Task { @MainActor in
+        // UIKit calls this on the main thread; assumeIsolated provides actor isolation
+        // proof to the compiler without any async scheduling.
+        MainActor.assumeIsolated {
             OrderEnvironment.shared.flushAllActiveDeliveries()
         }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Secondary flush in case the app is force-quit without going to background first.
-        Task { @MainActor in
+        // Must be synchronous — the OS may kill the process immediately after this returns.
+        MainActor.assumeIsolated {
             OrderEnvironment.shared.flushAllActiveDeliveries()
         }
     }
