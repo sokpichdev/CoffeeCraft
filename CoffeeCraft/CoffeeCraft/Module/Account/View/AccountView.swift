@@ -210,7 +210,6 @@ struct AccountView: View {
                         if userSession.isLoggedIn {
                             AllCardsView()
                                 .environmentObject(cardVM)
-                                .environmentObject(authVM)
                         } else {
                             AuthView().environmentObject(authVM)
                         }

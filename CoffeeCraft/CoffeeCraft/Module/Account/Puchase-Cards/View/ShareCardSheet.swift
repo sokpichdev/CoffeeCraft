@@ -8,11 +8,14 @@
 import SwiftUI
 
 struct ShareCardSheet: View {
-    @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var cardVM: CardViewModel
     @Environment(\.dismiss) private var dismiss
     
     let card: LoyaltyCard
+    
+    // Local form state — no longer coupled to AuthViewModel
+    @State private var email: String = ""
+    @State private var emailValidation = FieldValidation()
     
     @State private var isSharing = false
     @State private var shareError: String?
@@ -30,24 +33,22 @@ struct ShareCardSheet: View {
                         Text("Share with")
                             .font(.subheadline.weight(.medium))
                             .foregroundColor(.secondary)
-//                        CustomProductTextField(title: "Enter User ID", text: $enteredUserEmail, icon: "person.text.rectangle")
-//                            .disabled(isSharing)
-                        CustomTextField1(text: $authVM.email,
+                        CustomTextField1(text: $email,
                                          placeHolder: "Enter User Email",
                                          keyboardType: .emailAddress,
                                          fieldType: .email,
                                          isAutoCorrect: false, isStarMark: true,
                                          leadingIcon: .username,
                                          trailingView: EmptyView(),
-                                         isValidate: $authVM.emailValidation.isValid,
-                                         validateText: authVM.emailValidation.message,
+                                         isValidate: $emailValidation.isValid,
+                                         validateText: emailValidation.message,
                                          isAutoCapitalize: .none,
                                          onTextChange: { _ in
-                            authVM.validateEmail()
-                            if authVM.emailValidation.isValid {
+                            validateEmail()
+                            if emailValidation.isValid {
                                 Task {
                                     do {
-                                        foundUserId = try await cardVM.findUserId(byEmail: authVM.email) ?? ""
+                                        foundUserId = try await cardVM.findUserId(byEmail: email) ?? ""
                                     } catch {
                                         AppLog.firestore.error("Error finding user: \(error.localizedDescription)")
                                         foundUserId = ""
@@ -67,8 +68,8 @@ struct ShareCardSheet: View {
                     }
                     
                     // Share Button
-                    CustomCoffeeButton(title: "Share Card", isDisabled: !authVM.emailValidation.isValid || isSharing) {
-                        if authVM.emailValidation.isValid {
+                    CustomCoffeeButton(title: "Share Card", isDisabled: !emailValidation.isValid || isSharing) {
+                        if emailValidation.isValid {
                             shareCard(userID: foundUserId)
                         }
                     }
@@ -87,6 +88,16 @@ struct ShareCardSheet: View {
             }
         }
         .background(Color.bgPrimary)
+    }
+    
+    private func validateEmail() {
+        if email.isEmpty {
+            emailValidation = .init(isValid: false, message: "Email is required")
+        } else if !email.isValidEmail() {
+            emailValidation = .init(isValid: false, message: "Invalid email format")
+        } else {
+            emailValidation = .init()
+        }
     }
     
     private func shareCard(userID: String) {

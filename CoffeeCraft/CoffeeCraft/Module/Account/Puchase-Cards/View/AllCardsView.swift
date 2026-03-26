@@ -8,7 +8,6 @@ import SwiftUI
 
 struct AllCardsView: View {
     @EnvironmentObject var cardVM: CardViewModel
-    @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
     @State private var isNavigateToPurchaseCard = false
@@ -76,7 +75,6 @@ struct AllCardsView: View {
             if let card = selectedCardForSharing {
                 ShareCardSheet(card: card)
                     .environmentObject(cardVM)
-                    .environmentObject(authVM)
             }
         }
         .onChange(of: cardVM.activeCardNumber) { _, _ in

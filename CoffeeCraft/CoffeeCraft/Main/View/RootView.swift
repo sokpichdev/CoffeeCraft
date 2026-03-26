@@ -26,7 +26,7 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if authVM.isLoading {
+            if session.isRestoring {
                 CoffeeLoaderView()
             } else {
                 VStack(spacing: 0) {

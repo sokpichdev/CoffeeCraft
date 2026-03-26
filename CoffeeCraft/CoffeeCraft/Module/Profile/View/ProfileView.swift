@@ -124,7 +124,7 @@ struct ProfileView: View {
                              editType: .phone) {}
             DeviderInSectionView()
             
-            RowInProfileView(title: .constant(authVM.currentUser?.email ?? "-"),
+            RowInProfileView(title: .constant(UserSession.shared.currentUser?.email ?? "-"),
                              isEditing: isEditingBinding,
                              label: "Email",
                              systemImage: "envelope.fill",
@@ -133,7 +133,7 @@ struct ProfileView: View {
             
             RowInProfileView(title: $gender,
                              isEditing: isEditingBinding,
-                             previousTitle: authVM.currentUser?.gender ?? "-",
+                             previousTitle: UserSession.shared.currentUser?.gender ?? "-",
                              label: "Gender",
                              systemImage: "figure.stand",
                              editType: .dropDown) {
@@ -154,7 +154,7 @@ struct ProfileView: View {
             RowInProfileView(
                 title: .constant(dob.formatted(date: .long, time: .omitted)),
                 isEditing: isEditingBinding,
-                previousTitle: authVM.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-",
+                previousTitle: UserSession.shared.currentUser?.dateOfBirth?.formatted(date: .long, time: .omitted) ?? "-",
                 label: "Date of Birth",
                 systemImage: "calendar",
                 editType: .date
@@ -167,7 +167,7 @@ struct ProfileView: View {
             
             RowInProfileView(title: $city,
                              isEditing: isEditingBinding,
-                             previousTitle: authVM.currentUser?.city ?? "-",
+                             previousTitle: UserSession.shared.currentUser?.city ?? "-",
                              label: "City / Province",
                              systemImage: "mappin.circle.fill",
                              editType: .dropDown) {
@@ -216,7 +216,7 @@ struct ProfileView: View {
             }
             
             VStack(spacing: 6) {
-                Text(authVM.currentUser?.name ?? "User")
+                Text(UserSession.shared.currentUser?.name ?? "User")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.textPrimary)
@@ -231,7 +231,7 @@ struct ProfileView: View {
     }
     
     private func loadUserData() {
-        guard let user = authVM.currentUser else { return }
+        guard let user = UserSession.shared.currentUser else { return }
         name = user.name
         phone = user.phoneNumber ?? ""
         gender = user.gender ?? ""
@@ -250,7 +250,7 @@ struct ProfileView: View {
     }
     
     private func saveProfile() {
-        guard var user = authVM.currentUser else { return }
+        guard var user = UserSession.shared.currentUser else { return }
         isSaving = true
         
         user.name = name
