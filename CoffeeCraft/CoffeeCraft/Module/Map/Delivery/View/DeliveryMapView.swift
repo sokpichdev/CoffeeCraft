@@ -303,7 +303,8 @@ struct DeliveryMapView: View {
             cameraPosition = .region(region)
         }
         // Reset flag after animation so subsequent user interactions are detected
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+        Task {
+            try? await Task.sleep(for: .seconds(0.7))
             isAutoZooming = false
         }
     }
@@ -319,8 +320,13 @@ struct DeliveryMapView: View {
         }
         let lats = coords.map(\.latitude)
         let lngs = coords.map(\.longitude)
-        let minLat = lats.min()!, maxLat = lats.max()!
-        let minLng = lngs.min()!, maxLng = lngs.max()!
+        guard let minLat = lats.min(), let maxLat = lats.max(),
+              let minLng = lngs.min(), let maxLng = lngs.max() else {
+            return MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 11.5564, longitude: 104.9282),
+                latitudinalMeters: 1000, longitudinalMeters: 1000
+            )
+        }
         let center = CLLocationCoordinate2D(
             latitude: (minLat + maxLat) / 2,
             longitude: (minLng + maxLng) / 2
