@@ -12,7 +12,7 @@ struct RegisterView: View {
     @State private var appeared = false
     @Environment(\.dismiss) private var dismiss
     private var isDisabled: Bool {
-        authVM.isLoading || authVM.name.isEmpty || authVM.email.isEmpty || authVM.password.isEmpty
+        authVM.name.isEmpty || authVM.email.isEmpty || authVM.password.isEmpty
     }
 
     var body: some View {

@@ -17,6 +17,7 @@ struct ProductDetailView: View {
     var allProducts: [Product] = []
 
     @StateObject private var reviewVM = ReviewViewModel()
+    @StateObject private var authVM = AuthViewModel()
     @State private var showRatingSheet = false
     @State private var showRatingsReview = false
     @State private var showAuth = false
@@ -238,7 +239,7 @@ struct ProductDetailView: View {
             )
         }
         .navigationDestination(isPresented: $showAuth) {
-            AuthView().environmentObject(AuthViewModel())
+            AuthView().environmentObject(authVM)
         }
         .navigationDestination(item: $selectedRelated) { related in
             ProductDetailView(product: related, allProducts: allProducts)

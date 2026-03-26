@@ -9,6 +9,7 @@ import Combine
 import FirebaseCrashlytics
 import Foundation
 
+@MainActor
 class UserSession: ObservableObject {
     // MARK: - Singleton Instance
     static let shared = UserSession()
@@ -16,6 +17,8 @@ class UserSession: ObservableObject {
     // MARK: - Published Properties
     @Published var currentUser: User?
     @Published var isLoggedIn: Bool = false
+    /// True while the initial session restore is in progress (checked by RootView).
+    @Published var isRestoring: Bool = false
     
     // MARK: - Private Initializer
     private init() {

@@ -30,10 +30,7 @@ class AuthViewModel: ObservableObject {
     @Published var nameValidation = FieldValidation()
     
     // MARK: - UI State
-    @Published var isLoading = false
     @Published var errorMessage: String?
-
-    var currentUser: User? { UserSession.shared.currentUser }
 
     private let authRepo: AuthRepositoryProtocol
     private var fcmTokenObserver: NSObjectProtocol?
@@ -66,22 +63,26 @@ class AuthViewModel: ObservableObject {
             AppLog.auth.debug("👤 checkUser — session already active, skipping")
             return
         }
-        isLoading = true
+        Task { @MainActor in
+            UserSession.shared.isRestoring = true
+        }
         // FirebaseAuth.Auth.auth().currentUser is a fast local check — no Firestore call
         guard let uid = FirebaseAuth.Auth.auth().currentUser?.uid else {
             AppLog.auth.debug("👤 checkUser — no session, skipping")
-            isLoading = false
+            Task { @MainActor in
+                UserSession.shared.isRestoring = false
+            }
             return
         }
         AppLog.auth.debug("👤 checkUser — restoring session for uid: \(uid)")
         Task {
             do {
                 try await fetchUserData(uid: uid)
-                isLoading = false
+                UserSession.shared.isRestoring = false
                 // Re-hydrate any delivery sessions that were active before the app was closed
                 await DeliveryRestoreService.shared.restoreActiveDeliveries(for: uid)
             } catch {
-                isLoading = false
+                UserSession.shared.isRestoring = false
                 UserSession.shared.clearUser()
                 AlertManager.shared.showError(title: "Session Error", message: "Failed to load user data")
             }
@@ -146,7 +147,6 @@ class AuthViewModel: ObservableObject {
 
     func login(email: String, password: String) async -> Bool {
         AppLog.auth.debug("🔐 login — email: \(email)")
-        isLoading = true
         LoaderManager.shared.showLoading()
 
         do {
@@ -159,7 +159,6 @@ class AuthViewModel: ObservableObject {
             try await MinimumLoadingTime(2).waitIfNeeded()
 
             LoaderManager.shared.hideLoading()
-            isLoading = false
             AnalyticsService.shared.log(.login(method: "email"))
             AlertManager.shared.showSuccess(message: "Logged in successfully")
             // Re-hydrate any in-flight deliveries for this account
@@ -169,7 +168,6 @@ class AuthViewModel: ObservableObject {
             Crashlytics.crashlytics().record(error: error)
             AppLog.auth.error("❌ login failed: \(error.localizedDescription)")
             LoaderManager.shared.hideLoading()
-            isLoading = false
             AlertManager.shared.showError(title: "Login Error", message: error.localizedDescription)
             return false
         }

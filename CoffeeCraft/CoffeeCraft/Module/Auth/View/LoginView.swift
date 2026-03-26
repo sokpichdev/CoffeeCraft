@@ -13,7 +13,7 @@ struct LoginView: View {
     @State private var appeared = false
     @Environment(\.dismiss) private var dismiss
     private var isDisabled: Bool {
-        authVM.isLoading || authVM.email.isEmpty || authVM.password.isEmpty
+        authVM.email.isEmpty || authVM.password.isEmpty
     }
 
     var body: some View {

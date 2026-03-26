@@ -16,6 +16,7 @@ struct MenuView: View {
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var orderEnv: OrderEnvironment
+    @StateObject private var authVM = AuthViewModel()
     @State private var showAuth = false
     
     private struct EditTarget: Identifiable, Hashable {
@@ -139,7 +140,7 @@ struct MenuView: View {
                 .environmentObject(favVM)
         }
         .navigationDestination(isPresented: $showAuth) {
-            AuthView().environmentObject(AuthViewModel())
+            AuthView().environmentObject(authVM)
         }
         .navigationDestination(item: $editTarget) { target in
             handleNavigateToEditProduct(sectionId: target.sectionId, product: target.product)

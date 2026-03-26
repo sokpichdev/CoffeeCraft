@@ -11,6 +11,7 @@ struct HomeView: View {
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     @EnvironmentObject var walletVM: WalletViewModel
     @EnvironmentObject var cardVM: CardViewModel
+    @StateObject private var authVM = AuthViewModel()
     @Binding var selectedTab: Tab
     @State private var currentIndex: Int = 0
     private var bannerImages: [String] {
@@ -239,7 +240,7 @@ struct HomeView: View {
                         if UserSession.shared.isLoggedIn {
                             AnnouncementDetailView(announcement: ann)
                         } else {
-                            AuthView().environmentObject(AuthViewModel())
+                            AuthView().environmentObject(authVM)
                         }
                     } label: {
                         AnnouncementCardView(announcement: ann)
@@ -250,7 +251,7 @@ struct HomeView: View {
                     if UserSession.shared.isLoggedIn {
                         AnnouncementsListView().environmentObject(announcementVM)
                     } else {
-                        AuthView().environmentObject(AuthViewModel())
+                        AuthView().environmentObject(authVM)
                     }
                 } label: {
                     HStack(spacing: 6) {
