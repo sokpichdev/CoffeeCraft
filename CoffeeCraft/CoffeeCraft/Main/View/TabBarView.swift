@@ -46,7 +46,8 @@ private struct TabsLayoutView: View {
         var namespace: Namespace.ID
         @State private var selectedOffset: CGFloat = 0
         @State private var rotationAngle: CGFloat = 0
-        
+        @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
         var isSelected: Bool {
             selectedTab == tab
         }
@@ -55,13 +56,15 @@ private struct TabsLayoutView: View {
                 withAnimation(.easeInOut) {
                     selectedTab = tab
                 }
+                guard !reduceMotion else { return }
                 selectedOffset = -60
                 if tab < selectedTab {
                     rotationAngle += 360
                 } else {
                     rotationAngle -= 360
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                Task {
+                    try? await Task.sleep(for: .seconds(0.3))
                     selectedOffset = 0
                     if tab < selectedTab {
                         rotationAngle += 720
@@ -80,14 +83,14 @@ private struct TabsLayoutView: View {
                         Image(systemName: tab.icon)
                             .font(.title3.weight(.semibold))
                             .foregroundColor(isSelected ? tab.color : .primary.opacity(0.6))
-                            .rotationEffect(.degrees(rotationAngle))
+                            .rotationEffect(.degrees(reduceMotion ? 0 : rotationAngle))
                             .scaleEffect(isSelected ? 1 : 0.9)
-                            .animation(.easeInOut, value: rotationAngle)
+                            .animation(reduceMotion ? nil : .easeInOut, value: rotationAngle)
                             .opacity(isSelected ? 1 : 0.7)
                             .padding(.leading, isSelected ? 20 : 0)
                             .padding(.horizontal, selectedTab != tab ? 10 : 0)
-                            .offset(y: selectedOffset)
-                            .animation(.default, value: selectedOffset)
+                            .offset(y: reduceMotion ? 0 : selectedOffset)
+                            .animation(reduceMotion ? nil : .default, value: selectedOffset)
                         if isSelected {
                             Text(tab.title)
                                 .font(.title3.weight(.semibold))
@@ -99,6 +102,9 @@ private struct TabsLayoutView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(tab.title)
+            .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+            .accessibilityRemoveTraits(isSelected ? [] : [.isSelected])
         }
     }
 }

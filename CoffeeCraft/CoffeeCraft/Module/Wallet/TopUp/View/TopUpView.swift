@@ -63,6 +63,30 @@ struct TopUpView: View {
                     ) {
                         dismiss()
                     }
+                } else {
+                    VStack(spacing: 20) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 44, weight: .light))
+                            .foregroundColor(Color.textMuted)
+                        Text("Missing payment details.")
+                            .font(.subheadline)
+                            .foregroundColor(.textSecondary)
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                                currentStep = .amount
+                            }
+                        } label: {
+                            Text("Go Back")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 12)
+                                .background(Color.accentPrimary)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
         }

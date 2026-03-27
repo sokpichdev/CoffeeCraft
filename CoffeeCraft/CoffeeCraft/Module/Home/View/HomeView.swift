@@ -11,7 +11,7 @@ struct HomeView: View {
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     @EnvironmentObject var walletVM: WalletViewModel
     @EnvironmentObject var cardVM: CardViewModel
-    @StateObject private var authVM = AuthViewModel()
+    @EnvironmentObject var authVM: AuthViewModel
     @Binding var selectedTab: Tab
     @State private var currentIndex: Int = 0
     private var bannerImages: [String] {
@@ -121,6 +121,7 @@ struct HomeView: View {
                 HStack(spacing: 10) {
                     NavigationLink {
                         WalletView(showWallet: false)
+                            .environmentObject(walletVM)
                     } label: {
                         // CC Balance pill
                         HStack(spacing: 5) {
@@ -220,6 +221,28 @@ struct HomeView: View {
         }
     }
 
+    private var seeAllLabel: some View {
+        HStack(spacing: 6) {
+            Text("See All")
+                .font(.subheadline.weight(.semibold))
+            Image(systemName: "arrow.right")
+                .font(.subheadline.weight(.semibold))
+        }
+        .foregroundColor(Color.textPrimary)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(
+            Capsule()
+                .fill(Color.surfaceSub)
+        )
+        .overlay(
+            Capsule()
+                .stroke(Color.accentPrimary.opacity(0.5), lineWidth: 1)
+        )
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+    }
+
     private var announcementsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Announcements", icon: "megaphone.fill")
@@ -254,25 +277,7 @@ struct HomeView: View {
                         AuthView().environmentObject(authVM)
                     }
                 } label: {
-                    HStack(spacing: 6) {
-                        Text("See All")
-                            .font(.subheadline.weight(.semibold))
-                        Image(systemName: "arrow.right")
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    .foregroundColor(Color.textPrimary)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(
-                        Capsule()
-                            .fill(Color.surfaceSub)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(Color.accentPrimary.opacity(0.5), lineWidth: 1)
-                    )
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
+                    seeAllLabel
                 }
             }
         }
@@ -346,7 +351,7 @@ struct CozyOrderButton: View {
                 Group {
                     if isDisabled {
                         Text("Coming Soon")
-                            .font(.system(size: 9, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundColor(Color.accentPrimary)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
@@ -382,6 +387,7 @@ struct PageIndicator: View {
         .padding(.vertical, 7)
         .background(Capsule().fill(Color.textPrimary.opacity(0.3)))
         .colorScheme(.dark)
+        .accessibilityValue("Slide \(currentIndex + 1) of \(count)")
     }
 }
 

@@ -25,7 +25,7 @@ struct MenuItemRow: View {
             AsyncImageCard(imageURL: item.imageURL, height: 78, width: 78, corner: 12)
         }
         .padding(8)
-        .frame(height: 90)
+        .frame(minHeight: 90)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color.surfacePrimary)

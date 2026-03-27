@@ -37,34 +37,37 @@ struct CustomSegmentedControl<T: SegmentItem>: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(segments, id: \.self) { segment in
-                ZStack {
-                    if selectedSegment == segment {
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.85)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .matchedGeometryEffect(id: "SEGMENT_BG", in: animation)
-                            .frame(height: height)
-                    }
-
-                    Text(segment.title)
-                        .font(.subheadline)
-                        .fontWeight(selectedSegment == segment ? .semibold : .medium)
-                        .foregroundColor(selectedSegment == segment ? .white : Color.accentPrimary)
-                }
-                .frame(maxWidth: .infinity, minHeight: height)
-                .contentShape(Rectangle())
-                .onTapGesture {
+                Button(action: {
                     guard selectedSegment != segment else { return }
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         selectedSegment = segment
                     }
                     onClick()
+                }) {
+                    ZStack {
+                        if selectedSegment == segment {
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.85)],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .matchedGeometryEffect(id: "SEGMENT_BG", in: animation)
+                                .frame(height: height)
+                        }
+
+                        Text(segment.title)
+                            .font(.subheadline)
+                            .fontWeight(selectedSegment == segment ? .semibold : .medium)
+                            .foregroundColor(selectedSegment == segment ? .white : Color.accentPrimary)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: height)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selectedSegment == segment ? [.isSelected] : [])
             }
         }
         .padding(4)

@@ -9,7 +9,7 @@ import SwiftUI
 struct WalletView: View {
     var showWallet: Bool = true
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var vm = WalletViewModel()
+    @EnvironmentObject var vm: WalletViewModel
     @State private var showTopUp = false
 
     var body: some View {
@@ -48,10 +48,6 @@ struct WalletView: View {
         }
         .navigationDestination(isPresented: $showTopUp) {
             TopUpView(walletVM: vm)
-        }
-        .onAppear {
-            guard let userId = UserSession.shared.userId else { return }
-            vm.setup(userId: userId)
         }
     }
 

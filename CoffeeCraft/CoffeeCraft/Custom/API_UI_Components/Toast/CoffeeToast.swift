@@ -43,13 +43,14 @@ struct CoffeeToast: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            ZStack(alignment: .leading) {
-                // Background
-                RoundedRectangle(cornerRadius: 0)
-                    .fill(.ultraThinMaterial)
-                    .shadow(color: .black.opacity(0.1), radius: 12, y: 6)
-                
-                // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(.ultraThinMaterial)
+                        .shadow(color: .black.opacity(0.1), radius: 12, y: 6)
+
+                    // Progress bar
                     RoundedRectangle(cornerRadius: 0)
                         .fill(
                             LinearGradient(
@@ -58,7 +59,8 @@ struct CoffeeToast: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: (UIScreen.main.bounds.width - 32)  * progress)
+                        .frame(width: geometry.size.width * progress)
+                }
             }
         )
         .cornerRadius(20)

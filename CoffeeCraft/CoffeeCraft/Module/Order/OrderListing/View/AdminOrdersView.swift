@@ -14,6 +14,7 @@ struct AdminOrdersView: View {
     @State private var selectedTab: Segment = .activeOrders
     @State private var showWaitTimeEditor = false
     @State private var waitTimeBranch: Branch?
+    @State private var branches: [Branch] = []
 
     var body: some View {
         ZStack {
@@ -37,11 +38,19 @@ struct AdminOrdersView: View {
         }
         .customNavigationBar("Orders") {
             ToolBarButton(placement: .topBarTrailing, buttonType: .icon("clock.badge.fill")) {
-                waitTimeBranch = MockBranchData.all.first
+                waitTimeBranch = branches.first
                 showWaitTimeEditor = true
             }
         }
         .background(Color.bgSecondary)
+        .onAppear {
+            BranchRepository.shared.listen { updated in
+                branches = updated
+            }
+        }
+        .onDisappear {
+            BranchRepository.shared.stopListening()
+        }
         .sheet(isPresented: $showWaitTimeEditor) {
             if let branch = waitTimeBranch {
                 BranchWaitTimeEditor(branch: branch)
@@ -86,7 +95,7 @@ struct ActiveOrdersContent: View {
                         ForEach(Array(filteredOrders.enumerated()), id: \.element.id) { _, order in
                             OrderCardView(
                                 order: order,
-                                adminActions: { AnyView(AdminProgressButtons(order: order, vm: vm)) },
+                                adminActions: { AdminProgressButtons(order: order, vm: vm) },
                                 onNavigate: { selectedOrder = order }
                             )
                             .onAppear {
