@@ -148,11 +148,11 @@ class FavoriteViewModel: ObservableObject {
 
             favorites = snapshot.documents.compactMap { doc in
                 guard
-                    let productName = doc["productName"] as? String,
-                    let imageURL = doc["imageURL"] as? String,
-                    let basePrice = doc["basePrice"] as? Double,
-                    let customizations = doc["customizations"] as? [String: String],
-                    let customizationHash = doc["customizationHash"] as? String
+                    let productName = doc[Firebase.Users.Favorites.productName] as? String,
+                    let imageURL = doc[Firebase.Users.Favorites.imageURL] as? String,
+                    let basePrice = doc[Firebase.Users.Favorites.basePrice] as? Double,
+                    let customizations = doc[Firebase.Users.Favorites.customizations] as? [String: String],
+                    let customizationHash = doc[Firebase.Users.Favorites.customizationHash] as? String
                 else {
                     AppLog.menu.warning("⚠️ loadAllFavorites — skipped malformed doc: \(doc.documentID)")
                     return nil
@@ -160,7 +160,7 @@ class FavoriteViewModel: ObservableObject {
 
                 return FavoriteItem(
                     id: doc.documentID,
-                    productId: doc["productId"] as? String ?? "",
+                    productId: doc[Firebase.Users.Favorites.productId] as? String ?? "",
                     productName: productName,
                     imageURL: imageURL,
                     basePrice: basePrice,
