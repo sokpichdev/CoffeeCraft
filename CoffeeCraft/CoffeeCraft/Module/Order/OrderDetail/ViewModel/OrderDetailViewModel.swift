@@ -28,8 +28,10 @@ class OrderDetailViewModel: ObservableObject {
 
     deinit { orderListener?.remove() }
 
-    /// Cancels a Pending order and refunds wallet balance if it was wallet-paid.
-    /// Guard: only callable when status == .pending — enforced in UI and here.
+    /// Cancels a Pending order atomically using a Firestore transaction.
+    /// The transaction reads the current server-side status, marks the order
+    /// Cancelled, and issues a wallet refund ledger entry in a single atomic write —
+    /// preventing refund loss if the app is killed between the two operations.
     func cancelOrder() async {
         guard let orderId = order.id else { return }
         guard order.orderStatus == .pending else {
@@ -42,38 +44,59 @@ class OrderDetailViewModel: ObservableObject {
 
         AppLog.order.info("Cancelling order \(orderId) — payment: \(self.order.paymentMethod ?? "cash")")
 
+        let wasWalletPayment = order.wasWalletPayment
+        let userId = order.userId
+        let walletAmountPaid = order.walletAmountPaid ?? 0
+
         do {
-            // Step 1: Mark order Cancelled in Firestore
-            try await db.collection(Firebase.Orders.collection)
-                .document(orderId)
-                .updateData([Firebase.Orders.status: OrderStatus.cancelled.rawValue])
+            try await db.runTransaction { transaction, errorPointer in
+                // 1. Read current order status server-side (prevents stale local state)
+                let orderRef = self.db.collection(Firebase.Orders.collection).document(orderId)
+                let orderSnap: DocumentSnapshot
+                do {
+                    orderSnap = try transaction.getDocument(orderRef)
+                } catch let fetchError as NSError {
+                    errorPointer?.pointee = fetchError
+                    return nil
+                }
+                guard let currentStatus = orderSnap.data()?[Firebase.Orders.status] as? String,
+                      currentStatus == OrderStatus.pending.rawValue else {
+                    let err = NSError(domain: "CoffeeCraft", code: 409,
+                                      userInfo: [NSLocalizedDescriptionKey: "Order is no longer Pending and cannot be cancelled."])
+                    errorPointer?.pointee = err
+                    return nil
+                }
 
-            AppLog.order.debug("Order \(orderId) marked Cancelled")
+                // 2. Mark order Cancelled
+                transaction.updateData([Firebase.Orders.status: OrderStatus.cancelled.rawValue], forDocument: orderRef)
 
-            // Step 2: Refund wallet if this was wallet-paid
-            if order.wasWalletPayment,
-               let userId = order.userId,
-               let amount = order.walletAmountPaid,
-               amount > 0 {
+                // 3. Atomic wallet refund (if wallet-paid)
+                if wasWalletPayment, let uid = userId, walletAmountPaid > 0 {
+                    let walletRef = self.db.collection(Firebase.Wallets.collection).document(uid)
+                    transaction.updateData([Firebase.Wallets.balance: FieldValue.increment(walletAmountPaid)], forDocument: walletRef)
 
-                AppLog.order.info("Issuing refund: +\(amount.currencyFormatted) for orderId: \(orderId)")
+                    let txRef = self.db.collection(Firebase.WalletTransactions.collection).document()
+                    transaction.setData([
+                        Firebase.WalletTransactions.userId: uid,
+                        Firebase.WalletTransactions.amount: walletAmountPaid,
+                        Firebase.WalletTransactions.type: "refund",
+                        Firebase.WalletTransactions.orderId: orderId,
+                        Firebase.WalletTransactions.createdAt: Timestamp(date: Date())
+                    ], forDocument: txRef)
+                }
+                return nil
+            }
 
-                try await WalletService.shared.refund(
-                    userId: userId,
-                    amount: amount,
-                    orderId: orderId
-                )
+            AppLog.order.debug("Order \(orderId) cancelled atomically")
 
+            if wasWalletPayment, walletAmountPaid > 0 {
                 ToastManager.shared.showTop(
-                    message: "Order cancelled · +\(amount.currencyFormatted) refunded to wallet",
+                    message: "Order cancelled · +\(walletAmountPaid.currencyFormatted) refunded to wallet",
                     type: .success
                 )
             } else {
-                // Cash order — just confirm cancellation
                 ToastManager.shared.showTop(message: "Order cancelled", type: .success)
             }
-
-            // Real-time listener picks up the status change automatically
         } catch {
             AppLog.order.error("cancelOrder failed: \(error.localizedDescription)")
             AlertManager.shared.showError(
