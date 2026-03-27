@@ -274,22 +274,28 @@ final class MapViewModel: NSObject {
 extension MapViewModel: CLLocationManagerDelegate {
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        authorizationStatus = manager.authorizationStatus
-        if isPermissionGranted { manager.startUpdatingLocation() }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            authorizationStatus = manager.authorizationStatus
+            if isPermissionGranted { manager.startUpdatingLocation() }
+        }
     }
 
     func locationManager(_ manager: CLLocationManager,
                          didUpdateLocations locations: [CLLocation]) {
-        guard let latest = locations.last else { return }
-        userLocation = latest
-        guard !hasInitiallyLocated else { return }
-        hasInitiallyLocated = true
-        withAnimation {
-            cameraPosition = .region(MKCoordinateRegion(
-                center: latest.coordinate,
-                latitudinalMeters: 1_000,
-                longitudinalMeters: 1_000
-            ))
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard let latest = locations.last else { return }
+            userLocation = latest
+            guard !hasInitiallyLocated else { return }
+            hasInitiallyLocated = true
+            withAnimation {
+                cameraPosition = .region(MKCoordinateRegion(
+                    center: latest.coordinate,
+                    latitudinalMeters: 1_000,
+                    longitudinalMeters: 1_000
+                ))
+            }
         }
     }
 
