@@ -71,7 +71,7 @@ final class SalesAnalyticsViewModel: ObservableObject {
                 type: .error,
                 confirmTitle: "Retry",
                 cancelTitle: "Dismiss",
-                onConfirm: { Task { await self.loadAnalytics() } }
+                onConfirm: { [weak self] in Task { await self?.loadAnalytics() } }
             )
             AppLog.dashboard.error("SalesAnalyticsViewModel \(error.localizedDescription)")
         }
