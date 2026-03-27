@@ -155,7 +155,8 @@ struct OrdersView: View {
         if orderVM.orders.contains(where: { $0.id == orderId }) {
             navigateToLinkedOrder(orderId: orderId)
         } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
                 navigateToLinkedOrder(orderId: orderId)
             }
         }
