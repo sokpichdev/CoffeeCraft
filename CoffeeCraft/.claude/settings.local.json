@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcodebuild test:*)",
+      "Bash(swift -e 'print\\(#filePath\\)')",
+      "Bash(grep -n \"class NetworkMonitor\\\\|struct NetworkMonitor\\\\|final class NetworkMonitor\" /Users/iosdev/Desktop/Git/CoffeeCraft/CoffeeCraft/CoffeeCraft/Module/Notification/*.swift /Users/iosdev/Desktop/Git/CoffeeCraft/CoffeeCraft/CoffeeCraft/Utility/*.swift /Users/iosdev/Desktop/Git/CoffeeCraft/CoffeeCraft/CoffeeCraft/Network/*.swift)",
+      "Bash(xcrun xcresulttool:*)"
+    ]
+  }
+}
