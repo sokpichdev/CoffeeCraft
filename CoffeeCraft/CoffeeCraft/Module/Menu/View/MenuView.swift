@@ -120,7 +120,8 @@ struct MenuView: View {
                 // view goes stale. Set pendingFulfillmentBranch after the dismiss
                 // animation so sheet(item:) doesn't fire while showBranchSheet is still true.
                 let capturedBranch = branch
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(550))
                     pendingFulfillmentBranch = capturedBranch
                 }
             })
