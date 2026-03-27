@@ -168,6 +168,8 @@ enum Firebase {
         static let description   = "description"
         static let timestamp     = "timestamp"
         static let referenceId   = "referenceId"
+        static let orderId       = "orderId"
+        static let createdAt     = "createdAt"
     }
 
     // MARK: - loyalty_cards
