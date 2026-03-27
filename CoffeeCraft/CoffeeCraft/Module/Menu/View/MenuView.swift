@@ -16,7 +16,7 @@ struct MenuView: View {
     @EnvironmentObject var cardVM: CardViewModel
     @EnvironmentObject var favVM: FavoriteViewModel
     @EnvironmentObject var orderEnv: OrderEnvironment
-    @StateObject private var authVM = AuthViewModel()
+    @EnvironmentObject var authVM: AuthViewModel
     @State private var showAuth = false
     
     private struct EditTarget: Identifiable, Hashable {
