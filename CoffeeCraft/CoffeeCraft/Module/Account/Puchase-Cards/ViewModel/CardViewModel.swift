@@ -170,7 +170,7 @@ class CardViewModel: ObservableObject {
         }
         
         try await db.collection(Firebase.Users.collection).document(userId).updateData([
-            "accessibleCards": FieldValue.arrayUnion([cleanCardNumber])
+            Firebase.Users.accessibleCards: FieldValue.arrayUnion([cleanCardNumber])
         ])
         
         AppLog.firestore.debug("✅ Card added to accessibleCards: \(cleanCardNumber)")
@@ -232,7 +232,7 @@ class CardViewModel: ObservableObject {
         AppLog.firestore.debug("🃏 setActiveCard — setting \(card.cardNumber) as active for uid: \(userId)")
         
         isLoading = true
-        defer { Task { @MainActor in isLoading = false } }
+        defer { isLoading = false }
         
         try await db.collection(Firebase.Users.collection).document(userId).updateData([
             Firebase.Users.activeCard: card.cardNumber
