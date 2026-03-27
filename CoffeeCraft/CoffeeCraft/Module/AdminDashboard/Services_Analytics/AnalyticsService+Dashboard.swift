@@ -81,25 +81,28 @@ extension AnalyticsService {
         let todayStart = Calendar.current.startOfDay(for: now)
         let yesterdayStart = Calendar.current.date(byAdding: .day, value: -1, to: todayStart)!
 
-        async let todaySnap = db.collection(Firebase.Orders.collection)
+        async let todayAgg = db.collection(Firebase.Orders.collection)
             .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: todayStart))
-            .getDocuments()
+            .count
+            .getAggregation(source: .server)
 
-        async let yesterdaySnap = db.collection(Firebase.Orders.collection)
+        async let yesterdayAgg = db.collection(Firebase.Orders.collection)
             .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: yesterdayStart))
             .whereField(Firebase.Orders.timestamp, isLessThan: Timestamp(date: todayStart))
-            .getDocuments()
+            .count
+            .getAggregation(source: .server)
 
-        async let activeSnap = db.collection(Firebase.Orders.collection)
+        async let activeAgg = db.collection(Firebase.Orders.collection)
             .whereField(Firebase.Orders.status, in: OrderStatus.activeRawValues)
-            .getDocuments()
+            .count
+            .getAggregation(source: .server)
 
-        let (today, yesterday, active) = try await (todaySnap, yesterdaySnap, activeSnap)
+        let (today, yesterday, active) = try await (todayAgg, yesterdayAgg, activeAgg)
 
         return OrderSummary(
-            todayCount: today.documents.count,
-            yesterdayCount: yesterday.documents.count,
-            activeCount: active.documents.count
+            todayCount: Int(truncating: today.count),
+            yesterdayCount: Int(truncating: yesterday.count),
+            activeCount: Int(truncating: active.count)
         )
     }
 
