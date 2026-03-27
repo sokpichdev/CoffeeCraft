@@ -13,6 +13,7 @@ import SwiftUI
 
 // MARK: - MapViewModel
 
+@MainActor
 @Observable
 final class MapViewModel: NSObject {
 
@@ -151,7 +152,7 @@ final class MapViewModel: NSObject {
         isOffline = !NetworkMonitor.shared.isConnected
         BranchRepository.shared.listen { [weak self] updatedBranches in
             guard let self else { return }
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.branches  = updatedBranches
                 self.isOffline = !NetworkMonitor.shared.isConnected
             }
