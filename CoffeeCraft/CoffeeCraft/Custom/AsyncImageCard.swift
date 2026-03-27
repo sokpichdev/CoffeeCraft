@@ -14,6 +14,7 @@ struct AsyncImageCard: View {
     let height: CGFloat
     let width: CGFloat
     var corner: CGFloat = 15
+    var accessibilityLabel: String? = nil
     
     @State private var isURLValid: Bool = false
     private var iconSize: CGFloat { height * 0.35 }
@@ -51,6 +52,8 @@ struct AsyncImageCard: View {
                     .frame(maxWidth: width)
                     .clipped()
                     .cornerRadius(corner)
+                    .accessibilityHidden(accessibilityLabel == nil)
+                    .accessibilityLabel(accessibilityLabel ?? "")
             }
         }
         .frame(height: height)

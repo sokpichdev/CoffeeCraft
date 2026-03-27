@@ -6,9 +6,9 @@
 //
 import SwiftUI
 
-struct OrderCardView: View {
+struct OrderCardView<AdminContent: View>: View {
     let order: Order
-    var adminActions: (() -> AnyView)?
+    var adminActions: (() -> AdminContent)?
     var onNavigate: (() -> Void)?
     var onTrackDelivery: (() -> Void)?
     var onReorder: (() -> Void)?
@@ -17,27 +17,27 @@ struct OrderCardView: View {
     /// as soon as DeliveryRestoreService re-hydrates sessions on app relaunch,
     /// without requiring the user to navigate away and back.
     @ObservedObject private var orderEnv = OrderEnvironment.shared
-    
+
     /// Number of items to show in the preview stack before the +N badge
     private let previewDisplayCount: Int = 5
-    
+
     @State private var isExpanded: Bool = false
     @Namespace private var animationNamespace
-    
+
     // Pre-compute values to avoid recalculation during body
     private let formattedOrderNumber: String
     private let statusColorValue: Color
     private var items: [CartItemData] { (order.items ?? []).compactMap { $0 } }
     private var itemCount: Int { items.count }
     private var overflowCount: Int { max(0, items.count - previewDisplayCount) }
-    
+
     private var isCompleted: Bool {
         let status = order.status?.lowercased() ?? ""
         return status == "completed" || status == "done"
     }
 
     init(order: Order,
-         adminActions: (() -> AnyView)? = nil,
+         @ViewBuilder adminActions: @escaping () -> AdminContent,
          onNavigate: (() -> Void)? = nil,
          onTrackDelivery: (() -> Void)? = nil,
          onReorder: (() -> Void)? = nil) {
@@ -47,7 +47,6 @@ struct OrderCardView: View {
         self.onTrackDelivery = onTrackDelivery
         self.onReorder = onReorder
         self.formattedOrderNumber = String(format: "%04d", order.orderId ?? 0)
-        // Colour resolved from the shared enum — no local switch needed.
         self.statusColorValue = order.orderStatus.color
     }
 
@@ -55,11 +54,11 @@ struct OrderCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             headerSection
             itemsPreviewSection
-            
+
             if isExpanded {
                 detailedItemsSection
             }
-            
+
             // Live delivery banner — only when this card's order is actively being delivered.
             // Uses orderEnv (the @ObservedObject) so SwiftUI re-renders this card
             // when DeliveryRestoreService populates activeDeliveryVMs on relaunch.
@@ -88,8 +87,7 @@ struct OrderCardView: View {
         .onTapGesture {
             onNavigate?()
         }
-        // Prevent animation from affecting scroll performance
-        .drawingGroup(opaque: false)
+        .compositingGroup()
     }
 
     private var headerSection: some View {
@@ -101,7 +99,7 @@ struct OrderCardView: View {
                     .fontDesign(.rounded)
                     .frame(height: 16)
                     .foregroundColor(.textPrimary)
-                
+
                 if let date = order.timestamp {
                     Text(date.formatted(date: .abbreviated, time: .shortened))
                         .font(.caption)
@@ -125,10 +123,8 @@ struct OrderCardView: View {
 
     private var itemsPreviewSection: some View {
         HStack(spacing: 12) {
-            // Stacked thumbnails area - shows either stack or expands into spacer
             ZStack(alignment: .leading) {
                 if !isExpanded {
-                    // Visible preview items (first N items)
                     ForEach(Array(items.suffix(previewDisplayCount).enumerated()), id: \.offset) { index, item in
                         FlyingThumbnail(
                             url: item.imageURL ?? "",
@@ -139,8 +135,7 @@ struct OrderCardView: View {
                         .offset(x: CGFloat(index * 20))
                         .zIndex(Double(index))
                     }
-                    
-                    // Overflow items stacked at badge position (invisible but for matched geometry)
+
                     if overflowCount > 0 {
                         let overflowItems = Array(items.dropFirst(previewDisplayCount).enumerated())
                         ForEach(overflowItems, id: \.offset) { index, item in
@@ -152,14 +147,13 @@ struct OrderCardView: View {
                                 isCircle: true
                             )
                             .offset(
-                                x: CGFloat(previewDisplayCount - 1) * 20, // Position at last visible item
-                                y: CGFloat(index * 2) // Slight vertical offset to prevent z-fighting
+                                x: CGFloat(previewDisplayCount - 1) * 20,
+                                y: CGFloat(index * 2)
                             )
                             .zIndex(Double(previewDisplayCount + index))
-                            .opacity(0) // Invisible but participates in animation
+                            .opacity(0)
                         }
-                        
-                        // Count badge on top
+
                         OverflowBadge(count: overflowCount)
                             .offset(x: CGFloat(previewDisplayCount - 1) * 20)
                             .zIndex(100)
@@ -179,7 +173,7 @@ struct OrderCardView: View {
                     Text(isExpanded ? "Less" : "Details")
                         .font(.caption)
                         .fontWeight(.medium)
-                    
+
                     Image(systemName: "chevron.down")
                         .font(.system(size: 12, weight: .semibold))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
@@ -241,6 +235,23 @@ struct OrderCardView: View {
     }
 }
 
+// MARK: - No-admin convenience init
+
+extension OrderCardView where AdminContent == EmptyView {
+    init(order: Order,
+         onNavigate: (() -> Void)? = nil,
+         onTrackDelivery: (() -> Void)? = nil,
+         onReorder: (() -> Void)? = nil) {
+        self.order = order
+        self.adminActions = nil
+        self.onNavigate = onNavigate
+        self.onTrackDelivery = onTrackDelivery
+        self.onReorder = onReorder
+        self.formattedOrderNumber = String(format: "%04d", order.orderId ?? 0)
+        self.statusColorValue = order.orderStatus.color
+    }
+}
+
 // MARK: - Detail Item Row (all items use matched geometry)
 struct DetailItemRow: View {
     let item: CartItemData
@@ -287,7 +298,7 @@ struct DetailItemRow: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        
+
         if index < totalItems - 1 {
             Divider().padding(.horizontal)
         }
@@ -312,7 +323,7 @@ struct FlyingThumbnail: View {
     let url: String
     let index: Int
     var namespace: Namespace.ID
-    
+
     var size: CGFloat = 32
     var cornerRadius: CGFloat = 16
     var isCircle: Bool = false
@@ -334,7 +345,7 @@ struct CachedThumbnail: View {
     var size: CGFloat = 32
     var cornerRadius: CGFloat = 16
     var isCircle: Bool = false
-    
+
     var body: some View {
         AsyncImageCard(
             imageURL: url,

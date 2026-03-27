@@ -28,21 +28,22 @@ extension MaterialTextFeild {
     // MARK: - UITextField Layout Overrides
     override public func textRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.textRect(forBounds: bounds)
-//        let rightViewWidth = rightView?.frame.width ?? 0
         return CGRect(
-            x: leftView == nil ? leftPadding : leftPaddingWithImage,
+            x: leftPaddingWithImage,
             y: superRect.origin.y,
-            width: UIScreen.main.bounds.width - 32 - leftPaddingWithImage - 60,
+            width: bounds.width - leftPaddingWithImage - 60,
             height: superRect.height
         )
     }
-    
+
     override public func editingRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.editingRect(forBounds: bounds)
-        return CGRect(x: leftView == nil ? leftPadding : leftPaddingWithImage,
-                      y: superRect.origin.y,
-                      width: UIScreen.main.bounds.width - 32 - leftPaddingWithImage - 60,
-                      height: superRect.height)
+        return CGRect(
+            x: leftPaddingWithImage,
+            y: superRect.origin.y,
+            width: bounds.width - leftPaddingWithImage - 60,
+            height: superRect.height
+        )
     }
     
     override public func leftViewRect(forBounds bounds: CGRect) -> CGRect {
@@ -217,9 +218,8 @@ public class MaterialTextFeild: UITextField {
     private var starFrame = CGRect.zero
     
     // MARK: - Constants
-    
+
     private let animationDuration: TimeInterval = 0.15
-    private let leftPadding: CGFloat = 117
     private var rightPadding: CGFloat = 0
     private let clearButtonSideLength: CGFloat = 24
     private let floatingLabelOutlineSidePadding: CGFloat = 4
@@ -298,7 +298,7 @@ public class MaterialTextFeild: UITextField {
         let size = floatingLabelSize(with: label.text ?? "", maxWidth: maxWidth, font: normalFont)
         let starSize = floatingLabelSize(with: "*", maxWidth: maxWidth, font: normalFont)
         let originY = rect.midY - (0.5 * size.height)
-        return CGRect(x: leftView == nil ? size.width+117 : size.width+leftPaddingWithImage,
+        return CGRect(x: size.width + leftPaddingWithImage,
                       y: originY, width: starSize.width, height: starSize.height)
     }
     
@@ -474,22 +474,34 @@ class Dimens {
     static let mediumPadding: CGFloat = 12
     static let largePadding: CGFloat = 16
     static let extraLargePadding: CGFloat = 20
-    
+
     static let cornerRadius: CGFloat = 16
     static let largeCornerRadius: CGFloat = 16
-    
-    static let gaps: CGFloat = 10
-    
-    static let niuniuDealerCardHeight = ((((UIScreen.screenWidth - 32 ) / 2) - 20) / 10) * 4
-    static let niuniucardHeight = ((UIScreen.screenWidth - 60) / 10) * 4
-    static let lightNiuCardHeight = ((UIScreen.screenWidth - 60) / 24) * 6 + 30
-    static let bigRoadMapCardHeight = ((UIScreen.screenWidth - 60) / 16) * 6
-    static let dealerCardHeight = ((((UIScreen.screenWidth - 32) / 2) - 20) / 16) * 6
-    static let lightCardHeight = ((((UIScreen.screenWidth - 78) / 2)) / 7) * 6
-}
 
-extension UIScreen {
-   static let screenWidth = UIScreen.main.bounds.size.width
-   static let screenHeight = UIScreen.main.bounds.size.height
-   static let screenSize = UIScreen.main.bounds.size
+    static let gaps: CGFloat = 10
+
+    static var niuniuDealerCardHeight: CGFloat {
+        let width = UIScreen.main.bounds.size.width
+        return ((((width - 32) / 2) - 20) / 10) * 4
+    }
+    static var niuniucardHeight: CGFloat {
+        let width = UIScreen.main.bounds.size.width
+        return ((width - 60) / 10) * 4
+    }
+    static var lightNiuCardHeight: CGFloat {
+        let width = UIScreen.main.bounds.size.width
+        return ((width - 60) / 24) * 6 + 30
+    }
+    static var bigRoadMapCardHeight: CGFloat {
+        let width = UIScreen.main.bounds.size.width
+        return ((width - 60) / 16) * 6
+    }
+    static var dealerCardHeight: CGFloat {
+        let width = UIScreen.main.bounds.size.width
+        return ((((width - 32) / 2) - 20) / 16) * 6
+    }
+    static var lightCardHeight: CGFloat {
+        let width = UIScreen.main.bounds.size.width
+        return ((((width - 78) / 2)) / 7) * 6
+    }
 }

@@ -4,6 +4,7 @@
 //
 //  Created by Sok Pich on 12/13/25.
 //
+import FirebaseAuth
 import SwiftUI
 
 struct ForgotPasswordView: View {
@@ -59,7 +60,7 @@ struct ForgotPasswordView: View {
                         onBack()
                     } catch {
                         LoaderManager.shared.hideLoading()
-                        AlertManager.shared.showError(title: "Error", message: error.localizedDescription)
+                        AlertManager.shared.showError(title: "Error", message: friendlyAuthMessage(from: error))
                     }
                     isSending = false
                 }
@@ -86,5 +87,21 @@ struct ForgotPasswordView: View {
         .offset(y: appeared ? 0 : 20)
         .opacity(appeared ? 1 : 0)
         .onAppear { appeared = true }
+    }
+
+    private func friendlyAuthMessage(from error: Error) -> String {
+        guard let code = AuthErrorCode(rawValue: (error as NSError).code) else {
+            return "Something went wrong. Please try again."
+        }
+        switch code {
+        case .userNotFound:
+            return "No account found with that email."
+        case .invalidEmail:
+            return "Please enter a valid email address."
+        case .networkError:
+            return "Connection error. Please check your internet and try again."
+        default:
+            return "Something went wrong. Please try again."
+        }
     }
 }

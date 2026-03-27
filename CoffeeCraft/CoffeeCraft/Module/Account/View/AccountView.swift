@@ -15,6 +15,7 @@ struct AccountView: View {
     @EnvironmentObject var walletVM: WalletViewModel
 
     @EnvironmentObject var userSession: UserSession
+    @Binding var selectedTab: Tab
     @State var isOpenAddCard: Bool = false
 
     // Navigation state
@@ -84,6 +85,7 @@ struct AccountView: View {
         }
         .navigationDestination(isPresented: $showWallet) {
             WalletView()
+                .environmentObject(walletVM)
         }
         .navigationDestination(isPresented: $showInbox) {
             InboxView().environmentObject(inboxVM)
@@ -92,7 +94,7 @@ struct AccountView: View {
             ColorThemePickerView()
         }
         .navigationDestination(isPresented: $showFavorites) {
-            FavoriteView().environmentObject(favVM)
+            FavoriteView(selectedTab: $selectedTab).environmentObject(favVM)
         }
         .navigationDestination(isPresented: $showAnnouncements) {
             AnnouncementsListView().environmentObject(announcementVM)
@@ -168,7 +170,11 @@ struct AccountView: View {
     var walletSection: some View {
         SettingsSection(title: "My Wallet", icon: "creditcard.fill") {
             RowInSectionView(label: walletVM.formattedBalance, title: "Wallet", systemImage: "creditcard.fill") {
-                showWallet = true
+                if userSession.isLoggedIn {
+                    showWallet = true
+                } else {
+                    showAuth = true
+                }
             }
         }
     }
@@ -295,7 +301,11 @@ struct AccountView: View {
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Color Theme", systemImage: "paintpalette.fill") {
-                showColorTheme = true
+                if userSession.isLoggedIn {
+                    showColorTheme = true
+                } else {
+                    showAuth = true
+                }
             }
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Personalization", systemImage: "slider.horizontal.3")
@@ -316,7 +326,7 @@ struct AccountView: View {
                 }
             }
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Vouchers", systemImage: "ticket.fill", badgeCount: 2)
+            RowInSectionView(title: "Vouchers", systemImage: "ticket.fill")
         }
     }
     
@@ -444,20 +454,23 @@ struct SocialMediaButton: View {
     let url: String
 
     var body: some View {
-        Button {
-            openURL()
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(Color.surfacePrimary)
-                    .frame(width: 44, height: 44)
-                
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundColor(Color.textSecondary)
+        if !url.isEmpty {
+            Button {
+                openURL()
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color.surfacePrimary)
+                        .frame(width: 44, height: 44)
+
+                    Image(systemName: icon)
+                        .font(.headline)
+                        .foregroundColor(Color.textSecondary)
+                }
             }
         }
     }
+
     private func openURL() {
         guard let url = URL(string: url) else { return }
         UIApplication.shared.open(url)

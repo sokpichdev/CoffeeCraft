@@ -201,52 +201,38 @@ struct AdminDashboardHomeView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
                       spacing: 12) {
                 // Sales
-                quickNavCell(
-                    title: "Sales",
-                    subtitle: "Trends",
-                    icon: "chart.xyaxis.line",
-                    color: .accentPrimary,
-                    destination: AnyView(SalesAnalyticsView())
-                )
+                quickNavCell(title: "Sales", subtitle: "Trends",
+                             icon: "chart.xyaxis.line", color: .accentPrimary) {
+                    SalesAnalyticsView()
+                }
                 // Products
-                quickNavCell(
-                    title: "Products",
-                    subtitle: "Top sellers",
-                    icon: "trophy.fill",
-                    color: .accentGold,
-                    destination: AnyView(ProductPerformanceView())
-                )
+                quickNavCell(title: "Products", subtitle: "Top sellers",
+                             icon: "trophy.fill", color: .accentGold) {
+                    ProductPerformanceView()
+                }
                 // Orders
-                quickNavCell(
-                    title: "Orders",
-                    subtitle: "Queue",
-                    icon: "bag.fill",
-                    color: .orange,
-                    destination: AnyView(OrderAnalyticsDashboardView())
-                )
+                quickNavCell(title: "Orders", subtitle: "Queue",
+                             icon: "bag.fill", color: .orange) {
+                    OrderAnalyticsDashboardView()
+                }
                 // Users
-                quickNavCell(
-                    title: "Users",
-                    subtitle: "Accounts",
-                    icon: "person.2.fill",
-                    color: .blue,
-                    destination: AnyView(UserManagementView())
-                )
+                quickNavCell(title: "Users", subtitle: "Accounts",
+                             icon: "person.2.fill", color: .blue) {
+                    UserManagementView()
+                }
                 // Reviews
-                quickNavCell(
-                    title: "Reviews",
-                    subtitle: "Moderate",
-                    icon: "bubble.left.and.bubble.right.fill",
-                    color: Color.semanticSuccess,
-                    destination: AnyView(ReviewModerationDashboardView())
-                )
+                quickNavCell(title: "Reviews", subtitle: "Moderate",
+                             icon: "bubble.left.and.bubble.right.fill", color: Color.semanticSuccess) {
+                    ReviewModerationDashboardView()
+                }
             }
         }
     }
 
-    private func quickNavCell(title: String, subtitle: String, icon: String,
-                              color: Color, destination: AnyView) -> some View {
-        NavigationLink(destination: destination) {
+    private func quickNavCell<Destination: View>(title: String, subtitle: String, icon: String,
+                                                color: Color,
+                                                @ViewBuilder destination: () -> Destination) -> some View {
+        NavigationLink(destination: destination()) {
             VStack(spacing: 8) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)

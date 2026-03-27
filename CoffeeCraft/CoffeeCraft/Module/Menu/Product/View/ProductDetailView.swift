@@ -19,6 +19,7 @@ struct ProductDetailView: View {
     @StateObject private var reviewVM = ReviewViewModel()
     @StateObject private var authVM = AuthViewModel()
     @State private var showRatingSheet = false
+    @State private var ratingTask: Task<Void, Never>?
     @State private var showRatingsReview = false
     @State private var showAuth = false
     @State private var selectedRelated: Product?
@@ -187,7 +188,10 @@ struct ProductDetailView: View {
         .task(id: product.id) {
             await reviewVM.loadInitialState(productId: product.id)
         }
-        .onDisappear { favVM.resetFavoriteState() }
+        .onDisappear {
+            favVM.resetFavoriteState()
+            ratingTask?.cancel()
+        }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showRatingSheet) {
             RatingInputSheet(
@@ -227,7 +231,8 @@ struct ProductDetailView: View {
                 vm: reviewVM,
                 product: product,
                 onWriteReview: {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    ratingTask = Task {
+                        try? await Task.sleep(for: .seconds(0.35))
                         reviewVM.prepareForEditing(
                             existingReview: reviewVM.reviews.first {
                                 $0.userId == UserSession.shared.userId
@@ -239,7 +244,7 @@ struct ProductDetailView: View {
             )
         }
         .navigationDestination(isPresented: $showAuth) {
-            AuthView().environmentObject(authVM)
+            AuthView().environmentObject(AuthViewModel())
         }
         .navigationDestination(item: $selectedRelated) { related in
             ProductDetailView(product: related, allProducts: allProducts)

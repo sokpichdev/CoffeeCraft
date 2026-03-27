@@ -258,6 +258,7 @@ struct CartBranchInfoCard: View {
                     Circle()
                         .fill(branch.isOpen ? Color.semanticSuccess : Color.semanticError)
                         .frame(width: 7, height: 7)
+                        .accessibilityHidden(true)
                     Text(branch.isOpen ? "Open" : "Closed")
                         .font(.custom("Nunito-SemiBold", size: 12))
                         .foregroundColor(branch.isOpen ? .semanticSuccess : .semanticError)

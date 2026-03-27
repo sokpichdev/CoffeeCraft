@@ -17,13 +17,15 @@ struct CoffeeAlertView: View {
     
     var body: some View {
         ZStack {
-            // Backdrop - tappable to dismiss
+            // Backdrop - tappable to dismiss only for single-button informational alerts
             Rectangle()
                 .fill(.black.opacity(0.8))
                 .ignoresSafeArea()
                 .opacity(opacity)
                 .onTapGesture {
-                    dismissAlert()
+                    if !alertModel.hasTwoButtons {
+                        dismissAlert()
+                    }
                 }
             
             VStack(spacing: 20) {

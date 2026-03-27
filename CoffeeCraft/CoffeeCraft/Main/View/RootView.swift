@@ -66,7 +66,7 @@ struct RootView: View {
                                     .environmentObject(coordinator)
                             }
                         case .profile:
-                            AccountView()
+                            AccountView(selectedTab: $selectedTab)
                                 .environmentObject(favVM)
                                 .environmentObject(announcementVM)
                                 .environmentObject(authVM)
