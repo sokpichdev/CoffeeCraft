@@ -6,6 +6,7 @@
 //
 
 @testable import CoffeeCraft
+import FirebaseFirestore
 //
 //  DeliveryPhase4Tests.swift
 //  CoffeeCraftTests
@@ -34,7 +35,7 @@
 //    straight-line logic is verified through direct method calls.
 //  • MainActor isolation — @Observable ViewModel tests run on @MainActor.
 //  • No mocking framework — pure XCTest + CoreLocation.
-// import CoreLocation
+import CoreLocation
 import XCTest
 
 // MARK: - Shared test fixtures
@@ -148,7 +149,21 @@ final class DeliverySessionTests: XCTestCase {
         original.riderPhone       = "+855 12 345 678"
         original.estimatedArrival = Date(timeIntervalSinceNow: 600)
 
-        let dict    = original.asFirestoreData()
+        // asFirestoreData() intentionally omits riderLatitude/riderLongitude —
+        // those are written separately by DeliveryViewModel.writeRiderPosition().
+        // A real Firestore snapshot always contains them, so we merge them in here
+        // to replicate what init?(firestoreData:) would actually receive at runtime.
+        //
+        // asFirestoreData() also stores Date objects directly.  In production
+        // Firestore converts these to Timestamp on write and returns Timestamp on
+        // read.  init?(firestoreData:) only handles the Timestamp path, so we must
+        // replace any Date values with Timestamp to simulate the Firestore read path.
+        var dict = original.asFirestoreData()
+        dict["riderLatitude"]  = original.riderLatitude
+        dict["riderLongitude"] = original.riderLongitude
+        if let eta = original.estimatedArrival {
+            dict["estimatedArrival"] = Timestamp(date: eta)
+        }
         let decoded = DeliverySession(firestoreData: dict)
 
         XCTAssertNotNil(decoded, "init?(firestoreData:) must succeed for a valid dictionary")
