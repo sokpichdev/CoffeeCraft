@@ -90,6 +90,10 @@ enum Firebase {
         enum Favorites {
             static let collection        = "favorites"
             static let productId         = "productId"
+            static let productName       = "productName"
+            static let imageURL          = "imageURL"
+            static let basePrice         = "basePrice"
+            static let customizations    = "customizations"
             static let customizationHash = "customizationHash"
             static let createdAt         = "createdAt"
         }

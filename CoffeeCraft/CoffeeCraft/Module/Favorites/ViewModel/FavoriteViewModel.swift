@@ -53,15 +53,19 @@ class FavoriteViewModel: ObservableObject {
 
 //        AppLog.menu.debug("🔍 loadFavoriteState — productId: \(product.id), hash: \(hash)")
 
-        let snapshot = try? await db
-            .collection(Firebase.Users.collection)
-            .document(userId)
-            .collection(Firebase.Users.Favorites.collection)
-            .whereField(Firebase.Users.Favorites.productId, isEqualTo: product.id)
-            .whereField(Firebase.Users.Favorites.customizationHash, isEqualTo: hash)
-            .getDocuments()
-
-        isFavorite = !(snapshot?.documents.isEmpty ?? true)
+        do {
+            let snapshot = try await db
+                .collection(Firebase.Users.collection)
+                .document(userId)
+                .collection(Firebase.Users.Favorites.collection)
+                .whereField(Firebase.Users.Favorites.productId, isEqualTo: product.id)
+                .whereField(Firebase.Users.Favorites.customizationHash, isEqualTo: hash)
+                .getDocuments()
+            isFavorite = !snapshot.documents.isEmpty
+        } catch {
+            AppLog.menu.error("❌ loadFavoriteState — fetch failed: \(error.localizedDescription)")
+            // Do not reset isFavorite — keep the last known state rather than falsely showing unfavorited
+        }
         AppLog.menu.debug("❤️ loadFavoriteState — isFavorite: \(self.isFavorite) for productId: \(product.id)")
     }
 
@@ -107,13 +111,13 @@ class FavoriteViewModel: ObservableObject {
                 AppLog.menu.debug("🗑️ toggleFavorite — removed favorite, docId: \(doc.documentID), productId: \(product.id)")
             } else {
                 let docRef = try await ref.addDocument(data: [
-                    "productId": product.id,
-                    "productName": product.name,
-                    "imageURL": product.imageURL,
-                    "basePrice": product.price,
-                    "customizations": customizations,
-                    "customizationHash": hash,
-                    "createdAt": Date()
+                    Firebase.Users.Favorites.productId: product.id,
+                    Firebase.Users.Favorites.productName: product.name,
+                    Firebase.Users.Favorites.imageURL: product.imageURL,
+                    Firebase.Users.Favorites.basePrice: product.price,
+                    Firebase.Users.Favorites.customizations: customizations,
+                    Firebase.Users.Favorites.customizationHash: hash,
+                    Firebase.Users.Favorites.createdAt: Date()
                 ])
                 isFavorite = true
                 // Allow re-fetch after a toggle so the state stays in sync.
