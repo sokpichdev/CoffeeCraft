@@ -152,21 +152,19 @@ class OrderDetailViewModel: ObservableObject {
     }
     
     func fetchUserInfo(userId: String) {
-        isLoadingUser = true
-        db.collection(Firebase.Users.collection).document(userId).getDocument { [weak self] snapshot, error in
-            guard let self else { return }
-            Task { @MainActor in
-                defer { self.isLoadingUser = false }
-                if let error {
-                    AppLog.order.error("Failed to fetch user: \(error.localizedDescription)")
-                    self.userName = "Unknown User"
-                    return
-                }
-                if let name = snapshot?.data()?["name"] as? String {
+        Task {
+            defer { isLoadingUser = false }
+            isLoadingUser = true
+            do {
+                let snapshot = try await db.collection(Firebase.Users.collection).document(userId).getDocument()
+                if let name = snapshot.data()?[Firebase.Users.name] as? String {
                     self.userName = name
                 } else {
                     self.userName = "User #\(userId.suffix(6))"
                 }
+            } catch {
+                AppLog.order.error("Failed to fetch user: \(error.localizedDescription)")
+                self.userName = "Unknown User"
             }
         }
     }
