@@ -8,7 +8,6 @@ import FirebaseAuth
 import SwiftUI
 
 struct RootView: View {
-    @EnvironmentObject var networkMonitor: NetworkMonitor
     @EnvironmentObject var session: UserSession
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var orderVM: OrderViewModel
