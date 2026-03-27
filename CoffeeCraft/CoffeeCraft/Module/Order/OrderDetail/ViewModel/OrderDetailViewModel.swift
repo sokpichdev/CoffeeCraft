@@ -79,7 +79,7 @@ class OrderDetailViewModel: ObservableObject {
                     transaction.setData([
                         Firebase.WalletTransactions.userId: uid,
                         Firebase.WalletTransactions.amount: walletAmountPaid,
-                        Firebase.WalletTransactions.type: "refund",
+                        Firebase.WalletTransactions.type: WalletTransactionType.refund.rawValue,
                         Firebase.WalletTransactions.orderId: orderId,
                         Firebase.WalletTransactions.createdAt: Timestamp(date: Date())
                     ], forDocument: txRef)
