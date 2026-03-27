@@ -244,7 +244,7 @@ struct ProductDetailView: View {
             )
         }
         .navigationDestination(isPresented: $showAuth) {
-            AuthView().environmentObject(AuthViewModel())
+            AuthView().environmentObject(authVM)
         }
         .navigationDestination(item: $selectedRelated) { related in
             ProductDetailView(product: related, allProducts: allProducts)
