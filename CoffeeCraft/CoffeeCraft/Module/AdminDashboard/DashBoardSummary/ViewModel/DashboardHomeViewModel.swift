@@ -121,7 +121,7 @@ final class DashboardHomeViewModel: ObservableObject {
                 type: .error,
                 confirmTitle: "Retry",
                 cancelTitle: "Dismiss",
-                onConfirm: { Task { await self.loadSummary() } }
+                onConfirm: { [weak self] in Task { await self?.loadSummary() } }
             )
             AppLog.dashboard.error("❌ loadSummary: \(error.localizedDescription)")
         }
