@@ -17,8 +17,8 @@ import SwiftUI
 //   WalletService → checks paymentMethod before deducting / refunding
 
 enum PaymentMethod: String, Codable, CaseIterable {
-    case wallet = "wallet"
-    case cash   = "cash"
+    case wallet
+    case cash
 
     // MARK: Display
 

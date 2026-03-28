@@ -15,7 +15,7 @@ struct ReviewCard: View {
     @ObservedObject var vm: ReviewViewModel
     var isOwn: Bool = false
     /// Called when the card is tapped — parent pushes ReviewDetailView.
-    var onTap: (() -> Void)? = nil
+    var onTap: (() -> Void)?
 
     // Fixed two-line height for 13pt font (lineHeight ≈ 18pt × 2 lines)
     private let textBlockHeight: CGFloat = 36

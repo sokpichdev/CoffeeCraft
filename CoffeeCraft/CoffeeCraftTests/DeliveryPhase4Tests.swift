@@ -6,7 +6,6 @@
 //
 
 @testable import CoffeeCraft
-import FirebaseFirestore
 //
 //  DeliveryPhase4Tests.swift
 //  CoffeeCraftTests
@@ -36,6 +35,7 @@ import FirebaseFirestore
 //  • MainActor isolation — @Observable ViewModel tests run on @MainActor.
 //  • No mocking framework — pure XCTest + CoreLocation.
 import CoreLocation
+import FirebaseFirestore
 import XCTest
 
 // MARK: - Shared test fixtures

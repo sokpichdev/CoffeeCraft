@@ -230,8 +230,8 @@ struct AdminDashboardHomeView: View {
     }
 
     private func quickNavCell<Destination: View>(title: String, subtitle: String, icon: String,
-                                                color: Color,
-                                                @ViewBuilder destination: () -> Destination) -> some View {
+                                                 color: Color,
+                                                 @ViewBuilder destination: () -> Destination) -> some View {
         NavigationLink(destination: destination()) {
             VStack(spacing: 8) {
                 ZStack {

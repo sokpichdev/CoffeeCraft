@@ -340,19 +340,19 @@ class CardViewModel: ObservableObject {
         AppLog.firestore.debug("🆕 createInitialCard userName: \(userName), cardNumber: \(cardNumber)")
         
         try await db.collection(Firebase.LoyaltyCards.collection).document(cardNumber).setData([
-            Firebase.LoyaltyCards.cardNumber:  cardNumber,
-            Firebase.LoyaltyCards.ownerId:     userId,
-            Firebase.LoyaltyCards.ownerName:   userName,
+            Firebase.LoyaltyCards.cardNumber: cardNumber,
+            Firebase.LoyaltyCards.ownerId: userId,
+            Firebase.LoyaltyCards.ownerName: userName,
             Firebase.LoyaltyCards.memberSince: formatMemberSince(Date()),
-            Firebase.LoyaltyCards.points:      0,
-            Firebase.LoyaltyCards.createdAt:   Timestamp(date: Date()),
-            Firebase.LoyaltyCards.sharedWith:  [] as NSArray
+            Firebase.LoyaltyCards.points: 0,
+            Firebase.LoyaltyCards.createdAt: Timestamp(date: Date()),
+            Firebase.LoyaltyCards.sharedWith: [] as NSArray
         ])
         
         try await db.collection(Firebase.Users.collection).document(userId).setData([
-            Firebase.Users.activeCard:      cardNumber,
+            Firebase.Users.activeCard: cardNumber,
             Firebase.Users.accessibleCards: [cardNumber],
-            Firebase.Users.updatedAt:       Timestamp(date: Date())
+            Firebase.Users.updatedAt: Timestamp(date: Date())
         ], merge: true)
         
         AppLog.firestore.debug("✅ createInitialCard — card \(cardNumber) created and set as active for uid: \(userId)")

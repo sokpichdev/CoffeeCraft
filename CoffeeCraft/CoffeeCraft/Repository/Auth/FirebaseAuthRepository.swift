@@ -71,15 +71,15 @@ struct FirebaseAuthRepository: AuthRepositoryProtocol {
 
     func saveUser(_ user: User, uid: String) async throws {
         try await db.collection(Firebase.Users.collection).document(uid).setData([
-            Firebase.Users.name:  user.name,
+            Firebase.Users.name: user.name,
             Firebase.Users.email: user.email,
-            Firebase.Users.role:  user.role.rawValue
+            Firebase.Users.role: user.role.rawValue
         ])
     }
 
     func updateUser(_ user: User, uid: String) async throws {
         var data: [String: Any] = [
-            Firebase.Users.name:  user.name,
+            Firebase.Users.name: user.name,
             Firebase.Users.email: user.email
         ]
         if let phone = user.phoneNumber { data[Firebase.Users.phoneNumber] = phone }

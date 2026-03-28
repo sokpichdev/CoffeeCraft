@@ -40,11 +40,11 @@ struct CategorySelectionSheet: View {
                                 .padding(.leading, 8)
                             
                             if !searchText.isEmpty {
-                                Button(action: { searchText = "" }) {
+                                Button(action: { searchText = "" }, label: {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.gray)
                                         .padding(.trailing, 8)
-                                }
+                                })
                             }
                         }
                     )
@@ -54,7 +54,7 @@ struct CategorySelectionSheet: View {
                         ForEach(filteredCategories, id: \.self) { category in
                             Button(action: {
                                 tempSelectedCategory = category
-                            }) {
+                            }, label: {
                                 HStack {
                                     Text(category)
                                         .foregroundColor(category == tempSelectedCategory ?
@@ -73,7 +73,7 @@ struct CategorySelectionSheet: View {
                                 .background(category == tempSelectedCategory ?
                                             Color.accentPrimary.opacity(0.1) : Color.clear)
                                 .contentShape(Rectangle())
-                            }
+                            })
                             .buttonStyle(.plain)
                         }
                         

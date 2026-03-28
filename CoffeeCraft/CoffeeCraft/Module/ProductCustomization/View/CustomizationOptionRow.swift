@@ -17,11 +17,11 @@ struct CustomizationOptionRow: View {
                 withAnimation {
                     onDelete()
                 }
-            }) {
+            }, label: {
                 Image(systemName: "minus.circle.fill")
                     .font(.title3)
                     .foregroundColor(.red)
-            }
+            })
             .buttonStyle(PlainButtonStyle())
             
             TextField("Option name", text: $option.name)

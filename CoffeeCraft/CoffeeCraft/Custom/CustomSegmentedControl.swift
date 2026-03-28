@@ -43,7 +43,7 @@ struct CustomSegmentedControl<T: SegmentItem>: View {
                         selectedSegment = segment
                     }
                     onClick()
-                }) {
+                }, label: {
                     ZStack {
                         if selectedSegment == segment {
                             RoundedRectangle(cornerRadius: 24)
@@ -65,7 +65,7 @@ struct CustomSegmentedControl<T: SegmentItem>: View {
                     }
                     .frame(maxWidth: .infinity, minHeight: height)
                     .contentShape(Rectangle())
-                }
+                })
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selectedSegment == segment ? [.isSelected] : [])
             }

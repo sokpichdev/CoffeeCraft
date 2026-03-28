@@ -156,7 +156,7 @@ struct EditProductView: View {
                         ))
                         dismiss()
                     }
-                }) {
+                }, label: {
                     HStack(spacing: 10) {
                         Image(systemName: "square.and.arrow.down.fill")
                         Text(isEditing ? "Save Changes" : "Add Product")
@@ -168,7 +168,7 @@ struct EditProductView: View {
                     .foregroundColor(.white)
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 3)
-                }
+                })
                 .padding(.bottom, 20)
                 .padding(.horizontal)
             }

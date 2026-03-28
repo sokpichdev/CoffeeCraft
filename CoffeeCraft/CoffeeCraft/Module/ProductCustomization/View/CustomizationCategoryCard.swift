@@ -19,7 +19,7 @@ struct CustomizationCategoryCard: View {
                 withAnimation(.spring(response: 0.3)) {
                     isExpanded.toggle()
                 }
-            }) {
+            }, label: {
                 HStack {
                     Image(systemName: "folder.fill")
                         .foregroundColor(.accentPrimary)
@@ -45,9 +45,9 @@ struct CustomizationCategoryCard: View {
                     }
                 }
                 .padding()
-            }
+            })
             .buttonStyle(PlainButtonStyle())
-            
+
             if isExpanded {
                 Divider()
                 

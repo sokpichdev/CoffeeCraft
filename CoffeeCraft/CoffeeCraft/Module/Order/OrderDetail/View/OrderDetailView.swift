@@ -212,8 +212,8 @@ struct OrderDetailView: View {
                         return (productId, existing != nil)
                     }
                 }
-                for await (productId, hasRating) in group {
-                    if hasRating { rated.insert(productId) }
+                for await (productId, hasRating) in group where hasRating {
+                    rated.insert(productId)
                 }
             }
             await MainActor.run { ratedProductIds = rated }

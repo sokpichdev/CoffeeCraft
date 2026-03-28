@@ -17,10 +17,10 @@ import SwiftUI
 // Stored in Firestore as a raw String value.
 
 enum WalletTransactionType: String, Codable, CaseIterable {
-    case topup   = "topup"    // User manually added $
-    case payment = "payment"  // $ deducted when order was placed
-    case refund  = "refund"   // $ returned when order was cancelled
-    case reward  = "reward"   // Bonus $ from loyalty milestone
+    case topup    // User manually added $
+    case payment  // $ deducted when order was placed
+    case refund   // $ returned when order was cancelled
+    case reward   // Bonus $ from loyalty milestone
 
     // MARK: Display
 
@@ -113,13 +113,13 @@ extension WalletTransaction {
     /// Called inside WalletService runTransaction() closures.
     func toFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
-            Firebase.WalletTransactions.userId:        userId,
-            Firebase.WalletTransactions.type:          type.rawValue,
-            Firebase.WalletTransactions.amount:        amount,
+            Firebase.WalletTransactions.userId: userId,
+            Firebase.WalletTransactions.type: type.rawValue,
+            Firebase.WalletTransactions.amount: amount,
             Firebase.WalletTransactions.balanceBefore: balanceBefore,
-            Firebase.WalletTransactions.balanceAfter:  balanceAfter,
-            Firebase.WalletTransactions.description:   description,
-            Firebase.WalletTransactions.timestamp:     Timestamp(date: timestamp)
+            Firebase.WalletTransactions.balanceAfter: balanceAfter,
+            Firebase.WalletTransactions.description: description,
+            Firebase.WalletTransactions.timestamp: Timestamp(date: timestamp)
         ]
         if let referenceId { data[Firebase.WalletTransactions.referenceId] = referenceId }
         return data

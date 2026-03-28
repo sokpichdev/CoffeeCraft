@@ -48,17 +48,17 @@ class FCMTokenService {
 
             if let index = tokensArray.firstIndex(where: { $0[Firebase.Users.FcmTokenField.deviceId] as? String == deviceId }) {
                 tokensArray[index] = [
-                    Firebase.Users.FcmTokenField.token:     token,
-                    Firebase.Users.FcmTokenField.deviceId:  deviceId,
-                    Firebase.Users.FcmTokenField.platform:  "ios",
+                    Firebase.Users.FcmTokenField.token: token,
+                    Firebase.Users.FcmTokenField.deviceId: deviceId,
+                    Firebase.Users.FcmTokenField.platform: "ios",
                     Firebase.Users.FcmTokenField.updatedAt: Timestamp(date: Date())
                 ]
                 AppLog.firestore.info("🔄 Updating FCM token for device: \(deviceId)")
             } else {
                 tokensArray.append([
-                    Firebase.Users.FcmTokenField.token:     token,
-                    Firebase.Users.FcmTokenField.deviceId:  deviceId,
-                    Firebase.Users.FcmTokenField.platform:  "ios",
+                    Firebase.Users.FcmTokenField.token: token,
+                    Firebase.Users.FcmTokenField.deviceId: deviceId,
+                    Firebase.Users.FcmTokenField.platform: "ios",
                     Firebase.Users.FcmTokenField.updatedAt: Timestamp(date: Date())
                 ])
                 AppLog.firestore.info("➕ Adding new FCM token for device: \(deviceId)")

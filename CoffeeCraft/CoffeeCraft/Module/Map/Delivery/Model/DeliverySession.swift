@@ -81,15 +81,15 @@ struct DeliverySession {
     /// when the app restarts and startDelivery() is called on a fresh session.
     func asFirestoreData() -> [String: Any] {
         var data: [String: Any] = [
-            Firebase.Deliveries.orderId:              orderId,
-            Firebase.Deliveries.branchId:             branchId,
-            Firebase.Deliveries.userId:               userId,
-            Firebase.Deliveries.branchLatitude:       branchLatitude,
-            Firebase.Deliveries.branchLongitude:      branchLongitude,
-            Firebase.Deliveries.destinationLatitude:  destinationLatitude,
+            Firebase.Deliveries.orderId: orderId,
+            Firebase.Deliveries.branchId: branchId,
+            Firebase.Deliveries.userId: userId,
+            Firebase.Deliveries.branchLatitude: branchLatitude,
+            Firebase.Deliveries.branchLongitude: branchLongitude,
+            Firebase.Deliveries.destinationLatitude: destinationLatitude,
             Firebase.Deliveries.destinationLongitude: destinationLongitude,
-            Firebase.Deliveries.status:               status.rawValue,
-            Firebase.Deliveries.updatedAt:            Date()
+            Firebase.Deliveries.status: status.rawValue,
+            Firebase.Deliveries.updatedAt: Date()
         ]
         if let eta = estimatedArrival { data[Firebase.Deliveries.estimatedArrival] = eta }
         if let name = riderName { data[Firebase.Deliveries.riderName] = name }

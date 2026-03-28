@@ -281,8 +281,8 @@ extension RatingService {
         // MARK: Step 2 — Write ratings/{userId}
         let now = Timestamp(date: Date())
         let ratingData: [String: Any] = [
-            Firebase.Products.Ratings.score:    score,
-            Firebase.Products.Ratings.orderId:  orderId,
+            Firebase.Products.Ratings.score: score,
+            Firebase.Products.Ratings.orderId: orderId,
             Firebase.Products.Ratings.createdAt: now
             // reviewId intentionally omitted — patched in Step 4 if body provided
         ]
