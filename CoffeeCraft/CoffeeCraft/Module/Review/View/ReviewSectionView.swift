@@ -136,7 +136,7 @@ private extension ReviewSectionView {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 12) {
                 ForEach(vm.reviews.prefix(3)) { review in
-                    ReviewCard(review: review, vm: vm, isOwn: review.userId == UserSession.shared.userId, onTap: { selectedReview = review } )
+                    ReviewCard(review: review, vm: vm, isOwn: review.userId == UserSession.shared.userId, onTap: { selectedReview = review })
                     .frame(width: (UIScreen.main.bounds.width * 0.95) - 32)
                 }
 

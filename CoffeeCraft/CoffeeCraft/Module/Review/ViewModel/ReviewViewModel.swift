@@ -115,8 +115,8 @@ final class ReviewViewModel: ObservableObject {
 
     // MARK: - Pagination cursor
 
-    /// Firestore DocumentSnapshot cursor for the next page.
-    /// nil after the first page is loaded, then set from fetchReviews result.
+    // Firestore DocumentSnapshot cursor for the next page.
+    // nil after the first page is loaded, then set from fetchReviews result.
     // Firestore DocumentSnapshot cursor — typed as Any to avoid a FirebaseFirestore
     // import at the top of this file. Cast to DocumentSnapshot inside the service call.
     private var lastDocument: Any?

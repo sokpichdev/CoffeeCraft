@@ -76,7 +76,8 @@ struct MapView: View {
             viewModel.stopListening()
         }
         .sheet(isPresented: $viewModel.isSheetPresented,
-               onDismiss: { viewModel.deselectBranch() }) {
+               onDismiss: { viewModel.deselectBranch() },
+               content: {
             if let branch = viewModel.selectedBranch {
                 BranchDetailSheet(
                     branch: branch,
@@ -98,7 +99,7 @@ struct MapView: View {
                 .presentationCornerRadius(26)
                 .presentationBackground(Color.bgPrimary)
             }
-        }
+        })
         .customNavigationBar("Find a Branch", hideBackBtn: false)
     }
 

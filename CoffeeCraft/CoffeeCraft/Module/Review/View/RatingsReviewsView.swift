@@ -230,7 +230,7 @@ private extension RatingsReviewsView {
 
             // Own review pinned at top
             if let own = ownReview {
-                ReviewCard(review: own, vm: vm, isOwn: true, onTap: { selectedReview = own } )
+                ReviewCard(review: own, vm: vm, isOwn: true, onTap: { selectedReview = own })
                 .transition(.opacity.combined(with: .move(edge: .top)))
 
                 if !otherReviews.isEmpty {
@@ -239,7 +239,7 @@ private extension RatingsReviewsView {
             }
 
             ForEach(otherReviews) { review in
-                ReviewCard(review: review, vm: vm, onTap: { selectedReview = review } )
+                ReviewCard(review: review, vm: vm, onTap: { selectedReview = review })
                 .transition(.opacity)
             }
 

@@ -10,12 +10,12 @@ import SwiftUI
 // MARK: - DeliveryStatus
 
 enum DeliveryStatus: String, Codable, CaseIterable {
-    case orderPlaced   = "orderPlaced"
-    case riderAssigned = "riderAssigned"
-    case pickedUp      = "pickedUp"
-    case enRoute       = "enRoute"
-    case arriving      = "arriving"
-    case delivered     = "delivered"
+    case orderPlaced
+    case riderAssigned
+    case pickedUp
+    case enRoute
+    case arriving
+    case delivered
 
     // MARK: - Display
 

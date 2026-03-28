@@ -65,12 +65,12 @@ final class WalletService {
 
         let now = Timestamp(date: Date())
         try await walletRef.setData([
-            Firebase.Wallets.balance:    0.0,
-            Firebase.Wallets.currency:   "USD",
+            Firebase.Wallets.balance: 0.0,
+            Firebase.Wallets.currency: "USD",
             Firebase.Wallets.totalTopUp: 0.0,
             Firebase.Wallets.totalSpent: 0.0,
-            Firebase.Wallets.createdAt:  now,
-            Firebase.Wallets.updatedAt:  now
+            Firebase.Wallets.createdAt: now,
+            Firebase.Wallets.updatedAt: now
         ])
 
         AppLog.firestore.debug("✅ Wallet created for userId: \(userId)")
@@ -104,20 +104,20 @@ final class WalletService {
                 // 2. Update wallet balance + totals
                 if snapshot.exists {
                     transaction.updateData([
-                        Firebase.Wallets.balance:    newBalance,
+                        Firebase.Wallets.balance: newBalance,
                         Firebase.Wallets.totalTopUp: FieldValue.increment(amount),
-                        Firebase.Wallets.updatedAt:  Timestamp(date: Date())
+                        Firebase.Wallets.updatedAt: Timestamp(date: Date())
                     ], forDocument: walletRef)
                 } else {
                     // First top-up → create wallet inline
                     let now = Timestamp(date: Date())
                     transaction.setData([
-                        Firebase.Wallets.balance:    newBalance,
-                        Firebase.Wallets.currency:   "USD",
+                        Firebase.Wallets.balance: newBalance,
+                        Firebase.Wallets.currency: "USD",
                         Firebase.Wallets.totalTopUp: amount,
                         Firebase.Wallets.totalSpent: 0.0,
-                        Firebase.Wallets.createdAt:  now,
-                        Firebase.Wallets.updatedAt:  now
+                        Firebase.Wallets.createdAt: now,
+                        Firebase.Wallets.updatedAt: now
                     ], forDocument: walletRef)
                 }
 
@@ -186,9 +186,9 @@ final class WalletService {
 
                 // Update wallet
                 transaction.updateData([
-                    Firebase.Wallets.balance:    newBalance,
+                    Firebase.Wallets.balance: newBalance,
                     Firebase.Wallets.totalSpent: FieldValue.increment(amount),
-                    Firebase.Wallets.updatedAt:  Timestamp(date: Date())
+                    Firebase.Wallets.updatedAt: Timestamp(date: Date())
                 ], forDocument: walletRef)
 
                 // Write ledger entry
@@ -248,7 +248,7 @@ final class WalletService {
                 let newBalance = current + amount
 
                 transaction.updateData([
-                    Firebase.Wallets.balance:   newBalance,
+                    Firebase.Wallets.balance: newBalance,
                     Firebase.Wallets.updatedAt: Timestamp(date: Date())
                 ], forDocument: walletRef)
 
@@ -301,19 +301,19 @@ final class WalletService {
 
                 if snapshot.exists {
                     transaction.updateData([
-                        Firebase.Wallets.balance:   newBalance,
+                        Firebase.Wallets.balance: newBalance,
                         Firebase.Wallets.updatedAt: Timestamp(date: Date())
                     ], forDocument: walletRef)
                 } else {
                     // Wallet doesn't exist yet — create it with the reward
                     let now = Timestamp(date: Date())
                     transaction.setData([
-                        Firebase.Wallets.balance:    newBalance,
-                        Firebase.Wallets.currency:   "USD",
+                        Firebase.Wallets.balance: newBalance,
+                        Firebase.Wallets.currency: "USD",
                         Firebase.Wallets.totalTopUp: 0.0,
                         Firebase.Wallets.totalSpent: 0.0,
-                        Firebase.Wallets.createdAt:  now,
-                        Firebase.Wallets.updatedAt:  now
+                        Firebase.Wallets.createdAt: now,
+                        Firebase.Wallets.updatedAt: now
                     ], forDocument: walletRef)
                 }
 

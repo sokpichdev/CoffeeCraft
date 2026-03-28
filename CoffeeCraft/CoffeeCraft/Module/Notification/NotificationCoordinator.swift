@@ -1,3 +1,4 @@
+import Combine
 //
 //  NotificationCoordinator.swift
 //  CoffeeCraft
@@ -5,7 +6,6 @@
 //  Created by Sok Pich on 2/6/26.
 //
 import SwiftUI
-import Combine
 
 @MainActor
 class NotificationCoordinator: ObservableObject {

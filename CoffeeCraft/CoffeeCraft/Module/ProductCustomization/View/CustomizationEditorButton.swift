@@ -17,7 +17,7 @@ struct CustomizationEditorButton: View {
     var body: some View {
         Button(action: {
             showEditor = true
-        }) {
+        }, label: {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
@@ -65,7 +65,7 @@ struct CustomizationEditorButton: View {
                     .fill(Color(.systemBackground))
                     .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
             )
-        }
+        })
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showEditor) {
             CustomizationView(customizations: $customizations)

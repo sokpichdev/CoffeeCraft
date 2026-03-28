@@ -47,11 +47,11 @@ struct LibraryCategoryCard: View {
                         withAnimation {
                             showDetails.toggle()
                         }
-                    }) {
+                    }, label: {
                         Image(systemName: showDetails ? "chevron.up.circle.fill" : "info.circle.fill")
                             .font(.title2)
                             .foregroundColor(Color.accentPrimary)
-                    }
+                    })
                     .buttonStyle(PlainButtonStyle())
                 }
                 .padding()

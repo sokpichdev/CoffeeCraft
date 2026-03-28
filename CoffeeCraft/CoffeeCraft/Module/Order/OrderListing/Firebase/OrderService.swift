@@ -147,13 +147,13 @@ class OrderService: ObservableObject {
             "\(Firebase.Orders.items)": cartItems.map { item -> [String: Any] in
                 var dict: [String: Any] = [
                     Firebase.Orders.ItemField.productId: item.product.id,
-                    Firebase.Orders.ItemField.name:      item.product.name,
-                    Firebase.Orders.ItemField.price:     item.totalPrice,
-                    Firebase.Orders.ItemField.imageURL:  item.product.imageURL,
-                    Firebase.Orders.ItemField.quantity:  item.quantity
+                    Firebase.Orders.ItemField.name: item.product.name,
+                    Firebase.Orders.ItemField.price: item.totalPrice,
+                    Firebase.Orders.ItemField.imageURL: item.product.imageURL,
+                    Firebase.Orders.ItemField.quantity: item.quantity
                 ]
                 if !item.selections.isEmpty { dict[Firebase.Orders.ItemField.selections] = item.selections }
-                if !item.extras.isEmpty     { dict[Firebase.Orders.ItemField.extras]     = item.extras }
+                if !item.extras.isEmpty { dict[Firebase.Orders.ItemField.extras]     = item.extras }
                 return dict
             }
         ]

@@ -4,7 +4,6 @@
 //
 //  Created by Sok Pich on 10/20/25.
 //
-// swiftlint:disable force_unwrapping
 import FirebaseFirestore
 import Foundation
 

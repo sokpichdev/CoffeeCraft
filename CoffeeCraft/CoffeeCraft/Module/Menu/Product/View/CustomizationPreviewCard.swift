@@ -17,7 +17,7 @@ struct CustomizationPreviewCard: View {
                 withAnimation(.spring(response: 0.3)) {
                     isExpanded.toggle()
                 }
-            }) {
+            }, label: {
                 HStack(spacing: 12) {
                     Image(systemName: "tag.fill")
                         .font(.headline)
@@ -44,7 +44,7 @@ struct CustomizationPreviewCard: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-            }
+            })
             .buttonStyle(PlainButtonStyle())
             
             if isExpanded {

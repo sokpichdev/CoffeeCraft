@@ -14,7 +14,7 @@ struct AsyncImageCard: View {
     let height: CGFloat
     let width: CGFloat
     var corner: CGFloat = 15
-    var accessibilityLabel: String? = nil
+    var accessibilityLabel: String?
     
     @State private var isURLValid: Bool = false
     private var iconSize: CGFloat { height * 0.35 }

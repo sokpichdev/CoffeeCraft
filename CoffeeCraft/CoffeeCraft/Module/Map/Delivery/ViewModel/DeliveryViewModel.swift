@@ -389,9 +389,9 @@ final class DeliveryViewModel: ObservableObject {
         db.collection(Firebase.Deliveries.collection)
             .document(orderId)
             .setData([
-                "riderLatitude":  coord.latitude,
+                "riderLatitude": coord.latitude,
                 "riderLongitude": coord.longitude,
-                "updatedAt":      Date()
+                "updatedAt": Date()
             ], merge: true) { _ in }
     }
 

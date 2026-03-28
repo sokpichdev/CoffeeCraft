@@ -182,7 +182,7 @@ struct WalletBalanceCard: View {
                 withAnimation(.spring(response: 0.25)) { buttonPressed = false }
                 onTopUp()
             }
-        }) {
+        }, label: {
             HStack(spacing: 0) {
                 // Left hint
                 HStack(spacing: 6) {
@@ -226,7 +226,7 @@ struct WalletBalanceCard: View {
                     endPoint: .bottom
                 )
             )
-        }
+        })
         .buttonStyle(.plain)
     }
 }

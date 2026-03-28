@@ -50,7 +50,7 @@ extension AnalyticsService {
     ///   - `totalRevenue`: sum across all items
     ///   - `totalUnits`: sum of all units sold
     private func fetchCompletedOrderItems(from start: Date,
-                                           to end: Date) async throws -> ([String: (Int, Double)], Double, Int) {
+                                          to end: Date) async throws -> ([String: (Int, Double)], Double, Int) {
         let snapshot = try await db.collection(Firebase.Orders.collection)
             .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
             .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: start))
