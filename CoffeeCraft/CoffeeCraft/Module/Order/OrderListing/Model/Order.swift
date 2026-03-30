@@ -89,6 +89,7 @@ struct CartItemData: Identifiable, Codable, Hashable {
     var extras: [String]?
     var price: Double?
     var quantity: Int?
+    var pointsValue: Int?
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
