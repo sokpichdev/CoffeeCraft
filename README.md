@@ -1,845 +1,655 @@
-# ☕ CoffeeCraft
+# CoffeeCraft
 
-> A production-grade iOS coffee shop application built with **SwiftUI** and **Firebase** — featuring dual user roles, real-time order tracking, wallet payments, reviews & ratings, loyalty cards, and comprehensive admin tools.
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Platform-iOS%2017%2B-blue.svg" alt="Platform: iOS 17+"/>
-  <img src="https://img.shields.io/badge/Swift-5.9%2B-orange.svg" alt="Swift 5.9+"/>
-  <img src="https://img.shields.io/badge/Framework-SwiftUI-green.svg" alt="SwiftUI"/>
-  <img src="https://img.shields.io/badge/Backend-Firebase-yellow.svg" alt="Firebase"/>
-  <img src="https://img.shields.io/badge/Status-Production%20Ready-success.svg" alt="Production Ready"/>
-</p>
+A production-grade iOS coffee shop ordering app built with SwiftUI and Firebase. Supports two distinct user roles — **Customer** and **Manager** — with real-time order tracking, an in-app wallet, loyalty cards, a reviews system, and an admin dashboard.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Screenshots](#-screenshots)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Module Breakdown](#-module-breakdown)
-- [Firestore Schema](#-firestore-schema)
-- [Custom Components](#-custom-components)
-- [Getting Started](#-getting-started)
-- [Environment Configuration](#-environment-configuration)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
-
-## 🌟 Overview
-
-**CoffeeCraft** is a full-featured iOS application that simulates a real-world coffee shop experience with two distinct user roles — **Customer** and **Manager**. The app demonstrates production-grade iOS development patterns and best practices.
-
-### What Makes CoffeeCraft Special?
-
-- **🎭 Dual User Roles:** Complete customer and manager experiences in one app
-- **⚡ Real-time Everything:** Live order updates, wallet sync, push notifications
-- **💳 Full Payment System:** In-app wallet with top-up, transactions, and refunds
-- **⭐ Reviews & Ratings:** Proof-of-purchase verified reviews with helpful voting
-- **🎴 Loyalty System:** Multi-card support with sharing capabilities
-- **🗺️ Store Locator:** MapKit integration with branch details
-- **🎨 Custom UI Library:** 30+ reusable SwiftUI components
-- **🏗️ Production Architecture:** MVVM, real-time listeners, transaction-based operations
-
-### Built For Learning & Portfolio
-
-This project showcases:
-- Advanced SwiftUI techniques
-- Firebase integration (Auth, Firestore, FCM)
-- Real-time data synchronization
-- Transaction-based database operations
-- Custom navigation system
-- Reusable component library
-- Dark mode theming
-- Role-based access control
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Module Breakdown](#module-breakdown)
+- [Key Data Models](#key-data-models)
+- [Firestore Collections](#firestore-collections)
+- [Theme System](#theme-system)
+- [Navigation Flow](#navigation-flow)
+- [Custom UI Components](#custom-ui-components)
+- [Environment Setup](#environment-setup)
+- [Running the App](#running-the-app)
+- [Creating Test Accounts](#creating-test-accounts)
+- [Contributing](#contributing)
 
 ---
 
-## ✨ Key Features
+## Overview
 
-### 👤 Customer Features
-
-#### 🛒 Shopping & Orders
-- ✅ Browse product catalog with categories
-- ✅ Search products by name
-- ✅ Filter by category (Coffee, Tea, Espresso, Latte, etc.)
-- ✅ Detailed product view with customization options
-- ✅ Add to cart with size, temperature, extras
-- ✅ Shopping cart management
-- ✅ Wallet-based checkout
-- ✅ Real-time order tracking
-- ✅ Order status timeline (Pending → Preparing → Ready → Completed)
-- ✅ Cancel orders (Pending status only) with auto-refund
-- ✅ Reorder with one tap
-- ✅ Order receipt view
-
-#### ⭐ Reviews & Ratings
-- ✅ Rate products 1-5 stars (verified purchases only)
-- ✅ Write reviews with title and body
-- ✅ Edit/delete your reviews
-- ✅ Mark reviews as helpful
-- ✅ View rating distribution
-- ✅ Sort by: Most Recent, Most Helpful
-- ✅ Proof of purchase validation
-
-#### 💰 Wallet & Payments
-- ✅ In-app wallet with balance tracking
-- ✅ Multi-step top-up flow (Amount → Bank → Checkout)
-- ✅ Transaction history (Top-up, Payment, Refund)
-- ✅ Filter transactions by type
-- ✅ Real-time balance updates
-- ✅ Atomic payment transactions
-
-#### 🎴 Loyalty & Rewards
-- ✅ Loyalty points system
-- ✅ Multiple loyalty cards support
-- ✅ Share cards with other users
-- ✅ Flippable card UI (3D animation)
-- ✅ Points accumulation on orders
-- ✅ Active card selection
-
-#### 📍 Discover & Explore
-- ✅ Store locator with MapKit
-- ✅ Branch details (hours, amenities, contact)
-- ✅ Get directions to store
-- ✅ Distance calculation from your location
-- ✅ Favorites/wishlist
-- ✅ Announcements feed
-- ✅ Infinite banner carousel
-
-#### 👨‍💼 Profile & Settings
-- ✅ View and edit profile
-- ✅ Change password
-- ✅ Notification inbox
-- ✅ Dark mode toggle
-- ✅ Theme customization
-- ✅ Order history
-- ✅ Account settings
-
-### 👨‍💼 Manager Features
-
-#### 📦 Product Management
-- ✅ Create new products
-- ✅ Edit existing products
-- ✅ Delete products
-- ✅ Set product availability
-- ✅ Manage customization options
-- ✅ Upload product images
-- ✅ Categorize products
-- ✅ Seed sample data
-
-#### 📋 Order Management
-- ✅ Real-time order dashboard
-- ✅ Update order status
-- ✅ Order queue view
-- ✅ Send push notifications to customers
-- ✅ View customer details
-- ✅ Order analytics (in progress)
-
-#### 🛡️ Review Moderation
-- ✅ View all product reviews
-- ✅ Hide inappropriate reviews
-- ✅ Review analytics per product
-
-#### 📊 Analytics (Partial)
-- ⚠️ Dashboard views (in development)
-- ⚠️ Sales reporting (planned)
-- ⚠️ Best-selling products (planned)
+CoffeeCraft is a full-featured coffee shop ordering app demonstrating real-world iOS development practices. Customers can browse the menu, customize drinks, pay with an in-app wallet, track orders in real time, write verified reviews, and manage loyalty cards. Managers have a separate experience for handling orders, managing products, moderating reviews, and viewing sales analytics.
 
 ---
 
-## 📱 Screenshots
+## Tech Stack
 
-> *Screenshots coming soon*
+| Layer | Technology |
+|---|---|
+| UI Framework | SwiftUI (iOS 17+) |
+| Language | Swift 5.9+ |
+| Backend | Firebase (Auth, Firestore, Cloud Messaging, Crashlytics, Analytics) |
+| Database | Cloud Firestore |
+| Authentication | Firebase Auth (Email/Password) |
+| Push Notifications | Firebase Cloud Messaging (FCM) |
+| Maps | MapKit + CoreLocation |
+| Minimum iOS | 17.0 |
+| Xcode | 15+ |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-CoffeeCraft follows a **clean MVVM architecture** with additional layers for scalability:
+CoffeeCraft follows MVVM with a Repository layer. ViewModels never import Firebase directly — they depend only on repository protocols.
 
 ```
-┌─────────────────────────────────────────┐
-│            SwiftUI Views                │
-│  (Stateless, declarative UI components) │
-└──────────────┬──────────────────────────┘
-               │
-               ↓
-┌─────────────────────────────────────────┐
-│          ViewModels (@MainActor)        │
-│   (Business logic, state management)    │
-└──────────────┬──────────────────────────┘
-               │
-               ↓
-┌─────────────────────────────────────────┐
-│        Service Layer (Singletons)       │
-│  WalletService, RatingService, etc.     │
-└──────────────┬──────────────────────────┘
-               │
-               ↓
-┌─────────────────────────────────────────┐
-│            Firebase Backend             │
-│  (Firestore, Auth, Cloud Messaging)     │
-└─────────────────────────────────────────┘
+View (SwiftUI)
+  └─ ViewModel (@MainActor, @Published state)
+       └─ Repository Protocol
+            └─ Firebase Repository (Firestore / Firebase Auth)
 ```
 
-### Architecture Highlights
+### Dependency Injection
 
-- **MVVM Pattern:** Clear separation of concerns
-- **@MainActor:** Thread-safe UI updates
-- **Singleton Services:** Centralized business logic
-- **Real-time Listeners:** Firestore snapshot listeners
-- **Transaction-Based:** Atomic operations for critical flows
-- **Custom Navigation:** Type-safe navigation with environment injection
-- **Dependency Injection:** @EnvironmentObject for shared state
+Global state is distributed via `@EnvironmentObject` from `CoffeeCraftApp`. The following objects are injected at the root and accessible throughout the entire view hierarchy:
 
-### Key Design Patterns
+| Object | Purpose |
+|---|---|
+| `UserSession.shared` | Current user, role, auth state, Crashlytics identity |
+| `AuthViewModel` | Auth lifecycle: sign-in, registration, session restore, password reset |
+| `OrderViewModel` | Real-time customer orders with cursor-based pagination |
+| `WalletViewModel` | Real-time wallet balance and transaction list |
+| `ThemeManager.shared` | Appearance mode and color palette |
+| `NotificationCoordinator.shared` | Deep-link routing from push notification taps |
 
-| Pattern | Usage |
-|---------|-------|
-| **MVVM** | Core architectural pattern |
-| **Singleton** | Services (UserSession, WalletService, RatingService) |
-| **Observer** | Real-time Firestore listeners |
-| **Factory** | Model creation (Review.create(), Product.empty()) |
-| **Strategy** | Payment methods, transaction types |
-| **Repository** | Firebase data access abstraction |
-| **Coordinator** | Custom navigation system |
+Scene-scoped objects created in `RootView` (not global):
+
+| Object | Purpose |
+|---|---|
+| `CartManager` | Shopping cart with Firestore sync, one per scene |
+| `ProductViewModel` | Product catalog and CRUD |
+| `FavoriteViewModel` | Wishlist management |
+| `CardViewModel` | Loyalty card management |
+| `AnnouncementViewModel` | Home screen announcements |
+| `InboxViewModel` | Notification inbox with pagination |
+
+Additional singletons accessed directly (not injected):
+
+| Object | Purpose |
+|---|---|
+| `AlertManager.shared` | Global modal alerts and error dialogs |
+| `ToastManager.shared` | Transient toast notifications |
+| `LoaderManager.shared` | Full-screen loading spinner |
+| `NetworkMonitor.shared` | Connectivity detection |
+| `WalletService.shared` | All atomic wallet mutations (top-up, payment, refund) |
+
+### Repository Pattern
+
+Every domain with Firebase access has:
+- A protocol in `CoffeeCraft/Repository/<Domain>/`
+- A Firebase implementation in the same folder
+
+Protocols available:
+
+| Protocol | Firebase Implementation |
+|---|---|
+| `AuthRepositoryProtocol` | `FirebaseAuthRepository` |
+| `ProductRepositoryProtocol` | `FirestoreProductRepository` |
+| `OrderRepositoryProtocol` | `FirestoreOrderRepository` |
+| `WalletRepositoryProtocol` | `FirestoreWalletRepository` |
+
+ViewModels receive a repository via initializer injection, defaulting to the Firebase implementation. Swap the implementation in tests without touching any ViewModel or View code.
+
+### Real-Time Data Strategy
+
+| Strategy | Used For |
+|---|---|
+| Snapshot listeners | Products, wallet balance, wallet transactions, inbox notifications |
+| Cursor-based pagination | Orders (pageSize = 5; the listener covers all loaded pages) |
+| `db.runTransaction()` | Wallet top-up, order payment, order cancellation refund — all atomic across multiple documents |
 
 ---
 
-## 🛠️ Tech Stack
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **UI Framework** | SwiftUI | Declarative UI |
-| **Backend** | Firebase | Authentication, Database, Messaging |
-| **Database** | Cloud Firestore | NoSQL real-time database |
-| **Authentication** | Firebase Auth | Email/Password auth |
-| **Push Notifications** | Firebase Cloud Messaging | Order updates |
-| **Maps** | MapKit + CoreLocation | Store locator |
-| **Image Loading** | AsyncImage | Async image fetching |
-| **State Management** | @StateObject, @EnvironmentObject | Reactive state |
-| **Persistence** | @AppStorage | UserDefaults wrapper |
-| **Architecture** | MVVM | Design pattern |
-| **Minimum iOS** | iOS 17+ | Latest SwiftUI features |
-| **Language** | Swift 5.9+ | Type-safe programming |
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 CoffeeCraft/
 ├── Main/
-│   ├── View/
-│   │   ├── CoffeeCraftApp.swift          # App entry point
-│   │   ├── RootView.swift                # Auth gate
-│   │   ├── ContentView.swift             # Main container
-│   │   ├── TabBarView.swift              # Custom tab bar
-│   │   └── AppDelegate.swift             # FCM setup
-│   └── ViewModel/
-│       └── MainViewModel.swift
+│   └── View/
+│       ├── CoffeeCraftApp.swift      # @main entry, all EnvironmentObjects injected here
+│       ├── RootView.swift            # Auth gate + tab routing + scene ViewModels
+│       ├── TabBarView.swift          # Custom animated tab bar, role-filtered tabs
+│       ├── ContentView.swift
+│       └── AppDelegate.swift         # FCM setup, push notification delegate
 │
-├── Module/                               # Feature modules (15 total)
-│   ├── Auth/                             # Authentication
-│   │   ├── Model/
-│   │   ├── View/
-│   │   └── ViewModel/
-│   │
-│   ├── Home/                             # Landing screen
-│   │   ├── Announcement/
-│   │   └── View/
-│   │
-│   ├── Menu/                             # Product catalog
-│   │   ├── Product/
-│   │   ├── Category/
-│   │   ├── Search/
-│   │   └── View/
-│   │
-│   ├── ProductCustomization/             # Drink customization
-│   │   ├── Model/
-│   │   ├── View/
-│   │   └── ViewModel/
-│   │
-│   ├── Cart/                             # Shopping cart
-│   │   ├── Model/
-│   │   ├── View/
-│   │   └── ViewModel/
-│   │
-│   ├── Order/                            # Order management
-│   │   ├── OrderListing/
-│   │   ├── OrderDetail/
-│   │   └── OrderReceipt/
-│   │
-│   ├── Wallet/                           # Payment system
-│   │   ├── MVVM/
-│   │   ├── TopUp/
-│   │   └── Firebase/
-│   │
-│   ├── Review/                           # ⭐ NEW: Ratings & Reviews
-│   │   ├── Model/
-│   │   ├── View/
-│   │   ├── ViewModel/
-│   │   └── Services/
-│   │
-│   ├── Favorites/                        # Wishlist
-│   │   ├── Model/
-│   │   ├── View/
-│   │   └── ViewModel/
-│   │
-│   ├── Map/                              # Store locator
-│   │   ├── Model/
-│   │   ├── View/
-│   │   └── ViewModel/
-│   │
-│   ├── Account/                          # User profile
-│   │   ├── Inbox/
-│   │   ├── Puchase-Cards/               # ⭐ NEW: Loyalty cards
-│   │   └── View/
-│   │
-│   ├── Profile/                          # Edit profile
-│   │   ├── Model/
-│   │   └── View/
-│   │
-│   ├── Notification/                     # Push notifications
-│   ├── Theme/                            # Dark mode
-│   │   ├── Model/
-│   │   ├── View/
-│   │   └── ViewModel/
-│   │
-│   └── Settings/                         # App settings
-│       └── View/
+├── Module/                           # Feature modules (see Module Breakdown)
+│   ├── Auth/
+│   ├── Home/
+│   ├── Menu/
+│   ├── ProductCustomization/
+│   ├── Cart/
+│   ├── Order/
+│   ├── Wallet/
+│   ├── Review/
+│   ├── Favorites/
+│   ├── Map/
+│   ├── Account/
+│   ├── AdminDashboard/
+│   ├── Profile/
+│   ├── Notification/
+│   ├── Theme/
+│   └── Settings/
 │
-├── Custom/                               # 30+ Reusable components
-│   ├── Navigation/
-│   │   ├── PushLink.swift
-│   │   └── CustomNavigationBar.swift
-│   │
-│   ├── API_UI_Components/
-│   │   ├── AlertManager.swift
-│   │   └── ToastManager.swift
-│   │
-│   ├── Scroll/
-│   │   └── CustomRefreshScrollView.swift
-│   │
+├── Repository/                       # Protocol + Firebase implementations
+│   ├── Auth/
+│   ├── Product/
+│   ├── Order/
+│   └── Wallet/
+│
+├── Custom/                           # 30+ reusable SwiftUI components
+│   ├── API_UI_Components/            # AlertManager, ToastManager, LoaderManager, ShimmerView
+│   ├── Scroll/                       # CustomRefreshScrollView
 │   ├── MaterialTextField.swift
+│   ├── AsyncImageCard.swift
 │   ├── InfiniteCarousel.swift
 │   ├── ChipFlowLayout.swift
-│   ├── AsyncImageCard.swift
-│   ├── ShimmerView.swift
-│   └── ... (30+ components)
+│   └── ...
 │
 ├── Extension/
-│   ├── Color+Ex.swift                   # Semantic colors
-│   ├── View+Ex.swift                    # View helpers
-│   ├── String+Ex.swift                  # String utilities
-│   └── Fonts/                           # Custom fonts
-│
-├── Constants/
-│   └── Constants.swift                  # App constants
+│   ├── Color+Ex.swift                # Semantic color token system
+│   ├── Font+Ex.swift                 # Custom font system
+│   ├── View+Ex.swift
+│   ├── String+Ex.swift
+│   └── Double+Ex.swift
 │
 ├── Utilize/
-│   ├── UserSession.swift                # Session manager
-│   ├── AppLog.swift                     # Structured logging
-│   └── Network/                         # Network monitor
+│   ├── UserSession.swift             # Auth + user identity state
+│   ├── AppLog.swift                  # Structured logging (use instead of print)
+│   ├── AnalyticsService.swift        # Firebase Analytics wrapper
+│   ├── PerformanceService.swift      # Firebase Performance wrapper
+│   └── Network/
+│       └── NetworkMonitor.swift
 │
-├── Preference/                          # User preferences
-│
-├── Resource/                            # Assets, fonts, images
+├── Constants/
+│   └── FirebaseKeys.swift            # All Firestore collection/field name constants
 │
 └── docs/
-    ├── FeaturePlanning.md
-    └── firestore-schema.md
-```
-
-**Statistics:**
-- **211 Swift files**
-- **15 core modules**
-- **30+ custom UI components**
-- **~15,000+ lines of code**
-
----
-
-## 📦 Module Breakdown
-
-### Core Modules
-
-| Module | Status | Files | Description |
-|--------|--------|-------|-------------|
-| **Auth** | ✅ Complete | 7 | Email/Password authentication, registration, password reset |
-| **Home** | ✅ Complete | 6+ | Landing screen, banners, announcements, quick actions |
-| **Menu** | ✅ Complete | 14+ | Product catalog, search, categories, product management |
-| **ProductCustomization** | ✅ Complete | 4 | Dynamic customization UI for drinks |
-| **Cart** | ✅ Complete | 5 | Shopping cart, checkout flow |
-| **Order** | ✅ Complete | 15+ | Order tracking, status updates, receipts, cancellation |
-| **Wallet** | ✅ Complete | 10+ | Balance, top-up, transactions, payments |
-| **Review** | ✅ Complete | 8 | Ratings, reviews, proof of purchase, moderation |
-| **Favorites** | ✅ Complete | 4 | Wishlist functionality |
-| **Map** | ✅ Complete | 5 | Store locator, branch details, directions |
-| **Account** | ✅ Complete | 15+ | Profile, inbox, loyalty cards |
-| **Notification** | ✅ Complete | 3 | FCM integration, push notifications |
-| **Theme** | ✅ Complete | 4 | Dark mode, color system |
-| **Settings** | ✅ Complete | 2 | App settings, preferences |
-| **Profile** | ✅ Complete | 4 | Edit profile, change password |
-
----
-
-## 🗄️ Firestore Schema
-
-### Collections Overview
-
-```
-firestore
-├── users/{userId}
-│   ├── fcmTokens/{deviceId}
-│   └── favorites/{productId}
-│
-├── products/{productId}
-│   ├── ratings/{userId}
-│   └── reviews/{reviewId}
-│
-├── carts/{userId}
-├── orders/{orderId}
-├── wallets/{userId}
-├── branches/{branchId}
-├── announcements/{announcementId}
-└── loyaltyCards/{cardId}
-```
-
-### Key Document Schemas
-
-#### User Document
-```json
-{
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "role": "customer",
-  "points": 150,
-  "createdAt": "<Timestamp>"
-}
-```
-
-#### Product Document
-```json
-{
-  "name": "Cappuccino",
-  "description": "Classic Italian coffee...",
-  "price": 4.50,
-  "imageURL": "https://...",
-  "category": "Coffee",
-  "available": true,
-  "customizations": {
-    "Size": {"Small": 0.0, "Large": 1.0},
-    "Temperature": {"Hot": 0.0, "Iced": 0.5}
-  },
-  "avgRating": 4.3,
-  "ratingCount": 127,
-  "ratingDistribution": {"5": 80, "4": 30, "3": 10, "2": 5, "1": 2}
-}
-```
-
-#### Order Document
-```json
-{
-  "userId": "<uid>",
-  "items": [...],
-  "totalPrice": 12.50,
-  "status": "Preparing",
-  "timestamp": "<Timestamp>",
-  "productIds": ["prod1", "prod2"],
-  "branchId": "branch1"
-}
-```
-
-#### Rating Document
-```json
-{
-  "score": 5,
-  "orderId": "order123",
-  "reviewId": "review456",
-  "createdAt": "<Timestamp>",
-  "updatedAt": "<Timestamp>"
-}
-```
-
-#### Review Document
-```json
-{
-  "userId": "<uid>",
-  "userName": "Jane Doe",
-  "orderId": "order123",
-  "rating": 5,
-  "title": "Absolutely perfect!",
-  "body": "Best cappuccino I've ever had...",
-  "helpfulCount": 12,
-  "helpfulBy": ["user1", "user2"],
-  "isHidden": false,
-  "createdAt": "<Timestamp>"
-}
-```
-
-#### Loyalty Card Document
-```json
-{
-  "cardNumber": "CC-2026-0001",
-  "ownerId": "<uid>",
-  "ownerName": "Jane Doe",
-  "memberSince": "2026-01-15",
-  "points": 250,
-  "sharedWith": ["user2", "user3"],
-  "createdAt": "<Date>"
-}
+    ├── firestore-schema.md           # Full Firestore schema reference
+    ├── architecture.md               # MVVM + Repository deep-dive
+    ├── theme-system.md               # Theme and color token guide
+    ├── navigation.md                 # Navigation flow and deep-link routing
+    └── custom-components.md          # Custom UI component catalog
 ```
 
 ---
 
-## 🎨 Custom Components
+## Module Breakdown
 
-CoffeeCraft includes **30+ reusable SwiftUI components**:
+Each module follows the folder convention `MVVM/Model`, `MVVM/ViewModel`, `View` (or the flat equivalents `Model/`, `ViewModel/`, `View/`).
 
-### Form & Input
-- `MaterialTextField` - Floating label with validation
-- `CustomTextField1` - Extended field with icons
-- `CustomSecureField` - Password input
-- `CustomNumberField` - Numeric input
+### Auth
 
-### Selection
-- `CustomSegmentedControl` - Styled segment picker
-- `CustomSingleSelectionView` - Radio button grid
-- `CustomMultipleSelectionView` - Checkbox grid
-- `ChipFlowLayout` - Wrapping chip layout
-- `PickerSheetView` - Bottom sheet picker
+Email/password sign-up, sign-in, and password reset via Firebase Auth. On sign-up the app writes a `users/{uid}` document with name, email, role, and optional profile fields. `AuthViewModel` restores sessions on launch via `Auth.auth().currentUser`.
 
-### Media & Display
-- `AsyncImageCard` - Image with shimmer loading
-- `InfiniteCarousel` - Auto-scrolling carousel
-- `WebView` - WKWebView wrapper
-- `ShimmerView` - Skeleton loading effect
+Key files: `AuthViewModel.swift`, `AuthView.swift`, `FirebaseAuthRepository.swift`
 
-### Navigation
-- `PushLink` - Custom navigation link
-- `CustomNavigationBar` - Bespoke nav bar
-- `ToolBarButton` - Toolbar button
+### Home
 
-### Feedback
-- `AlertManager` - Global alert system
-- `ToastManager` - Toast notifications
-- `ComingSoonView` - Feature placeholder
+Landing screen with an infinite banner carousel, announcement cards, and wallet balance shortcut. `AnnouncementViewModel` listens to the `announcements` Firestore collection.
 
-### Layout
-- `ActionCardButton` - Large card button
-- `CustomRefreshScrollView` - Pull-to-refresh
-- `MinimumLoadingTime` - Loading duration enforcer
+Key files: `HomeView.swift`, `AnnouncementViewModel.swift`, `InfiniteCarousel.swift`
 
----
+### Menu
 
-## 🚀 Getting Started
+Product catalog grouped by category. Supports search by name, category chip filtering, and product detail with customization. Managers see add/edit/delete controls. `ProductViewModel` uses a snapshot listener so product availability updates in real time.
 
-### Prerequisites
+Key files: `MenuView.swift`, `ProductViewModel.swift`, `FirestoreProductRepository.swift`
 
-- **Xcode 15+**
-- **iOS 17+** device or simulator
-- **Firebase project** with:
-  - Authentication enabled (Email/Password)
-  - Cloud Firestore database
-  - Cloud Messaging enabled
-- **CocoaPods** or **Swift Package Manager**
+### ProductCustomization
 
-### Installation
+Dynamic drink customization sheet. `Product.customizations` is a `[String: [String: Double]]` map (e.g. `"Size" → ["Small": 0.0, "Large": 1.0]`). The sheet renders one selection group per key. Price delta is computed in `CartItem.totalPrice`.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/CoffeeCraft.git
-   cd CoffeeCraft
-   ```
+Key files: `CustomizationView.swift`, `CustomizationOption.swift`
 
-2. **Install dependencies**
-   
-   Dependencies are managed via Swift Package Manager and should resolve automatically when opening the project in Xcode.
-   
-   Required Firebase packages:
-   - FirebaseAuth
-   - FirebaseFirestore
-   - FirebaseMessaging
+### Cart
 
-3. **Firebase setup**
-   
-   a. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
-   
-   b. Enable Email/Password authentication:
-      - Go to Authentication → Sign-in method
-      - Enable Email/Password provider
-   
-   c. Create a Firestore database:
-      - Go to Firestore Database
-      - Create database in production mode
-      - Set initial rules (see below)
-   
-   d. Enable Cloud Messaging:
-      - Go to Cloud Messaging
-      - Add iOS app with your bundle ID
-   
-   e. Download `GoogleService-Info.plist`:
-      - Replace `CoffeeCraft/GoogleService-Info-Dev.plist` with your file
+Shopping cart backed by a Firestore document at `carts/{userId}`. `CartManager` encodes the full `CartItem` (including the nested `Product` snapshot) via `Firestore.Encoder` so the cart survives app restarts.
 
-4. **Firestore Security Rules** (Development)
-   ```javascript
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /{document=**} {
-         allow read, write: if request.auth != null;
-       }
-     }
-   }
-   ```
-   
-   ⚠️ **Important:** Update rules for production deployment!
+Key files: `CartManager.swift`, `CartItem.swift`
 
-5. **Seed sample data** (Optional)
-   
-   - Run the app
-   - Go to Account tab
-   - Tap "Seed Database" (only visible in Dev environment)
-   - This will populate:
-     - Sample products
-     - Store branches
-     - Announcements
+### Order
 
-6. **Build and run**
-   ```
-   - Open CoffeeCraft.xcodeproj in Xcode
-   - Select Dev scheme
-   - Choose target device/simulator
-   - Press ⌘R to build and run
-   ```
+Customer-facing order list with real-time status updates and cursor-based pagination. Each order card links to a detail view showing a status timeline, pricing breakdown, and reorder button. Orders in `Pending` status can be cancelled, which triggers an atomic wallet refund. Managers see a separate `AdminOrdersView` to update order status and send FCM notifications to the customer.
 
-### Creating Test Accounts
+Order status flow: `Pending` → `Preparing` → `Ready` → `Completed`
 
-Use the Register screen to create accounts:
+Key files: `OrderViewModel.swift`, `AdminOrdersViewModel.swift`, `OrderService.swift`, `Order.swift`, `OrderDetailView.swift`, `OrderReceiptView.swift`
 
-**Customer Account:**
-- Name: Test Customer
-- Email: customer@test.com
-- Password: Test123!
-- Role: Customer
+### Wallet
 
-**Manager Account:**
-- Name: Test Manager
-- Email: manager@test.com
-- Password: Test123!
-- Role: Manager
+In-app wallet with balance display and scrollable transaction history. Top-up is a three-step flow: Amount → Bank → Checkout. All balance mutations (top-up, payment, refund) go through `WalletService.shared` using Firestore transactions to keep the `wallets` balance and `wallet_transactions` ledger in sync atomically.
+
+Key files: `WalletViewModel.swift`, `WalletService.swift`, `Wallet.swift`, `WalletTransaction.swift`
+
+### Review
+
+Proof-of-purchase verified reviews. Before a customer can rate a product, the app queries `orders` for a completed order containing that product's ID. Star ratings live at `products/{id}/ratings/{userId}` (one per user per product). Review text lives at `products/{id}/reviews/{autoId}`. `RatingService` runs a Firestore transaction on submit to atomically update `avgRating`, `ratingCount`, and `ratingDistribution` on the product document.
+
+Key files: `RatingService.swift`, `ReviewViewModel.swift`, `UserRating.swift`, `Review.swift`
+
+### Favorites
+
+Wishlist backed by `users/{uid}/favorites/{productId}` subcollection documents. `FavoriteViewModel` loads favorites on launch and keeps an in-memory set for O(1) toggle checks.
+
+Key files: `FavoriteViewModel.swift`, `FavoriteItem.swift`
+
+### Map
+
+Store locator with MapKit showing all branches as annotated pins. Branch detail sheet shows hours, amenities, wait time, and a directions button. `OrderEnvironment.shared` holds the selected branch and delivery type for the checkout flow.
+
+Key files: `MapView.swift`, `MapViewModel.swift`, `Branch.swift`, `BranchRepository.swift`
+
+### Account
+
+Profile hub with sections for wallet balance, loyalty cards, inbox, order history, profile editing, and appearance settings. The inbox fetches paginated notifications from the `users/{uid}/notifications` subcollection and categorizes them into typed row views (order status, wallet, announcement, promotion, reward).
+
+Key files: `AccountView.swift`, `InboxViewModel.swift`, `CardViewModel.swift`
+
+### AdminDashboard
+
+Manager-only tab with four sub-sections:
+- **Dashboard Summary** — KPI cards (revenue today/week/month, active orders, new customers) and a live order feed
+- **Order Analytics** — real-time order queue with status filter
+- **Product Performance** — best sellers and analytics charts
+- **Sales Analytics** — revenue over time and peak-hour heatmap
+- **Review Moderation** — hide/unhide reviews per product
+
+Key files: `DashboardHomeViewModel.swift`, `OrderAnalyticsViewModel.swift`, `ProductPerformanceViewModel.swift`, `SalesAnalyticsViewModel.swift`, `ReviewModerationViewModel.swift`
+
+### Theme
+
+Manages appearance mode (system/light/dark) and color palette (Brown, Strawberry, Matcha, Oreo) persisted via `@AppStorage`. See `docs/theme-system.md` for the full token reference.
+
+Key files: `ThemeManager.swift`, `AppTheme.swift`, `AppearanceSettingsView.swift`
+
+### Notification
+
+`AppDelegate` registers for push notifications and forwards FCM tokens to Firestore at `users/{uid}/fcmTokens/{deviceId}`. `NotificationCoordinator` receives tap callbacks and sets a flag that `RootView` observes to navigate to the Orders tab.
+
+Key files: `AppDelegate.swift`, `NotificationCoordinator.swift`
 
 ---
 
-## ⚙️ Environment Configuration
+## Key Data Models
 
-CoffeeCraft supports multiple Firebase environments:
+### User
 
 ```swift
-enum FirebaseEnvironment {
-    case dev    // Development
-    case sit    // System Integration Testing
-    case uat    // User Acceptance Testing
-    case prod   // Production
+struct User: Identifiable, Codable, Equatable {
+    var id: String
+    var name: String
+    var email: String
+    var role: UserRole          // .customer | .manager
+    var phoneNumber: String?
+    var gender: String?
+    var dateOfBirth: Date?
+    var city: String?
 }
 ```
 
-### Setting Up Environments
+### Product
 
-1. Duplicate the `Dev` scheme in Xcode
-2. Rename to `SIT`, `UAT`, or `Prod`
-3. Add corresponding `GoogleService-Info.plist` files:
-   - `GoogleService-Info-Dev.plist`
-   - `GoogleService-Info-SIT.plist`
-   - `GoogleService-Info-UAT.plist`
-   - `GoogleService-Info.plist` (production)
+```swift
+struct Product: Identifiable, Codable {
+    var id: String
+    var name: String
+    var description: String
+    var price: Double
+    var imageURL: String
+    var category: String
+    var available: Bool
+    var customizations: [String: [String: Double]]?  // e.g. "Size" → ["Large": 1.0]
+    var avgRating: Double?
+    var ratingCount: Int?
+    var ratingDistribution: [String: Int]?           // keys "1".."5"
+}
+```
 
-4. Update `CoffeeCraftApp.swift` to select the correct config based on build scheme
+### CartItem
 
----
+```swift
+struct CartItem: Identifiable, Codable {
+    let id: UUID
+    let product: Product          // full snapshot at add-to-cart time
+    let selections: [String: String]  // e.g. ["Size": "Large"]
+    let extras: [String]
+    var quantity: Int
+    var totalPrice: Double        // computed from base price + option deltas * quantity
+}
+```
 
-## 🗺️ Roadmap
+### Order
 
-### ✅ Phase 1-7: Completed (v1.0)
+Stored in `orders/{autoId}`. Key fields:
 
-| Phase | Features | Status |
-|-------|----------|--------|
-| **Phase 1** | Auth, Basic Product CRUD | ✅ |
-| **Phase 2** | Cart, Checkout, Orders | ✅ |
-| **Phase 3** | Wallet System, Payments | ✅ |
-| **Phase 4** | Real-time Order Tracking | ✅ |
-| **Phase 5** | Push Notifications, Inbox | ✅ |
-| **Phase 6** | Favorites, Maps, Profile | ✅ |
-| **Phase 7** | Reviews, Ratings, Loyalty Cards | ✅ |
+| Field | Type | Notes |
+|---|---|---|
+| `userId` | String | Firebase Auth UID |
+| `orderId` | Int | Sequential display number |
+| `items` | [CartItemData] | Lightweight snapshot — name, price, selections, extras |
+| `totalPrice` | Double | |
+| `status` | String | "Pending" / "Preparing" / "Ready" / "Completed" |
+| `timestamp` | Date | |
+| `paymentMethod` | String? | "wallet" or "cash" |
+| `walletAmountPaid` | Double? | Wallet amount deducted, used for refund |
+| `branchId` | String? | Branch document ID |
+| `productIds` | [String]? | Flat list used for proof-of-purchase queries |
 
-### 🚧 Phase 8: Admin Dashboard (In Progress)
+### Wallet
 
-- [ ] Sales analytics dashboard
-- [ ] Product performance metrics
-- [ ] Revenue charts (daily/weekly/monthly)
-- [ ] User management panel
-- [ ] Review moderation dashboard
-- [ ] Order analytics
+```swift
+struct Wallet: Identifiable, Codable {
+    var id: String?           // = userId
+    var balance: Double
+    let currency: String      // "USD"
+    var totalTopUp: Double
+    var totalSpent: Double
+    let createdAt: Date
+    var updatedAt: Date
+}
+```
 
-**Priority:** P0 (Critical)  
-**Timeline:** 2-3 weeks
+### WalletTransaction
 
-### 📅 Phase 9: Customer Experience (Planned)
+Append-only ledger document. `amount` is positive for credits (top-up, refund, reward) and negative for debits (payment).
 
-- [ ] Home screen curated sections
-  - [ ] Featured products
-  - [ ] Best sellers (dynamic)
-  - [ ] New arrivals
-- [ ] Product availability badges
-- [ ] Recently viewed products
-- [ ] Advanced search & filters
-- [ ] Order tracking enhancements
+| Field | Type | Notes |
+|---|---|---|
+| `userId` | String | |
+| `type` | String | "topup" / "payment" / "refund" / "reward" |
+| `amount` | Double | + credit, - debit |
+| `balanceBefore` | Double | Snapshot for auditability |
+| `balanceAfter` | Double | Snapshot for auditability |
+| `description` | String | Human-readable label |
+| `referenceId` | String? | orderId for payment/refund types |
+| `timestamp` | Date | |
 
-**Priority:** P1 (High)  
-**Timeline:** 2 weeks
+### LoyaltyCard
 
-### 💰 Phase 10: Monetization (Planned)
-
-- [ ] Promo code system
-- [ ] Membership tiers (Bronze, Silver, Gold)
-- [ ] Gift cards & vouchers
-- [ ] Birthday rewards
-- [ ] Referral program
-
-**Priority:** P1 (High)  
-**Timeline:** 2-3 weeks
-
-### 🔮 Phase 11: Advanced Features (Future)
-
-- [ ] Multiple payment methods (Stripe integration)
-- [ ] Saved addresses
-- [ ] Delivery mode
-- [ ] Order scheduling
-- [ ] Language localization (Khmer)
-- [ ] Social sharing
-- [ ] Group orders
-
-**Priority:** P2-P3 (Medium-Low)  
-**Timeline:** TBD
-
-### 🛠️ Technical Improvements (Completed ✅)
-
-- [x] Firebase Analytics integration
-- [x] Crashlytics setup
-- [x] Unit test coverage (target 60%)
-- [x] UI automation tests
-- [x] Offline mode support
-- [x] Image caching optimization
-- [x] Performance monitoring
-
----
-
-## 📊 Project Statistics
-
-- **Total Swift Files:** 211
-- **Core Modules:** 15
-- **Custom Components:** 30+
-- **Firestore Collections:** 9
-- **Lines of Code:** ~15,000+
-- **Development Time:** 6+ months
-- **Status:** Production-ready
+```swift
+struct LoyaltyCard: Identifiable, Codable {
+    var id: String?
+    let cardNumber: String
+    let ownerId: String
+    let ownerName: String
+    let memberSince: String
+    var points: Int
+    let createdAt: Date
+    var sharedWith: [String]   // array of userIds with shared access
+}
+```
 
 ---
 
-## 🤝 Contributing
+## Firestore Collections
 
-This is a portfolio/learning project, but contributions are welcome!
+For the full field-level schema with example documents see `CoffeeCraft/CoffeeCraft/CoffeeCraft/docs/firestore-schema.md`.
 
-### How to Contribute
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Coding Standards
-
-- Follow Swift style guide
-- Use MVVM pattern
-- Add comments for complex logic
-- Include unit tests for new features
-- Update documentation
+| Collection | Document ID | Purpose |
+|---|---|---|
+| `users` | Firebase Auth UID | User profile, role, optional details |
+| `products` | Auto ID | Product catalog with customizations and rating aggregates |
+| `products/{id}/ratings` | userId | One rating per user per product (proof of purchase, star score) |
+| `products/{id}/reviews` | Auto ID | Optional review text linked to a rating |
+| `carts` | userId | Active shopping cart (full CartItem snapshots) |
+| `orders` | Auto ID | Placed orders with status, items, payment details |
+| `wallets` | userId | Wallet balance and lifetime totals |
+| `wallet_transactions` | Auto ID | Append-only balance ledger |
+| `branches` | Auto ID | Physical store locations with coordinates, hours, amenities |
+| `announcements` | Auto ID | Home screen announcement cards |
+| `loyaltyCards` | Auto ID | Loyalty cards, ownership, shared access, points |
 
 ---
 
-## 📄 License
+## Theme System
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+`ThemeManager.shared` manages two independent settings:
 
----
+- **Appearance mode** (`AppTheme`): `.system`, `.light`, `.dark` — maps to SwiftUI `ColorScheme`
+- **Color palette** (`ColorPalette`): `.brown`, `.strawberry`, `.matcha`, `.oreo`
 
-## 👨‍💻 Author
+Both are persisted with `@AppStorage` and survive app restarts.
 
-**Sok Pich**  
-iOS Developer | SwiftUI Enthusiast
+### Semantic Color Tokens
 
-- GitHub: [@cobra-PICH](https://github.com/cobra-PICH)
-- Portfolio: [your-portfolio.com](https://your-portfolio.com)
+Always use these tokens instead of raw hex colors or asset catalog names:
 
----
+| Token | Purpose |
+|---|---|
+| `Color.bgPrimary` | Main app background |
+| `Color.bgSecondary` | Grouped list section background |
+| `Color.surfacePrimary` | Card and sheet surfaces |
+| `Color.surfaceSub` | Nested rows, chips, tag backgrounds |
+| `Color.borderColor` | Dividers, card strokes, input borders |
+| `Color.textPrimary` | Body copy and titles |
+| `Color.textSecondary` | Subtitles and secondary labels |
+| `Color.textMuted` | Placeholders, timestamps, captions |
+| `Color.accentPrimary` | Primary CTA buttons, tab highlights, active states |
+| `Color.accentGold` | Rewards, points, premium CTAs |
 
-## 🙏 Acknowledgments
+All tokens call `ThemeManager.shared.palette.dynamicColor(...)`, which uses `UIColor(dynamicProvider:)` to handle light/dark switching automatically.
 
-- Firebase for backend infrastructure
-- SwiftUI community for inspiration
-- Coffee shops everywhere for the inspiration ☕
+### Palette Re-Render
 
----
+`CoffeeCraftApp` applies `.id(themeManager.palette.rawValue)` to the root view. This forces a full SwiftUI re-render when the palette changes, ensuring every `Color.accentPrimary` call picks up the new palette. Do not remove this modifier.
 
-## 📞 Support
-
-For questions or issues:
-- Open an issue on GitHub
-- Email: pichsok016@gmail.com
-
----
-
-<p align="center">
-  <strong>Built with ☕ and Swift</strong><br>
-  CoffeeCraft © 2026
-</p>
+See `docs/theme-system.md` for a complete palette and token reference.
 
 ---
 
-## 🔗 Related Documentation
+## Navigation Flow
 
-- [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) - Comprehensive technical documentation
-- [FEATURE_PRIORITY_PLAN.md](docs/FEATURE_PRIORITY_PLAN.md) - Strategic feature roadmap
-- [firestore-schema.md](CoffeeCraft/docs/firestore-schema.md) - Database schema reference
-- [FeaturePlanning.md](CoffeeCraft/docs/FeaturePlanning.md) - Feature checklist
+```
+CoffeeCraftApp (NavigationStack)
+  └─ RootView
+       ├─ CoffeeLoaderView          (shown while session.isRestoring = true)
+       └─ Tab-switched content
+            ├─ HomeView             (all roles)
+            ├─ MenuView             (all roles; manager gets edit controls)
+            ├─ OrdersView           (customer) / AdminOrdersView (manager)
+            ├─ AccountView          (all roles)
+            └─ AdminDashboardHomeView  (manager only — Dashboard tab)
+```
 
----
+The `Tab` enum has five cases: `dashboard`, `home`, `menu`, `orders`, `profile`. `Tab.visible(for:)` filters out `.dashboard` for customer role, so the tab bar shows 4 tabs for customers and 5 for managers.
 
-## 📸 App Preview
-
-> *Coming soon: Screenshots and demo video*
-
-**Key Screens:**
-- Authentication (Login/Register)
-- Home Dashboard
-- Product Menu & Search
-- Product Detail & Customization
-- Shopping Cart
-- Order Tracking
-- Reviews & Ratings
-- Wallet & Top-up
-- Loyalty Cards
-- Store Map
-- Profile & Settings
-- Admin Dashboard
+Push notification taps route through `NotificationCoordinator`. When the coordinator sets `shouldNavigateToOrders`, `RootView` switches `selectedTab` to `.orders`.
 
 ---
 
-**Status:** ✅ Production Ready | **Version:** 1.0 | **Last Updated:** March 2026
+## Custom UI Components
+
+All reusable components live in `CoffeeCraft/Custom/`. Prefer these over building new primitives.
+
+### Input
+
+| Component | Description |
+|---|---|
+| `MaterialTextField` | Floating-label text field with validation state |
+| `CustomTextField1` | Extended field with leading icon |
+| `CustomSecureField` | Password field with show/hide toggle |
+| `CustomNumberField` | Numeric-only input |
+
+### Selection
+
+| Component | Description |
+|---|---|
+| `CustomSegmentedControl` | Styled segment picker matching app theme |
+| `CustomSingleSelectionView` | Radio-button-style grid for single selection |
+| `CustomMultipleSelectionView` | Checkbox-style grid for multi-select |
+| `ChipFlowLayout` | Wrapping chip layout for tag/filter lists |
+| `PickerSheetView` | Bottom sheet with list picker |
+
+### Media
+
+| Component | Description |
+|---|---|
+| `AsyncImageCard` | Async image with built-in shimmer skeleton while loading |
+| `InfiniteCarousel` | Auto-scrolling banner carousel with manual page control |
+| `ShimmerView` | Standalone shimmer/skeleton effect for loading states |
+| `WebView` | WKWebView wrapper for in-app web content |
+
+### Feedback
+
+| Component | Description |
+|---|---|
+| `AlertManager` | Global alert/error dialog system (call `AlertManager.shared.showSuccess(...)`) |
+| `ToastManager` | Transient toast notifications (call `ToastManager.shared.show(...)`) |
+| `LoaderManager` | Full-screen loading spinner overlay |
+| `OfflineBannerModifier` | Sticky banner shown when `NetworkMonitor` detects no connectivity |
+| `ComingSoonView` | Placeholder for features not yet implemented |
+
+### Layout and Navigation
+
+| Component | Description |
+|---|---|
+| `CustomRefreshScrollView` | ScrollView with pull-to-refresh |
+| `ActionCardButton` | Large tappable card for primary actions |
+| `ToolBarButton` | Consistent toolbar/navigation bar button |
+| `MinimumLoadingTime` | Ensures a loading state shows for at least N milliseconds |
+
+---
+
+## Environment Setup
+
+The project has four Xcode schemes, each pointing to a separate Firebase project via its own `GoogleService-Info.plist`:
+
+| Scheme | Purpose | Plist |
+|---|---|---|
+| `CoffeeCraft-Dev` | Local development | `GoogleService-Info-Dev.plist` |
+| `CoffeeCraft-SIT` | System integration testing | `GoogleService-Info-SIT.plist` |
+| `CoffeeCraft-UAT` | User acceptance testing | `GoogleService-Info-UAT.plist` |
+| `CoffeeCraft` | Production | `GoogleService-Info.plist` |
+
+Scheme files live in `CoffeeCraft.xcodeproj/xcshareddata/xcschemes/`.
+
+### Step 1 — Clone the repository
+
+```bash
+git clone https://github.com/cobra-PICH/CoffeeCraft.git
+cd CoffeeCraft
+```
+
+### Step 2 — Set up a Firebase project
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) and create a new project.
+2. Add an iOS app with your bundle identifier.
+3. Enable **Email/Password** authentication under Authentication > Sign-in method.
+4. Create a **Cloud Firestore** database (start in production mode for real deployments; test mode is fine for local dev).
+5. Enable **Firebase Cloud Messaging** under Cloud Messaging.
+6. Download `GoogleService-Info.plist` from the project settings.
+
+### Step 3 — Add the plist to Xcode
+
+Rename the downloaded file to `GoogleService-Info-Dev.plist` and place it in `CoffeeCraft/CoffeeCraft/`. Repeat for each environment you need (SIT, UAT, production).
+
+If you only have one Firebase project for development:
+- Copy the same plist file as `GoogleService-Info-Dev.plist`
+- Select the `CoffeeCraft-Dev` scheme before building
+
+### Step 4 — Resolve Swift Package Manager dependencies
+
+Open `CoffeeCraft/CoffeeCraft.xcodeproj` in Xcode. Xcode will automatically resolve Firebase SPM packages on first open. Required packages:
+
+- `FirebaseAuth`
+- `FirebaseFirestore`
+- `FirebaseMessaging`
+- `FirebaseCrashlytics`
+- `FirebaseAnalytics`
+- `FirebasePerformance`
+
+### Step 5 — Set Firestore security rules (development)
+
+In the Firebase Console under Firestore > Rules, use the following for development only:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+Update these rules before deploying to production.
+
+---
+
+## Running the App
+
+1. Open `CoffeeCraft/CoffeeCraft.xcodeproj` in Xcode 15 or later.
+2. Select the `CoffeeCraft-Dev` scheme from the scheme picker in the toolbar.
+3. Choose an iOS 17 simulator or physical device.
+4. Press `Cmd+R` to build and run.
+
+### Seeding Sample Data
+
+After running the app for the first time, you can populate the database with sample products and branches:
+
+1. Create a manager account (see Creating Test Accounts below).
+2. Go to the Menu tab.
+3. Tap the seed button in the manager controls (visible only in the Dev scheme).
+4. This writes sample products and branch documents to Firestore.
+
+---
+
+## Creating Test Accounts
+
+Use the Register screen in the app to create accounts. Set the role field to the desired role:
+
+**Customer account**
+
+| Field | Value |
+|---|---|
+| Name | Test Customer |
+| Email | customer@test.com |
+| Password | Test123! |
+| Role | Customer |
+
+**Manager account**
+
+| Field | Value |
+|---|---|
+| Name | Test Manager |
+| Email | manager@test.com |
+| Password | Test123! |
+| Role | Manager |
+
+Managers will see a Dashboard tab and the product management controls in the Menu tab.
+
+---
+
+## Contributing
+
+1. Fork the repository.
+2. Create a feature branch from `main`: `git checkout -b feature/your-feature-name`
+3. Follow the MVVM + Repository pattern. New data sources should have a protocol before a Firebase implementation.
+4. Use `Color.accentPrimary`, `Color.bgPrimary`, and the other semantic tokens — never raw hex or system colors.
+5. Use `AppLog.<category>.debug(...)` instead of `print`.
+6. Add doc comments to all public types and functions in `Services/`, `Repository/`, and `ViewModel/` files.
+7. Open a pull request against `main`.
+
+---
+
+**Author:** Sok Pich — iOS Developer
+**Contact:** pichsok016@gmail.com
+**Status:** Production-ready | Version 1.0 | Last updated March 2026
