@@ -116,14 +116,17 @@ class InboxViewModel: ObservableObject {
         }
         currentListenerLimit = newLimit
         listener?.remove()
+        attachListener(userId: userId, limit: newLimit)
+    }
 
-        AppLog.menu.debug("🔌 setupRealtimeListener — uid: \(userId), limit: \(newLimit)")
+    private func attachListener(userId: String, limit: Int) {
+        AppLog.menu.debug("🔌 setupRealtimeListener — uid: \(userId), limit: \(limit)")
 
         listener = db.collection(Firebase.Users.collection)
             .document(userId)
             .collection(Firebase.Users.Notifications.collection)
             .order(by: Firebase.Users.Notifications.createdAt, descending: true)
-            .limit(to: newLimit)
+            .limit(to: limit)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self else { return }
 
@@ -137,48 +140,64 @@ class InboxViewModel: ObservableObject {
                 for change in changes {
                     switch change.type {
                     case .added:
-                        if let notif = try? change.document.data(as: AppNotification.self),
-                           !self.notifications.contains(where: { $0.id == notif.id }) {
-                            self.notifications.insert(notif, at: 0)
-                            if !notif.isRead {
-                                self.unreadCount += 1
-                                self.syncAppIconBadge(self.unreadCount)
-                            }
-                            AppLog.menu.debug("➕ Realtime — new notification: \(notif.id ?? "nil")")
-                        }
-
+                        handleAdded(change)
                     case .modified:
-                        if let updated = try? change.document.data(as: AppNotification.self),
-                           let index = self.notifications.firstIndex(where: { $0.id == updated.id }) {
-                            let wasUnread = !self.notifications[index].isRead
-                            let isNowRead = updated.isRead
-                            self.notifications[index] = updated
-                            // Keep unreadCount in sync when listener picks up a read change
-                            if wasUnread && isNowRead {
-                                self.unreadCount = max(0, self.unreadCount - 1)
-                                self.syncAppIconBadge(self.unreadCount)
-                            }
-                            AppLog.menu.debug("✏️ Realtime — updated: \(updated.id ?? "nil"), isRead: \(updated.isRead)")
-                        }
-
+                        handleModified(change)
                     case .removed:
-                        if let removed = try? change.document.data(as: AppNotification.self),
-                           let index = self.notifications.firstIndex(where: { $0.id == removed.id }) {
-                            self.notifications.remove(at: index)
-                            if !removed.isRead {
-                                self.unreadCount = max(0, self.unreadCount - 1)
-                                self.syncAppIconBadge(self.unreadCount)
-                            }
-                            AppLog.menu.debug("🗑️ Realtime — removed transient: \(removed.id ?? "nil")")
-                        }
-
+                        handleRemoved(change)
                     @unknown default:
                         break
                     }
                 }
             }
     }
+    
+    private func handleAdded(_ change: DocumentChange) {
+        guard let notif = try? change.document.data(as: AppNotification.self),
+              !notifications.contains(where: { $0.id == notif.id } )
+        else {
+            return
+        }
+        
+        notifications.insert(notif, at: 0)
+        
+        if !notif.isRead {
+            self.unreadCount += 1
+            self.syncAppIconBadge(self.unreadCount)
+        }
+        AppLog.menu.debug("➕ Realtime — new notification: \(notif.id ?? "nil")")
+    }
+    
+    private func handleModified(_ change: DocumentChange) {
+        guard let updated = try? change.document.data(as: AppNotification.self),
+              let index = notifications.firstIndex(where: { $0.id == updated.id }) else { return }
 
+        let wasUnread = !notifications[index].isRead
+        let isNowRead = updated.isRead
+
+        notifications[index] = updated
+
+        if wasUnread && isNowRead {
+            self.unreadCount = max(0, self.unreadCount - 1)
+            self.syncAppIconBadge(self.unreadCount)
+        }
+        AppLog.menu.debug("✏️ Realtime — updated: \(updated.id ?? "nil"), isRead: \(updated.isRead)")
+    }
+    
+    private func handleRemoved(_ change: DocumentChange) {
+        guard let removed = try? change.document.data(as: AppNotification.self),
+              let index = notifications.firstIndex(where: { $0.id == removed.id }) else { return }
+
+        notifications.remove(at: index)
+
+        if !removed.isRead {
+            self.unreadCount = max(0, self.unreadCount - 1)
+            self.syncAppIconBadge(self.unreadCount)
+        }
+
+        AppLog.menu.debug("🗑️ Realtime — removed transient: \(removed.id ?? "nil")")
+    }
+    
     // MARK: - Refresh
 
     func refreshNotifications() async {
