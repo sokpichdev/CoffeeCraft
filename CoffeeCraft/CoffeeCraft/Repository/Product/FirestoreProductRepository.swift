@@ -82,7 +82,7 @@ struct FirestoreProductRepository: ProductRepositoryProtocol {
             category: data[Firebase.Products.category] as? String ?? "Others",
             available: data[Firebase.Products.available] as? Bool ?? true,
             customizations: data[Firebase.Products.customizations] as? [String: [String: Double]],
-            pointsValue: data[Firebase.Products.pointsValue] as? Int ?? 0,
+            pointsValue: data[Firebase.Products.pointsValue] as? Double ?? 0,
             avgRating: data[Firebase.Products.avgRating] as? Double,
             ratingCount: data[Firebase.Products.ratingCount] as? Int,
             ratingDistribution: data[Firebase.Products.ratingDistribution] as? [String: Int]

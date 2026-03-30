@@ -194,6 +194,18 @@ enum Firebase {
         static let createdAt       = "createdAt"
     }
 
+    // MARK: - points_transactions
+
+    enum PointsTransactions {
+        static let collection   = "points_transactions"
+        static let userId       = "userId"
+        static let cardNumber   = "cardNumber"
+        static let orderId      = "orderId"
+        static let points       = "points"
+        static let description  = "description"
+        static let timestamp    = "timestamp"
+    }
+
     // MARK: - counters
 
     enum Counters {
