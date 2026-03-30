@@ -49,6 +49,7 @@ struct AppLog {
     static let order     = Logger(subsystem: subsystem, category: "Order")      // User orders
     static let wallet    = Logger(subsystem: subsystem, category: "Wallet")
     static let dashboard = Logger(subsystem: subsystem, category: "Dashboard")
+    static let rewards   = Logger(subsystem: subsystem, category: "Rewards")
 
     // MARK: - extractValue
     // Recursively walks through any Swift value using Mirror (Swift's reflection API)
