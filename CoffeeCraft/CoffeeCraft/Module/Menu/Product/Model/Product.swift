@@ -17,6 +17,10 @@ struct Product: Identifiable, Hashable, Codable, Equatable {
     var available: Bool = true
     var customizations: [String: [String: Double]]?
 
+    // MARK: Phase 8 — Rewards
+    /// Loyalty points awarded when this product is part of a completed order. Defaults to 0.
+    var pointsValue: Int = 0
+
     // MARK: Phase 7 — Ratings
     /// Running average of all submitted star scores (1.0 – 5.0).
     /// nil on products created before Phase 7. Display as 0 or hide widget.

@@ -49,6 +49,7 @@ enum Firebase {
             static let quantity    = "quantity"
             static let selections  = "selections"
             static let extras      = "extras"
+            static let pointsValue = "pointsValue"
         }
     }
 
@@ -120,6 +121,7 @@ enum Firebase {
         static let avgRating          = "avgRating"
         static let ratingCount        = "ratingCount"
         static let ratingDistribution = "ratingDistribution"
+        static let pointsValue        = "pointsValue"
 
         // MARK: Subcollection — products/{id}/reviews
         enum Reviews {
