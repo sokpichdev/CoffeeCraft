@@ -89,14 +89,11 @@ struct AllCardsView: View {
     // MARK: - Card Row
     private func cardRow(card: LoyaltyCard) -> some View {
         VStack(spacing: 0) {
-            // Top Status Badges
-            if snapshotCards.count > 1 {
+            if snapshotCards.count > 1 { // Top Status Badges
                 HStack(spacing: 8) {
-                    // Active Card Badge
-                    if card.isActiveForCurrentUser {
+                    if card.isActiveForCurrentUser { // Active Card Badge
                         StatusBadgeView(icon: "checkmark.circle.fill", text: "Active", bgColor: .semanticSuccess)
                     }
-                    
                     // Ownership Status Badge
                     StatusBadgeView(icon: card.isOwnedByCurrentUser ? "person.fill" : "person.fill",
                                     text: card.isOwnedByCurrentUser ? "Owner" : "Shared",
@@ -106,23 +103,16 @@ struct AllCardsView: View {
                 .padding(.horizontal, 8)
                 .padding(.bottom, 8)
             }
-
             FlippableCardView(card: card, width: cardWidth)
-            
-            // buttons
             HStack(spacing: 12) {
                 if !card.isActiveForCurrentUser {
-                    CustomCoffeeButton(title: "Activate",
-                                       buttonImage: "checkmark.circle",
+                    CustomCoffeeButton(title: "Activate", buttonImage: "checkmark.circle",
                                        bgColors: [Color.accentPrimary, Color.accentPrimary.opacity(0.6)]) {
-                        Task {
-                            try await cardVM.setActiveCard(card)
-                        }
+                        Task { try await cardVM.setActiveCard(card) }
                     }
                 }
                 
-                // Share Button (only for owned cards)
-                if card.isOwnedByCurrentUser {
+                if card.isOwnedByCurrentUser { // Share Button (only for owned cards)
                     CustomCoffeeButton(
                         title: card.isActiveForCurrentUser ? "Share" : "",
                         buttonImage: "square.and.arrow.up",
@@ -137,12 +127,9 @@ struct AllCardsView: View {
                 }
             }
             .padding(.top, 12)
-        }
-        .padding(8)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(card.isActiveForCurrentUser ? Color.accentPrimary.opacity(0.06) : Color.clear)
-        )
+        }.padding(8)
+        .background(RoundedRectangle(cornerRadius: 24)
+            .fill(card.isActiveForCurrentUser ? Color.accentPrimary.opacity(0.06) : Color.clear))
     }
     
     private var ownCardEmpty: some View {

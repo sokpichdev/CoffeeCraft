@@ -154,7 +154,7 @@ class InboxViewModel: ObservableObject {
     
     private func handleAdded(_ change: DocumentChange) {
         guard let notif = try? change.document.data(as: AppNotification.self),
-              !notifications.contains(where: { $0.id == notif.id } )
+              !notifications.contains(where: { $0.id == notif.id })
         else {
             return
         }
