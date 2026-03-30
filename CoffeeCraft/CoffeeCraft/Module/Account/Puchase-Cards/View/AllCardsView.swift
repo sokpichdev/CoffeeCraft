@@ -98,11 +98,9 @@ struct AllCardsView: View {
                     }
                     
                     // Ownership Status Badge
-                    if card.isOwnedByCurrentUser {
-                        StatusBadgeView(icon: "person.fill", text: "Owner", bgColor: Color.accentPrimary)
-                    } else {
-                        StatusBadgeView(icon: "person.2.fill", text: "Shared", bgColor: Color.borderColor)
-                    }
+                    StatusBadgeView(icon: card.isOwnedByCurrentUser ? "person.fill" : "person.fill",
+                                    text: card.isOwnedByCurrentUser ? "Owner" : "Shared",
+                                    bgColor: card.isOwnedByCurrentUser ? Color.accentPrimary : Color.borderColor)
                     Spacer()
                 }
                 .padding(.horizontal, 8)
