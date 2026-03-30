@@ -18,7 +18,7 @@ struct EditProductView: View {
     var productImageURL: String
     var productAvailable: Bool
     var productCustomizations: [String: [String: Double]]
-    var productPointsValue: Int = 0
+    var productPointsValue: Double = 0
 
     @State private var tempName: String = ""
     @State private var tempDescription: String = ""
@@ -156,7 +156,7 @@ struct EditProductView: View {
                             category: tempCategory,
                             available: tempAvailable,
                             customizations: customizationsDict,
-                            pointsValue: Int(tempPointsValue)
+                            pointsValue: tempPointsValue
                         ))
                         dismiss()
                     }
@@ -194,7 +194,7 @@ struct EditProductView: View {
             tempCategory = productCategory
             tempImageURL = productImageURL
             tempAvailable = productAvailable
-            tempPointsValue = Double(productPointsValue)
+            tempPointsValue = productPointsValue
 
             // Convert Firebase format to CustomizationCategory array
             tempCustomizations = productCustomizations.map { key, value in
