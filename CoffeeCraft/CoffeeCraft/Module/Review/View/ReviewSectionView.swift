@@ -146,6 +146,7 @@ private extension ReviewSectionView {
             }
             .padding(.vertical, 4)
         }
+        .scrollClipDisabled()
     }
 
     var seeAllCard: some View {
