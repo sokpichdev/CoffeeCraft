@@ -19,7 +19,7 @@ struct Product: Identifiable, Hashable, Codable, Equatable {
 
     // MARK: Phase 8 — Rewards
     /// Loyalty points awarded when this product is part of a completed order. Defaults to 0.
-    var pointsValue: Int = 0
+    var pointsValue: Double = 0.0
 
     // MARK: Phase 7 — Ratings
     /// Running average of all submitted star scores (1.0 – 5.0).
