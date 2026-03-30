@@ -1,259 +1,513 @@
-# CoffeeCraft — Firestore & Firebase Schema Reference
+# CoffeeCraft — Firestore Schema Reference
 
-This document summarizes all Firebase-related data used by the CoffeeCraft app (Firestore + Auth). It extracts collection names, document shapes, model mappings (Swift types), example documents, uncertainties, and concrete validation steps you can run against your Firebase project or emulator.
+This document covers every Firestore collection used by the CoffeeCraft app. For each collection it lists the document ID convention, all fields with their types and constraints, a concrete example document, and notes on how the app reads and writes the data.
 
-Last scan: 2025-12-16
-
----
-
-## TL;DR
-- Collections used: `users`, `products`, `carts`, `orders`.
-- Auth: Email/password (Firebase Auth). The app uses `Auth.auth().currentUser?.uid` as the primary user identifier.
-- Storage: No Firebase Storage usage found — product images are external URLs (postimg.cc).
+Last updated: March 2026
 
 ---
 
-## Files that touch Firebase
-(Primary files inside `CoffeeCraft/CoffeeCraft`)
+## Collections at a Glance
 
-- `CoffeeCraftApp.swift` — calls `FirebaseApp.configure()`
-- `Module/Auth/ViewModel/AuthViewModel.swift` — imports `FirebaseAuth`, `FirebaseFirestore`; uses collection `users` and Auth APIs (createUser, signIn, signOut, sendPasswordReset)
-- `Module/Menu/Product/ViewModel/ProductViewModel.swift` — reads/writes collection `products` (getDocuments, addDocument, setData, delete, updateData)
-- `Module/Firebase/ProductSeeder.swift` — seeds `products` collection with sample documents (gives canonical fields/values)
-- `Module/Cart/ViewModel/CartManager.swift` — reads/writes `carts` collection; stores cart by document id = `userId` and encodes `CartItem` via `Firestore.Encoder/Decoder`
-- `Module/Firebase/OrderService.swift` — writes to `orders` (placeOrder) and uses `Auth.auth().currentUser?.uid` and `Timestamp`
-- `Module/Order/ViewModel/OrderViewModel.swift` — queries `orders` for current user
-- `Module/Order/ViewModel/AdminOrdersViewModel.swift` — listens to `orders` collection and updates order status
-- `Module/Main/RootView.swift` — reads `Auth.auth().currentUser?.uid` when constructing `CartManager`
-
-> Note: A workspace-wide scan also found other projects that use Firebase (OneNews, etc.), but this document focuses on the `CoffeeCraft` app.
-
----
-
-## Swift model mappings (extracted)
-These structs/classes are defined in the project and map to Firestore documents (directly or indirectly):
-
-- Product (`Module/Menu/Product/Model/Product.swift`)
-- id: String
-- name: String
-- description: String
-- price: Double
-- imageURL: String
-- category: String
-- available: Bool
-- customizations: [String: [String: Double]]?  (optional map of category → option → price)
-
-- User (`Module/Auth/Model/UserRole.swift`)
-- id: String
-- name: String
-- email: String
-- role: UserRole (`"customer"` | `"manager"`)
-
-- CartItem (`Module/Cart/Model/CartItem.swift`) — encoded with `Firestore.Encoder`
-- id: UUID (encoded as string)
-- product: Product (nested)
-- selections: [String: String]
-- extras: [String]
-- totalPrice: computed locally (not stored as a field by the app)
-
-- Order (`Module/Order/Model/Order.swift`)
-- @DocumentID id: String? (Firestore doc id)
-- userId: String
-- items: [CartItemData]
-- totalPrice: Double
-- status: String
-- timestamp: Date (stored in Firestore as `Timestamp`)
-
-- CartItemData (lightweight order item)
-- name: String
-- selections: [String: String]? (optional)
-- extras: [String]? (optional)
-- price: Double
+| Collection | Document ID | Swift Model |
+|---|---|---|
+| `users` | Firebase Auth UID | `User` |
+| `products` | Auto ID | `Product` |
+| `products/{id}/ratings` | userId | `UserRating` |
+| `products/{id}/reviews` | Auto ID | `Review` |
+| `carts` | userId | `[CartItem]` (array field) |
+| `orders` | Auto ID | `Order` |
+| `wallets` | userId | `Wallet` |
+| `wallet_transactions` | Auto ID | `WalletTransaction` |
+| `branches` | Auto ID | `Branch` |
+| `announcements` | Auto ID | `Announcement` |
+| `loyaltyCards` | Auto ID | `LoyaltyCard` |
 
 ---
 
-## Canonical Firestore schema (collection-by-collection)
+## 1. `users`
 
-### 1) `users` (document id: user uid)
-- name: String (required — `AuthViewModel` expects it)
-- email: String (required)
-- role: String (`"customer"` | `"manager"`) (required)
+**Document ID:** Firebase Auth UID (same as `Auth.auth().currentUser?.uid`)
 
-Notes:
-- `AuthViewModel.fetchUserData` reads `name`, `email`, and `role` and constructs the `User` model. Treat these fields as required for correct app behavior.
+Managed by: `FirebaseAuthRepository`, `AuthViewModel`
 
-Example document (JSON)
-```
-/users/<UID>
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | String | Yes | Display name |
+| `email` | String | Yes | Login email, mirrors Firebase Auth |
+| `role` | String | Yes | `"customer"` or `"manager"` |
+| `phoneNumber` | String | No | Optional profile field |
+| `gender` | String | No | Optional profile field |
+| `dateOfBirth` | Timestamp | No | Optional profile field |
+| `city` | String | No | Optional profile field |
+
+### Example
+
+```json
 {
-"name": "Jane Doe",
-"email": "jane@example.com",
-"role": "customer"
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "role": "customer",
+  "phoneNumber": "+1-555-0100",
+  "city": "San Francisco"
 }
 ```
 
+### Notes
+
+- Written by `FirebaseAuthRepository.saveUser()` at registration.
+- Updated by `FirebaseAuthRepository.updateUser()` from the Profile edit screen.
+- `role` determines which tabs and controls are visible. Changing a user's role requires a direct Firestore update — there is no in-app role promotion UI.
+
 ---
 
-### 2) `products` (document id: productId)
-Fields used by the app (inferred types):
-- name: String
-- description: String
-- price: Double
-- imageURL: String (URL string)
-- category: String
-- available: Bool
-- customizations: Map<String, Map<String, Double>> (optional)
+## 2. `products`
 
-Notes:
-- `ProductSeeder` provides many sample products matching this structure. `ProductViewModel` provides defaults when fields are missing (e.g., price -> 0.0, description -> "", available -> true).
+**Document ID:** Auto-generated by Firestore
 
-Example document (JSON)
-```
-/products/<PRODUCT_ID>
+Managed by: `FirestoreProductRepository`, `ProductViewModel`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | String | Yes | Display name |
+| `description` | String | Yes | Displayed on product detail screen |
+| `price` | Double | Yes | Base price in USD |
+| `imageURL` | String | Yes | External URL (currently hosted on postimg.cc) |
+| `category` | String | Yes | Used for tab filtering in MenuView |
+| `available` | Bool | Yes | When false, product is greyed out and cannot be added to cart |
+| `customizations` | Map | No | `{ "Size": { "Small": 0.0, "Large": 1.0 } }` — key is group label, value is option→price-delta map |
+| `avgRating` | Double | No | Running average, nil on products with no ratings. Display as 0. |
+| `ratingCount` | Int | No | Total number of ratings, nil on products with no ratings. Treat as 0. |
+| `ratingDistribution` | Map | No | `{ "5": 80, "4": 30, "3": 10, "2": 5, "1": 2 }` — keys are strings "1" through "5" |
+
+### Example
+
+```json
 {
-"name": "Cappuccino",
-"description": "A classic Italian coffee with steamed milk foam.",
-"price": 3.5,
-"imageURL": "https://i.postimg.cc/VNK61H8p/capp.jpg",
-"category": "Coffee",
-"available": true,
-"customizations": {
-"Size": { "Small": 0.0, "Medium": 0.5, "Large": 1.0 },
-"Milk": { "Whole": 0.0, "Oat": 0.5 }
-}
+  "name": "Cappuccino",
+  "description": "A classic Italian coffee with steamed milk foam.",
+  "price": 3.5,
+  "imageURL": "https://i.postimg.cc/VNK61H8p/capp.jpg",
+  "category": "Coffee",
+  "available": true,
+  "customizations": {
+    "Size": { "Small": 0.0, "Medium": 0.5, "Large": 1.0 },
+    "Milk": { "Whole": 0.0, "Oat": 0.5 },
+    "Extras": { "Whipped Cream": 0.5, "Extra Shot": 1.0 }
+  },
+  "avgRating": 4.3,
+  "ratingCount": 127,
+  "ratingDistribution": { "5": 80, "4": 30, "3": 10, "2": 5, "1": 2 }
 }
 ```
+
+### Notes
+
+- `customizations` must be stored as a Firestore Map, not a serialized JSON string. The Swift decoder uses `as?` casts that only work on native Firestore maps.
+- `avgRating`, `ratingCount`, and `ratingDistribution` are updated atomically by `RatingService` inside a Firestore transaction every time a rating is submitted or edited. Never update these fields directly.
+- The `Extras` customization group is handled differently in `CartItem.totalPrice` — it accumulates all selected extras rather than picking one.
 
 ---
 
-### 3) `carts` (document id: userId)
-- items: Array<CartItem> (stored via `Firestore.Encoder`)
+## 3. `products/{productId}/ratings`
 
-CartItem shape (encoded) roughly corresponds to the Swift `CartItem`:
-- id: String (UUID)
-- product: Product (embedded sub-object with product fields)
-- selections: { String: String }
-- extras: [String]
+**Document ID:** userId (one document per user per product, naturally enforced)
 
-Notes:
-- `CartManager` writes `db.collection("carts").document(userId).setData(["items": data])` where `data` is `try items.map { try Firestore.Encoder().encode($0) }`.
-- `CartManager.loadCartFromFirestore` expects `items` to be an array of dictionaries (`[[String: Any]]`) and decodes them with `Firestore.Decoder().decode(CartItem.self, from: $0)`.
-- Because encoding/decoding is used, the cart documents will mirror the Swift types (including nested `product`).
+Managed by: `RatingService`
 
-Example document (JSON-ish)
-```
-/carts/<UID>
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `score` | Int | Yes | 1 – 5 |
+| `orderId` | String | Yes | Proof-of-purchase order document ID |
+| `reviewId` | String | No | Review document ID if the user also wrote a review |
+| `createdAt` | Timestamp | Yes | |
+| `updatedAt` | Timestamp | No | Set when the user edits their rating |
+
+### Example
+
+```json
 {
-"items": [
-{ "id": "...", "product": { "id": "...", "name": "Espresso", "price": 2.0, ... }, "selections": { "Size": "Small" }, "extras": [] }
-]
+  "score": 5,
+  "orderId": "xK9pQ2mT",
+  "reviewId": "rev_abc123",
+  "createdAt": "<Timestamp>",
+  "updatedAt": null
 }
 ```
 
+### Notes
+
+- The document ID equals the userId, so a query for a specific user's rating is a direct document read with no index required.
+- `RatingService` reads this document first to determine whether the user has already rated and what their previous score was (needed to correctly recalculate `avgRating` on edit).
+
 ---
 
-### 4) `orders` (document id: generated by Firestore)
-Fields written by `OrderService.placeOrder`:
-- userId: String (Auth UID)
-- timestamp: Timestamp
-- totalPrice: Double
-- status: String (ex: `"Pending"`)
-- items: Array of lightweight item dictionaries
-- Each item: { name: String, price: Double, selections?: {String:String}, extras?: [String] }
+## 4. `products/{productId}/reviews`
 
-Notes:
-- `Order` model expects `timestamp` to decode to `Date` (Firestore will store `Timestamp`).
-- `AdminOrdersViewModel` decodes docs using `try? doc.data(as: Order.self)` so all Order fields should be present for a successful decode.
+**Document ID:** Auto-generated by Firestore
 
-Example document (JSON)
-```
-/orders/<ORDER_ID>
+Managed by: `RatingService`, `ReviewViewModel`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `userId` | String | Yes | Author's Firebase Auth UID |
+| `userName` | String | Yes | Snapshot of the author's display name at write time |
+| `orderId` | String | Yes | Proof-of-purchase order document ID |
+| `rating` | Int | Yes | Star score 1–5, denormalized from the ratings subcollection |
+| `title` | String | No | Short headline, max 60 characters |
+| `body` | String | No | Review text, max 280 characters |
+| `helpfulCount` | Int | Yes | Count of users who marked the review helpful |
+| `helpfulBy` | Array[String] | Yes | userIds who marked helpful; used for toggle state |
+| `isHidden` | Bool | Yes | Admin moderation flag; hidden reviews are excluded from customer queries |
+| `createdAt` | Timestamp | Yes | |
+| `updatedAt` | Timestamp | No | Set when the user edits their review |
+
+### Example
+
+```json
 {
-"userId": "UID",
-"timestamp": <Firestore Timestamp>,
-"totalPrice": 12.00,
-"status": "Pending",
-"items": [ { "name": "Cappuccino", "price": 3.5, "selections": {"Size":"Large"}, "extras": ["Whip"] } ]
+  "userId": "UID_ABC",
+  "userName": "Jane Doe",
+  "orderId": "xK9pQ2mT",
+  "rating": 5,
+  "title": "Best cappuccino I've tried",
+  "body": "Rich flavor with a perfect foam layer. Highly recommend.",
+  "helpfulCount": 12,
+  "helpfulBy": ["uid1", "uid2"],
+  "isHidden": false,
+  "createdAt": "<Timestamp>",
+  "updatedAt": null
+}
+```
+
+### Notes
+
+- `userName` is a snapshot so the review still shows the correct name if the user later changes their display name.
+- `helpfulCount` and `helpfulBy` are updated with `FieldValue.increment` and `FieldValue.arrayUnion`/`arrayRemove` to avoid read-modify-write races.
+- `isHidden = true` excludes the document from customer-facing queries. The document is retained for audit purposes. Managers can toggle this flag from the Review Moderation dashboard.
+
+---
+
+## 5. `carts`
+
+**Document ID:** userId
+
+Managed by: `CartManager`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `items` | Array | Yes | Array of encoded `CartItem` objects |
+
+Each item in the array contains a full `Product` snapshot plus:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | UUID string |
+| `product` | Map | Full Product object encoded by `Firestore.Encoder` |
+| `selections` | Map | `{ "Size": "Large", "Milk": "Oat" }` |
+| `extras` | Array[String] | `["Whipped Cream"]` |
+| `quantity` | Int | |
+
+### Example
+
+```json
+{
+  "items": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "product": { "id": "prod_001", "name": "Cappuccino", "price": 3.5, "..." },
+      "selections": { "Size": "Large", "Milk": "Oat" },
+      "extras": ["Whipped Cream"],
+      "quantity": 2
+    }
+  ]
+}
+```
+
+### Notes
+
+- The cart stores a full product snapshot so the cart remains accurate even if the product is later edited or deleted.
+- `CartManager` uses `Firestore.Encoder` / `Firestore.Decoder` for serialization, meaning the Firestore document structure exactly mirrors the Swift `CartItem` type.
+- When an order is placed, `OrderService` converts cart items into lightweight `CartItemData` objects (name, price, selections, extras only) — the order does not store the full product object.
+
+---
+
+## 6. `orders`
+
+**Document ID:** Auto-generated by Firestore
+
+Managed by: `OrderService`, `OrderViewModel`, `AdminOrdersViewModel`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `userId` | String | Yes | Firebase Auth UID of the customer |
+| `orderId` | Int | Yes | Sequential display number shown in UI |
+| `items` | Array | Yes | Array of lightweight item maps (see below) |
+| `totalPrice` | Double | Yes | Sum of all item prices |
+| `status` | String | Yes | `"Pending"` / `"Preparing"` / `"Ready"` / `"Completed"` |
+| `timestamp` | Timestamp | Yes | Order placement time |
+| `paymentMethod` | String | No | `"wallet"` or `"cash"`. nil on old orders — treat as cash. |
+| `walletAmountPaid` | Double | No | Amount deducted from wallet. Used to calculate refund on cancellation. |
+| `branchId` | String | No | Branch document ID. nil on orders before branch selection was added. |
+| `branchName` | String | No | Snapshot of branch display name at order time |
+| `productIds` | Array[String] | No | Flat list of product IDs for proof-of-purchase queries. nil on old orders — treat as unverifiable. |
+| `deliveryType` | String | No | `"delivery"` or `"pickup"`. nil on old orders — treat as pickup. |
+
+Each item in the `items` array:
+
+| Field | Type | Notes |
+|---|---|---|
+| `productId` | String | Product document ID |
+| `name` | String | Product name snapshot |
+| `imageURL` | String | Product image URL snapshot |
+| `price` | Double | Price per unit at time of order |
+| `selections` | Map | Customization selections |
+| `extras` | Array[String] | Extras selected |
+| `quantity` | Int | |
+
+### Example
+
+```json
+{
+  "userId": "UID_ABC",
+  "orderId": 42,
+  "totalPrice": 9.0,
+  "status": "Preparing",
+  "timestamp": "<Timestamp>",
+  "paymentMethod": "wallet",
+  "walletAmountPaid": 9.0,
+  "branchId": "branch_001",
+  "branchName": "Downtown Branch",
+  "productIds": ["prod_001"],
+  "items": [
+    {
+      "productId": "prod_001",
+      "name": "Cappuccino",
+      "imageURL": "https://...",
+      "price": 4.5,
+      "selections": { "Size": "Large" },
+      "extras": ["Whipped Cream"],
+      "quantity": 2
+    }
+  ]
+}
+```
+
+### Notes
+
+- Status transitions are triggered by managers via `AdminOrdersViewModel.updateStatus()`. Cancellation is triggered by customers on Pending orders via `OrderDetailViewModel.cancelOrder()`.
+- Cancellation triggers a wallet refund transaction written atomically with a status update via `db.runTransaction()`.
+- `productIds` enables efficient proof-of-purchase queries: `db.collection("orders").whereField("userId", ==, uid).whereField("productIds", arrayContains: productId).whereField("status", ==, "Completed")`.
+
+---
+
+## 7. `wallets`
+
+**Document ID:** userId
+
+Managed by: `WalletService`, `FirestoreWalletRepository`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `balance` | Double | Yes | Current balance in USD |
+| `currency` | String | Yes | Always `"USD"` (reserved for future multi-currency) |
+| `totalTopUp` | Double | Yes | Lifetime total added via top-up |
+| `totalSpent` | Double | Yes | Lifetime total spent on orders |
+| `createdAt` | Timestamp | Yes | When the wallet was first created |
+| `updatedAt` | Timestamp | Yes | Last balance change |
+
+### Example
+
+```json
+{
+  "balance": 87.50,
+  "currency": "USD",
+  "totalTopUp": 200.0,
+  "totalSpent": 112.50,
+  "createdAt": "<Timestamp>",
+  "updatedAt": "<Timestamp>"
+}
+```
+
+### Notes
+
+- The wallet document is created on a user's first top-up by `WalletService.createWalletIfNeeded()`.
+- **Never write to `balance` directly.** All balance mutations must go through `WalletService` methods (`topUp`, `deductForOrder`, `refund`) which use `db.runTransaction()` to keep the wallet document and `wallet_transactions` ledger in sync atomically.
+- `WalletViewModel` attaches a Firestore snapshot listener to this document for real-time balance display.
+
+---
+
+## 8. `wallet_transactions`
+
+**Document ID:** Auto-generated by Firestore
+
+Managed by: `WalletService`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `userId` | String | Yes | Firebase Auth UID |
+| `type` | String | Yes | `"topup"` / `"payment"` / `"refund"` / `"reward"` |
+| `amount` | Double | Yes | Positive = credit (top-up, refund, reward), negative = debit (payment) |
+| `balanceBefore` | Double | Yes | Balance snapshot before this transaction |
+| `balanceAfter` | Double | Yes | Balance snapshot after this transaction |
+| `description` | String | Yes | Human-readable label, e.g. `"Order #42"` |
+| `referenceId` | String | No | Order document ID for payment and refund types |
+| `timestamp` | Timestamp | Yes | |
+
+### Example
+
+```json
+{
+  "userId": "UID_ABC",
+  "type": "payment",
+  "amount": -9.0,
+  "balanceBefore": 96.50,
+  "balanceAfter": 87.50,
+  "description": "Order #42",
+  "referenceId": "order_xK9pQ2",
+  "timestamp": "<Timestamp>"
+}
+```
+
+### Notes
+
+- Transaction documents are **write-once and immutable**. Never update an existing transaction document.
+- To reverse a payment, write a new document with `type: "refund"` and a positive `amount`. This creates a clear audit trail.
+- `WalletViewModel` attaches a listener ordered by `timestamp desc`, limited to the 50 most recent transactions.
+
+---
+
+## 9. `branches`
+
+**Document ID:** Auto-generated by Firestore
+
+Managed by: `BranchRepository`, `MapViewModel`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | String | Yes | Display name shown on map and in order history |
+| `address` | String | Yes | Street address |
+| `latitude` | Double | Yes | |
+| `longitude` | Double | Yes | |
+| `phone` | String | Yes | |
+| `openingHours` | String | Yes | Human-readable string, e.g. `"Mon–Fri 7am–8pm"` |
+| `isOpen` | Bool | Yes | Controls open/closed badge in BranchDetailSheet |
+| `amenities` | Array[String] | Yes | Keys: `"wifi"`, `"parking"`, `"dine-in"`, `"takeaway"`, `"drive-thru"` |
+| `imageURL` | String | No | Branch photo URL |
+| `estimatedWaitMinutes` | Int | No | Set by staff. nil = not posted, 0 = no wait, >0 = wait in minutes |
+
+### Example
+
+```json
+{
+  "name": "Downtown Branch",
+  "address": "123 Coffee St, San Francisco, CA 94102",
+  "latitude": 37.7749,
+  "longitude": -122.4194,
+  "phone": "+1-415-555-0199",
+  "openingHours": "Mon–Sun 6am–9pm",
+  "isOpen": true,
+  "amenities": ["wifi", "dine-in", "takeaway"],
+  "imageURL": "https://...",
+  "estimatedWaitMinutes": 5
 }
 ```
 
 ---
 
-## Firebase Storage
-No usage of `Storage.storage()` or `FirebaseStorage` was found in the CoffeeCraft codebase. Product images are stored as external URLs (see `ProductSeeder`). If you plan to allow image uploads from the app in the future, you'll need to add Storage usage and update rules and upload paths.
+## 10. `announcements`
 
----
+**Document ID:** Auto-generated by Firestore
 
-## Firebase Auth usage summary
-- The app uses Firebase Email/Password auth via `Auth.auth()` APIs (createUser, signIn, sendPasswordReset, signOut).
-- The app stores/reads Firestore `users` documents under document id = `user.uid` and reads `uid` for carts and orders to tie data to a user.
+Managed by: `AnnouncementViewModel`
 
----
+### Fields
 
-## Known mismatch / design notes
-- `CartManager` stores a full `CartItem` (including nested `Product`) via `Firestore.Encoder`.
-- `OrderService` converts cart items into lightweight dictionaries (only `name`, `price`, `selections`, `extras`) when placing orders. This is intentional (orders store snapshot info rather than full product object) but keep in mind the two structures differ.
-- `Product.customizations` is a nested map (`[String: [String: Double]]`). Ensure Firestore documents store this as a Map (not serialized JSON string) so `as?` casts succeed.
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `title` | String | No | |
+| `description` | String | No | |
+| `imageName` | String | No | Image URL or asset name |
+| `createdDate` | Timestamp | No | Used for sorting and relative date display |
 
----
+### Example
 
-## Uncertainties / TODOs (manual verification required)
-1. Verify that live `products` documents in your Firestore project exactly match the `Product` fields (especially `customizations` being a Map).
-2. Confirm whether any cart/ order documents already exist that were saved with a different shape (older app versions). If so, add migration code or tolerant decoders.
-3. Confirm which `GoogleService-Info.plist` is used for the environment you intend to test (dev vs prod).
-4. If you later add image uploads, plan Storage bucket names, upload path templates, and security rules.
-
----
-
-## Concrete validation steps (quick checklist)
-1. Identify Firebase project (which `GoogleService-Info.plist` is active in Xcode).
-2. In Firebase Console > Firestore, inspect the following collections & sample documents:
-- `users/<UID>` — confirm `name`, `email`, `role` fields exist
-- `products/<PRODUCT_ID>` — confirm `price` is numeric, `customizations` is a Map, and `imageURL` is a URL string
-- `carts/<UID>` — inspect `items` array, ensure each item contains nested product data as expected
-- `orders/<ORDER_ID>` — confirm `timestamp` is a Timestamp and `items` entries follow the lightweight shape
-3. Run the app flows:
-- Sign up a new user as `customer`, verify `users/<UID>` created with expected fields
-- Add products to cart (while logged in), confirm `carts/<UID>` is created/updated
-- Place an order, confirm `orders/<ORDER_ID>` is created with `userId`, `timestamp`, `totalPrice`, `items`, and `status`
-
----
-
-## Example Firestore console queries
-(Use these in the Firebase console or in a script)
-
-- List recent orders for a user (JavaScript/firestore client):
-```js
-db.collection('orders').where('userId', '==', '<UID>').orderBy('timestamp', 'desc')
-```
-
-- Inspect a product in the console:
-```js
-db.collection('products').doc('<PRODUCT_ID>').get()
-```
-
-- Inspect a user's cart:
-```js
-db.collection('carts').doc('<UID>').get()
+```json
+{
+  "title": "Summer Menu Launch",
+  "description": "Introducing our new iced drinks for summer.",
+  "imageName": "https://...",
+  "createdDate": "<Timestamp>"
+}
 ```
 
 ---
 
-## Suggested low-risk improvements
-- Centralize collection names into constants (e.g., `struct FirestoreCollections { static let users = "users" }`) and refactor usages to avoid typos.
-- Add a small `docs/firestore-schema.md` (this file) to the repo (done) and keep it updated when model fields change.
-- Add tolerant decoding for older data shapes (use optional fields and fallback values where appropriate).
-- Add unit/integration tests using the Firebase Emulator to validate flows (signup, add-to-cart, place-order) without touching production data.
+## 11. `loyaltyCards`
+
+**Document ID:** Auto-generated by Firestore
+
+Managed by: `CardViewModel`
+
+### Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `cardNumber` | String | Yes | Human-readable ID, e.g. `"CC-2026-0001"` |
+| `ownerId` | String | Yes | Firebase Auth UID of the card creator |
+| `ownerName` | String | Yes | Snapshot of owner's display name |
+| `memberSince` | String | Yes | Date string, e.g. `"2026-01-15"` |
+| `points` | Int | Yes | Current point balance |
+| `createdAt` | Timestamp | Yes | |
+| `sharedWith` | Array[String] | Yes | userIds with shared access (can be empty array) |
+
+### Example
+
+```json
+{
+  "cardNumber": "CC-2026-0001",
+  "ownerId": "UID_ABC",
+  "ownerName": "Jane Doe",
+  "memberSince": "2026-01-15",
+  "points": 250,
+  "createdAt": "<Timestamp>",
+  "sharedWith": ["UID_XYZ"]
+}
+```
+
+### Notes
+
+- Both `ownerId` and every userId in `sharedWith` have access to the card.
+- The active card for a user session is tracked in `LoyaltyCard.currentActiveCardNumber` (a static property), which is not persisted to Firestore.
 
 ---
 
-## Want me to also:
-- [ ] Add a constants file and refactor collection string literals to use it (low-risk)
-- [ ] Add a Swift unit/integration test that runs against the Firebase Emulator (requires adding dev dependencies)
-- [ ] Generate a small migration utility for older cart/order document shapes
+## Firestore Constants
 
-Tell me which one(s) and I'll implement them next.
+All collection names and field name string literals are centralized in `CoffeeCraft/Constants/FirebaseKeys.swift`. Update this file when adding new collections or renaming fields — never scatter raw string literals through the codebase.
 
 ---
 
-End of document.
+## Known Limitations and Design Notes
+
+- **No Firebase Storage.** Product and branch images are stored as external URLs. To support user-uploaded images, Firebase Storage must be added.
+- **Legacy orders** created before Phase 7 have no `productIds` field. `RatingService` treats these orders as unverifiable and denies rating — the user must have a Phase 7 or later completed order.
+- **Legacy orders** without `paymentMethod` are treated as cash orders. Cancellation of these orders does not trigger a wallet refund.
+- **Cart encoding shape.** The cart document encodes the full Swift `CartItem` type. If the `CartItem` struct changes, documents written by older app versions may fail to decode. Use optional fields and fallback values when evolving the model.
