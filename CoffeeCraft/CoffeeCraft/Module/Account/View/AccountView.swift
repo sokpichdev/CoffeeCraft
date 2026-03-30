@@ -28,6 +28,7 @@ struct AccountView: View {
     @State private var showAnnouncements = false
     @State private var showAddresses = false
     @State private var showAuth = false
+    @State private var showRewards = false
     
     var body: some View {
         CustomRefreshScrollView( {
@@ -43,7 +44,7 @@ struct AccountView: View {
                                 showFavorites: $showFavorites, showAddresses: $showAddresses, showAuth: $showAuth)
                     .environmentObject(inboxVM)
                 
-                ShortcutsSection(showAnnouncements: $showAnnouncements, showAuth: $showAuth)
+                ShortcutsSection(showAnnouncements: $showAnnouncements, showRewards: $showRewards, showAuth: $showAuth)
                     .environmentObject(announcementVM)
                 ContactsSection()
                 FooterSection()
@@ -104,6 +105,9 @@ struct AccountView: View {
         }
         .navigationDestination(isPresented: $showAuth) {
             AuthView().environmentObject(authVM)
+        }
+        .navigationDestination(isPresented: $showRewards) {
+            RewardsView().environmentObject(cardVM)
         }
     }
 }
@@ -184,8 +188,9 @@ struct ShortcutsSection: View {
     @EnvironmentObject var announcementVM: AnnouncementViewModel
     @EnvironmentObject var userSession: UserSession
     @Binding var showAnnouncements: Bool
+    @Binding var showRewards: Bool
     @Binding var showAuth: Bool
-    
+
     var body: some View {
         SettingsSection(title: "Shortcuts", icon: "bolt.fill") {
             RowInSectionView(title: "Stores", systemImage: "building.2.fill")
@@ -198,7 +203,13 @@ struct ShortcutsSection: View {
                 }
             }
             DeviderInSectionView(padding: 44)
-            RowInSectionView(title: "Rewards", systemImage: "gift.fill")
+            RowInSectionView(title: "Rewards", systemImage: "gift.fill") {
+                if userSession.isLoggedIn {
+                    showRewards = true
+                } else {
+                    showAuth = true
+                }
+            }
         }
     }
 }
