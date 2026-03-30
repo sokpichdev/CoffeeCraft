@@ -4,6 +4,7 @@
 //
 //  Created by Sok Pich on 1/15/26.
 //
+
 import SwiftUI
 
 struct AccountView: View {
@@ -31,21 +32,21 @@ struct AccountView: View {
     var body: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
-                profileSection
-                walletSection
-                myCardSection
-                personalSection
-                shortcutsSection
-                contactsSection
-//                Button("Seed Database") {s
-//                    Task {
-//                        await CustomizationSeeder.seedCustomizations()
-//                    }
-//                }
-//                Button("Seed branch") {
-//                    Task { await BranchSeeder.seed() }
-//                }
-                footerSection
+                ProfileSection()
+                    .environmentObject(authVM)
+                WalletSection(showWallet: $showWallet, showAuth: $showAuth)
+                    .environmentObject(walletVM)
+                MyCardSection(isOpenAddCard: $isOpenAddCard, showAuth: $showAuth)
+                    .environmentObject(cardVM)
+                    .environmentObject(authVM)
+                PersonalSection(showInbox: $showInbox, showColorTheme: $showColorTheme,
+                                showFavorites: $showFavorites, showAddresses: $showAddresses, showAuth: $showAuth)
+                    .environmentObject(inboxVM)
+                
+                ShortcutsSection(showAnnouncements: $showAnnouncements, showAuth: $showAuth)
+                    .environmentObject(announcementVM)
+                ContactsSection()
+                FooterSection()
             }
             .padding()
         }, onRefresh: {
@@ -69,7 +70,6 @@ struct AccountView: View {
         }
         .onChange(of: UserSession.shared.currentUser) { _, newValue in
             if let userId = newValue?.id {
-                // Reset and fetch when user changes (login/logout)
                 cardVM.isActiveCardFetched = false
                 cardVM.setUser(userId: userId)
             }
@@ -106,68 +106,16 @@ struct AccountView: View {
             AuthView().environmentObject(authVM)
         }
     }
+}
+
+// MARK: - Wallet Section
+struct WalletSection: View {
+    @EnvironmentObject var walletVM: WalletViewModel
+    @EnvironmentObject var userSession: UserSession
+    @Binding var showWallet: Bool
+    @Binding var showAuth: Bool
     
-    // MARK: Profile
-    var profileSection: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.accentPrimary,
-                                     Color.accentPrimary.opacity(0.75),
-                                     Color.accentPrimary.opacity(0.5)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 80, height: 80)
-                
-                Image(systemName: "person.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.white)
-            }
-            .shadow(color: Color.surfacePrimary.opacity(0.3), radius: 8, y: 4)
-            
-            VStack(spacing: 6) {
-                Text(UserSession.shared.userName ?? "")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.textPrimary)
-                
-                NavigationLink {
-                    if userSession.isLoggedIn {
-                        ProfileView()
-                            .environmentObject(authVM)
-                    } else {
-                        AuthView().environmentObject(authVM)
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("View Profile")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Image(systemName: "arrow.right.circle.fill")
-                            .font(.headline)
-                    }
-                    .foregroundColor(Color.accentPrimary)
-                }
-            }
-        }
-        .padding(.vertical, 24)
-        .padding(.horizontal)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.surfacePrimary)
-//                .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
-        )
-    }
-    
-    // MARK: Wallet
-    var walletSection: some View {
+    var body: some View {
         SettingsSection(title: "My Wallet", icon: "creditcard.fill") {
             RowInSectionView(label: walletVM.formattedBalance, title: "Wallet", systemImage: "creditcard.fill") {
                 if userSession.isLoggedIn {
@@ -178,119 +126,19 @@ struct AccountView: View {
             }
         }
     }
+}
+
+// MARK: - Personal Section
+struct PersonalSection: View {
+    @EnvironmentObject var inboxVM: InboxViewModel
+    @EnvironmentObject var userSession: UserSession
+    @Binding var showInbox: Bool
+    @Binding var showColorTheme: Bool
+    @Binding var showFavorites: Bool
+    @Binding var showAddresses: Bool
+    @Binding var showAuth: Bool
     
-    // MARK: My Cards
-    var myCardSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "creditcard.fill")
-                    .font(.headline)
-                    .foregroundColor(Color.textSecondary)
-                Text("My Cards")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.textPrimary)
-            }
-            .padding(.leading, 4)
-            
-            VStack(alignment: .center) {
-                HStack(spacing: 0) {
-                    let cardWidth = (UIScreen.main.bounds.width * 0.8) - 32
-                    if userSession.isLoggedIn {
-                        if cardVM.isRefreshing || (cardVM.isLoading && cardVM.activeCard == nil) {
-                            ShimmerView(cornerRadius: 10)
-                                .frame(width: cardWidth, height: cardWidth / (16 / 9))
-                        } else if let activeCard = cardVM.activeCard {
-                            // Single LoyaltyCard
-                            FlippableCardView(card: activeCard, width: cardWidth)
-                        }
-                    } else {
-                        NavigationLink {
-                            AuthView().environmentObject(authVM)
-                        } label: {
-                            CardEmptyView(title: "Log in to see your cards", cardWidth: cardWidth)
-                        }
-                    }
-                    Spacer()
-                    NavigationLink {
-                        if userSession.isLoggedIn {
-                            AllCardsView()
-                                .environmentObject(cardVM)
-                        } else {
-                            AuthView().environmentObject(authVM)
-                        }
-                    } label: {
-                        VStack {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.surfacePrimary)
-                                    .frame(width: 50, height: 50)
-                                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
-                                
-                                Image(systemName: "arrow.right")
-                                    .font(.headline)
-                                    .foregroundColor(Color.textSecondary)
-                            }
-                            Text("See All")
-                                .font(.subheadline)
-                                .foregroundColor(.textPrimary)
-                        }
-                    }
-                }
-                HStack {
-                    Button(action: {
-                        if userSession.isLoggedIn {
-                            AlertManager.shared.showWarning(title: "Coming Soon",
-                                                            message: "This Feature will be coming soon.")
-                        } else {
-                            showAuth = true
-                        }
-                    }, label: {
-                        VStack {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.accentPrimary)
-                                    .frame(width: 50, height: 50)
-                                
-                                Image(systemName: "cart.badge.plus")
-                                    .font(.headline)
-                                    .foregroundColor(.textPrimary)
-                                    .colorInvert()
-                            }
-                            Text("Purchase")
-                                .font(.subheadline)
-                                .foregroundColor(.textPrimary)
-                        }
-                    })
-                    Button(action: {
-                        if userSession.isLoggedIn {
-                            isOpenAddCard = true
-                        } else {
-                            showAuth = true
-                        }
-                    }, label: {
-                        VStack {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.surfacePrimary)
-                                    .frame(width: 50, height: 50)
-                                    .shadow(color: Color.textPrimary.opacity(0.08), radius: 12, y: 4)
-                                
-                                Image(systemName: "plus")
-                                    .font(.headline)
-                                    .foregroundColor(Color.textSecondary)
-                            }
-                            Text("Add")
-                                .font(.subheadline)
-                                .foregroundColor(.textPrimary)
-                        }
-                    })
-                }
-            }
-        }
-    }
-    // MARK: Personal
-    var personalSection: some View {
+    var body: some View {
         SettingsSection(title: "Personal", icon: "person.text.rectangle") {
             RowInSectionView(title: "Inbox", systemImage: "tray.fill", badgeCount: inboxVM.unreadCount) {
                 if userSession.isLoggedIn {
@@ -329,9 +177,16 @@ struct AccountView: View {
             RowInSectionView(title: "Vouchers", systemImage: "ticket.fill")
         }
     }
+}
+
+// MARK: - Shortcuts Section
+struct ShortcutsSection: View {
+    @EnvironmentObject var announcementVM: AnnouncementViewModel
+    @EnvironmentObject var userSession: UserSession
+    @Binding var showAnnouncements: Bool
+    @Binding var showAuth: Bool
     
-    // MARK: ShortCuts
-    var shortcutsSection: some View {
+    var body: some View {
         SettingsSection(title: "Shortcuts", icon: "bolt.fill") {
             RowInSectionView(title: "Stores", systemImage: "building.2.fill")
             DeviderInSectionView(padding: 44)
@@ -346,18 +201,22 @@ struct AccountView: View {
             RowInSectionView(title: "Rewards", systemImage: "gift.fill")
         }
     }
-    
-    // MARK: contacts
-    var contactsSection: some View {
+}
+
+// MARK: - Contacts Section
+struct ContactsSection: View {
+    var body: some View {
         SettingsSection(title: "Contacts", icon: "bubble.left.and.bubble.right.fill") {
             RowInSectionView(title: "Customer Service", systemImage: "headset")
             DeviderInSectionView(padding: 44)
             RowInSectionView(title: "Feedback", systemImage: "bubble.left.fill")
         }
     }
+}
 
-    // MARK: Footer
-    var footerSection: some View {
+// MARK: - Footer Section
+struct FooterSection: View {
+    var body: some View {
         VStack(spacing: 16) {
             Text("Stay connected with us")
                 .font(.subheadline)
@@ -373,72 +232,6 @@ struct AccountView: View {
         }
         .padding(.vertical, 20)
         .padding(.top, 8)
-    }
-}
-
-struct RowInSectionView: View {
-    var label: String?
-    let title: String
-    let systemImage: String
-    var badgeCount: Int?
-    
-    var trailingSystemImage: String = "chevron.right"
-    var onClicked: (() -> Void)?
-    
-    var body: some View {
-        Button {
-            onClicked?()
-        } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(Color(.tertiarySystemGroupedBackground))
-                        .frame(width: 36, height: 36)
-                    
-                    Image(systemName: systemImage)
-                        .font(.headline)
-                        .foregroundColor(Color.textSecondary)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    if let label = label {
-                        Text(label)
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-                    }
-                    
-                    Text(title)
-                        .font(.subheadline)
-                        .foregroundColor(.textPrimary)
-                }
-                
-                Spacer()
-                
-                if let count = badgeCount, count > 0 {
-                    Text("\(count)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(
-                            Capsule()
-                                .fill(Color.semanticError)
-                        )
-                }
-                
-                if onClicked != nil {
-                    if trailingSystemImage != "" {
-                        Image(systemName: trailingSystemImage)
-                            .font(.headline)
-                            .foregroundColor(Color.textSecondary)
-                    }
-                }
-            }
-            .padding(.vertical, 12)
-        }
-        .disabled(onClicked == nil)
-        .foregroundColor(.textPrimary)
     }
 }
 

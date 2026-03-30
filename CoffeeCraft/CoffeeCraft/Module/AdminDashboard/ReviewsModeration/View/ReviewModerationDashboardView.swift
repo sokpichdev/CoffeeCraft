@@ -137,61 +137,6 @@ struct ReviewModerationDashboardView: View {
         .background(Color.bgSecondary)
     }
 
-    @ViewBuilder
-    private var reviewList: some View {
-        CustomRefreshScrollView({
-            if vm.isLoadingQueue {
-                reviewListSkeleton
-            } else if vm.reviews.isEmpty {
-                DashboardEmptyState(
-                    icon: "bubble.left.and.bubble.right",
-                    title: "No reviews found",
-                    message: vm.filter.isEmpty
-                    ? "No reviews have been submitted yet."
-                    : "Try adjusting your filters."
-                )
-            } else {
-                LazyVStack(spacing: 12) {
-                    ForEach(vm.reviews) { review in
-                        ReviewQueueCard(
-                            review: review,
-                            isToggling: vm.togglingIds.contains(review.id),
-                            onToggle: { await vm.toggleHidden(for: review) }
-                        )
-                        .onAppear {
-                            if review.id == vm.reviews.last?.id {
-                                Task { await vm.loadMore() }
-                            }
-                        }
-                    }
-                    if vm.isLoadingMore {
-                        ProgressView().tint(.accentPrimary).frame(maxWidth: .infinity).padding(.vertical, 16)
-                    } else if !vm.canLoadMore && vm.reviews.count >= 30 {
-                        Text("All reviews loaded")
-                            .font(.caption).foregroundStyle(Color.textMuted)
-                            .frame(maxWidth: .infinity).padding(.vertical, 16)
-                    }
-                }
-                .padding(16)
-            }
-        }, onRefresh: {
-            await vm.loadQueue()
-        })
-    }
-
-    private var reviewListSkeleton: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                ForEach(0..<8, id: \.self) { _ in
-                    ShimmerView()
-                        .frame(maxWidth: .infinity, minHeight: 110)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
-            }
-            .padding(16)
-        }
-    }
-
     // MARK: ─ ANALYTICS ─
 
     private var analyticsSection: some View {
@@ -304,7 +249,61 @@ struct ReviewModerationDashboardView: View {
 }
 
 extension ReviewModerationDashboardView {
-    
+    @ViewBuilder
+    private var reviewList: some View {
+        CustomRefreshScrollView({
+            if vm.isLoadingQueue {
+                reviewListSkeleton
+            } else if vm.reviews.isEmpty {
+                DashboardEmptyState(
+                    icon: "bubble.left.and.bubble.right",
+                    title: "No reviews found",
+                    message: vm.filter.isEmpty
+                    ? "No reviews have been submitted yet."
+                    : "Try adjusting your filters."
+                )
+            } else {
+                LazyVStack(spacing: 12) {
+                    ForEach(vm.reviews) { review in
+                        ReviewQueueCard(
+                            review: review,
+                            isToggling: vm.togglingIds.contains(review.id),
+                            onToggle: { await vm.toggleHidden(for: review) }
+                        )
+                        .onAppear {
+                            if review.id == vm.reviews.last?.id {
+                                Task { await vm.loadMore() }
+                            }
+                        }
+                    }
+                    if vm.isLoadingMore {
+                        ProgressView().tint(.accentPrimary).frame(maxWidth: .infinity).padding(.vertical, 16)
+                    } else if !vm.canLoadMore && vm.reviews.count >= 30 {
+                        Text("All reviews loaded")
+                            .font(.caption).foregroundStyle(Color.textMuted)
+                            .frame(maxWidth: .infinity).padding(.vertical, 16)
+                    }
+                }
+                .padding(16)
+            }
+        }, onRefresh: {
+            await vm.loadQueue()
+        })
+    }
+
+    private var reviewListSkeleton: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(0..<8, id: \.self) { _ in
+                    ShimmerView()
+                        .frame(maxWidth: .infinity, minHeight: 110)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+            }
+            .padding(16)
+        }
+    }
+
     private var productPickerBar: some View {
         Button {
             showProductSheet = true
