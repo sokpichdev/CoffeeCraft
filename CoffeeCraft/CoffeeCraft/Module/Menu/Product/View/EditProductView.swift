@@ -18,7 +18,8 @@ struct EditProductView: View {
     var productImageURL: String
     var productAvailable: Bool
     var productCustomizations: [String: [String: Double]]
-    
+    var productPointsValue: Int = 0
+
     @State private var tempName: String = ""
     @State private var tempDescription: String = ""
     @State private var tempPrice: Double = 0.0
@@ -26,6 +27,7 @@ struct EditProductView: View {
     @State private var tempImageURL: String = ""
     @State private var tempCustomizations: [CustomizationCategory] = []
     @State private var tempAvailable: Bool = true
+    @State private var tempPointsValue: Double = 0
     
     var isEditing: Bool = true
     @State private var showCategorySheet: Bool = false
@@ -89,6 +91,7 @@ struct EditProductView: View {
                         CustomProductTextField(title: "Name", text: $tempName, icon: "cup.and.saucer.fill")
                         CustomProductTextField(title: "Description", text: $tempDescription, icon: "text.justify")
                         CustomNumberField(title: "Price ($)", value: $tempPrice, icon: "dollarsign.circle.fill")
+                        CustomNumberField(title: "Points Value", value: $tempPointsValue, icon: "star.circle.fill")
                         CategorySelectionButton(title: "Category", category: tempCategory, icon: "folder.fill") {
                             showCategorySheet = true
                         }
@@ -152,7 +155,8 @@ struct EditProductView: View {
                             imageURL: tempImageURL,
                             category: tempCategory,
                             available: tempAvailable,
-                            customizations: customizationsDict
+                            customizations: customizationsDict,
+                            pointsValue: Int(tempPointsValue)
                         ))
                         dismiss()
                     }
@@ -190,7 +194,8 @@ struct EditProductView: View {
             tempCategory = productCategory
             tempImageURL = productImageURL
             tempAvailable = productAvailable
-            
+            tempPointsValue = Double(productPointsValue)
+
             // Convert Firebase format to CustomizationCategory array
             tempCustomizations = productCustomizations.map { key, value in
                 CustomizationCategory.fromFirebaseFormat(name: key, data: value)

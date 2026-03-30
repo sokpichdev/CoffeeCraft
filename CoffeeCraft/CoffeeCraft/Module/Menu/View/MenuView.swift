@@ -341,7 +341,8 @@ extension MenuView {
                             productCategory: productVM.products[index].category,
                             productImageURL: productVM.products[index].imageURL,
                             productAvailable: productVM.products[index].available,
-                            productCustomizations: productVM.products[index].customizations ?? [:])
+                            productCustomizations: productVM.products[index].customizations ?? [:],
+                            productPointsValue: productVM.products[index].pointsValue)
         } else {
             return EditProductView(productVM: productVM,
                             productID: "",
