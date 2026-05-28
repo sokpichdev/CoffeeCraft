@@ -41,6 +41,12 @@ extension AnalyticsService {
             query = query.whereField(Firebase.Orders.status, isEqualTo: status.rawValue)
         }
 
+        if let r = filter.dateRange {
+            query = query
+                .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: r.start))
+                .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: Timestamp(date: r.end))
+        }
+
         // Fetch page + 1 to detect hasMore
         query = query.limit(to: pageSize + 1)
 
@@ -86,6 +92,12 @@ extension AnalyticsService {
             query = query.whereField(Firebase.Orders.status, isEqualTo: status.rawValue)
         }
 
+        if let r = filter.dateRange {
+            query = query
+                .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: Timestamp(date: r.start))
+                .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: Timestamp(date: r.end))
+        }
+
         let snapshot = try await query.getDocuments()
         var items = snapshot.documents.compactMap(mapToQueueItem)
 
@@ -115,36 +127,38 @@ extension AnalyticsService {
 
     // MARK: - Order Funnel
 
-    /// Computes funnel metrics from the last 30 days of orders.
-    func fetchOrderFunnel() async throws -> OrderFunnelData {
-        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -29,
-                                                   to: Calendar.current.startOfDay(for: Date()))!
-        let startTimestamp = Timestamp(date: thirtyDaysAgo)
+    /// Computes funnel metrics over the given date range.
+    func fetchOrderFunnel(range: DateRange = .last30Days) async throws -> OrderFunnelData {
+        let startTimestamp = Timestamp(date: range.start)
+        let endTimestamp = Timestamp(date: range.end)
         let ordersRef = db.collection(Firebase.Orders.collection)
 
         async let totalCountAgg = ordersRef
             .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: endTimestamp)
             .count
             .getAggregation(source: .server)
 
         async let completedCountAgg = ordersRef
             .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
             .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: endTimestamp)
             .count
             .getAggregation(source: .server)
 
         async let cancelledCountAgg = ordersRef
             .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.cancelled.rawValue)
             .whereField(Firebase.Orders.timestamp, isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.timestamp, isLessThanOrEqualTo: endTimestamp)
             .count
             .getAggregation(source: .server)
 
         // ── Fulfillment time (still needs document content) ───────────────────
-        // Capped at 100 most-recent completed orders so cost is bounded at
-        // ≤ 100 reads regardless of how many orders exist in the 30-day window.
+        // Capped at 100 most-recent completed orders so cost is bounded.
         async let recentCompletedSnap = ordersRef
             .whereField(Firebase.Orders.status, isEqualTo: OrderStatus.completed.rawValue)
             .whereField(Firebase.Orders.completedAt, isGreaterThanOrEqualTo: startTimestamp)
+            .whereField(Firebase.Orders.completedAt, isLessThanOrEqualTo: endTimestamp)
             .order(by: Firebase.Orders.completedAt, descending: true)
             .limit(to: 100)
             .getDocuments()

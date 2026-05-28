@@ -13,7 +13,7 @@ final class SalesAnalyticsViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var analyticsData: SalesAnalyticsData?
-    @Published var selectedPeriod: SalesPeriod = .week
+    @Published var selectedRange: DateRange = .last7Days
     @Published var isLoading: Bool = false
 
     // MARK: - Private
@@ -63,7 +63,7 @@ final class SalesAnalyticsViewModel: ObservableObject {
     func loadAnalytics() async {
         isLoading = true
         do {
-            analyticsData = try await service.fetchSalesAnalytics(for: selectedPeriod)
+            analyticsData = try await service.fetchSalesAnalytics(range: selectedRange)
         } catch {
             AlertManager.shared.showConfirmation(
                 title: "Failed to load analytics",

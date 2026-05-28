@@ -13,7 +13,9 @@ import SwiftUI
 struct OrderAnalyticsDashboardView: View {
 
     @StateObject private var vm = OrderAnalyticsViewModel()
-    @State private var now = Date()
+    @State private var now = AppEnvironment.now
+    @State private var showHistoryDatePicker = false
+    @State private var showFunnelDatePicker = false
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(spacing: 0) {
@@ -43,6 +45,45 @@ struct OrderAnalyticsDashboardView: View {
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) {
             now = $0
         }
+        .sheet(isPresented: $showHistoryDatePicker) {
+            DateRangePickerSheet(
+                range: Binding(
+                    get: { vm.filter.dateRange ?? .last30Days },
+                    set: { vm.filter.dateRange = $0 }
+                )
+            ) {
+                Task { await vm.applyFilter() }
+            }
+        }
+        .sheet(isPresented: $showFunnelDatePicker) {
+            DateRangePickerSheet(range: $vm.funnelRange) {
+                Task { await vm.loadFunnel() }
+            }
+        }
+    }
+
+    // MARK: - Date Range Button (shared)
+
+    private func dateRangeButton(label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.accentPrimary)
+                Text(label)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.textPrimary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Color.textMuted)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.surfacePrimary)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(Color.borderColor, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
     
     // MARK: - QUEUE ─
@@ -116,6 +157,26 @@ struct OrderAnalyticsDashboardView: View {
                 Task { await vm.applyFilter() }
             }
             )
+
+            // Date range row
+            HStack(spacing: 8) {
+                dateRangeButton(label: vm.filter.dateRange?.displayLabel ?? "All time") {
+                    showHistoryDatePicker = true
+                }
+                if vm.filter.dateRange != nil {
+                    Button {
+                        vm.filter.dateRange = nil
+                        Task { await vm.applyFilter() }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+
             // Status chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -194,6 +255,13 @@ struct OrderAnalyticsDashboardView: View {
     private var funnelSection: some View {
         CustomRefreshScrollView( {
             VStack(spacing: 20) {
+                HStack {
+                    dateRangeButton(label: vm.funnelRange.displayLabel) {
+                        showFunnelDatePicker = true
+                    }
+                    Spacer()
+                }
+
                 if vm.isLoadingFunnel {
                     DashboardLoadingPlaceholder(count: 2)
                 } else {
@@ -242,7 +310,7 @@ struct OrderAnalyticsDashboardView: View {
     }
 
     private var funnelBarChart: some View {
-        ChartCard(title: "Order Breakdown", subtitle: "Last 30 days") {
+        ChartCard(title: "Order Breakdown", subtitle: vm.funnelRange.displayLabel) {
             let data: [(String, Int, Color)] = [
                 ("Completed", vm.funnelData.completedCount, .semanticSuccess),
                 ("Active", vm.funnelData.activeCount, .accentPrimary),

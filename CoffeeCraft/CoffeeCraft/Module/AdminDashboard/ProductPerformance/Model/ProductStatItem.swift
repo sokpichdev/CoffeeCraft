@@ -46,7 +46,7 @@ struct CategoryRevenueStat: Identifiable {
 // MARK: - Full Performance Payload
 
 struct ProductPerformanceData {
-    let period: SalesPeriod
+    let range: DateRange
     let topProducts: [ProductStatItem] // sorted by unitsSold desc, rank assigned
     let categoryRevenue: [CategoryRevenueStat]  // sorted by revenue desc
     let totalRevenue: Double
