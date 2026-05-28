@@ -14,21 +14,20 @@ extension AnalyticsService {
 
     // MARK: - Main Entry Point
 
-    /// Fetches the complete sales analytics payload for the given period.
+    /// Fetches the complete sales analytics payload for the given date range.
     /// All sub-queries run in parallel.
-    func fetchSalesAnalytics(for period: SalesPeriod) async throws -> SalesAnalyticsData {
-        let (start, end) = dateRange(for: period)
-        let orders = try await fetchOrdersInRange(from: start, to: end)
+    func fetchSalesAnalytics(range: DateRange) async throws -> SalesAnalyticsData {
+        let orders = try await fetchOrdersInRange(from: range.start, to: range.end)
 
         // All aggregations are computed from the same in-memory snapshot —
         // no extra Firestore reads needed after the initial fetch.
-        async let summary = computeSummary(from: orders, period: period)
-        async let dailyRevenue = computeDailyRevenue(from: orders, start: start, period: period)
+        async let summary = computeSummary(from: orders)
+        async let dailyRevenue = computeDailyRevenue(from: orders, start: range.start, end: range.end)
         async let statusBreakdown = computeStatusBreakdown(from: orders)
         async let peakHours = computePeakHours(from: orders)
 
         return await SalesAnalyticsData(
-            period: period,
+            range: range,
             summary: summary,
             dailyRevenue: dailyRevenue,
             statusBreakdown: statusBreakdown,
@@ -51,7 +50,7 @@ extension AnalyticsService {
 
     // MARK: - Summary Aggregation
 
-    private func computeSummary(from orders: [[String: Any]], period: SalesPeriod) -> SalesSummary {
+    private func computeSummary(from orders: [[String: Any]]) -> SalesSummary {
         let completed = orders.filter { $0["status"] as? String == OrderStatus.completed.rawValue }
         let cancelled = orders.filter { $0["status"] as? String == OrderStatus.cancelled.rawValue }
 
@@ -75,7 +74,7 @@ extension AnalyticsService {
     /// Fills in zero-revenue days so the chart x-axis has no gaps.
     private func computeDailyRevenue(from orders: [[String: Any]],
                                      start: Date,
-                                     period: SalesPeriod) -> [DailyRevenuePoint] {
+                                     end: Date) -> [DailyRevenuePoint] {
         let cal = Calendar.current
 
         // Build a dict: day-start-date → (revenue, count)
@@ -95,7 +94,7 @@ extension AnalyticsService {
         // Generate every day in the range, filling gaps with 0
         var points: [DailyRevenuePoint] = []
         var cursor = cal.startOfDay(for: start)
-        let endDay = cal.startOfDay(for: Date())
+        let endDay = cal.startOfDay(for: end)
 
         while cursor <= endDay {
             let (rev, count) = revenueMap[cursor] ?? (0, 0)
@@ -169,12 +168,4 @@ extension AnalyticsService {
         return points
     }
 
-    // MARK: - Date Range Helper
-
-    private func dateRange(for period: SalesPeriod) -> (Date, Date) {
-        let now = Date()
-        let todayStart = Calendar.current.startOfDay(for: now)
-        let start = Calendar.current.date(byAdding: .day, value: -(period.dayCount - 1), to: todayStart)!
-        return (start, now)
-    }
 }

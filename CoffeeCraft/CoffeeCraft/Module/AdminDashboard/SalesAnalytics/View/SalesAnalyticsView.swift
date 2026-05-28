@@ -14,21 +14,14 @@ struct SalesAnalyticsView: View {
 
     @StateObject private var vm = SalesAnalyticsViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showDatePicker = false
     var body: some View {
         CustomRefreshScrollView({
             VStack(alignment: .leading, spacing: 20) {
 
-                CustomSegmentedControl(
-                    selectedSegment: $vm.selectedPeriod,
-                    segments: SalesPeriod.allCases,
-                    onClick: {
-                        Task {
-                            await vm.loadAnalytics()
-                        }
-                    }
-                )
-                .padding(.top, 8)
-                
+                dateRangeBar
+                    .padding(.top, 8)
+
                 summaryCards
 
                 if vm.isLoading {
@@ -55,6 +48,46 @@ struct SalesAnalyticsView: View {
         .onAppear {
             Task { await vm.loadAnalytics() }
         }
+        .sheet(isPresented: $showDatePicker) {
+            DateRangePickerSheet(range: $vm.selectedRange) {
+                Task { await vm.loadAnalytics() }
+            }
+        }
+    }
+
+    // MARK: - Date Range Bar
+
+    private var dateRangeBar: some View {
+        Button {
+            showDatePicker = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.accentPrimary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Date Range")
+                        .font(.caption2)
+                        .foregroundStyle(Color.textMuted)
+                    Text(vm.selectedRange.displayLabel)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.textPrimary)
+                }
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.textMuted)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color.surfacePrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.borderColor, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Summary Stat Cards
@@ -107,7 +140,7 @@ struct SalesAnalyticsView: View {
     // MARK: - Revenue Chart
 
     private var revenueChartSection: some View {
-        ChartCard(title: "Daily Revenue", subtitle: vm.selectedPeriod.rawValue) {
+        ChartCard(title: "Daily Revenue", subtitle: vm.selectedRange.displayLabel) {
             Chart(vm.analyticsData?.dailyRevenue ?? []) { point in
                 AreaMark(
                     x: .value("Date", point.date, unit: .day),
@@ -158,13 +191,13 @@ struct SalesAnalyticsView: View {
         }
     }
 
-    private var axisDayStride: Int { vm.selectedPeriod == .week ? 1 : 5 }
+    private var axisDayStride: Int { vm.selectedRange.dayCount <= 10 ? 1 : max(1, vm.selectedRange.dayCount / 7) }
 
     // MARK: - Status Breakdown
 
     private var statusBreakdownSection: some View {
         ChartCard(title: "Orders by Status",
-                  subtitle: "All statuses · \(vm.selectedPeriod.rawValue)") {
+                  subtitle: "All statuses · \(vm.selectedRange.displayLabel)") {
             Chart(vm.analyticsData?.statusBreakdown ?? []) { point in
                 BarMark(
                     x: .value("Count", point.count),

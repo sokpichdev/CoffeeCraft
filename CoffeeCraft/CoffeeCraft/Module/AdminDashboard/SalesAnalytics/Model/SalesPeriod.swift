@@ -7,23 +7,6 @@
 
 import Foundation
 
-// MARK: - Period Selector
-
-enum SalesPeriod: String, CaseIterable, Identifiable {
-    case week  = "7 Days"
-    case month = "30 Days"
-
-    var id: String { rawValue }
-
-    /// Number of calendar days to look back from today.
-    var dayCount: Int {
-        switch self {
-        case .week:  return 7
-        case .month: return 30
-        }
-    }
-}
-
 // MARK: - Daily Revenue Point
 
 /// One point on the revenue line/area chart.
@@ -96,7 +79,7 @@ struct SalesSummary {
 
 /// Everything the SalesAnalyticsViewModel holds for one period.
 struct SalesAnalyticsData {
-    let period: SalesPeriod
+    let range: DateRange
     let summary: SalesSummary
     let dailyRevenue: [DailyRevenuePoint]
     let statusBreakdown: [OrderStatusPoint]
