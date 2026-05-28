@@ -146,9 +146,9 @@ struct AuthView: View {
 
     private var heroSubtitle: String {
         switch screen {
-        case .login: return "Welcome back ☕️"
-        case .register: return "Join the craft 🌿"
-        case .forgotPassword: return "Reset your password 🔑"
+        case .login: return "Welcome back"
+        case .register: return "Join the craft"
+        case .forgotPassword: return "Reset your password"
         }
     }
 }
