@@ -31,6 +31,7 @@ struct ProductPerformanceView: View {
 
     /// Drives conditional rendering — only one tab's subtree exists at a time.
     @State private var activeTab: PerformanceTab = .analytics
+    @State private var showDatePicker = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,16 +56,46 @@ struct ProductPerformanceView: View {
             ToolBarButton.back { dismiss() }
         }
         .onAppear { vm.onAppear() }
+        .sheet(isPresented: $showDatePicker) {
+            DateRangePickerSheet(range: $vm.selectedRange) {
+                Task { await vm.loadPerformance() }
+            }
+        }
     }
 
     /// Rendered once, never re-drawn during scroll.
     private var stickyHeader: some View {
         VStack(spacing: 12) {
-            CustomSegmentedControl(
-                selectedSegment: $vm.selectedPeriod,
-                segments: SalesPeriod.allCases,
-                onClick: { Task { await vm.periodChanged() } }
-            )
+            Button {
+                showDatePicker = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color.accentPrimary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Date Range")
+                            .font(.caption2)
+                            .foregroundStyle(Color.textMuted)
+                        Text(vm.selectedRange.displayLabel)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.textPrimary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.textMuted)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(Color.surfacePrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.borderColor, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
 
             HStack(spacing: 12) {
                 StatCard(

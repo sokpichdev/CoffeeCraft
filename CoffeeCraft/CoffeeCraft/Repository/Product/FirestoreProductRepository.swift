@@ -54,7 +54,8 @@ struct FirestoreProductRepository: ProductRepositoryProtocol {
             Firebase.Products.imageURL: product.imageURL,
             Firebase.Products.category: product.category,
             Firebase.Products.available: product.available,
-            Firebase.Products.customizations: product.customizations ?? [:]
+            Firebase.Products.customizations: product.customizations ?? [:],
+            Firebase.Products.pointsValue: product.pointsValue
         ]
         try await db.collection(Firebase.Products.collection).document(product.id).setData(data)
     }
@@ -81,6 +82,7 @@ struct FirestoreProductRepository: ProductRepositoryProtocol {
             category: data[Firebase.Products.category] as? String ?? "Others",
             available: data[Firebase.Products.available] as? Bool ?? true,
             customizations: data[Firebase.Products.customizations] as? [String: [String: Double]],
+            pointsValue: data[Firebase.Products.pointsValue] as? Double ?? 0,
             avgRating: data[Firebase.Products.avgRating] as? Double,
             ratingCount: data[Firebase.Products.ratingCount] as? Int,
             ratingDistribution: data[Firebase.Products.ratingDistribution] as? [String: Int]

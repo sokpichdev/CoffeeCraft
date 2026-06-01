@@ -10,7 +10,7 @@ import SwiftUI
 struct AdminDashboardHomeView: View {
 
     @StateObject private var vm = DashboardHomeViewModel()
-    @State private var now = Date()
+    @State private var now = AppEnvironment.now
 
     var body: some View {
         CustomRefreshScrollView({

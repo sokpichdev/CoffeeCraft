@@ -67,7 +67,7 @@ struct LiveOrderItem: Identifiable {
 
     var totalFormatted: String { totalPrice.asCurrency }
 
-    func timeAgo(relativeTo now: Date = Date()) -> String {
+    func timeAgo(relativeTo now: Date = AppEnvironment.now) -> String {
         let diff = now.timeIntervalSince(timestamp)
         if diff < 60 { return "Just now" }
         let formatter = RelativeDateTimeFormatter()

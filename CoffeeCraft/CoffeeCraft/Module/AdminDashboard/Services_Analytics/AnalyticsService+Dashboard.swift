@@ -45,7 +45,7 @@ extension AnalyticsService {
     // MARK: - Revenue
 
     private func fetchRevenueSummary() async throws -> RevenueSummary {
-        let now = Date()
+        let now = AppEnvironment.now
         let todayStart = Calendar.current.startOfDay(for: now)
         let weekStart = Calendar.current.date(byAdding: .day, value: -6, to: todayStart)!
         let monthStart = Calendar.current.date(byAdding: .day, value: -29, to: todayStart)!
@@ -77,7 +77,7 @@ extension AnalyticsService {
     // MARK: - Orders
 
     private func fetchOrderSummary() async throws -> OrderSummary {
-        let now = Date()
+        let now = AppEnvironment.now
         let todayStart = Calendar.current.startOfDay(for: now)
         let yesterdayStart = Calendar.current.date(byAdding: .day, value: -1, to: todayStart)!
 
@@ -109,7 +109,7 @@ extension AnalyticsService {
     // MARK: - Customers
 
     private func fetchCustomerSummary() async throws -> CustomerSummary {
-        let weekStart = Calendar.current.date(byAdding: .day, value: -6, to: Date())!
+        let weekStart = Calendar.current.date(byAdding: .day, value: -6, to: AppEnvironment.now)!
 
         // New customers this week — count only, no documents downloaded
         async let newCountAgg = db.collection(Firebase.Users.collection)

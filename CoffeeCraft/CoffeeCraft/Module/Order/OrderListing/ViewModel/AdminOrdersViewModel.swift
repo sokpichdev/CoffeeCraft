@@ -284,6 +284,24 @@ class AdminOrdersViewModel: ObservableObject {
                 .updateData(fields)
 
             applyLocalStatusChange(orderId: orderId, status: status)
+
+            // MARK: Phase 8 — Award loyalty points when order reaches Completed
+            if OrderStatus.from(status) == .completed, let userId = order.userId {
+                let totalPoints = order.items?.compactMap { $0 }
+                    .reduce(0.0) { $0 + (($1.pointsValue ?? 0) * Double($1.quantity ?? 1)) } ?? 0
+                if totalPoints > 0 {
+                    let orderNumber = order.orderId.map { "#\($0)" } ?? orderId
+                    Task {
+                        try? await LoyaltyService.shared.awardPoints(
+                            userId: userId,
+                            orderId: orderId,
+                            points: totalPoints,
+                            orderDescription: "Order \(orderNumber)"
+                        )
+                    }
+                }
+            }
+
             return true
         } catch {
             AppLog.order.error("❌ updateOrderStatus error: \(error.localizedDescription)")
