@@ -50,6 +50,7 @@ final class OrderAnalyticsViewModel: ObservableObject {
 
     @Published var funnelData: OrderFunnelData = .empty
     @Published var isLoadingFunnel = false
+    @Published var funnelRange: DateRange = .last30Days
 
     // MARK: - Private
 
@@ -149,7 +150,7 @@ final class OrderAnalyticsViewModel: ObservableObject {
     func loadFunnel() async {
         isLoadingFunnel = true
         do {
-            funnelData = try await service.fetchOrderFunnel()
+            funnelData = try await service.fetchOrderFunnel(range: funnelRange)
         } catch {
             AppLog.dashboard.error("OrderAnalyticsViewModel funnel \(error.localizedDescription)")
         }

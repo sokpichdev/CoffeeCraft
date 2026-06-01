@@ -15,9 +15,6 @@ protocol SegmentItem: Hashable {
 extension Segment: SegmentItem {} // title already returns rawValue
 
 // Conform all dashboard enums
-extension SalesPeriod: SegmentItem {
-    var title: String { rawValue } // "7 Days" / "30 Days"
-}
 extension OrderAnalyticsSection: SegmentItem {
     var title: String { rawValue } // "Queue" / "History" / "Funnel"
 }

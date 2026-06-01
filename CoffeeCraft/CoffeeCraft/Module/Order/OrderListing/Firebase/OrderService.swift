@@ -150,7 +150,8 @@ class OrderService: ObservableObject {
                     Firebase.Orders.ItemField.name: item.product.name,
                     Firebase.Orders.ItemField.price: item.totalPrice,
                     Firebase.Orders.ItemField.imageURL: item.product.imageURL,
-                    Firebase.Orders.ItemField.quantity: item.quantity
+                    Firebase.Orders.ItemField.quantity: item.quantity,
+                    Firebase.Orders.ItemField.pointsValue: item.product.pointsValue
                 ]
                 if !item.selections.isEmpty { dict[Firebase.Orders.ItemField.selections] = item.selections }
                 if !item.extras.isEmpty { dict[Firebase.Orders.ItemField.extras]     = item.extras }

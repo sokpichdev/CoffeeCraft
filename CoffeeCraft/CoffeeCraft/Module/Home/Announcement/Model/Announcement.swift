@@ -40,6 +40,6 @@ struct Announcement: Identifiable, Codable {
         let date = timestamp.dateValue()
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
-        return formatter.localizedString(for: date, relativeTo: Date())
+        return formatter.localizedString(for: date, relativeTo: AppEnvironment.now)
     }
 }

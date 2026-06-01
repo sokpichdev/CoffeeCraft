@@ -27,7 +27,7 @@ struct OrderQueueItem: Identifiable {
     var totalFormatted: String { totalPrice.asCurrency }
 
     /// Minutes elapsed since the order was placed.
-    func waitMinutes(relativeTo now: Date = Date()) -> Int {
+    func waitMinutes(relativeTo now: Date = AppEnvironment.now) -> Int {
         Int(now.timeIntervalSince(timestamp) / 60)
     }
 
@@ -58,9 +58,10 @@ struct OrderHistoryFilter {
     var status: OrderStatus? // nil = all statuses
     var searchText: String = ""
     var sortOrder: HistorySortOrder = .newest
+    var dateRange: DateRange? // nil = all time
 
     var isEmpty: Bool {
-        status == nil && searchText.isEmpty
+        status == nil && searchText.isEmpty && dateRange == nil
     }
 }
 

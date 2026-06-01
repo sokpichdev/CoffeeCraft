@@ -38,7 +38,7 @@ struct AnalyticsTab: View {
     private var categoryDonutSection: some View {
         ChartCard(
             title: "Revenue by Category",
-            subtitle: vm.selectedPeriod.rawValue
+            subtitle: vm.selectedRange.displayLabel
         ) {
             HStack(alignment: .center, spacing: 20) {
                 ZStack {

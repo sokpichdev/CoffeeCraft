@@ -46,7 +46,7 @@ struct RowInSectionView: View {
                 Spacer()
                 
                 if let count = badgeCount, count > 0 {
-                    Text("\\(count)")
+                    Text("\(count)")
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)

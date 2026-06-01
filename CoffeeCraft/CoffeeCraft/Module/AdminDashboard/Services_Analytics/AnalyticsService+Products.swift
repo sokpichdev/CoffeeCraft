@@ -21,11 +21,9 @@ extension AnalyticsService {
     ///   2. Fetch the full product catalog in one query → join in memory
     ///
     /// This keeps Firestore reads to exactly 2 queries regardless of product count.
-    func fetchProductPerformance(for period: SalesPeriod) async throws -> ProductPerformanceData {
-        let (start, end) = productDateRange(for: period)
-
+    func fetchProductPerformance(range: DateRange) async throws -> ProductPerformanceData {
         // Run both queries in parallel — they're independent
-        async let ordersData = fetchCompletedOrderItems(from: start, to: end)
+        async let ordersData = fetchCompletedOrderItems(from: range.start, to: range.end)
         async let productsData = fetchAllProducts()
 
         let (itemMap, totalRevenue, totalUnits) = try await ordersData
@@ -35,7 +33,7 @@ extension AnalyticsService {
         let stats = buildProductStats(from: itemMap, catalog: productDocs)
 
         return ProductPerformanceData(
-            period: period,
+            range: range,
             topProducts: stats,
             categoryRevenue: buildCategoryRevenue(from: stats),
             totalRevenue: totalRevenue,
@@ -164,16 +162,4 @@ extension AnalyticsService {
             .sorted { $0.revenue > $1.revenue }  // largest slice first
     }
 
-    // MARK: - Date Range Helper
-
-    private func productDateRange(for period: SalesPeriod) -> (Date, Date) {
-        let now = Date()
-        let todayStart = Calendar.current.startOfDay(for: now)
-        let start = Calendar.current.date(
-            byAdding: .day,
-            value: -(period.dayCount - 1),
-            to: todayStart
-        )!
-        return (start, now)
-    }
 }

@@ -13,7 +13,7 @@ final class ProductPerformanceViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var performanceData: ProductPerformanceData?
-    @Published var selectedPeriod: SalesPeriod = .month // default 30 days for richer data
+    @Published var selectedRange: DateRange = .last30Days // default 30 days for richer data
     @Published var isLoading: Bool = false
 
     // MARK: - Private
@@ -45,7 +45,7 @@ final class ProductPerformanceViewModel: ObservableObject {
     func loadPerformance() async {
         isLoading = true
         do {
-            performanceData = try await service.fetchProductPerformance(for: selectedPeriod)
+            performanceData = try await service.fetchProductPerformance(range: selectedRange)
         } catch {
             AlertManager.shared.showConfirmation(
                 title: "Failed to load product data",
@@ -60,7 +60,4 @@ final class ProductPerformanceViewModel: ObservableObject {
         isLoading = false
     }
 
-    func periodChanged() async {
-        await loadPerformance()
-    }
 }
