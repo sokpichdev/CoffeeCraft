@@ -22,6 +22,72 @@
 
 ---
 
+## 📸 Screenshots
+
+### 👤 Customer
+
+<p align="center">
+  <img src="screenshots/customers/loading.png" width="160"/>
+  <img src="screenshots/customers/login.png" width="160"/>
+  <img src="screenshots/customers/signup.png" width="160"/>
+  <img src="screenshots/customers/forget_password.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/customers/home.gif" width="160"/>
+  <img src="screenshots/customers/menu.png" width="160"/>
+  <img src="screenshots/customers/search_menu.png" width="160"/>
+  <img src="screenshots/customers/product_detail.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/customers/cart.png" width="160"/>
+  <img src="screenshots/customers/store_selection.png" width="160"/>
+  <img src="screenshots/customers/pickup_delivery.png" width="160"/>
+  <img src="screenshots/customers/delivery.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/customers/payment_method.png" width="160"/>
+  <img src="screenshots/customers/orders.png" width="160"/>
+  <img src="screenshots/customers/order_detail.png" width="160"/>
+  <img src="screenshots/customers/ratings_reviews.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/customers/wallet.png" width="160"/>
+  <img src="screenshots/customers/topup.png" width="160"/>
+  <img src="screenshots/customers/find_branch.png" width="160"/>
+  <img src="screenshots/customers/branch_info.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/customers/account.png" width="160"/>
+  <img src="screenshots/customers/edit_profile.png" width="160"/>
+  <img src="screenshots/customers/shared_cards.png" width="160"/>
+  <img src="screenshots/customers/settings.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/customers/color_pallete.png" width="160"/>
+</p>
+
+### 🛠 Admin / Manager
+
+<p align="center">
+  <img src="screenshots/admin/inbox.png" width="160"/>
+  <img src="screenshots/admin/order_analytics_history.png" width="160"/>
+  <img src="screenshots/admin/order_analytics_funnel.png" width="160"/>
+  <img src="screenshots/admin/pick_ordering_hours.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/admin/sales_analytics.png" width="160"/>
+  <img src="screenshots/admin/rating_sales.png" width="160"/>
+  <img src="screenshots/admin/product_performance.png" width="160"/>
+  <img src="screenshots/admin/best_sellers.png" width="160"/>
+</p>
+<p align="center">
+  <img src="screenshots/admin/review_moderation.png" width="160"/>
+  <img src="screenshots/admin/users_info.png" width="160"/>
+  <img src="screenshots/admin/users_detail.png" width="160"/>
+</p>
+
+---
+
 ## ✨ Features
 
 ### 👤 Customer
