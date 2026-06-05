@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&pause=2000&color=C8A97E&center=true&vCenter=true&width=700&lines=CoffeeCraft+☕;A+Production+iOS+Coffee+Shop+App" alt="Typing SVG" />
-</p>
+<h1 align="center">CoffeeCraft ☕</h1>
 
 <p align="center">
   A full-featured coffee shop ordering app built with <strong>SwiftUI + Firebase</strong>.<br/>
