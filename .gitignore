@@ -1,7 +1,24 @@
-# Xcode user state (safe to ignore)
-*.xcuserstate
-
-# macOS junk
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode user state
 *.xcuserstate
-*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+
+# Firebase / Google credentials — NEVER commit these
+GoogleService-Info*.plist
+*.p12
+*.mobileprovision
+*.cer
+*.pem
+
+# Environment / secrets
+.env
+.env.*
+secrets/
