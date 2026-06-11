@@ -4,5 +4,11 @@
 # macOS junk
 .DS_Store
 
+# Local-only planning and dev files
+CLAUDE.md
+FEATURE_PRIORITY_PLAN.md
+PHASE_8_ADMIN_DASHBOARD_PLAN.md
+install-agents.sh
+
 # Firebase config (contains API keys — do not commit)
 **/GoogleService-Info*.plist
