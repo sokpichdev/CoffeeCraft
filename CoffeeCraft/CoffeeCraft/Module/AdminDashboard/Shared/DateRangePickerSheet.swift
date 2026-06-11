@@ -135,50 +135,87 @@ struct DateRangePickerSheet: View {
                 .foregroundStyle(Color.textMuted)
                 .textCase(.uppercase)
 
-            VStack(spacing: 0) {
-                DatePicker("From", selection: $customStart, in: ...customEnd,
-                           displayedComponents: .date)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .foregroundStyle(Color.textPrimary)
+            HStack(spacing: 8) {
+                dateCard(label: "From", date: $customStart, range: ...customEnd)
 
-                Divider()
-                    .padding(.leading, 16)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.textMuted)
 
-                DatePicker("To", selection: $customEnd, in: customStart...,
-                           displayedComponents: .date)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .foregroundStyle(Color.textPrimary)
+                dateCard(label: "To", date: $customEnd, range: customStart...)
             }
-            .background(Color.surfacePrimary)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
-            )
 
-            Button {
-                let cal = Calendar.current
-                let normalizedEnd = cal.date(bySettingHour: 23, minute: 59, second: 59,
-                                             of: customEnd) ?? customEnd
-                range = DateRange(
-                    start: cal.startOfDay(for: customStart),
-                    end: normalizedEnd,
-                    presetLabel: nil
-                )
-                onApply?()
-                dismiss()
-            } label: {
-                Text("Apply Custom Range")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.accentPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            .buttonStyle(.plain)
+            applyButton
         }
+    }
+
+    private func dateCard(label: String, date: Binding<Date>, range: PartialRangeThrough<Date>) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Color.textMuted)
+                .textCase(.uppercase)
+            DatePicker("", selection: date, in: range, displayedComponents: .date)
+                .labelsHidden()
+                .datePickerStyle(.compact)
+                .foregroundStyle(Color.textPrimary)
+                .tint(Color.accentPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
+        )
+    }
+
+    private func dateCard(label: String, date: Binding<Date>, range: PartialRangeFrom<Date>) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Color.textMuted)
+                .textCase(.uppercase)
+            DatePicker("", selection: date, in: range, displayedComponents: .date)
+                .labelsHidden()
+                .datePickerStyle(.compact)
+                .foregroundStyle(Color.textPrimary)
+                .tint(Color.accentPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color.surfacePrimary)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.borderColor.opacity(0.5), lineWidth: 0.5)
+        )
+    }
+
+    private var applyButton: some View {
+        Button {
+            let cal = Calendar.current
+            let normalizedEnd = cal.date(bySettingHour: 23, minute: 59, second: 59,
+                                         of: customEnd) ?? customEnd
+            range = DateRange(
+                start: cal.startOfDay(for: customStart),
+                end: normalizedEnd,
+                presetLabel: nil
+            )
+            onApply?()
+            dismiss()
+        } label: {
+            Text("Apply Custom Range")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.accentPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
     }
 }
