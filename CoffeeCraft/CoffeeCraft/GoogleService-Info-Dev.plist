@@ -2,8 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>713648009529-3rt16s9hsk7qb4e2viklue80sft7u75r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.713648009529-3rt16s9hsk7qb4e2viklue80sft7u75r</string>
 	<key>API_KEY</key>
-	<string>AIzaSyC1j-qhO6B-wQH_2QP5LdekwSmm9dJTEww</string>
+	<string>AIzaSyCCs4Z8xj-ItY4mEQSBlz3wTC9k9V-ZitI</string>
 	<key>GCM_SENDER_ID</key>
 	<string>713648009529</string>
 	<key>PLIST_VERSION</key>
@@ -15,15 +19,15 @@
 	<key>STORAGE_BUCKET</key>
 	<string>tictactoert.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:713648009529:ios:9023d4caa612fca85b78e8</string>
 	<key>DATABASE_URL</key>

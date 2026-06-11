@@ -3,5 +3,6 @@
 
 # macOS junk
 .DS_Store
-*.xcuserstate
-*.xcuserstate
+
+# Firebase config (contains API keys — do not commit)
+**/GoogleService-Info*.plist

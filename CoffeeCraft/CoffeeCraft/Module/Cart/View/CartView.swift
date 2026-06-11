@@ -130,7 +130,6 @@ struct CartView: View {
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: method.icon).font(.caption.weight(.semibold))
-                VStack(alignment: .leading, spacing: 1) {
                     Text(method.displayName)
                         .font(.caption)
                         .fontWeight(isSelected ? .bold : .regular)
@@ -139,7 +138,6 @@ struct CartView: View {
                             .font(.system(size: 10))
                             .foregroundColor(canAfford ? Color.semanticSuccess : Color.semanticError)
                     }
-                }
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
             .frame(maxWidth: .infinity)
