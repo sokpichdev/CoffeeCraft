@@ -19,8 +19,19 @@ struct PeakHoursHeatmap: View {
     private let cellSpacing: CGFloat = 2
 
     // Shared cell width calculation - ensures labels align with columns
-    private var cellWidth: CGFloat { rowHeight * 1.5 }
+//    private var cellWidth: CGFloat { rowHeight * 1.5 }
 
+    private var cellWidth: CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+
+        let horizontalPadding: CGFloat = 32 // SalesAnalyticsView padding
+        let cardPadding: CGFloat = 32 // ChartCard padding (assuming 16+16)
+        let labelArea: CGFloat = labelWidth + 6
+
+        let available = screenWidth - horizontalPadding - cardPadding - labelArea
+
+        return (available - (cellSpacing * CGFloat(hours.count - 1))) / CGFloat(hours.count)
+    }
     var body: some View {
         VStack(spacing: 8) {
 
