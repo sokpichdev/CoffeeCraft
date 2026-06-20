@@ -1,13 +1,27 @@
-# CoffeeCraft
+# ☕ CoffeeCraft
 
-A production-grade iOS coffee shop ordering app built with SwiftUI and Firebase. Supports two distinct user roles — **Customer** and **Manager** — with real-time order tracking, an in-app wallet, loyalty cards, a reviews system, and an admin dashboard.
+> A production-grade iOS coffee shop ordering app built with **SwiftUI** and **Firebase**.
+
+CoffeeCraft serves two distinct roles from a single codebase — **Customer** and **Manager** — with real-time order tracking, live delivery on a map, an in-app wallet, loyalty cards, verified reviews, and a full admin analytics dashboard.
+
+![Platform](https://img.shields.io/badge/platform-iOS%2017%2B-blue)
+![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange)
+![UI](https://img.shields.io/badge/UI-SwiftUI-1575F9)
+![Backend](https://img.shields.io/badge/Backend-Firebase-FFCA28)
+![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Repository-success)
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Tech Stack](#tech-stack)
+- [Architecture at a Glance](#architecture-at-a-glance) — *project diagrams*
+  - [System Architecture](#system-architecture)
+  - [Project / Module Map](#project--module-map)
+  - [Dependency Injection](#dependency-injection)
+  - [Order & Delivery Lifecycle](#order--delivery-lifecycle)
 - [Architecture](#architecture)
 - [Project Structure](#project-structure)
 - [Module Breakdown](#module-breakdown)
@@ -29,6 +43,68 @@ CoffeeCraft is a full-featured coffee shop ordering app demonstrating real-world
 
 ---
 
+## Screenshots
+
+### Customer App
+
+**Onboarding & Authentication**
+
+| Login | Sign Up | Reset Password | Splash / Loading |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/customers/login.png" width="190"/> | <img src="docs/screenshots/customers/signup.png" width="190"/> | <img src="docs/screenshots/customers/forget_password.png" width="190"/> | <img src="docs/screenshots/customers/loading.png" width="190"/> |
+
+**Home & Menu**
+
+| Home | Menu | Search | Product Detail |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/customers/home.gif" width="190"/> | <img src="docs/screenshots/customers/menu.png" width="190"/> | <img src="docs/screenshots/customers/search_menu.png" width="190"/> | <img src="docs/screenshots/customers/product_detail.png" width="190"/> |
+
+**Ordering & Checkout**
+
+| Pickup / Delivery | Store Selection | Cart | Payment Method |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/customers/pickup_delivery.png" width="190"/> | <img src="docs/screenshots/customers/store_selection.png" width="190"/> | <img src="docs/screenshots/customers/cart.png" width="190"/> | <img src="docs/screenshots/customers/payment_method.png" width="190"/> |
+
+**Orders & Live Delivery**
+
+| Orders | Order Detail | Live Delivery | Reviews & Ratings |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/customers/orders.png" width="190"/> | <img src="docs/screenshots/customers/order_detail.png" width="190"/> | <img src="docs/screenshots/customers/delivery.png" width="190"/> | <img src="docs/screenshots/customers/ratings_reviews.png" width="190"/> |
+
+**Branches, Wallet & Loyalty**
+
+| Find a Branch | Branch Info | Wallet | Top Up |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/customers/find_branch.png" width="190"/> | <img src="docs/screenshots/customers/branch_info.png" width="190"/> | <img src="docs/screenshots/customers/wallet.png" width="190"/> | <img src="docs/screenshots/customers/topup.png" width="190"/> |
+
+**Account & Appearance**
+
+| Account | Edit Profile | Shared Loyalty Cards | Settings | Color Palettes |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/customers/account.png" width="150"/> | <img src="docs/screenshots/customers/edit_profile.png" width="150"/> | <img src="docs/screenshots/customers/shared_cards.png" width="150"/> | <img src="docs/screenshots/customers/settings.png" width="150"/> | <img src="docs/screenshots/customers/color_pallete.png" width="150"/> |
+
+### Manager / Admin Dashboard
+
+**Sales & Product Analytics**
+
+| Sales Analytics | Rating vs. Sales | Best Sellers | Product Performance |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/admin/sales_analytics.png" width="190"/> | <img src="docs/screenshots/admin/rating_sales.png" width="190"/> | <img src="docs/screenshots/admin/best_sellers.png" width="190"/> | <img src="docs/screenshots/admin/product_performance.png" width="190"/> |
+
+**Order Analytics & Operations**
+
+| Order Funnel | Order History | Ordering Hours | Inbox |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/admin/order_analytics_funnel.png" width="190"/> | <img src="docs/screenshots/admin/order_analytics_history.png" width="190"/> | <img src="docs/screenshots/admin/pick_ordering_hours.png" width="190"/> | <img src="docs/screenshots/admin/inbox.png" width="190"/> |
+
+**Moderation & Users**
+
+| Review Moderation | Users List | User Detail |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/admin/review_moderation.png" width="190"/> | <img src="docs/screenshots/admin/users_info.png" width="190"/> | <img src="docs/screenshots/admin/users_detail.png" width="190"/> |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -42,6 +118,165 @@ CoffeeCraft is a full-featured coffee shop ordering app demonstrating real-world
 | Maps | MapKit + CoreLocation |
 | Minimum iOS | 17.0 |
 | Xcode | 15+ |
+
+---
+
+## Architecture at a Glance
+
+A complete map of how CoffeeCraft fits together — render-friendly Mermaid diagrams you can read top-to-bottom. (GitHub renders these automatically.)
+
+### System Architecture
+
+Every layer depends only on the one below it. Views render state, ViewModels own state, Services/Repositories speak to Firebase through protocols, and Firebase is the source of truth.
+
+```mermaid
+flowchart TD
+    User(["👤 Customer / Manager"]) --> APP
+
+    subgraph Presentation["🖼️ Presentation — SwiftUI"]
+        APP["CoffeeCraftApp (@main)"]
+        ROOT["RootView — auth gate + scene VMs"]
+        TAB["TabBarView — role-filtered tabs"]
+        CUST["Customer Views<br/>Home · Menu · Cart · Orders · Wallet · Map · Account"]
+        MGR["Manager Views<br/>Dashboard · Analytics · Moderation"]
+        APP --> ROOT --> TAB
+        TAB --> CUST
+        TAB --> MGR
+    end
+
+    subgraph State["🧠 State — ViewModels (@MainActor, @Published)"]
+        AUTHVM[AuthViewModel]
+        ORDERVM[OrderViewModel]
+        WALLETVM[WalletViewModel]
+        PRODVM[ProductViewModel]
+        MAPVM[MapViewModel]
+        DELVM[DeliveryViewModel]
+        ADMINVM[Dashboard / Analytics VMs]
+    end
+
+    subgraph Domain["⚙️ Services & Repositories — protocol-backed"]
+        AUTHREPO[AuthRepository]
+        PRODREPO[ProductRepository]
+        ORDERREPO[OrderRepository]
+        WALLETSVC[WalletService]
+        BRANCHREPO[BranchRepository]
+        RATINGSVC[RatingService]
+    end
+
+    subgraph Backend["🔥 Firebase"]
+        AUTH[(Auth)]
+        FS[(Cloud Firestore)]
+        FCM[(Cloud Messaging)]
+        OBS[(Analytics / Crashlytics)]
+    end
+
+    CUST --> State
+    MGR --> State
+    State --> Domain
+    Domain --> Backend
+```
+
+### Project / Module Map
+
+Feature modules live in `CoffeeCraft/Module/`. Some are shared by all roles, others are gated by `UserRole`.
+
+```mermaid
+flowchart TB
+    subgraph Shared["Shared — all roles"]
+        Auth
+        Home
+        Menu
+        Customize["Product Customization"]
+        Cart
+        Wallet
+        MapMod["Map + Live Delivery"]
+        Theme
+        Notification
+    end
+
+    subgraph CustomerOnly["Customer only"]
+        Order
+        Review
+        Favorites
+        Account
+    end
+
+    subgraph ManagerOnly["Manager only — Admin Dashboard"]
+        Summary["KPI Summary"]
+        OrderAnalytics["Order Analytics"]
+        SalesAnalytics["Sales Analytics"]
+        ProductPerf["Product Performance"]
+        Moderation["Review Moderation"]
+    end
+```
+
+### Dependency Injection
+
+Global singletons are injected once from `CoffeeCraftApp` via `@EnvironmentObject`; scene state is created in `RootView`; a few managers are accessed directly.
+
+```mermaid
+flowchart LR
+    APP["CoffeeCraftApp (@main)"]
+
+    subgraph Global["Injected @EnvironmentObject (global)"]
+        US[UserSession.shared]
+        AVM[AuthViewModel]
+        OVM[OrderViewModel]
+        WVM[WalletViewModel]
+        TM[ThemeManager.shared]
+        NC[NotificationCoordinator.shared]
+    end
+
+    subgraph Scene["Scene-scoped (created in RootView)"]
+        CART[CartManager]
+        PVM[ProductViewModel]
+        FVM[FavoriteViewModel]
+        CVM[CardViewModel]
+        ANN[AnnouncementViewModel]
+        IVM[InboxViewModel]
+    end
+
+    subgraph Direct["Direct-access singletons"]
+        AM[AlertManager]
+        TOAST[ToastManager]
+        LOAD[LoaderManager]
+        NM[NetworkMonitor]
+        WS[WalletService]
+    end
+
+    APP --> Global
+    APP --> Scene
+    Global -.uses.-> Direct
+    Scene -.uses.-> Direct
+```
+
+### Order & Delivery Lifecycle
+
+An order moves through a fixed status flow; once a delivery order is dispatched, a separate live-tracking lifecycle drives the map (powered by `DeliveryViewModel` + Firestore `deliveries/`).
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Pending: placed (wallet / cash)
+    Pending --> Preparing
+    Preparing --> Ready
+    Ready --> Completed
+    Pending --> Cancelled: cancel → atomic wallet refund
+    Completed --> [*]
+    Cancelled --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> orderPlaced: Preparing your order
+    orderPlaced --> riderAssigned: Rider heading to branch
+    riderAssigned --> pickedUp: Rider picked up order
+    pickedUp --> enRoute: On the way to you
+    enRoute --> arriving: Almost there
+    arriving --> delivered: Delivered
+    delivered --> [*]
+```
 
 ---
 
@@ -250,11 +485,13 @@ Wishlist backed by `users/{uid}/favorites/{productId}` subcollection documents. 
 
 Key files: `FavoriteViewModel.swift`, `FavoriteItem.swift`
 
-### Map
+### Map & Live Delivery
 
-Store locator with MapKit showing all branches as annotated pins. Branch detail sheet shows hours, amenities, wait time, and a directions button. `OrderEnvironment.shared` holds the selected branch and delivery type for the checkout flow.
+Store locator built on MapKit + CoreLocation showing every branch as an annotated pin, with search, filter chips, distance sorting, and an "Order from here" handoff into the menu. The branch detail sheet shows hours, amenities, staff-posted wait time, and an Apple Maps directions button. `OrderEnvironment.shared` is the cross-module hub that holds the selected branch, fulfillment mode (pickup vs. delivery), and all active delivery sessions.
 
-Key files: `MapView.swift`, `MapViewModel.swift`, `Branch.swift`, `BranchRepository.swift`
+The **Delivery** submodule (`Map/Delivery/`) drives real-time rider tracking: when a delivery order reaches `OnDelivery`, `DeliveryViewModel` starts a route simulation (`DeliverySimulator`), animates a rider annotation along an `MKPolyline`, computes a live ETA, and persists the rider's last position to Firestore `deliveries/{orderId}`. `DeliveryRestoreService` resumes an in-progress delivery at the correct mid-route position after an app relaunch, and multiple concurrent deliveries are tracked independently (keyed by `orderId`).
+
+Key files: `MapView.swift`, `MapViewModel.swift`, `OrderEnvironment.swift`, `Branch.swift`, `BranchRepository.swift`, `DeliveryViewModel.swift`, `DeliverySession.swift`, `DeliveryStatus.swift`, `DeliveryRestoreService.swift`, `DeliveryMapView.swift`
 
 ### Account
 
@@ -412,7 +649,8 @@ For the full field-level schema with example documents see `CoffeeCraft/CoffeeCr
 | `orders` | Auto ID | Placed orders with status, items, payment details |
 | `wallets` | userId | Wallet balance and lifetime totals |
 | `wallet_transactions` | Auto ID | Append-only balance ledger |
-| `branches` | Auto ID | Physical store locations with coordinates, hours, amenities |
+| `branches` | Auto ID | Physical store locations with coordinates, hours, amenities, wait time |
+| `deliveries` | orderId | Live delivery session: rider position, status, ETA, route endpoints |
 | `announcements` | Auto ID | Home screen announcement cards |
 | `loyaltyCards` | Auto ID | Loyalty cards, ownership, shared access, points |
 
@@ -456,16 +694,29 @@ See `docs/theme-system.md` for a complete palette and token reference.
 
 ## Navigation Flow
 
-```
-CoffeeCraftApp (NavigationStack)
-  └─ RootView
-       ├─ CoffeeLoaderView          (shown while session.isRestoring = true)
-       └─ Tab-switched content
-            ├─ HomeView             (all roles)
-            ├─ MenuView             (all roles; manager gets edit controls)
-            ├─ OrdersView           (customer) / AdminOrdersView (manager)
-            ├─ AccountView          (all roles)
-            └─ AdminDashboardHomeView  (manager only — Dashboard tab)
+```mermaid
+flowchart TD
+    Launch([App Launch]) --> Restore{session.isRestoring?}
+    Restore -- yes --> Loader[CoffeeLoaderView]
+    Restore -- no --> AuthGate{Authenticated?}
+    Loader --> AuthGate
+    AuthGate -- no --> Login[AuthView — sign in / sign up / reset]
+    AuthGate -- yes --> Role{UserRole?}
+    Login --> Role
+
+    Role -- customer --> CTabs["Tab bar (4): Home · Menu · Orders · Account"]
+    Role -- manager --> MTabs["Tab bar (5): Dashboard · Home · Menu · Orders · Account"]
+
+    CTabs --> Home[HomeView]
+    CTabs --> Menu[MenuView]
+    CTabs --> Orders[OrdersView]
+    CTabs --> Account[AccountView]
+
+    MTabs --> Dash[AdminDashboardHomeView]
+    MTabs --> MenuM["MenuView + edit controls"]
+    MTabs --> OrdersM[AdminOrdersView]
+
+    Push[/Push notification tap/] -. NotificationCoordinator .-> Orders
 ```
 
 The `Tab` enum has five cases: `dashboard`, `home`, `menu`, `orders`, `profile`. `Tab.visible(for:)` filters out `.dashboard` for customer role, so the tab bar shows 4 tabs for customers and 5 for managers.
@@ -543,7 +794,7 @@ Scheme files live in `CoffeeCraft.xcodeproj/xcshareddata/xcschemes/`.
 ### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/cobra-PICH/CoffeeCraft.git
+git clone https://github.com/sokpichdev/CoffeeCraft.git
 cd CoffeeCraft
 ```
 
@@ -652,4 +903,4 @@ Managers will see a Dashboard tab and the product management controls in the Men
 
 **Author:** Sok Pich — iOS Developer
 **Contact:** pichsok016@gmail.com
-**Status:** Production-ready | Version 1.0 | Last updated March 2026
+**Status:** Production-ready | Version 1.0 | Last updated June 2026
