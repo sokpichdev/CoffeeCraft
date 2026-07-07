@@ -33,6 +33,10 @@ CoffeeCraft serves two distinct roles from a single codebase — **Customer** an
 - [Environment Setup](#environment-setup)
 - [Running the App](#running-the-app)
 - [Creating Test Accounts](#creating-test-accounts)
+- [Demo GIF / Video](#demo-gif--video)
+- [Project Status](#project-status)
+- [Roadmap](#roadmap)
+- [License](#license)
 - [Contributing](#contributing)
 
 ---
@@ -886,6 +890,32 @@ Use the Register screen in the app to create accounts. Set the role field to the
 | Role | Manager |
 
 Managers will see a Dashboard tab and the product management controls in the Menu tab.
+
+---
+
+## Demo GIF / Video
+
+<!-- [Add a short GIF/video: browse menu → customize drink → checkout, or live order tracking on the map] -->
+
+---
+
+## Project Status
+
+✅ Production-ready — Version 1.0, last updated June 2026. Customer and Manager experiences, real-time
+order tracking, wallet, loyalty cards, reviews, and the admin analytics dashboard are all shipped.
+
+---
+
+## Roadmap
+
+- [ ] [Add planned features here, e.g. push notifications for order status]
+- [ ] [...]
+
+---
+
+## License
+
+[MIT / Apache-2.0 / To be determined — add a LICENSE file before claiming a license.]
 
 ---
 
