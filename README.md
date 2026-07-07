@@ -1,49 +1,49 @@
 # ☕ CoffeeCraft
 
-> A production-grade iOS coffee shop ordering app built with **SwiftUI** and **Firebase**.
+<p align="center">
+  <strong>A production-grade iOS coffee shop ordering app — one codebase, two roles.</strong><br/>
+  <sub>Customers order and track drinks in real time; managers run the store from a full analytics dashboard.</sub>
+</p>
 
-CoffeeCraft serves two distinct roles from a single codebase — **Customer** and **Manager** — with real-time order tracking, live delivery on a map, an in-app wallet, loyalty cards, verified reviews, and a full admin analytics dashboard.
+<p align="center">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-iOS%2017%2B-blue"/>
+  <img alt="Language" src="https://img.shields.io/badge/Swift-5.9%2B-orange"/>
+  <img alt="UI" src="https://img.shields.io/badge/UI-SwiftUI-1575F9"/>
+  <img alt="Backend" src="https://img.shields.io/badge/Backend-Firebase-FFCA28"/>
+  <img alt="Architecture" src="https://img.shields.io/badge/Architecture-MVVM%20%2B%20Repository-success"/>
+  <img alt="Status" src="https://img.shields.io/badge/status-production--ready-brightgreen"/>
+</p>
 
-![Platform](https://img.shields.io/badge/platform-iOS%2017%2B-blue)
-![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange)
-![UI](https://img.shields.io/badge/UI-SwiftUI-1575F9)
-![Backend](https://img.shields.io/badge/Backend-Firebase-FFCA28)
-![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Repository-success)
+<p align="center">
+  <a href="#getting-started">🛠 Build locally</a>
+</p>
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Screenshots](#screenshots)
+- [Features](#features)
+- [Demo](#demo)
 - [Tech Stack](#tech-stack)
-- [Architecture at a Glance](#architecture-at-a-glance) — *project diagrams*
-  - [System Architecture](#system-architecture)
-  - [Project / Module Map](#project--module-map)
-  - [Dependency Injection](#dependency-injection)
-  - [Order & Delivery Lifecycle](#order--delivery-lifecycle)
 - [Architecture](#architecture)
-- [Project Structure](#project-structure)
+- [Folder Structure](#folder-structure)
 - [Module Breakdown](#module-breakdown)
 - [Key Data Models](#key-data-models)
 - [Firestore Collections](#firestore-collections)
 - [Theme System](#theme-system)
 - [Navigation Flow](#navigation-flow)
 - [Custom UI Components](#custom-ui-components)
-- [Environment Setup](#environment-setup)
-- [Running the App](#running-the-app)
-- [Creating Test Accounts](#creating-test-accounts)
-- [Demo GIF / Video](#demo-gif--video)
+- [Getting Started](#getting-started)
+- [Testing](#testing)
+- [Privacy & Permissions](#privacy--permissions)
 - [Project Status](#project-status)
 - [Roadmap](#roadmap)
-- [License](#license)
 - [Contributing](#contributing)
-
----
-
-## Overview
-
-CoffeeCraft is a full-featured coffee shop ordering app demonstrating real-world iOS development practices. Customers can browse the menu, customize drinks, pay with an in-app wallet, track orders in real time, write verified reviews, and manage loyalty cards. Managers have a separate experience for handling orders, managing products, moderating reviews, and viewing sales analytics.
+- [Security](#security)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Author](#author)
 
 ---
 
@@ -109,29 +109,54 @@ CoffeeCraft is a full-featured coffee shop ordering app demonstrating real-world
 
 ---
 
+## Features
+
+- **Real-time order tracking** — orders move through `Pending → Preparing → Ready → Completed` with a live status listener and cursor-based pagination.
+- **Live delivery on a map** — once a delivery order dispatches, a rider annotation animates along a real route with a live ETA, backed by MapKit + Firestore.
+- **In-app wallet** — top-up, payment, and refund all run as atomic Firestore transactions, keeping the balance and an append-only ledger in sync.
+- **Proof-of-purchase reviews** — customers can only rate products they've actually completed an order for; rating aggregates update atomically on submit.
+- **Loyalty cards with shared access** — cards can be shared across multiple user accounts.
+- **Manager analytics dashboard** — KPI summary, order funnel, sales trends, best sellers, and review moderation, gated behind `UserRole.manager`.
+- **Theming** — light/dark appearance plus four selectable color palettes (Brown, Strawberry, Matcha, Oreo), persisted across restarts.
+
+---
+
+## Demo
+
+<!-- No demo video yet. Add a short GIF/video here once one is recorded (e.g. browse menu → customize drink → checkout, or live order tracking on the map). -->
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
 | UI Framework | SwiftUI (iOS 17+) |
 | Language | Swift 5.9+ |
-| Backend | Firebase (Auth, Firestore, Cloud Messaging, Crashlytics, Analytics) |
+| Architecture | MVVM + Repository |
+| Backend | Firebase (Auth, Firestore, Cloud Messaging, Crashlytics, Analytics, Performance) |
 | Database | Cloud Firestore |
 | Authentication | Firebase Auth (Email/Password) |
 | Push Notifications | Firebase Cloud Messaging (FCM) |
 | Maps | MapKit + CoreLocation |
+| Dependencies | Swift Package Manager |
 | Minimum iOS | 17.0 |
 | Xcode | 15+ |
 
 ---
 
-## Architecture at a Glance
+## Architecture
 
-A complete map of how CoffeeCraft fits together — render-friendly Mermaid diagrams you can read top-to-bottom. (GitHub renders these automatically.)
+CoffeeCraft follows MVVM with a Repository layer. ViewModels never import Firebase directly — they depend only on repository protocols, and every layer depends only on the one below it.
+
+```
+View (SwiftUI)
+  └─ ViewModel (@MainActor, @Published state)
+       └─ Repository Protocol
+            └─ Firebase Repository (Firestore / Firebase Auth)
+```
 
 ### System Architecture
-
-Every layer depends only on the one below it. Views render state, ViewModels own state, Services/Repositories speak to Firebase through protocols, and Firebase is the source of truth.
 
 ```mermaid
 flowchart TD
@@ -254,6 +279,51 @@ flowchart LR
     Scene -.uses.-> Direct
 ```
 
+**Globally injected** (`@EnvironmentObject` from `CoffeeCraftApp`):
+
+| Object | Purpose |
+|---|---|
+| `UserSession.shared` | Current user, role, auth state, Crashlytics identity |
+| `AuthViewModel` | Auth lifecycle: sign-in, registration, session restore, password reset |
+| `OrderViewModel` | Real-time customer orders with cursor-based pagination |
+| `WalletViewModel` | Real-time wallet balance and transaction list |
+| `ThemeManager.shared` | Appearance mode and color palette |
+| `NotificationCoordinator.shared` | Deep-link routing from push notification taps |
+
+**Scene-scoped** (created in `RootView`):
+
+| Object | Purpose |
+|---|---|
+| `CartManager` | Shopping cart with Firestore sync, one per scene |
+| `ProductViewModel` | Product catalog and CRUD |
+| `FavoriteViewModel` | Wishlist management |
+| `CardViewModel` | Loyalty card management |
+| `AnnouncementViewModel` | Home screen announcements |
+| `InboxViewModel` | Notification inbox with pagination |
+
+**Direct-access singletons** (not injected):
+
+| Object | Purpose |
+|---|---|
+| `AlertManager.shared` | Global modal alerts and error dialogs |
+| `ToastManager.shared` | Transient toast notifications |
+| `LoaderManager.shared` | Full-screen loading spinner |
+| `NetworkMonitor.shared` | Connectivity detection |
+| `WalletService.shared` | All atomic wallet mutations (top-up, payment, refund) |
+
+### Repository Pattern
+
+Every domain with Firebase access has a protocol in `CoffeeCraft/Repository/<Domain>/` and a Firebase implementation in the same folder:
+
+| Protocol | Firebase Implementation |
+|---|---|
+| `AuthRepositoryProtocol` | `FirebaseAuthRepository` |
+| `ProductRepositoryProtocol` | `FirestoreProductRepository` |
+| `OrderRepositoryProtocol` | `FirestoreOrderRepository` |
+| `WalletRepositoryProtocol` | `FirestoreWalletRepository` |
+
+ViewModels receive a repository via initializer injection, defaulting to the Firebase implementation. Swap the implementation in tests without touching any ViewModel or View code.
+
 ### Order & Delivery Lifecycle
 
 An order moves through a fixed status flow; once a delivery order is dispatched, a separate live-tracking lifecycle drives the map (powered by `DeliveryViewModel` + Firestore `deliveries/`).
@@ -282,70 +352,6 @@ stateDiagram-v2
     delivered --> [*]
 ```
 
----
-
-## Architecture
-
-CoffeeCraft follows MVVM with a Repository layer. ViewModels never import Firebase directly — they depend only on repository protocols.
-
-```
-View (SwiftUI)
-  └─ ViewModel (@MainActor, @Published state)
-       └─ Repository Protocol
-            └─ Firebase Repository (Firestore / Firebase Auth)
-```
-
-### Dependency Injection
-
-Global state is distributed via `@EnvironmentObject` from `CoffeeCraftApp`. The following objects are injected at the root and accessible throughout the entire view hierarchy:
-
-| Object | Purpose |
-|---|---|
-| `UserSession.shared` | Current user, role, auth state, Crashlytics identity |
-| `AuthViewModel` | Auth lifecycle: sign-in, registration, session restore, password reset |
-| `OrderViewModel` | Real-time customer orders with cursor-based pagination |
-| `WalletViewModel` | Real-time wallet balance and transaction list |
-| `ThemeManager.shared` | Appearance mode and color palette |
-| `NotificationCoordinator.shared` | Deep-link routing from push notification taps |
-
-Scene-scoped objects created in `RootView` (not global):
-
-| Object | Purpose |
-|---|---|
-| `CartManager` | Shopping cart with Firestore sync, one per scene |
-| `ProductViewModel` | Product catalog and CRUD |
-| `FavoriteViewModel` | Wishlist management |
-| `CardViewModel` | Loyalty card management |
-| `AnnouncementViewModel` | Home screen announcements |
-| `InboxViewModel` | Notification inbox with pagination |
-
-Additional singletons accessed directly (not injected):
-
-| Object | Purpose |
-|---|---|
-| `AlertManager.shared` | Global modal alerts and error dialogs |
-| `ToastManager.shared` | Transient toast notifications |
-| `LoaderManager.shared` | Full-screen loading spinner |
-| `NetworkMonitor.shared` | Connectivity detection |
-| `WalletService.shared` | All atomic wallet mutations (top-up, payment, refund) |
-
-### Repository Pattern
-
-Every domain with Firebase access has:
-- A protocol in `CoffeeCraft/Repository/<Domain>/`
-- A Firebase implementation in the same folder
-
-Protocols available:
-
-| Protocol | Firebase Implementation |
-|---|---|
-| `AuthRepositoryProtocol` | `FirebaseAuthRepository` |
-| `ProductRepositoryProtocol` | `FirestoreProductRepository` |
-| `OrderRepositoryProtocol` | `FirestoreOrderRepository` |
-| `WalletRepositoryProtocol` | `FirestoreWalletRepository` |
-
-ViewModels receive a repository via initializer injection, defaulting to the Firebase implementation. Swap the implementation in tests without touching any ViewModel or View code.
-
 ### Real-Time Data Strategy
 
 | Strategy | Used For |
@@ -356,7 +362,7 @@ ViewModels receive a repository via initializer injection, defaulting to the Fir
 
 ---
 
-## Project Structure
+## Folder Structure
 
 ```
 CoffeeCraft/
@@ -782,7 +788,22 @@ All reusable components live in `CoffeeCraft/Custom/`. Prefer these over buildin
 
 ---
 
-## Environment Setup
+## Getting Started
+
+### Requirements
+
+- macOS with Xcode 15 or later
+- iOS 17+ simulator or device
+- A Firebase project (Auth + Firestore + Cloud Messaging enabled)
+
+### Clone
+
+```bash
+git clone https://github.com/sokpichdev/CoffeeCraft.git
+cd CoffeeCraft
+```
+
+### Configuration
 
 The project has four Xcode schemes, each pointing to a separate Firebase project via its own `GoogleService-Info.plist`:
 
@@ -795,44 +816,16 @@ The project has four Xcode schemes, each pointing to a separate Firebase project
 
 Scheme files live in `CoffeeCraft.xcodeproj/xcshareddata/xcschemes/`.
 
-### Step 1 — Clone the repository
-
-```bash
-git clone https://github.com/sokpichdev/CoffeeCraft.git
-cd CoffeeCraft
-```
-
-### Step 2 — Set up a Firebase project
-
 1. Go to [console.firebase.google.com](https://console.firebase.google.com) and create a new project.
 2. Add an iOS app with your bundle identifier.
 3. Enable **Email/Password** authentication under Authentication > Sign-in method.
 4. Create a **Cloud Firestore** database (start in production mode for real deployments; test mode is fine for local dev).
 5. Enable **Firebase Cloud Messaging** under Cloud Messaging.
-6. Download `GoogleService-Info.plist` from the project settings.
+6. Download `GoogleService-Info.plist` from the project settings, rename it to `GoogleService-Info-Dev.plist`, and place it in `CoffeeCraft/CoffeeCraft/`. Repeat for each environment you need (SIT, UAT, production).
 
-### Step 3 — Add the plist to Xcode
+If you only have one Firebase project for development, copy the same plist as `GoogleService-Info-Dev.plist` and select the `CoffeeCraft-Dev` scheme before building.
 
-Rename the downloaded file to `GoogleService-Info-Dev.plist` and place it in `CoffeeCraft/CoffeeCraft/`. Repeat for each environment you need (SIT, UAT, production).
-
-If you only have one Firebase project for development:
-- Copy the same plist file as `GoogleService-Info-Dev.plist`
-- Select the `CoffeeCraft-Dev` scheme before building
-
-### Step 4 — Resolve Swift Package Manager dependencies
-
-Open `CoffeeCraft/CoffeeCraft.xcodeproj` in Xcode. Xcode will automatically resolve Firebase SPM packages on first open. Required packages:
-
-- `FirebaseAuth`
-- `FirebaseFirestore`
-- `FirebaseMessaging`
-- `FirebaseCrashlytics`
-- `FirebaseAnalytics`
-- `FirebasePerformance`
-
-### Step 5 — Set Firestore security rules (development)
-
-In the Firebase Console under Firestore > Rules, use the following for development only:
+For development-only Firestore rules:
 
 ```javascript
 rules_version = '2';
@@ -847,27 +840,35 @@ service cloud.firestore {
 
 Update these rules before deploying to production.
 
----
+### Install dependencies
 
-## Running the App
+```bash
+open CoffeeCraft/CoffeeCraft.xcodeproj
+```
 
-1. Open `CoffeeCraft/CoffeeCraft.xcodeproj` in Xcode 15 or later.
-2. Select the `CoffeeCraft-Dev` scheme from the scheme picker in the toolbar.
-3. Choose an iOS 17 simulator or physical device.
-4. Press `Cmd+R` to build and run.
+Xcode automatically resolves the required Firebase SPM packages on first open:
 
-### Seeding Sample Data
+- `FirebaseAuth`
+- `FirebaseFirestore`
+- `FirebaseMessaging`
+- `FirebaseCrashlytics`
+- `FirebaseAnalytics`
+- `FirebasePerformance`
 
-After running the app for the first time, you can populate the database with sample products and branches:
+### Run
+
+1. Select the `CoffeeCraft-Dev` scheme from the scheme picker in the toolbar.
+2. Choose an iOS 17 simulator or physical device.
+3. Press `Cmd+R` to build and run.
+
+### Seeding sample data
 
 1. Create a manager account (see Creating Test Accounts below).
 2. Go to the Menu tab.
 3. Tap the seed button in the manager controls (visible only in the Dev scheme).
 4. This writes sample products and branch documents to Firestore.
 
----
-
-## Creating Test Accounts
+### Creating test accounts
 
 Use the Register screen in the app to create accounts. Set the role field to the desired role:
 
@@ -893,9 +894,19 @@ Managers will see a Dashboard tab and the product management controls in the Men
 
 ---
 
-## Demo GIF / Video
+## Testing
 
-<!-- [Add a short GIF/video: browse menu → customize drink → checkout, or live order tracking on the map] -->
+There is no automated test suite or CI pipeline yet. Verification today is manual: build and run each scheme, then exercise the customer and manager flows using the test accounts above (see Roadmap).
+
+---
+
+## Privacy & Permissions
+
+| Permission | Why we need it | When we ask |
+|---|---|---|
+| Location (`NSLocationWhenInUseUsageDescription`) | Find nearby branches and support delivery | When using the Map / branch finder |
+
+No dedicated privacy policy document exists yet. Firebase Analytics and Crashlytics are enabled for the app; no other third-party data sharing is configured.
 
 ---
 
@@ -908,14 +919,12 @@ order tracking, wallet, loyalty cards, reviews, and the admin analytics dashboar
 
 ## Roadmap
 
-- [ ] [Add planned features here, e.g. push notifications for order status]
-- [ ] [...]
+- [ ] Add an automated test suite (unit + UI tests)
+- [ ] Add a CI pipeline (build + test on every PR)
+- [ ] Choose and add a LICENSE
+- [ ] Push notifications for order status (beyond current FCM plumbing)
 
----
-
-## License
-
-[MIT / Apache-2.0 / To be determined — add a LICENSE file before claiming a license.]
+Have an idea? Open a discussion or issue on the repository.
 
 ---
 
@@ -931,6 +940,27 @@ order tracking, wallet, loyalty cards, reviews, and the admin analytics dashboar
 
 ---
 
-**Author:** Sok Pich — iOS Developer
-**Contact:** pichsok016@gmail.com
-**Status:** Production-ready | Version 1.0 | Last updated June 2026
+## Security
+
+There is no dedicated security disclosure process or `SECURITY.md` yet. If you find a vulnerability, please email pichsok016@gmail.com directly rather than opening a public issue.
+
+---
+
+## License
+
+No license file exists in this repository yet. Until one is added, all rights are reserved by default — do not treat this as open source.
+
+---
+
+## Acknowledgments
+
+- [Firebase](https://firebase.google.com) — Auth, Firestore, Cloud Messaging, Crashlytics, Analytics, Performance
+- Apple's MapKit + CoreLocation frameworks — store locator and live delivery tracking
+
+---
+
+## Author
+
+**Sok Pich** — iOS Developer
+Contact: pichsok016@gmail.com
+Status: Production-ready · Version 1.0 · Last updated June 2026
