@@ -12,6 +12,7 @@
   <img alt="Backend" src="https://img.shields.io/badge/Backend-Firebase-FFCA28"/>
   <img alt="Architecture" src="https://img.shields.io/badge/Architecture-MVVM%20%2B%20Repository-success"/>
   <img alt="Status" src="https://img.shields.io/badge/status-production--ready-brightgreen"/>
+  <img alt="" src="https://komarev.com/ghpvc/?username=sokpichdev&color=blueviolet"/>
 </p>
 
 <p align="center">
