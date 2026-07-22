@@ -12,10 +12,12 @@
   <img alt="Backend" src="https://img.shields.io/badge/Backend-Firebase-FFCA28"/>
   <img alt="Architecture" src="https://img.shields.io/badge/Architecture-MVVM%20%2B%20Repository-success"/>
   <img alt="Status" src="https://img.shields.io/badge/status-production--ready-brightgreen"/>
+  <img alt="Landing Page" src="https://img.shields.io/badge/landing%20page-sokpich.dev-8B5E3C"/>
   <img alt="" src="https://komarev.com/ghpvc/?username=sokpichdev&color=blueviolet"/>
 </p>
 
 <p align="center">
+  <a href="https://sokpich.dev/coffeecraft">🌐 Landing Page</a> ·
   <a href="#getting-started">🛠 Build locally</a>
 </p>
 
@@ -124,7 +126,9 @@
 
 ## Demo
 
-<!-- No demo video yet. Add a short GIF/video here once one is recorded (e.g. browse menu → customize drink → checkout, or live order tracking on the map). -->
+🌐 **Live landing page:** [sokpich.dev/coffeecraft](https://sokpich.dev/coffeecraft) — feature walkthrough, screenshots, and app overview.
+
+<!-- A short in-README GIF/video is still to be recorded (e.g. browse menu → customize drink → checkout, or live order tracking on the map). -->
 
 ---
 
@@ -963,5 +967,6 @@ No license file exists in this repository yet. Until one is added, all rights ar
 ## Author
 
 **Sok Pich** — iOS Developer
+Website: [sokpich.dev/coffeecraft](https://sokpich.dev/coffeecraft)
 Contact: pichsok016@gmail.com
 Status: Production-ready · Version 1.0 · Last updated June 2026
