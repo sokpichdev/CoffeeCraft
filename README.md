@@ -1,4 +1,8 @@
-# ☕ CoffeeCraft
+<p align="center">
+  <img src="docs/appicon.png" alt="CoffeeCraft app icon" width="128"/>
+</p>
+
+<h1 align="center">CoffeeCraft</h1>
 
 <p align="center">
   <strong>A production-grade iOS coffee shop ordering app — one codebase, two roles.</strong><br/>

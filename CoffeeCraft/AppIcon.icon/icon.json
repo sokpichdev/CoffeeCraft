@@ -1,0 +1,96 @@
+{
+  "groups" : [
+    {
+      "name" : "Cup",
+      "layers" : [
+        {
+          "name" : "Crema",
+          "image-name" : "Crema.svg",
+          "glass" : true,
+          "opacity" : 0.32,
+          "position" : {
+            "scale" : 1.0,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name" : "Rim",
+          "image-name" : "Rim.svg",
+          "glass" : true,
+          "position" : {
+            "scale" : 1.0,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "specular" : false,
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.4
+      },
+      "blur-material" : null
+    },
+    {
+      "name" : "Mark",
+      "layers" : [
+        {
+          "name" : "Bean",
+          "image-name" : "Bean.svg",
+          "glass" : true,
+          "position" : {
+            "scale" : 1.0,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "specular" : true,
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.55
+      },
+      "blur-material" : null
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : "shared",
+    "circles" : [
+      "watchOS"
+    ]
+  },
+  "fill-specializations" : [
+    {
+      "value" : {
+        "linear-gradient" : [
+          "srgb:0.78431,0.52549,0.03922,1.00000",
+          "srgb:0.43529,0.30588,0.21569,1.00000"
+        ],
+        "orientation" : {
+          "start" : { "x" : 0.5, "y" : 0 },
+          "stop" : { "x" : 0.5, "y" : 1 }
+        }
+      }
+    },
+    {
+      "appearance" : "dark",
+      "value" : {
+        "linear-gradient" : [
+          "srgb:0.29020,0.18039,0.13333,1.00000",
+          "srgb:0.10196,0.05882,0.03922,1.00000"
+        ],
+        "orientation" : {
+          "start" : { "x" : 0.5, "y" : 0 },
+          "stop" : { "x" : 0.5, "y" : 1 }
+        }
+      }
+    }
+  ]
+}
